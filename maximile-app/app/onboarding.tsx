@@ -61,7 +61,7 @@ export default function OnboardingScreen() {
       try {
         const { data, error } = await supabase
           .from('cards')
-          .select('id,bank,name,slug,network,annual_fee,base_rate_mpd,image_url,apply_url,is_active,notes,created_at,updated_at,eligibility_criteria')
+          .select('*')
           .eq('is_active', true)
           .order('bank')
           .order('name');

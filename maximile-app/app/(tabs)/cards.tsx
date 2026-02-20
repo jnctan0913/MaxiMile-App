@@ -68,10 +68,11 @@ export default function CardsScreen() {
     // Step 1: Get user's cards with card details
     const { data: userCardsData, error: ucError } = await supabase
       .from('user_cards')
-      .select('card_id, added_at, cards(id, bank, name, slug, network, annual_fee, base_rate_mpd, image_url, apply_url, is_active, notes, created_at, updated_at, eligibility_criteria)')
+      .select('card_id, added_at, cards(*)')
       .order('added_at', { ascending: false });
 
     if (ucError || !userCardsData) {
+      if (__DEV__) console.error('user_cards fetch error:', ucError);
       setLoading(false);
       setRefreshing(false);
       return;
