@@ -50,7 +50,14 @@ See **[TEAMMATE_GUIDE.md](./TEAMMATE_GUIDE.md)** for full setup instructions to 
 ```bash
 cd maximile-app
 npm install
-npx expo start --go
+```
+Create `maximile-app/.env`:
+```bash
+EXPO_PUBLIC_SUPABASE_URL=https://piwoavkasfjqmrabplbl.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_XQeSilawJVtWnvMin063zQ_fLvLoD2L
+```
+```bash
+npx expo start
 ```
 Then scan the QR code with **Expo Go** on your phone (or press `w` for web preview).
 

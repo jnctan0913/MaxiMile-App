@@ -36,36 +36,33 @@ npm install
 
 ### 3. Environment Variables
 
-Create a `.env` file in the `maximile-app/` directory. Ask the project owner for the values:
+Create a `.env` file in the `maximile-app/` directory with these values:
 
 ```bash
 # maximile-app/.env
-EXPO_PUBLIC_SUPABASE_URL=<ask project owner>
-EXPO_PUBLIC_SUPABASE_ANON_KEY=<ask project owner>
+EXPO_PUBLIC_SUPABASE_URL=https://piwoavkasfjqmrabplbl.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_XQeSilawJVtWnvMin063zQ_fLvLoD2L
 ```
 
-> The `.env` file is git-ignored for security. You'll need to get these credentials from the team.
+> These are the public client credentials for the shared Supabase project. The `.env` file is git-ignored, so you need to create it manually — just copy-paste the two lines above.
 
 ### 4. Start the Dev Server
 
-If you want to try on **Expo Go** (recommended — no build required):
-
 ```bash
-npx expo start --go
+npx expo start
 ```
 
-This will start the server in Expo Go mode and display a QR code in your terminal.
+This will display a QR code in your terminal.
 
 ---
 
 ## Running the App
 
-### Option A: On Your Phone with Expo Go (Recommended)
+### Option A: On Your Phone (Recommended)
 
-1. Make sure you started the server with `npx expo start --go`
-2. Open **Expo Go** on your phone
-3. Scan the QR code shown in the terminal
-4. The app will load on your device
+1. Open **Expo Go** on your phone
+2. Scan the QR code shown in the terminal
+3. The app will load on your device
 
 > Make sure your phone and computer are on the **same Wi-Fi network**.
 
@@ -130,7 +127,7 @@ docs/
 | Issue | Fix |
 |-------|-----|
 | `npx expo start` fails | Make sure you're in the `maximile-app/` directory and ran `npm install` |
-| QR code won't scan | Ensure phone and computer are on the same Wi-Fi. Make sure you started with `npx expo start --go` |
+| QR code won't scan | Ensure phone and computer are on the same Wi-Fi. Try pressing `s` to switch to Expo Go mode |
 | "Network request failed" errors | The `.env` file may be missing or have incorrect Supabase credentials |
 | App shows blank screen | Try shaking your phone to open the Expo dev menu, then tap "Reload" |
 | `node_modules` issues | Delete `node_modules` and `package-lock.json`, then run `npm install` again |
