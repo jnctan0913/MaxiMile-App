@@ -17,7 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { CATEGORIES, CATEGORY_MAP } from '../../constants/categories';
@@ -108,29 +108,31 @@ export default function LogScreen() {
   const isCompact = windowHeight < 750;
 
   // -------------------------------------------------------------------------
-  // Fetch user cards on mount
+  // Fetch user cards on every screen focus (so new cards appear immediately)
   // -------------------------------------------------------------------------
-  useEffect(() => {
-    if (!user) return;
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
 
-    const fetchCards = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_cards')
-          .select('*, card:cards(*)')
-          .eq('user_id', user.id);
+      const fetchCards = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('user_cards')
+            .select('*, card:cards(*)')
+            .eq('user_id', user.id);
 
-        if (!error && data) {
-          setCards(data as unknown as UserCardWithDetails[]);
+          if (!error && data) {
+            setCards(data as unknown as UserCardWithDetails[]);
+          }
+        } catch {
+          showNetworkErrorAlert();
         }
-      } catch {
-        showNetworkErrorAlert();
-      }
-      setLoading(false);
-    };
+        setLoading(false);
+      };
 
-    fetchCards();
-  }, [user]);
+      fetchCards();
+    }, [user])
+  );
 
   // -------------------------------------------------------------------------
   // Pre-fill from route params (recommendation context) or time-of-day

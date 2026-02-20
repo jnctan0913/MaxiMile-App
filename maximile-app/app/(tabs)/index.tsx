@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { CATEGORIES } from '../../constants/categories';
@@ -59,29 +59,31 @@ export default function RecommendScreen() {
   const suggestedCategory = useMemo(() => getSuggestedCategory(), []);
 
   // -----------------------------------------------------------------------
-  // Fetch user cards to check if any exist
+  // Fetch user cards on every screen focus (so new cards appear immediately)
   // -----------------------------------------------------------------------
-  useEffect(() => {
-    if (!user) return;
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
 
-    const fetchUserCards = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_cards')
-          .select('*');
+      const fetchUserCards = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('user_cards')
+            .select('*');
 
-        if (!error && data) {
-          setUserCards(data as UserCard[]);
+          if (!error && data) {
+            setUserCards(data as UserCard[]);
+          }
+          setLoading(false);
+        } catch {
+          setLoading(false);
+          showNetworkErrorAlert();
         }
-        setLoading(false);
-      } catch {
-        setLoading(false);
-        showNetworkErrorAlert();
-      }
-    };
+      };
 
-    fetchUserCards();
-  }, [user]);
+      fetchUserCards();
+    }, [user])
+  );
 
   useEffect(() => {
     const fetchAlerts = async () => {

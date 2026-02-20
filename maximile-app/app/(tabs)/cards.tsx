@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -127,9 +127,11 @@ export default function CardsScreen() {
     }
   }, [user]);
 
-  useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchCards();
+    }, [fetchCards])
+  );
 
   // -----------------------------------------------------------------------
   // Pull-to-refresh
@@ -186,13 +188,17 @@ export default function CardsScreen() {
         imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
       >
         <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-          <EmptyState
-            icon="card-outline"
-            title="No cards in your portfolio"
-            description="Add your miles cards to get started."
-            ctaLabel="+ Add Cards"
-            onCtaPress={() => router.push('/onboarding')}
-          />
+          <View style={styles.emptyContainer}>
+            <Text style={styles.screenTitle}>My Cards</Text>
+            <Text style={styles.screenSubtitle}>Manage your miles credit cards</Text>
+            <EmptyState
+              icon="card-outline"
+              title="No cards in your portfolio"
+              description="Add your miles cards to get started."
+              ctaLabel="+ Add Cards"
+              onCtaPress={() => router.push('/onboarding')}
+            />
+          </View>
         </SafeAreaView>
       </ImageBackground>
     );
@@ -280,6 +286,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.textSecondary,
     marginBottom: Spacing.xl + 4,
+  },
+  emptyContainer: {
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
   },
   addButton: {
     flexDirection: 'row',
