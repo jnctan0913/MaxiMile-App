@@ -1,0 +1,26 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.cursor/
+.vscode/
+.idea/
+
+# Claude Code local settings (contains machine-specific paths)
+.claude/settings.local.json
+.claude/state/
+.claude/handover/
+
+# App dependencies & build artifacts (handled by maximile-app/.gitignore)
+maximile-app/node_modules/
+maximile-app/.expo/
+maximile-app/dist/
+maximile-app/web-build/
+maximile-app/ios/
+maximile-app/android/
+maximile-app/coverage/
+maximile-app/.env
+maximile-app/.env.local
+maximile-app/.env.production
+maximile-app/expo-env.d.ts
