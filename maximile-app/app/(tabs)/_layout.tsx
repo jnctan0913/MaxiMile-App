@@ -222,10 +222,10 @@ export default function TabsLayout() {
               heroTabStyles.container,
               focused && heroTabStyles.containerActive,
             ]}>
-              <Ionicons
-                name={focused ? 'compass' : 'compass-outline'}
-                size={28}
-                color={focused ? Colors.brandCharcoal : '#FFFFFF'}
+              <Image
+                source={require('../../assets/Logo.png')}
+                style={heroTabStyles.logo}
+                resizeMode="contain"
               />
             </View>
           ),
@@ -301,17 +301,22 @@ const heroTabStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Platform.OS === 'ios' ? 20 : 16,
-    shadowColor: Colors.brandGold,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 6,
+    overflow: 'hidden',
   },
   containerActive: {
     backgroundColor: Colors.brandGold,
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
     transform: [{ scale: 1.05 }],
+  },
+  logo: {
+    width: 62,
+    height: 62,
   },
 });
 

@@ -28,6 +28,16 @@ const CARD_IMAGES: Record<string, ImageSourcePropType> = {
   'citi-rewards': require('../assets/cards/citi-rewards.png'),
   'posb-everyday-card': require('../assets/cards/posb-everyday-card.png'),
   'uob-preferred-platinum': require('../assets/cards/uob-preferred-platinum.png'),
+  'dbs-vantage-visa-infinite': require('../assets/cards/dbs-vantage-visa-infinite.png'),
+  'uob-ladys-solitaire': require('../assets/cards/uob-ladys-solitaire.png'),
+  'uob-visa-signature': require('../assets/cards/uob-visa-signature.png'),
+  'ocbc-voyage-card': require('../assets/cards/ocbc-voyage-card.png'),
+  'sc-journey-card': require('../assets/cards/sc-journey-card.png'),
+  'sc-smart-card': require('../assets/cards/sc-smart-card.png'),
+  'sc-beyond-card': require('../assets/cards/sc-beyond-card.png'),
+  'maybank-world-mc': require('../assets/cards/maybank-world-mc.png'),
+  'maybank-xl-rewards': require('../assets/cards/maybank-xl-rewards.png'),
+  'hsbc-premier-mc': require('../assets/cards/hsbc-premier-mc.png'),
 };
 
 /**
