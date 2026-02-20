@@ -49,7 +49,8 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_XQeSilawJVtWnvMin063zQ_fLvLoD2L
 ### 4. Start the Dev Server
 
 ```bash
-npx expo start
+npx expo start #for laptop browser
+npx expo start --go #to run on physical phone
 ```
 
 This will display a QR code in your terminal.
