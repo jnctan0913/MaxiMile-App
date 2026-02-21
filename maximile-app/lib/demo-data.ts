@@ -71,6 +71,14 @@ const MERCHANTS: MerchantData[] = [
   { name: 'Walmart', category: 'Retail', minAmount: 20.00, maxAmount: 100.00 },
   { name: 'Home Depot', category: 'Retail', minAmount: 25.00, maxAmount: 180.00 },
   { name: "Lowe's", category: 'Retail', minAmount: 28.00, maxAmount: 175.00 },
+  { name: 'Amazon', category: 'Retail', minAmount: 15.00, maxAmount: 150.00 },
+  { name: 'Nordstrom', category: 'Retail', minAmount: 40.00, maxAmount: 250.00 },
+
+  // Online Services
+  { name: 'Amazon.com', category: 'Online', minAmount: 20.00, maxAmount: 200.00 },
+  { name: 'Netflix', category: 'Online', minAmount: 9.99, maxAmount: 22.99 },
+  { name: 'Spotify', category: 'Online', minAmount: 9.99, maxAmount: 16.99 },
+  { name: 'Apple Music', category: 'Online', minAmount: 10.99, maxAmount: 10.99 },
 ];
 
 /**
