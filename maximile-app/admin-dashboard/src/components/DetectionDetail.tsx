@@ -652,7 +652,7 @@ export default function DetectionDetail({
             </h3>
             <div className="py-2">
               <div className="flex items-baseline gap-2 text-[13px]">
-                <span className="font-mono text-[12px] text-slate-400">
+                <span className="font-mono text-[12px] text-text-tertiary">
                   {new Date(detection.reviewed_at)
                     .toISOString()
                     .slice(0, 16)

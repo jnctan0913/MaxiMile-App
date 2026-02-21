@@ -7,4 +7,7 @@ const config = getDefaultConfig(__dirname);
 // See: https://github.com/supabase/supabase-js/issues/1400
 config.resolver.unstable_enablePackageExports = false;
 
+// Allow Metro to bundle binary asset types used by the app.
+config.resolver.assetExts.push('shortcut');
+
 module.exports = config;

@@ -37,6 +37,7 @@ import type { AutoCaptureParams } from '../lib/deep-link';
 import { handleSupabaseError, showNetworkErrorAlert } from '../lib/error-handler';
 import { track } from '../lib/analytics';
 import { getCardImage } from '../constants/cardImages';
+import { DemoModeIndicator } from '../components/DemoModeIndicator';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -217,7 +218,7 @@ export default function AutoCaptureScreen() {
       amount: parsedAmount,
       transaction_date: today,
       merchant_name: merchantName || null,
-      source: source === 'manual' ? 'manual' : 'auto_capture',
+      source: source || 'manual',
       notes: null,
     });
 
@@ -321,7 +322,7 @@ export default function AutoCaptureScreen() {
                   <Ionicons name="close" size={24} color={Colors.textSecondary} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Confirm Transaction</Text>
-                <View style={{ width: 24 }} />
+                <DemoModeIndicator />
               </View>
 
               {/* Source badge */}

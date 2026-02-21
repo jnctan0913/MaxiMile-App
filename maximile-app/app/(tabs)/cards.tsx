@@ -189,8 +189,19 @@ export default function CardsScreen() {
       >
         <SafeAreaView style={styles.safeArea} edges={['bottom']}>
           <View style={styles.emptyContainer}>
-            <Text style={styles.screenTitle}>My Cards</Text>
-            <Text style={styles.screenSubtitle}>Manage your miles credit cards</Text>
+            <View style={styles.header}>
+              <View style={styles.headerText}>
+                <Text style={styles.screenTitle}>My Cards</Text>
+                <Text style={styles.screenSubtitle}>Manage your miles credit cards</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.addButtonCircle}
+                onPress={() => router.push('/onboarding')}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="add" size={22} color={Colors.brandGold} />
+              </TouchableOpacity>
+            </View>
             <EmptyState
               icon="card-outline"
               title="No cards in your portfolio"
@@ -221,9 +232,18 @@ export default function CardsScreen() {
           refreshing={refreshing}
           onRefresh={handleRefresh}
           ListHeaderComponent={
-            <View>
-              <Text style={styles.screenTitle}>My Cards</Text>
-              <Text style={styles.screenSubtitle}>Manage your miles credit cards</Text>
+            <View style={styles.header}>
+              <View style={styles.headerText}>
+                <Text style={styles.screenTitle}>My Cards</Text>
+                <Text style={styles.screenSubtitle}>Manage your miles credit cards</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.addButtonCircle}
+                onPress={() => router.push('/onboarding?from=cards')}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="add" size={22} color={Colors.brandGold} />
+              </TouchableOpacity>
             </View>
           }
           renderItem={({ item }) => (
@@ -242,16 +262,6 @@ export default function CardsScreen() {
               eligibilityCriteria={item.card.eligibility_criteria}
             />
           )}
-          ListFooterComponent={
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => router.push('/onboarding?from=cards')}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="add-circle-outline" size={24} color={Colors.brandGold} />
-              <Text style={styles.addButtonText}>+ Add More Cards</Text>
-            </TouchableOpacity>
-          }
         />
       </SafeAreaView>
     </ImageBackground>
@@ -275,6 +285,16 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     paddingBottom: Spacing.xxxl + 40,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.xl + 4,
+  },
+  headerText: {
+    flex: 1,
+    paddingRight: Spacing.md,
+  },
   screenTitle: {
     ...Typography.heading,
     fontSize: 26,
@@ -285,30 +305,21 @@ const styles = StyleSheet.create({
     ...Typography.body,
     fontSize: 15,
     color: Colors.textSecondary,
-    marginBottom: Spacing.xl + 4,
   },
   emptyContainer: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
   },
-  addButton: {
-    flexDirection: 'row',
+  addButtonCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(197, 165, 90, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Spacing.lg,
-    marginTop: Spacing.lg,
-    borderWidth: 1.5,
-    borderColor: 'rgba(197, 165, 90, 0.4)',
-    borderRadius: 20,
-    borderStyle: 'dashed',
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  addButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    lineHeight: 22,
-    color: Colors.brandGold,
-    marginLeft: Spacing.sm,
+    ...Shadows.sm,
   },
 });

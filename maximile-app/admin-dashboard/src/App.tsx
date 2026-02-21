@@ -110,7 +110,7 @@ export default function App() {
           <img
             src="/Logo.png"
             alt="MaxiMile"
-            className="h-8 w-8 rounded-lg"
+            className="h-9 w-auto object-contain"
           />
           <div className="flex items-center gap-2">
             <img

@@ -1,0 +1,11 @@
+This is a placeholder file.
+
+Replace this with the actual MaxiMile.shortcut file.
+
+To create the real file:
+1. Follow BUNDLE_SHORTCUT_FILE.md
+2. Create shortcut on iPhone/iPad
+3. Export as MaxiMile.shortcut
+4. Replace this placeholder file
+
+DO NOT delete this placeholder - the app requires a file at this path to compile.

@@ -44,6 +44,9 @@ import { getCardImage } from '../../constants/cardImages';
 import type { RecommendResult } from '../../lib/supabase-types';
 import type { LocationResult, LocationError } from '../../lib/location';
 import type { MerchantResult, MerchantError } from '../../lib/merchant';
+import { isDemoMode, getMockTransaction } from '../../lib/demo-transaction-data';
+import { getMockLocation, getMockMerchant } from '../../lib/demo-location-data';
+import { DemoModeIndicator } from '../../components/DemoModeIndicator';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -77,7 +80,7 @@ interface SuccessData {
 export default function PayScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const params = useLocalSearchParams<{ source?: string }>();
+  const params = useLocalSearchParams<{ source?: string; category?: string }>();
 
   // State machine
   const [state, setState] = useState<PayState>('detecting');
@@ -88,7 +91,9 @@ export default function PayScreen() {
 
   // Merchant
   const [merchant, setMerchant] = useState<MerchantResult | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    params.category || null
+  );
 
   // Recommendation
   const [recommendation, setRecommendation] = useState<RecommendResult | null>(null);
@@ -143,14 +148,23 @@ export default function PayScreen() {
     let cancelled = false;
     const detect = async () => {
       try {
-        const loc = await getCurrentLocation();
+        // =====================================================================
+        // DEMO MODE: Use mock Singapore location
+        // =====================================================================
+        const loc = isDemoMode() ? getMockLocation() : await getCurrentLocation();
+
         if (cancelled) return;
+
+        if (isDemoMode()) {
+          console.log('[DEMO MODE] Using mock Singapore location:', loc.latitude, loc.longitude);
+        }
 
         setLocation(loc);
         track('location_detected', {
           accuracy: loc.accuracy ?? -1,
           duration_ms: Date.now() - mountTime.current,
           cached: loc.cached,
+          demo_mode: isDemoMode(),
         }, user?.id);
 
         if (!isAccuracyAcceptable(loc.accuracy)) {
@@ -173,7 +187,7 @@ export default function PayScreen() {
 
     detect();
     return () => { cancelled = true; };
-  }, [state]);
+  }, [state, user]);
 
   // -------------------------------------------------------------------------
   // State 2: Identify merchant
@@ -184,28 +198,49 @@ export default function PayScreen() {
     let cancelled = false;
     const identify = async () => {
       try {
-        const result = await detectTopMerchant(
-          location.latitude,
-          location.longitude,
-          location.accuracy && location.accuracy > 30 ? 100 : 50,
-        );
+        // =====================================================================
+        // DEMO MODE: Use mock Singapore merchant matching selected category
+        // =====================================================================
+        const result = isDemoMode()
+          ? getMockMerchant(selectedCategoryId)
+          : await detectTopMerchant(
+              location.latitude,
+              location.longitude,
+              location.accuracy && location.accuracy > 30 ? 100 : 50,
+            );
+
         if (cancelled) return;
 
+        if (isDemoMode()) {
+          console.log(
+            '[DEMO MODE] Using mock merchant:',
+            result.name,
+            'Category:',
+            result.category
+          );
+        }
+
         setMerchant(result);
-        setSelectedCategoryId(result.category);
+        // Only override selected category if none was provided via route params
+        if (!params.category) {
+          setSelectedCategoryId(result.category);
+        }
+
         track('merchant_detected', {
           name: result.name,
           category: result.category,
           confidence: result.confidence,
           place_id: result.placeId,
+          demo_mode: isDemoMode(),
         }, user?.id);
 
         setState('confirming');
 
-        // Auto-fetch recommendation
+        // Auto-fetch recommendation for the final selected category
+        const categoryToRecommend = params.category || result.category;
         try {
           const { data: recData, error: rpcError } = await supabase.rpc('recommend', {
-            p_category_id: result.category,
+            p_category_id: categoryToRecommend,
           });
 
           if (!rpcError && recData && (recData as RecommendResult[]).length > 0) {
@@ -215,10 +250,11 @@ export default function PayScreen() {
             setAlternatives(results.filter((r) => r.card_id !== topPick.card_id));
 
             track('recommendation_used', {
-              category: result.category,
+              category: categoryToRecommend,
               results_count: results.length,
               top_card: topPick.card_name,
               via: 'smart_pay',
+              demo_mode: isDemoMode(),
             }, user?.id);
           }
         } catch {
@@ -239,7 +275,7 @@ export default function PayScreen() {
 
     identify();
     return () => { cancelled = true; };
-  }, [state, location]);
+  }, [state, location, params.category, selectedCategoryId, user]);
 
   // -------------------------------------------------------------------------
   // Fetch card images when recommendations change
@@ -366,7 +402,42 @@ export default function PayScreen() {
         const elapsed = Date.now() - walletOpenTime.current;
         // Only treat as wallet return if within 60s
         if (elapsed < 60_000) {
-          startAutoCaptureHandoff();
+          // =====================================================================
+          // DEMO MODE: Navigate directly to auto-capture with mock data
+          // =====================================================================
+          if (isDemoMode()) {
+            // Smart matching: Use mock transaction from user's selected category
+            const mockData = getMockTransaction(selectedCategoryId || undefined);
+
+            console.log(
+              `[DEMO MODE] Generated mock transaction for category "${selectedCategoryId}":`,
+              mockData.merchant,
+              mockData.amount
+            );
+
+            track('auto_capture_handoff', {
+              source: 'demo_smart_pay',
+              amount: mockData.amount,
+              merchant: mockData.merchant,
+              category: selectedCategoryId,
+              demo_mode: true,
+            }, user?.id);
+
+            router.push({
+              pathname: '/auto-capture',
+              params: {
+                amount: mockData.amount,
+                merchant: mockData.merchant,
+                card: mockData.card,
+                source: 'shortcut',
+              },
+            });
+          } else {
+            // =====================================================================
+            // PRODUCTION: Wait for real auto-capture deep link
+            // =====================================================================
+            startAutoCaptureHandoff();
+          }
         }
         walletOpenTime.current = 0;
       }
@@ -374,7 +445,7 @@ export default function PayScreen() {
 
     const sub = AppState.addEventListener('change', handleAppState);
     return () => sub.remove();
-  }, [state, startAutoCaptureHandoff]);
+  }, [state, startAutoCaptureHandoff, router, user, selectedCategoryId]);
 
   // -------------------------------------------------------------------------
   // Auto-capture deep link listener (S16.9)
@@ -679,6 +750,11 @@ export default function PayScreen() {
           headerTintColor: Colors.brandGold,
           headerStyle: { backgroundColor: Colors.background },
           headerTitleStyle: { fontWeight: '600', color: Colors.textPrimary },
+          headerRight: () => (
+            <View style={{ backgroundColor: 'transparent' }}>
+              <DemoModeIndicator />
+            </View>
+          ),
         }}
       />
       <ImageBackground

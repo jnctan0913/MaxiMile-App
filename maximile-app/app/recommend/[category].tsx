@@ -467,7 +467,7 @@ export default function RecommendResultScreen() {
               {/* Smart Pay CTA */}
               <TouchableOpacity
                 style={styles.smartPayCta}
-                onPress={() => router.push('/pay?source=recommend_cta')}
+                onPress={() => router.push(`/pay?source=recommend_cta&category=${category}`)}
                 activeOpacity={0.8}
               >
                 <Ionicons name="flash" size={18} color={Colors.brandGold} />

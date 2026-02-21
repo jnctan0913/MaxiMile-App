@@ -65,6 +65,7 @@ export default function OnboardingMilesScreen() {
 
   // -----------------------------------------------------------------------
   // Derive unique miles programs from selected cards
+  // Includes BOTH direct-earn programs AND transferable airline programs
   // -----------------------------------------------------------------------
   const fetchPrograms = useCallback(async () => {
     if (!cardIdsParam) {
@@ -86,38 +87,86 @@ export default function OnboardingMilesScreen() {
     }
 
     try {
-      const { data, error } = await supabase
+      // Step 1: Get direct programs from cards
+      const { data: cardsData, error: cardsError } = await supabase
         .from('cards')
-        .select('id, name, miles_program_id, miles_programs!inner(id, name, airline)')
+        .select('id, name, miles_program_id, miles_programs!inner(id, name, airline, program_type)')
         .in('id', cardIds);
 
-      if (error) {
-        handleSupabaseError(error);
+      if (cardsError) {
+        handleSupabaseError(cardsError);
         showNetworkErrorAlert();
         setLoading(false);
         return;
       }
 
-      // Deduplicate programs — multiple cards may map to same program
+      // Collect direct programs
       const seen = new Set<string>();
-      const unique: MilesProgram[] = [];
+      const allPrograms: MilesProgram[] = [];
+      const bankProgramIds: string[] = [];
 
-      for (const card of data ?? []) {
+      for (const card of cardsData ?? []) {
         const mp = card.miles_programs as unknown as {
           id: string;
           name: string;
           airline: string | null;
+          program_type: string;
         };
+
         if (mp && !seen.has(mp.id)) {
           seen.add(mp.id);
-          unique.push({ id: mp.id, name: mp.name, airline: mp.airline });
+          allPrograms.push({ id: mp.id, name: mp.name, airline: mp.airline });
+
+          // Track bank points programs to fetch their transfer partners
+          if (mp.program_type === 'bank_points' || mp.program_type === 'transferable') {
+            bankProgramIds.push(mp.id);
+          }
         }
       }
 
-      setPrograms(unique);
+      // Step 2: Get transferable airline programs from bank points programs
+      if (bankProgramIds.length > 0) {
+        const { data: transferData } = await supabase
+          .from('transfer_partners')
+          .select('destination_program_id, miles_programs!transfer_partners_destination_program_id_fkey(id, name, airline)')
+          .in('source_program_id', bankProgramIds);
+
+        if (transferData) {
+          for (const transfer of transferData) {
+            const destProgram = transfer.miles_programs as unknown as {
+              id: string;
+              name: string;
+              airline: string | null;
+            };
+
+            if (destProgram && !seen.has(destProgram.id)) {
+              seen.add(destProgram.id);
+              allPrograms.push({
+                id: destProgram.id,
+                name: destProgram.name,
+                airline: destProgram.airline,
+              });
+            }
+          }
+        }
+      }
+
+      // Sort: Airlines first, then bank programs
+      allPrograms.sort((a, b) => {
+        const aIsAirline = a.airline !== null;
+        const bIsAirline = b.airline !== null;
+        if (aIsAirline && !bIsAirline) return -1;
+        if (!aIsAirline && bIsAirline) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      setPrograms(allPrograms);
 
       if (user) {
-        track('onboarding_miles_view', { programs_count: unique.length }, user.id);
+        track('onboarding_miles_view', {
+          programs_count: allPrograms.length,
+          bank_programs: bankProgramIds.length,
+        }, user.id);
       }
     } catch {
       showNetworkErrorAlert();
@@ -226,9 +275,9 @@ export default function OnboardingMilesScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Set your current miles balances</Text>
+            <Text style={styles.title}>Set your current balances</Text>
             <Text style={styles.subtitle}>
-              We'll track your earnings from here. You can update anytime.
+              Enter your existing miles and points. We'll track your earnings from here.
             </Text>
           </View>
 

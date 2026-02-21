@@ -451,7 +451,7 @@ export default function SubmissionList({ onSelectSubmission }: SubmissionListPro
           >
             Prev
           </button>
-          <span className="text-[13px] text-slate-500">
+          <span className="text-[13px] text-text-secondary">
             Page {page + 1} of {totalPages}
           </span>
           <button

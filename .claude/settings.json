@@ -1,0 +1,292 @@
+{
+  "project": {
+    "name": "Vibe Coding Agent Team",
+    "version": "2.0.0",
+    "description": "Multi-agent collaborative development system with tiered ceremony"
+  },
+  "tiers": {
+    "quick": {
+      "description": "Prototype/experiment - minimal docs, straight to code",
+      "discovery": false,
+      "prd": "minimal",
+      "rice": false,
+      "stakeholders": false,
+      "competitive": false,
+      "product_marketing": "value_prop_only",
+      "sprint_plan": "basic",
+      "dor_dod": false,
+      "architecture_docs": "inline",
+      "handovers": false,
+      "state_tracking": ["resume.md"],
+      "retros": false,
+      "checkpoints": ["tier_selection", "commit"]
+    },
+    "standard": {
+      "description": "Most projects - balanced approach with key docs",
+      "discovery": "optional",
+      "prd": "standard",
+      "rice": "simplified",
+      "stakeholders": false,
+      "competitive": false,
+      "product_marketing": "standard",
+      "sprint_plan": "standard",
+      "dor_dod": true,
+      "architecture_docs": "standard",
+      "handovers": "context_only",
+      "state_tracking": ["resume.md", "context.md"],
+      "retros": "optional",
+      "checkpoints": ["tier_selection", "prd", "product_marketing", "sprint", "architecture", "commit"]
+    },
+    "full": {
+      "description": "Enterprise/compliance - complete documentation",
+      "discovery": true,
+      "prd": "comprehensive",
+      "rice": "full",
+      "stakeholders": true,
+      "competitive": true,
+      "product_marketing": "comprehensive",
+      "sprint_plan": "full",
+      "dor_dod": true,
+      "architecture_docs": "full",
+      "handovers": "full",
+      "state_tracking": ["resume.md", "context.md", "handover/*"],
+      "retros": true,
+      "checkpoints": ["tier_selection", "discovery", "prd", "prioritization", "product_marketing", "sprint", "architecture", "commit", "feedback", "retro"]
+    }
+  },
+  "tier_detection": {
+    "quick_keywords": ["quick", "fast", "prototype", "just build it", "skip ceremony", "hacky", "mvp"],
+    "full_keywords": ["full", "enterprise", "compliance", "document everything", "audit trail", "production"],
+    "default": "standard"
+  },
+  "agents": {
+    "pm": {
+      "name": "Product Manager",
+      "command": "/pm",
+      "outputs_by_tier": {
+        "quick": ["Quick PRD (inline or minimal file)"],
+        "standard": ["docs/PRD.md"],
+        "full": ["docs/DISCOVERY.md", "docs/PRD.md"]
+      }
+    },
+    "scrum": {
+      "name": "Scrum Master",
+      "command": "/scrum",
+      "outputs_by_tier": {
+        "quick": ["Basic task list"],
+        "standard": ["docs/SPRINT_PLAN.md"],
+        "full": ["docs/SPRINT_PLAN.md with full ceremony"]
+      }
+    },
+    "designer": {
+      "name": "UI/UX Designer",
+      "command": "/designer",
+      "outputs_by_tier": {
+        "quick": ["Inline notes or skip"],
+        "standard": ["docs/DRD.md"],
+        "full": ["docs/DRD.md (comprehensive)"]
+      }
+    },
+    "data-engineer": {
+      "name": "Data Engineer",
+      "command": "/data-engineer",
+      "outputs_by_tier": {
+        "quick": ["Inline notes or skip"],
+        "standard": ["docs/DATA_ARCHITECTURE.md"],
+        "full": ["docs/DATA_ARCHITECTURE.md (comprehensive)"]
+      }
+    },
+    "software-engineer": {
+      "name": "Software Engineer",
+      "command": "/software-engineer",
+      "outputs_by_tier": {
+        "quick": ["Inline notes or skip"],
+        "standard": ["docs/TECHNICAL_ARCHITECTURE.md"],
+        "full": ["docs/TECHNICAL_ARCHITECTURE.md (comprehensive)"]
+      }
+    },
+    "ai-engineer": {
+      "name": "AI Engineer",
+      "command": "/ai-engineer",
+      "outputs_by_tier": {
+        "quick": ["Skip unless needed"],
+        "standard": ["docs/AI_ARCHITECTURE.md if needed"],
+        "full": ["docs/AI_ARCHITECTURE.md (comprehensive)"]
+      }
+    },
+    "developer": {
+      "name": "Developer",
+      "command": "/developer",
+      "outputs_by_tier": {
+        "quick": ["Code directly"],
+        "standard": ["docs/IMPLEMENTATION_PLAN.md", "src/**/*"],
+        "full": ["docs/IMPLEMENTATION_PLAN.md (detailed)", "src/**/*"]
+      }
+    },
+    "debugger": {
+      "name": "Code Debugger",
+      "command": "/debugger",
+      "outputs_by_tier": {
+        "quick": ["Same (always thorough)"],
+        "standard": ["Same (always thorough)"],
+        "full": ["Same (always thorough)"]
+      },
+      "note": "Debugger is always thorough regardless of tier - bugs need proper analysis"
+    },
+    "tester": {
+      "name": "Code Tester",
+      "command": "/tester",
+      "outputs_by_tier": {
+        "quick": ["Basic tests"],
+        "standard": ["docs/TEST_PLAN.md", "tests/**/*"],
+        "full": ["docs/TEST_PLAN.md (comprehensive)", "tests/**/*"]
+      }
+    },
+    "market-researcher": {
+      "name": "Market Researcher",
+      "command": "/market-researcher",
+      "outputs_by_tier": {
+        "quick": ["Quick market scan (inline or brief section)"],
+        "standard": ["docs/MARKET_RESEARCH.md"],
+        "full": ["docs/MARKET_RESEARCH.md (comprehensive)", "docs/SURVEY_DESIGN.md"]
+      },
+      "note": "Runs before PM to provide evidence-based market insights. All claims must include citations with links."
+    },
+    "product-marketer": {
+      "name": "Product Marketer",
+      "command": "/product-marketer",
+      "outputs_by_tier": {
+        "quick": ["Quick value proposition and launch checklist (inline)"],
+        "standard": ["docs/PRODUCT_MARKETING.md"],
+        "full": ["docs/PRODUCT_MARKETING.md (comprehensive with GTM canvas, sales enablement)"]
+      },
+      "note": "Runs after PM to craft positioning, GTM strategy, and sales enablement. Bridges product development to market success."
+    },
+    "session-resume": {
+      "name": "Session Resume",
+      "command": "/session-resume",
+      "note": "Smart session resumption with context reconstruction"
+    },
+    "status-reporter": {
+      "name": "Status Reporter",
+      "command": "/status-reporter",
+      "note": "Comprehensive project status reports"
+    },
+    "story-generator": {
+      "name": "Story Generator",
+      "command": "/story-generator",
+      "note": "Generate sprint-ready user stories from PRD"
+    },
+    "sprint-retro": {
+      "name": "Sprint Retrospective",
+      "command": "/sprint-retro",
+      "note": "Structured sprint retrospectives (Start/Stop/Continue, 4Ls, Sailboat)"
+    },
+    "feedback-collector": {
+      "name": "Feedback Collector",
+      "command": "/feedback-collector",
+      "note": "Collect and synthesize user/stakeholder feedback"
+    },
+    "decision-log": {
+      "name": "Decision Log",
+      "command": "/decision-log",
+      "note": "ADR-format product and technical decision tracking"
+    },
+    "risk-register": {
+      "name": "Risk Register",
+      "command": "/risk-register",
+      "note": "Consolidated risk tracking with 5x5 likelihood/impact matrix"
+    },
+    "project-health": {
+      "name": "Project Health",
+      "command": "/project-health",
+      "note": "RAG health dashboard across all project dimensions"
+    },
+    "competitive-monitor": {
+      "name": "Competitive Monitor",
+      "command": "/competitive-monitor",
+      "note": "Ongoing competitive landscape updates"
+    },
+    "doc-exporter": {
+      "name": "Document Exporter",
+      "command": "/doc-exporter",
+      "note": "Export docs to PDF/DOCX/HTML via pandoc"
+    }
+  },
+  "state": {
+    "directory": ".claude/state",
+    "files": {
+      "resume": "resume.md",
+      "context": "context.md"
+    },
+    "update_triggers": [
+      "project_start",
+      "tier_set",
+      "phase_complete",
+      "agent_handoff",
+      "important_decision",
+      "session_end",
+      "token_limit_approaching"
+    ]
+  },
+  "git": {
+    "require_approval": true,
+    "commit_format": "type(scope): description",
+    "co_author": "Claude <noreply@anthropic.com>",
+    "branching": {
+      "strategy": "feature-branches",
+      "main_branch": "main",
+      "branch_prefixes": {
+        "feature": "feat/",
+        "bugfix": "fix/",
+        "refactor": "refactor/",
+        "docs": "docs/"
+      },
+      "by_tier": {
+        "quick": "optional",
+        "standard": "required",
+        "full": "required"
+      },
+      "checkpoints": {
+        "branch_creation": true,
+        "each_commit": true,
+        "merge_to_main": true,
+        "push_to_remote": true
+      }
+    },
+    "note": "Commits and merges ALWAYS require approval regardless of tier"
+  },
+  "token_management": {
+    "save_state_on_limit": true,
+    "resume_prompt_in_state": true,
+    "estimated_tokens_by_tier": {
+      "quick": "10-30k",
+      "standard": "50-100k",
+      "full": "100-200k+"
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-git-push.sh"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/save-session-state.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

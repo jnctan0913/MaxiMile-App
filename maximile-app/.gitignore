@@ -10,6 +10,13 @@ web-build/
 ios/
 android/
 
+# Android SDK files (shouldn't be in repo)
+build-tools/
+cmdline-tools/
+platform-tools/
+platforms/
+licenses/
+
 # Environment variables
 .env
 .env.local

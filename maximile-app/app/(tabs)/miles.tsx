@@ -7,13 +7,16 @@ import {
   StyleSheet,
   RefreshControl,
   TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Colors, Spacing, Typography } from '../../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius } from '../../constants/theme';
 import MilesHeroSection from '../../components/MilesHeroSection';
 import MilesProgramCard from '../../components/MilesProgramCard';
 import SegmentedControl from '../../components/SegmentedControl';
@@ -22,6 +25,7 @@ import BankPointsCard, { TransferOption } from '../../components/BankPointsCard'
 import TransferNudgeCard from '../../components/TransferNudgeCard';
 import EmptyState from '../../components/EmptyState';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import BottomSheet from '../../components/BottomSheet';
 import { showNetworkErrorAlert } from '../../lib/error-handler';
 import { track } from '../../lib/analytics';
 
@@ -84,6 +88,13 @@ interface NudgeSuggestion {
   potentialMiles: number;
 }
 
+interface AvailableProgram {
+  id: string;
+  name: string;
+  airline: string | null;
+  program_type: string;
+}
+
 // ---------------------------------------------------------------------------
 // Segment indices
 // ---------------------------------------------------------------------------
@@ -124,6 +135,13 @@ export default function MilesScreen() {
 
   // Track card positions for "View Options" scroll
   const bankCardOffsets = useRef<Record<string, number>>({});
+
+  // Add Program feature state
+  const [addProgramSheetVisible, setAddProgramSheetVisible] = useState(false);
+  const [availablePrograms, setAvailablePrograms] = useState<AvailableProgram[]>([]);
+  const [selectedNewProgram, setSelectedNewProgram] = useState<AvailableProgram | null>(null);
+  const [newProgramBalance, setNewProgramBalance] = useState('');
+  const [savingNewProgram, setSavingNewProgram] = useState(false);
 
   // -------------------------------------------------------------------------
   // Data fetching
@@ -280,6 +298,116 @@ export default function MilesScreen() {
   };
 
   // -------------------------------------------------------------------------
+  // Add Program handlers
+  // -------------------------------------------------------------------------
+  const handleOpenAddProgramSheet = async () => {
+    if (!user) return;
+
+    try {
+      // Determine program type based on active segment
+      const programType = activeSegment === MY_MILES ? 'airline' : 'bank_points';
+
+      // Fetch all programs of this type
+      const { data: allPrograms, error: programsError } = await supabase
+        .from('miles_programs')
+        .select('id, name, airline, program_type')
+        .eq('program_type', programType === 'bank_points' ? 'bank_points' : 'airline')
+        .order('name');
+
+      if (programsError) {
+        if (__DEV__) console.error('Fetch programs error:', programsError);
+        Alert.alert('Error', 'Failed to load programs. Please try again.');
+        return;
+      }
+
+      // Get IDs of programs already in portfolio
+      const existingIds = activeSegment === MY_MILES
+        ? airlinePrograms.map((p) => p.program_id)
+        : bankPrograms.map((p) => p.program_id);
+
+      // Filter out programs already tracked
+      const available = (allPrograms ?? [])
+        .filter((p) => !existingIds.includes(p.id))
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          airline: p.airline,
+          program_type: p.program_type,
+        }));
+
+      setAvailablePrograms(available);
+      setAddProgramSheetVisible(true);
+
+      await track('add_program_sheet_opened', { program_type: programType }, user.id);
+    } catch (err) {
+      if (__DEV__) console.error('Open add program sheet error:', err);
+      Alert.alert('Error', 'Failed to load programs. Please try again.');
+    }
+  };
+
+  const handleDismissAddProgramSheet = () => {
+    setAddProgramSheetVisible(false);
+    setAvailablePrograms([]);
+    setSelectedNewProgram(null);
+    setNewProgramBalance('');
+  };
+
+  const handleSelectProgram = (program: AvailableProgram) => {
+    setSelectedNewProgram(program);
+    setNewProgramBalance('');
+  };
+
+  const handleSaveNewProgram = async () => {
+    if (!user || !selectedNewProgram) return;
+
+    const parsed = parseInt(newProgramBalance, 10);
+    if (isNaN(parsed) || parsed < 0 || parsed > 10_000_000) {
+      Alert.alert('Invalid Amount', 'Balance must be between 0 and 10,000,000.');
+      return;
+    }
+
+    setSavingNewProgram(true);
+    try {
+      const { error } = await supabase.rpc('upsert_miles_balance', {
+        p_user_id: user.id,
+        p_program_id: selectedNewProgram.id,
+        p_amount: parsed,
+      });
+
+      if (error) {
+        if (__DEV__) console.error('Save new program error:', error);
+        Alert.alert('Error', 'Failed to add program. Please try again.');
+        setSavingNewProgram(false);
+        return;
+      }
+
+      await track('program_added_manually', {
+        program_id: selectedNewProgram.id,
+        program_name: selectedNewProgram.name,
+        initial_balance: parsed,
+      }, user.id);
+
+      handleDismissAddProgramSheet();
+      setLoading(true);
+      await fetchMilesPortfolio();
+    } catch (err) {
+      if (__DEV__) console.error('Save new program error:', err);
+      Alert.alert('Error', 'Failed to add program. Please try again.');
+    } finally {
+      setSavingNewProgram(false);
+    }
+  };
+
+  const parsedNewBalance = parseInt(newProgramBalance, 10);
+  const isSaveNewProgramDisabled =
+    savingNewProgram ||
+    !selectedNewProgram ||
+    newProgramBalance.trim() === '' ||
+    isNaN(parsedNewBalance) ||
+    parsedNewBalance < 0 ||
+    parsedNewBalance > 10_000_000;
+
+  // -------------------------------------------------------------------------
   // Derived data
   // -------------------------------------------------------------------------
   const totalAirlineMiles = airlinePrograms.reduce((sum, p) => {
@@ -332,21 +460,22 @@ export default function MilesScreen() {
   // Main render
   // -------------------------------------------------------------------------
   return (
-    <ImageBackground
-      source={require('../../assets/background.png')}
-      style={styles.background}
-      imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
-    >
-      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-        <ScrollView
-          ref={scrollRef}
-          style={styles.scrollView}
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-          }
-        >
+    <>
+      <ImageBackground
+        source={require('../../assets/background.png')}
+        style={styles.background}
+        imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
+      >
+        <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+          <ScrollView
+            ref={scrollRef}
+            style={styles.scrollView}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            }
+          >
           {/* Header */}
           <Text style={styles.screenTitle}>Miles Portfolio</Text>
           <Text style={styles.screenSubtitle}>Your loyalty program balances</Text>
@@ -426,6 +555,18 @@ export default function MilesScreen() {
                   />
                 );
               })}
+
+              {/* Add Program Button */}
+              <TouchableOpacity
+                style={styles.addProgramButton}
+                onPress={handleOpenAddProgramSheet}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="Track new airline program"
+              >
+                <Ionicons name="add-circle-outline" size={20} color={Colors.brandGold} />
+                <Text style={styles.addProgramButtonText}>Track New Airline Program</Text>
+              </TouchableOpacity>
             </>
           )}
 
@@ -504,6 +645,107 @@ export default function MilesScreen() {
         </ScrollView>
       </SafeAreaView>
     </ImageBackground>
+
+    {/* Add Program Bottom Sheet */}
+    <BottomSheet
+      visible={addProgramSheetVisible}
+      onDismiss={handleDismissAddProgramSheet}
+      title={activeSegment === MY_MILES ? 'Track Airline Program' : 'Track Bank Program'}
+    >
+      {!selectedNewProgram ? (
+        <>
+          <Text style={styles.sheetDescription}>
+            Select a program to track manually. You can add your current balance.
+          </Text>
+
+          {availablePrograms.length === 0 ? (
+            <Text style={styles.noPrograms}>
+              All {activeSegment === MY_MILES ? 'airline' : 'bank'} programs are already tracked.
+            </Text>
+          ) : (
+            <ScrollView style={styles.programList} showsVerticalScrollIndicator={false}>
+              {availablePrograms.map((program) => (
+                <TouchableOpacity
+                  key={program.id}
+                  style={styles.programOption}
+                  onPress={() => handleSelectProgram(program)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${program.name}`}
+                >
+                  <View style={styles.programOptionContent}>
+                    <Ionicons
+                      name={activeSegment === MY_MILES ? 'airplane-outline' : 'card-outline'}
+                      size={20}
+                      color={Colors.brandGold}
+                    />
+                    <Text style={styles.programOptionName}>{program.name}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={Colors.textTertiary} />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+        </>
+      ) : (
+        <>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => setSelectedNewProgram(null)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={20} color={Colors.brandGold} />
+            <Text style={styles.backButtonText}>Change program</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.selectedProgramName}>{selectedNewProgram.name}</Text>
+
+          <Text style={styles.inputLabel}>CURRENT BALANCE</Text>
+          <View style={styles.inputBorder}>
+            <TextInput
+              style={styles.numericInput}
+              value={newProgramBalance}
+              onChangeText={(text) => {
+                const cleaned = text.replace(/[^0-9]/g, '');
+                setNewProgramBalance(cleaned);
+              }}
+              keyboardType="numeric"
+              placeholder="0"
+              placeholderTextColor={Colors.textTertiary}
+              autoFocus
+              accessibilityLabel="Program balance"
+            />
+          </View>
+
+          <Text style={styles.helperText}>
+            Enter your current balance. You can update this anytime.
+          </Text>
+
+          <TouchableOpacity
+            style={[styles.saveCta, isSaveNewProgramDisabled && styles.saveCtaDisabled]}
+            activeOpacity={0.7}
+            onPress={handleSaveNewProgram}
+            disabled={isSaveNewProgramDisabled}
+            accessibilityRole="button"
+            accessibilityLabel="Save program"
+          >
+            {savingNewProgram ? (
+              <ActivityIndicator size="small" color={Colors.brandCharcoal} />
+            ) : (
+              <Text
+                style={[
+                  styles.saveCtaText,
+                  isSaveNewProgramDisabled && styles.saveCtaTextDisabled,
+                ]}
+              >
+                Add Program
+              </Text>
+            )}
+          </TouchableOpacity>
+        </>
+      )}
+    </BottomSheet>
+    </>
   );
 }
 
@@ -571,5 +813,123 @@ const styles = StyleSheet.create({
     color: Colors.textTertiary,
     textAlign: 'center',
     marginTop: Spacing.xs,
+  },
+
+  // Add Program Button
+  addProgramButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    borderWidth: 1.5,
+    borderColor: Colors.brandGold,
+    borderRadius: BorderRadius.xl,
+    borderStyle: 'dashed',
+    backgroundColor: 'rgba(197, 165, 90, 0.05)',
+    marginTop: Spacing.md,
+  },
+  addProgramButtonText: {
+    ...Typography.bodyBold,
+    color: Colors.brandGold,
+    fontSize: 15,
+  },
+
+  // Bottom Sheet Styles
+  sheetDescription: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.lg,
+  },
+  noPrograms: {
+    ...Typography.body,
+    color: Colors.textTertiary,
+    textAlign: 'center',
+    paddingVertical: Spacing.xl,
+  },
+  programList: {
+    maxHeight: 400,
+  },
+  programOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  programOptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    flex: 1,
+  },
+  programOptionName: {
+    ...Typography.body,
+    color: Colors.textPrimary,
+    fontWeight: '500',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: Spacing.lg,
+  },
+  backButtonText: {
+    ...Typography.body,
+    color: Colors.brandGold,
+  },
+  selectedProgramName: {
+    ...Typography.heading,
+    fontSize: 22,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xl,
+  },
+  inputLabel: {
+    ...Typography.captionBold,
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    marginBottom: Spacing.xs,
+    marginTop: Spacing.md,
+  },
+  inputBorder: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: BorderRadius.md,
+    height: 48,
+    paddingHorizontal: Spacing.lg,
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
+  },
+  numericInput: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    textAlign: 'right',
+  },
+  helperText: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
+    marginBottom: Spacing.xl,
+  },
+  saveCta: {
+    backgroundColor: Colors.brandGold,
+    borderRadius: BorderRadius.md,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.md,
+  },
+  saveCtaDisabled: {
+    opacity: 0.4,
+  },
+  saveCtaText: {
+    ...Typography.bodyBold,
+    color: Colors.brandCharcoal,
+  },
+  saveCtaTextDisabled: {
+    color: Colors.brandCharcoal,
   },
 });

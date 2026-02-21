@@ -69,9 +69,12 @@ async function main() {
 
   const NULL_UUID = '00000000-0000-0000-0000-000000000000';
 
+  const isTableMissing = (e) =>
+    e.code === '42P01' || e.message?.includes('schema cache') || e.message?.includes('not found');
+
   for (const table of byId) {
     const { error } = await supabase.from(table).delete().gte('id', NULL_UUID);
-    if (error && error.code !== '42P01') {
+    if (error && !isTableMissing(error)) {
       console.error(`  ✗ ${table}: ${error.message}`);
     } else {
       console.log(`  ✓ ${table}`);
@@ -80,7 +83,7 @@ async function main() {
 
   for (const table of byUserId) {
     const { error } = await supabase.from(table).delete().neq('user_id', NULL_UUID);
-    if (error && error.code !== '42P01') {
+    if (error && !isTableMissing(error)) {
       console.error(`  ✗ ${table}: ${error.message}`);
     } else {
       console.log(`  ✓ ${table}`);

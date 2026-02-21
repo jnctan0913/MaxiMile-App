@@ -98,13 +98,25 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Menu items */}
+        {/* Activity */}
+        <Text style={styles.sectionLabel}>Activity</Text>
         <View style={styles.menuSection}>
           <MenuItem
             icon="receipt-outline"
             label="Transaction History"
             onPress={() => router.push('/transactions')}
           />
+          <MenuItem
+            icon="flash-outline"
+            label="Auto-Capture"
+            onPress={() => router.push('/auto-capture-settings')}
+            isLast
+          />
+        </View>
+
+        {/* Community */}
+        <Text style={styles.sectionLabel}>Community</Text>
+        <View style={styles.menuSection}>
           <MenuItem
             icon="chatbubble-ellipses-outline"
             label="Send Feedback"
@@ -114,21 +126,12 @@ export default function ProfileScreen() {
             icon="flag-outline"
             label="Report Rate Changes"
             onPress={() => router.push('/my-submissions')}
-          />
-          <MenuItem
-            icon="information-circle-outline"
-            label="About MaxiMile"
-            onPress={() => setShowAboutModal(true)}
-          />
-          <MenuItem
-            icon="shield-checkmark-outline"
-            label="Privacy Policy"
-            onPress={() => router.push('/privacy-policy')}
             isLast
           />
         </View>
 
-        {/* Account management */}
+        {/* Account */}
+        <Text style={styles.sectionLabel}>Account</Text>
         <View style={styles.menuSection}>
           <MenuItem
             icon="lock-closed-outline"
@@ -159,8 +162,18 @@ export default function ProfileScreen() {
           <Text style={styles.signOutText}>Sign Out</Text>
         </TouchableOpacity>
 
-        {/* Version */}
-        <Text style={styles.versionText}>v1.0.0-beta</Text>
+        {/* Footer: legal + about + version (low-frequency, demoted from main menu) */}
+        <View style={styles.footer}>
+          <TouchableOpacity onPress={() => router.push('/privacy-policy')} activeOpacity={0.6}>
+            <Text style={styles.footerLink}>Privacy Policy</Text>
+          </TouchableOpacity>
+          <Text style={styles.footerDivider}>·</Text>
+          <TouchableOpacity onPress={() => setShowAboutModal(true)} activeOpacity={0.6}>
+            <Text style={styles.footerLink}>About</Text>
+          </TouchableOpacity>
+          <Text style={styles.footerDivider}>·</Text>
+          <Text style={styles.versionText}>v1.0.0-beta</Text>
+        </View>
       </ScrollView>
 
       {/* About Modal */}
@@ -392,6 +405,16 @@ const styles = StyleSheet.create({
     color: Colors.danger,
   },
 
+  // Section labels
+  sectionLabel: {
+    ...Typography.captionBold,
+    color: Colors.textTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: Spacing.sm,
+    marginLeft: Spacing.xs,
+  },
+
   // Sign out
   signOutButton: {
     flexDirection: 'row',
@@ -409,11 +432,27 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
   },
 
-  // Version
+  // Footer
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingTop: Spacing.sm,
+    flexWrap: 'wrap',
+  },
+  footerLink: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
+    textDecorationLine: 'underline',
+  },
+  footerDivider: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
+  },
   versionText: {
     ...Typography.caption,
     color: Colors.textTertiary,
-    textAlign: 'center',
   },
 
   // About modal

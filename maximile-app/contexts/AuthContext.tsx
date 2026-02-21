@@ -128,6 +128,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // Validate the session server-side. getSession() reads from local cache
+      // only — if the auth user was deleted server-side (e.g. after a data
+      // wipe), the cached session would appear valid but all queries would
+      // silently return empty rows. getUser() always hits the server.
+      if (session) {
+        const { error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.warn('Server-side session validation failed, signing out:', userError.message);
+          await supabase.auth.signOut();
+          setState({
+            user: null,
+            session: null,
+            loading: false,
+            needsOnboarding: false,
+            isRecovery: false,
+          });
+          return;
+        }
+      }
+
       let needsOnboarding = false;
       if (session?.user) {
         needsOnboarding = await checkOnboardingStatus(session.user.id);
@@ -153,6 +173,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Subscribe to future auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // INITIAL_SESSION fires on startup from the local cache before server
+        // validation completes. We handle it exclusively in getSession().then()
+        // above (which also calls getUser() for server-side validation), so
+        // skip it here to prevent a race condition that would redirect to
+        // /welcome before the stale-session check has a chance to run.
+        if (event === 'INITIAL_SESSION') return;
+
         if (event === 'TOKEN_REFRESHED' && !session) {
           await supabase.auth.signOut();
           setState({
@@ -195,6 +222,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const inOnboarding = segments[0] === 'onboarding';
     const inOnboardingAutoCapture = segments[0] === 'onboarding-auto-capture';
     const inOnboardingMiles = segments[0] === 'onboarding-miles';
+    const inAutoCaptureSetup = segments[0] === 'auto-capture-setup';
     const inWelcome = segments[0] === 'welcome';
     const inPrivacyPolicy = segments[0] === 'privacy-policy';
     const inResetPassword = segments[0] === 'reset-password';
@@ -214,8 +242,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } else if (state.needsOnboarding) {
       // Authenticated but no cards -> redirect to welcome (then onboarding)
-      // Allow onboarding-auto-capture (Step 1.5) and onboarding-miles (Step 2) since cards are saved before navigating there
-      if (!inOnboarding && !inOnboardingAutoCapture && !inOnboardingMiles && !inWelcome) {
+      // Allow onboarding-auto-capture (Step 1.5), auto-capture-setup wizard, and onboarding-miles (Step 2)
+      if (!inOnboarding && !inOnboardingAutoCapture && !inAutoCaptureSetup && !inOnboardingMiles && !inWelcome) {
         router.replace('/welcome');
       }
     } else {

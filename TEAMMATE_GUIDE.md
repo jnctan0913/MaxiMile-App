@@ -102,24 +102,73 @@ Additional screens accessible from the tabs:
 
 ---
 
+## Latest Features (February 2026)
+
+### 🎭 Demo Mode
+- **Purpose**: Showcase auto-capture feature without real wallet integration
+- **Activation**: Set `EXPO_PUBLIC_DEMO_MODE=true` in `.env` file
+- **Behavior**: Uses mock Singapore merchants, locations, and transaction data
+- **Documentation**: `docs/technical/PRD_DEMO_MODE.md`, `docs/technical/DEMO_MODE.md`
+
+### 💳 Miles Portfolio Fix
+- **Fixed**: Incorrect card→program mappings (DBS Altitude, HSBC Revolution)
+- **Enhancement**: Shows both direct-earn AND transferable airline programs in onboarding
+- **Documentation**: `docs/MILES_PORTFOLIO_FIX.md`, `docs/MILES_PORTFOLIO_VERIFICATION.md`
+
+### ✈️ Track New Program
+- **Feature**: Manually add any airline program to portfolio (even without cards)
+- **Use Case**: Track loyalty programs from non-card sources
+- **Location**: "My Miles" tab → "+ Track New Airline Program" button
+- **Documentation**: `docs/TRACK_NEW_PROGRAM_FEATURE.md`
+
+### 🍎 iOS Shortcut Integration
+- **Purpose**: Auto-capture transactions via Apple Pay
+- **Setup**: Import shortcut from `maximile-app/assets/MaxiMile.shortcut`
+- **Documentation**: `maximile-app/SHORTCUT_SETUP.md`
+
+---
+
 ## Reviewing the PM Documentation
 
-All product management deliverables are in the `docs/` folder at the repository root. These document the full PM process from discovery to sprint planning:
+All product management deliverables are in the `docs/` folder at the repository root:
 
 ```
 docs/
-├── DISCOVERY.md              # Problem discovery & validation
-├── MARKET_RESEARCH.md        # Market analysis (TAM/SAM/SOM)
-├── COMPETITIVE_LANDSCAPE.md  # Competitor analysis
-├── CUSTOMER_SURVEY.md        # User research & surveys
-├── PRD.md                    # Product Requirements Document
-├── DRD_MILES_PORTFOLIO.md    # Design Requirements Document
-├── EPICS_AND_USER_STORIES.md # User stories & acceptance criteria
-├── SPRINT_PLAN.md            # Sprint backlog & planning
-└── SPRINT_EARNING_INSIGHTS.md # Feature sprint details
+├── design/                    # Design requirements
+│   ├── DRD_AUTO_CAPTURE.md
+│   └── DRD_MILES_PORTFOLIO.md
+├── marketing/                 # Go-to-market materials
+│   ├── PITCH_DECK.md
+│   └── PRODUCT_MARKETING.md
+├── planning/                  # Sprint & project planning
+│   ├── EPICS_AND_USER_STORIES.md
+│   ├── SPRINT_PLAN.md
+│   └── SPRINT_PLAN_DEMO_MODE.md
+├── research/                  # Discovery & market research
+│   ├── COMPETITIVE_LANDSCAPE.md
+│   ├── CUSTOMER_SURVEY.md
+│   ├── DISCOVERY.md
+│   └── MARKET_RESEARCH.md
+├── technical/                 # Technical documentation
+│   ├── DATA_ARCHITECTURE.md
+│   ├── DEMO_MODE.md
+│   ├── GOOGLE_PLACES_SETUP.md
+│   ├── NOTIFICATION_CAPTURE_FEASIBILITY.md
+│   ├── PRD_DEMO_MODE.md
+│   ├── RATE_DETECTION_ARCHITECTURE.md
+│   └── TECHNICAL_ARCHITECTURE.md
+├── MILES_PORTFOLIO_FIX.md     # Latest bug fix documentation
+├── MILES_PORTFOLIO_VERIFICATION.md
+├── TRACK_NEW_PROGRAM_FEATURE.md
+├── PRD.md                     # Core Product Requirements Document
+└── PROBLEM_SOLUTION_ANALYSIS.md
 ```
 
-**Recommended**: Start with `DISCOVERY.md` for context, then read `PRD.md` for the full product spec.
+**Recommended Reading Order**:
+1. `research/DISCOVERY.md` — Problem context
+2. `PRD.md` — Core product spec
+3. `MILES_PORTFOLIO_FIX.md` — Latest fixes
+4. `TRACK_NEW_PROGRAM_FEATURE.md` — Latest feature
 
 ---
 

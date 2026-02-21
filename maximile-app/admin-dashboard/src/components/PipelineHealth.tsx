@@ -5,7 +5,7 @@
 // - Summary header: active sources, broken sources, last run time/status
 // - Source health table from v_pipeline_health view
 // - Pipeline runs log (last 10) from pipeline_runs table
-// DRD Section 16.4: Clean slate-palette design with color-coded statuses.
+// DRD Section 16.4: MaxiMile brand design with color-coded statuses.
 // =============================================================================
 
 import { useEffect, useState, useCallback } from 'react';
@@ -178,7 +178,7 @@ export default function PipelineHealth() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="flex items-center gap-2 text-slate-400">
+        <div className="flex items-center gap-2 text-text-tertiary">
           <svg
             className="animate-spin h-5 w-5"
             fill="none"
@@ -211,7 +211,7 @@ export default function PipelineHealth() {
     <div className="min-h-screen pb-12">
       {/* Error */}
       {error && (
-        <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+        <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
           {error}
         </div>
       )}
@@ -233,40 +233,40 @@ export default function PipelineHealth() {
             color={
               (summary?.broken_sources ?? 0) > 0
                 ? 'text-red-700'
-                : 'text-slate-500'
+                : 'text-text-secondary'
             }
             bgColor={
               (summary?.broken_sources ?? 0) > 0
                 ? 'bg-red-50 border-red-200'
-                : 'bg-slate-50 border-slate-200'
+                : 'bg-surface-bg border-gold-tint'
             }
           />
           {/* Last Run Time */}
-          <div className="border rounded-lg p-4 bg-white border-slate-200">
-            <p className="text-[12px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+          <div className="border border-gold-tint rounded-xl p-4 shadow-sm bg-white border-gold-tint">
+            <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-1">
               Last Run
             </p>
-            <p className="text-lg font-bold text-slate-800">
+            <p className="text-lg font-bold text-text-primary">
               {summary?.last_run_at
                 ? timeAgo(summary.last_run_at)
                 : 'Never'}
             </p>
             {summary?.last_run_at && (
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-text-tertiary mt-0.5">
                 {formatDateTime(summary.last_run_at)}
               </p>
             )}
           </div>
           {/* Last Run Status */}
-          <div className="border rounded-lg p-4 bg-white border-slate-200">
-            <p className="text-[12px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+          <div className="border border-gold-tint rounded-xl p-4 shadow-sm bg-white border-gold-tint">
+            <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-1">
               Last Run Status
             </p>
             <div className="mt-1">
               {summary?.last_run_status ? (
                 <StatusBadge status={summary.last_run_status} size="md" />
               ) : (
-                <span className="text-lg font-bold text-slate-400">--</span>
+                <span className="text-lg font-bold text-text-tertiary">--</span>
               )}
             </div>
           </div>
@@ -275,38 +275,38 @@ export default function PipelineHealth() {
 
       {/* ---- SOURCE HEALTH TABLE ---- */}
       <div className="px-6 mb-6">
-        <h3 className="text-[12px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
+        <h3 className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-3">
           Source Health
         </h3>
 
         {sources.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-lg p-8 text-center text-slate-400 text-sm">
+          <div className="bg-white border border-gold-tint rounded-xl shadow-sm p-8 text-center text-text-tertiary text-sm">
             No source configurations found. The pipeline has not been configured yet.
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="bg-white border border-gold-tint rounded-xl shadow-sm overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b-2 border-slate-200">
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                <tr className="border-b-2 border-gold-tint">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Bank
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     URL
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Status
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Uptime (30d)
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Last Check
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Failures
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Freshness
                   </th>
                 </tr>
@@ -315,9 +315,9 @@ export default function PipelineHealth() {
                 {sources.map((source) => (
                   <tr
                     key={source.source_id}
-                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                    className="border-b border-surface-border-light hover:bg-surface-bg transition-colors"
                   >
-                    <td className="px-4 py-3 text-sm font-medium text-slate-800">
+                    <td className="px-4 py-3 text-sm font-medium text-text-primary">
                       {source.bank_name}
                     </td>
                     <td className="px-4 py-3">
@@ -325,7 +325,7 @@ export default function PipelineHealth() {
                         href={source.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-blue-500 hover:underline"
+                        className="text-sm text-primary hover:underline"
                         title={source.url}
                       >
                         {truncateUrl(source.url)}
@@ -348,10 +348,10 @@ export default function PipelineHealth() {
                           {source.uptime_pct_30d.toFixed(1)}%
                         </span>
                       ) : (
-                        <span className="text-sm text-slate-400">--</span>
+                        <span className="text-sm text-text-tertiary">--</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-500">
+                    <td className="px-4 py-3 text-sm text-text-secondary">
                       {source.last_checked_at
                         ? timeAgo(source.last_checked_at)
                         : 'Never'}
@@ -361,7 +361,7 @@ export default function PipelineHealth() {
                         className={`text-sm font-medium ${
                           source.consecutive_failures > 0
                             ? 'text-red-700'
-                            : 'text-slate-500'
+                            : 'text-text-secondary'
                         }`}
                       >
                         {source.consecutive_failures}
@@ -380,38 +380,38 @@ export default function PipelineHealth() {
 
       {/* ---- PIPELINE RUNS LOG ---- */}
       <div className="px-6 mb-6">
-        <h3 className="text-[12px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
+        <h3 className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-3">
           Pipeline Runs (Last 10)
         </h3>
 
         {runs.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-lg p-8 text-center text-slate-400 text-sm">
+          <div className="bg-white border border-gold-tint rounded-xl shadow-sm p-8 text-center text-text-tertiary text-sm">
             No pipeline runs recorded yet.
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="bg-white border border-gold-tint rounded-xl shadow-sm overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b-2 border-slate-200">
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                <tr className="border-b-2 border-gold-tint">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Date
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Status
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Sources
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Changes
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Auto-Approved
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Queued
                   </th>
-                  <th className="text-left text-[12px] font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">
+                  <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Duration
                   </th>
                 </tr>
@@ -420,27 +420,27 @@ export default function PipelineHealth() {
                 {runs.map((run) => (
                   <tr
                     key={run.id}
-                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                    className="border-b border-surface-border-light hover:bg-surface-bg transition-colors"
                   >
-                    <td className="px-4 py-3 text-sm text-slate-500">
+                    <td className="px-4 py-3 text-sm text-text-secondary">
                       {formatDateTime(run.started_at)}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={run.status} />
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
+                    <td className="px-4 py-3 text-sm text-text-primary">
                       {run.sources_checked}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
+                    <td className="px-4 py-3 text-sm text-text-primary">
                       {run.changes_detected}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
+                    <td className="px-4 py-3 text-sm text-text-primary">
                       {run.auto_approved}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-700">
+                    <td className="px-4 py-3 text-sm text-text-primary">
                       {run.queued_for_review}
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-500">
+                    <td className="px-4 py-3 text-sm text-text-secondary">
                       {formatDuration(run.duration_ms)}
                     </td>
                   </tr>
@@ -455,7 +455,7 @@ export default function PipelineHealth() {
       <div className="px-6">
         <button
           onClick={fetchData}
-          className="text-[13px] text-slate-500 border border-slate-200 rounded-md px-4 py-2 hover:bg-slate-50 transition-colors"
+          className="text-[13px] text-text-secondary border border-gold-tint rounded-xl px-4 py-2 hover:bg-surface-bg transition-colors"
         >
           Refresh Data
         </button>
@@ -480,8 +480,8 @@ function SummaryCard({
   bgColor: string;
 }) {
   return (
-    <div className={`border rounded-lg p-4 ${bgColor}`}>
-      <p className="text-[12px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
+    <div className={`border border-gold-tint rounded-xl p-4 shadow-sm ${bgColor}`}>
+      <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-1">
         {label}
       </p>
       <p className={`text-3xl font-bold ${color}`}>{value}</p>
