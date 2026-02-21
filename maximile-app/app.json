@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.maximile.app",
       "infoPlist": {
         "LSApplicationQueriesSchemes": [
-          "shoebox"
+          "shoebox",
+          "shortcuts"
         ]
       }
     },
@@ -50,7 +51,9 @@
           "locationWhenInUsePermission": "MaxiMile uses your location to detect nearby merchants and recommend the best card to use."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-asset",
+      "./plugins/withNotificationListener"
     ],
     "experiments": {
       "typedRoutes": true
