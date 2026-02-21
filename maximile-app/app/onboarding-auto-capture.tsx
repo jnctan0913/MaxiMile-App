@@ -82,10 +82,13 @@ export default function OnboardingAutoCaptureScreen() {
     }
 
     if (Platform.OS === 'ios') {
-      router.push('/auto-capture-setup');
+      // iOS: Route to Shortcuts-based auto-capture setup
+      router.push({ pathname: '/auto-capture-setup', params: { skipIntro: '1' } });
+    } else if (Platform.OS === 'android') {
+      // Android: Route to notification-based auto-capture setup (Sprint 17)
+      router.push('/android-auto-capture-setup');
     } else {
-      // Android placeholder for Sprint 17
-      // For now, just proceed to miles balance entry
+      // Fallback for other platforms (web, etc.)
       handleSkip();
     }
   };
