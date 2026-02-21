@@ -5,25 +5,23 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ActivityIndicator,
   ImageBackground,
   Animated,
   Easing,
   Platform,
   Linking,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ExpoLinking from 'expo-linking';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
+import { Asset } from 'expo-asset';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
-import {
-  getUserCardMappings,
-  saveCardMapping,
-} from '../lib/card-matcher';
 import {
   Colors,
   Spacing,
@@ -33,19 +31,10 @@ import {
 } from '../constants/theme';
 import { track } from '../lib/analytics';
 
-const SHORTCUT_URL = 'https://maximile.app/shortcut';
-const TOTAL_STEPS = 4;
-
-interface UserCard {
-  cardId: string;
-  cardName: string;
-  bank: string;
-}
-
-interface CardMapping {
-  cardId: string;
-  walletName: string;
-}
+// Bundled shortcut file — create once on iPhone/iPad, then bundle with app
+// See BUNDLE_SHORTCUT_FILE.md for instructions on creating the file
+const SHORTCUT_ASSET = require('../assets/MaxiMile.shortcut');
+const TOTAL_STEPS = 2;
 
 // ---------------------------------------------------------------------------
 // Progress Dots
@@ -247,19 +236,11 @@ const pulseStyles = StyleSheet.create({
 export default function AutoCaptureSetupScreen() {
   const { user } = useAuth();
   const router = useRouter();
-  const [step, setStep] = useState(0);
+  const { skipIntro } = useLocalSearchParams<{ skipIntro?: string }>();
+  const [step, setStep] = useState(skipIntro === '1' ? 1 : 0);
 
   // Step 2 state
   const [shortcutAdded, setShortcutAdded] = useState(false);
-
-  // Step 3 state
-  const [cards, setCards] = useState<UserCard[]>([]);
-  const [mappings, setMappings] = useState<CardMapping[]>([]);
-  const [loadingCards, setLoadingCards] = useState(false);
-  const [savingMappings, setSavingMappings] = useState(false);
-
-  // Step 4 state
-  const [testSuccess, setTestSuccess] = useState(false);
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -287,59 +268,6 @@ export default function AutoCaptureSetupScreen() {
     animateIn();
   }, [step, animateIn]);
 
-  // Fetch cards for Step 3
-  useEffect(() => {
-    if (step !== 2 || !user) return;
-
-    const fetchData = async () => {
-      setLoadingCards(true);
-      try {
-        const { data, error } = await supabase
-          .from('user_cards')
-          .select('card_id, cards!inner(id, name, bank)')
-          .eq('user_id', user.id);
-
-        if (!error && data) {
-          const userCards: UserCard[] = (data as any[]).map((row) => ({
-            cardId: (row as any).cards.id,
-            cardName: (row as any).cards.name,
-            bank: (row as any).cards.bank,
-          }));
-          setCards(userCards);
-
-          const existing = await getUserCardMappings(user.id);
-          const initialMappings = userCards.map((c) => {
-            const found = existing.find((m) => m.cardId === c.cardId);
-            return {
-              cardId: c.cardId,
-              walletName: found?.walletName ?? '',
-            };
-          });
-          setMappings(initialMappings);
-        }
-      } catch {
-        // Best-effort
-      }
-      setLoadingCards(false);
-    };
-
-    fetchData();
-  }, [step, user]);
-
-  // Deep link listener for Step 4 test verification
-  useEffect(() => {
-    if (step !== 3) return;
-
-    const sub = ExpoLinking.addEventListener('url', ({ url }) => {
-      if (url.startsWith('maximile://log')) {
-        setTestSuccess(true);
-        track('auto_capture_test_success' as any, { source: 'setup_wizard' }, user?.id);
-      }
-    });
-
-    return () => sub.remove();
-  }, [step, user?.id]);
-
   // Track setup start
   useEffect(() => {
     track('screen_view', { screen: 'auto_capture_setup' }, user?.id);
@@ -361,38 +289,43 @@ export default function AutoCaptureSetupScreen() {
     }
   };
 
+  const [downloading, setDownloading] = useState(false);
+
   const handleDownloadShortcut = async () => {
+    setDownloading(true);
     try {
-      await Linking.openURL(SHORTCUT_URL);
+      // Load the bundled .shortcut file
+      // This file is created once on iPhone/iPad and bundled with the app
+      const [asset] = await Asset.loadAsync(SHORTCUT_ASSET);
+
+      // Copy to cache directory so it can be shared
+      const destUri = FileSystem.cacheDirectory + 'MaxiMile.shortcut';
+      await FileSystem.downloadAsync(asset.uri, destUri);
+
+      // Share the file — iOS shows native share sheet with "Add to Shortcuts" option
+      await Sharing.shareAsync(destUri, {
+        mimeType: 'application/x-apple-shortcuts',
+        UTI: 'com.apple.shortcuts.shortcut',
+        dialogTitle: 'Add MaxiMile to Shortcuts',
+      });
+
       setShortcutAdded(true);
-    } catch {
-      // URL may fail in simulator
-    }
-  };
-
-  const updateWalletName = (cardId: string, walletName: string) => {
-    setMappings((prev) =>
-      prev.map((m) =>
-        m.cardId === cardId ? { ...m, walletName } : m,
-      ),
-    );
-  };
-
-  const handleSaveMappings = async () => {
-    if (!user) return;
-    setSavingMappings(true);
-    try {
-      const toSave = mappings.filter((m) => m.walletName.trim().length > 0);
-      await Promise.all(
-        toSave.map((m) => saveCardMapping(user.id, m.walletName.trim(), m.cardId)),
+      track('shortcut_downloaded' as any, { method: 'file_sharing' }, user?.id);
+    } catch (err) {
+      Alert.alert(
+        'Could Not Share Shortcut',
+        'Please make sure the Shortcuts app is installed and try again.\n\n' +
+        'Error: ' + (err instanceof Error ? err.message : 'Unknown error'),
+        [{ text: 'OK' }],
       );
-      track('auto_capture_cards_mapped' as any, { count: toSave.length }, user.id);
-      setStep(3);
-    } catch {
-      // Best-effort
+    } finally {
+      setDownloading(false);
     }
-    setSavingMappings(false);
   };
+
+  // Note: Demo mode testing handled automatically by deep link handler.
+  // When EXPO_PUBLIC_DEMO_MODE=true, any trigger of maximile://log will
+  // inject mock transaction data via lib/deep-link.ts injectMockData().
 
   // ---------------------------------------------------------------------------
   // Step renderers
@@ -400,34 +333,57 @@ export default function AutoCaptureSetupScreen() {
 
   const renderStep0 = () => (
     <>
-      <Text style={styles.stepTitle}>How It Works</Text>
+      <Text style={styles.stepTitle}>Set Up Auto-Capture</Text>
       <Text style={styles.stepSubtitle}>
-        Automatically log Apple Pay transactions in three simple steps.
+        Pay with Apple Pay → MaxiMile opens automatically with the transaction pre-filled.
       </Text>
 
+      {/* Download button */}
+      <TouchableOpacity
+        style={[styles.downloadButton, downloading && { opacity: 0.7 }]}
+        activeOpacity={0.8}
+        onPress={handleDownloadShortcut}
+        disabled={downloading}
+      >
+        <LinearGradient
+          colors={['#D4B96A', Colors.brandGold, '#B8953F']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.downloadGradient}
+        >
+          {downloading
+            ? <ActivityIndicator size="small" color={Colors.brandCharcoal} />
+            : <Ionicons name="download-outline" size={22} color={Colors.brandCharcoal} />
+          }
+          <Text style={styles.downloadButtonText}>
+            {downloading ? 'Opening…' : 'Add Shortcut'}
+          </Text>
+        </LinearGradient>
+      </TouchableOpacity>
+
+      {/* Simplified Instructions */}
       <View style={styles.glassCard}>
-        <StepIcon
-          icon="phone-portrait-outline"
-          label="Pay with Apple Pay at any store"
-          delay={100}
-        />
-        <View style={styles.connector} />
-        <StepIcon
-          icon="flash-outline"
-          label="iOS Shortcuts auto-sends the transaction"
-          delay={300}
-        />
-        <View style={styles.connector} />
-        <StepIcon
-          icon="airplane-outline"
-          label="MaxiMile pre-fills your log — just confirm"
-          delay={500}
-        />
+        <Text style={styles.instructionHeader}>Quick setup:</Text>
+        {[
+          'Tap "Add Shortcut" above → Select "Shortcuts"',
+          'In Shortcuts app → tap "+ Add Shortcut"',
+          'Open Automation tab → tap "+"',
+          'Choose: "When I tap a Wallet Card or Pass"',
+          'Under "My Shortcuts", tap "MaxiMile"',
+          'Set Automation to "Run Immediately" → tap "Done"',
+        ].map((text, i) => (
+          <View key={i} style={styles.instructionRow}>
+            <View style={styles.instructionNumber}>
+              <Text style={styles.instructionNumberText}>{i + 1}</Text>
+            </View>
+            <Text style={styles.instructionText}>{text}</Text>
+          </View>
+        ))}
       </View>
 
       <View style={styles.requirementBadge}>
         <Ionicons name="information-circle-outline" size={16} color={Colors.textSecondary} />
-        <Text style={styles.requirementText}>Works with iOS 17+</Text>
+        <Text style={styles.requirementText}>Requires iOS 17+</Text>
       </View>
 
       <TouchableOpacity
@@ -441,8 +397,8 @@ export default function AutoCaptureSetupScreen() {
           end={{ x: 1, y: 1 }}
           style={styles.primaryGradient}
         >
-          <Text style={styles.primaryButtonText}>Next</Text>
-          <Ionicons name="arrow-forward" size={18} color={Colors.brandCharcoal} />
+          <Text style={styles.primaryButtonText}>I've set this up</Text>
+          <Ionicons name="checkmark-circle" size={18} color={Colors.brandCharcoal} />
         </LinearGradient>
       </TouchableOpacity>
     </>
@@ -450,179 +406,55 @@ export default function AutoCaptureSetupScreen() {
 
   const renderStep1 = () => (
     <>
-      <Text style={styles.stepTitle}>Download Shortcut</Text>
-      <Text style={styles.stepSubtitle}>
-        Tap below to download the MaxiMile Shortcut. Then add it as a Personal Automation in the Shortcuts app.
-      </Text>
+      <View style={styles.successContainer}>
+        <View style={styles.successCircle}>
+          <Ionicons name="checkmark" size={40} color={Colors.brandCharcoal} />
+        </View>
+        <Text style={styles.successTitle}>All Set!</Text>
+        <Text style={styles.successSubtitle}>
+          Auto-capture is ready. Next time you tap to pay with Apple Pay, MaxiMile will open automatically with your transaction pre-filled.
+        </Text>
+      </View>
+
+      <View style={styles.glassCard}>
+        <StepIcon
+          icon="card-outline"
+          label="Tap to pay with Apple Pay"
+          delay={100}
+        />
+        <View style={styles.connector} />
+        <StepIcon
+          icon="flash-outline"
+          label="MaxiMile opens automatically"
+          delay={300}
+        />
+        <View style={styles.connector} />
+        <StepIcon
+          icon="checkmark-circle-outline"
+          label="Review and confirm to log"
+          delay={500}
+        />
+      </View>
 
       <TouchableOpacity
-        style={styles.downloadButton}
+        style={styles.primaryButton}
         activeOpacity={0.8}
-        onPress={handleDownloadShortcut}
+        onPress={() => router.replace('/(tabs)')}
       >
         <LinearGradient
           colors={['#D4B96A', Colors.brandGold, '#B8953F']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.downloadGradient}
+          style={styles.primaryGradient}
         >
-          <Ionicons name="download-outline" size={22} color={Colors.brandCharcoal} />
-          <Text style={styles.downloadButtonText}>Download Shortcut</Text>
+          <Text style={styles.primaryButtonText}>Done</Text>
+          <Ionicons name="checkmark-circle" size={18} color={Colors.brandCharcoal} />
         </LinearGradient>
       </TouchableOpacity>
-
-      <View style={styles.glassCard}>
-        <Text style={styles.instructionHeader}>Setup Instructions</Text>
-        {[
-          'Open the downloaded Shortcut',
-          'Tap "Add Automation"',
-          'Select "Transaction" as the trigger',
-          'Choose "When I Tap" (all cards)',
-        ].map((text, i) => (
-          <View key={i} style={styles.instructionRow}>
-            <View style={styles.instructionNumber}>
-              <Text style={styles.instructionNumberText}>{i + 1}</Text>
-            </View>
-            <Text style={styles.instructionText}>{text}</Text>
-          </View>
-        ))}
-      </View>
-
-      <TouchableOpacity
-        style={styles.outlineButton}
-        activeOpacity={0.8}
-        onPress={() => setStep(2)}
-      >
-        <Ionicons name="checkmark-circle-outline" size={20} color={Colors.brandGold} />
-        <Text style={styles.outlineButtonText}>I've added the Shortcut</Text>
-      </TouchableOpacity>
     </>
   );
 
-  const renderStep2 = () => (
-    <>
-      <Text style={styles.stepTitle}>Verify Your Cards</Text>
-      <Text style={styles.stepSubtitle}>
-        Match your MaxiMile cards to their names in Apple Wallet so transactions route correctly.
-      </Text>
-
-      {loadingCards ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.brandGold} />
-        </View>
-      ) : cards.length === 0 ? (
-        <View style={styles.glassCard}>
-          <Text style={styles.emptyText}>
-            No cards in your portfolio yet. Add cards first, then come back to set up auto-capture.
-          </Text>
-        </View>
-      ) : (
-        cards.map((card) => {
-          const mapping = mappings.find((m) => m.cardId === card.cardId);
-          return (
-            <View key={card.cardId} style={styles.glassCard}>
-              <Text style={styles.cardLabel}>
-                {card.bank} {card.cardName}
-              </Text>
-              <TextInput
-                style={styles.walletInput}
-                value={mapping?.walletName ?? ''}
-                onChangeText={(text) => updateWalletName(card.cardId, text)}
-                placeholder="Name in Apple Wallet"
-                placeholderTextColor={Colors.textTertiary}
-                autoCapitalize="words"
-                autoCorrect={false}
-              />
-            </View>
-          );
-        })
-      )}
-
-      <TouchableOpacity
-        style={[
-          styles.primaryButton,
-          cards.length === 0 && styles.primaryButtonDisabled,
-        ]}
-        activeOpacity={0.8}
-        onPress={handleSaveMappings}
-        disabled={cards.length === 0 || savingMappings}
-      >
-        {savingMappings ? (
-          <View style={styles.primaryGradientFallback}>
-            <ActivityIndicator size="small" color={Colors.brandCharcoal} />
-          </View>
-        ) : (
-          <LinearGradient
-            colors={['#D4B96A', Colors.brandGold, '#B8953F']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.primaryGradient}
-          >
-            <Text style={styles.primaryButtonText}>Save & Continue</Text>
-            <Ionicons name="arrow-forward" size={18} color={Colors.brandCharcoal} />
-          </LinearGradient>
-        )}
-      </TouchableOpacity>
-    </>
-  );
-
-  const renderStep3 = () => (
-    <>
-      <Text style={styles.stepTitle}>Test It</Text>
-
-      {testSuccess ? (
-        <View style={styles.successContainer}>
-          <View style={styles.successCircle}>
-            <Ionicons name="checkmark" size={40} color={Colors.brandCharcoal} />
-          </View>
-          <Text style={styles.successTitle}>It works!</Text>
-          <Text style={styles.successSubtitle}>
-            Auto-capture is set up and ready to go. Every Apple Pay tap will be pre-filled for you.
-          </Text>
-          <TouchableOpacity
-            style={styles.primaryButton}
-            activeOpacity={0.8}
-            onPress={() => router.replace('/(tabs)')}
-          >
-            <LinearGradient
-              colors={['#D4B96A', Colors.brandGold, '#B8953F']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.primaryGradient}
-            >
-              <Text style={styles.primaryButtonText}>Done</Text>
-              <Ionicons name="checkmark-circle" size={18} color={Colors.brandCharcoal} />
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <>
-          <View style={styles.glassCard}>
-            <Text style={styles.testDescription}>
-              Make a small Apple Pay purchase to test the setup. MaxiMile should open automatically with the transaction pre-filled.
-            </Text>
-            <View style={styles.testWaiting}>
-              <PulsingDot />
-              <Text style={styles.waitingText}>Waiting for a transaction…</Text>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={styles.skipButton}
-            activeOpacity={0.7}
-            onPress={() => {
-              track('auto_capture_test_skipped' as any, undefined, user?.id);
-              router.replace('/(tabs)');
-            }}
-          >
-            <Text style={styles.skipButtonText}>I'll test later</Text>
-          </TouchableOpacity>
-        </>
-      )}
-    </>
-  );
-
-  const stepRenderers = [renderStep0, renderStep1, renderStep2, renderStep3];
+  const stepRenderers = [renderStep0, renderStep1];
 
   // ---------------------------------------------------------------------------
   // Render
