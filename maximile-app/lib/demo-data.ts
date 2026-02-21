@@ -118,6 +118,7 @@ function randomItem<T>(array: T[]): T {
  * Each call returns different randomized data.
  *
  * @param userCard - Optional user card name to use instead of fallback
+ * @param userCards - Optional array of user's cards for random selection
  * @returns MockTransaction object with realistic data
  *
  * @example
@@ -126,16 +127,32 @@ function randomItem<T>(array: T[]): T {
  *
  * const tx2 = generateMockTransaction('My Visa Card');
  * // { amount: 52.30, merchant: 'Shell', card: 'My Visa Card', ... }
+ *
+ * const tx3 = generateMockTransaction(null, ['Card A', 'Card B']);
+ * // Uses random card from user's cards
  */
-export function generateMockTransaction(userCard?: string | null): MockTransaction {
+export function generateMockTransaction(
+  userCard?: string | null,
+  userCards?: string[] | null
+): MockTransaction {
   // Select random merchant
   const merchant = randomItem(MERCHANTS);
 
   // Generate amount within merchant's realistic range
   const amount = randomAmount(merchant.minAmount, merchant.maxAmount);
 
-  // Use provided card or fallback to mock card
-  const card = userCard || randomItem(FALLBACK_CARDS);
+  // Determine which card to use (priority: userCard > userCards > fallback)
+  let card: string;
+  if (userCard) {
+    // Explicit card provided
+    card = userCard;
+  } else if (userCards && userCards.length > 0) {
+    // User has cards in portfolio - use random one
+    card = randomItem(userCards);
+  } else {
+    // Fallback to mock card
+    card = randomItem(FALLBACK_CARDS);
+  }
 
   return {
     amount,
@@ -159,11 +176,15 @@ export function isDemoMode(): boolean {
  * Gets a mock transaction if in demo mode, otherwise returns null
  *
  * @param userCard - Optional user card name
+ * @param userCards - Optional array of user's cards
  * @returns MockTransaction if demo mode, null if production
  */
-export function getMockTransactionIfDemo(userCard?: string | null): MockTransaction | null {
+export function getMockTransactionIfDemo(
+  userCard?: string | null,
+  userCards?: string[] | null
+): MockTransaction | null {
   if (!isDemoMode()) {
     return null;
   }
-  return generateMockTransaction(userCard);
+  return generateMockTransaction(userCard, userCards);
 }
