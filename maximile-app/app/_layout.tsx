@@ -11,6 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Linking from 'expo-linking';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { AndroidAutoCaptureProvider } from '../contexts/AndroidAutoCaptureContext';
 import { Colors } from '../constants/theme';
 import { parseAutoCaptureUrl } from '../lib/deep-link';
 
@@ -24,7 +25,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <RootContent />
+        <AndroidAutoCaptureProvider>
+          <RootContent />
+        </AndroidAutoCaptureProvider>
       </AuthProvider>
       <StatusBar style="auto" />
     </SafeAreaProvider>
@@ -271,6 +274,7 @@ function RootContent() {
         />
         <Stack.Screen name="auto-capture" options={{ headerShown: false }} />
         <Stack.Screen name="auto-capture-setup" options={{ headerShown: false }} />
+        <Stack.Screen name="android-auto-capture-setup" options={{ headerShown: false }} />
         <Stack.Screen name="auto-capture-settings" options={{ headerShown: false }} />
         <Stack.Screen
           name="reset-password"
