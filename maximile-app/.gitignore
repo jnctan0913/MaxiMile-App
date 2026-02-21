@@ -13,7 +13,9 @@ android/
 # Environment variables
 .env
 .env.local
-.env.production
+# Note: .env.demo and .env.production are templates for builds and should be committed
+!.env.demo
+!.env.production
 
 # IDE
 .vscode/
