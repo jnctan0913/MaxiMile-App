@@ -176,12 +176,6 @@ export default function RecommendScreen() {
   }
 
   // -----------------------------------------------------------------------
-  // Build the grid: first 6 categories in 2 columns, 7th (General) full width
-  // -----------------------------------------------------------------------
-  const pairedCategories = CATEGORIES.slice(0, 6);
-  const lastCategory = CATEGORIES[6]; // General
-
-  // -----------------------------------------------------------------------
   // Render
   // -----------------------------------------------------------------------
   return (
@@ -206,9 +200,9 @@ export default function RecommendScreen() {
             />
           )}
 
-          {/* 2-column grid for first 6 categories */}
+          {/* 2-column grid for all 8 categories */}
           <View style={styles.categoryGrid}>
-            {pairedCategories.map((category) => (
+            {CATEGORIES.map((category) => (
               <View key={category.id} style={styles.categoryTileWrapper}>
                 <CategoryTile
                   id={category.id}
@@ -221,21 +215,6 @@ export default function RecommendScreen() {
               </View>
             ))}
           </View>
-
-          {/* General category -- full width */}
-          {lastCategory && (
-            <View style={styles.fullWidthTile}>
-              <CategoryTile
-                id={lastCategory.id}
-                name={lastCategory.name}
-                emoji={lastCategory.emoji}
-                icon={lastCategory.icon}
-                iconFilled={lastCategory.iconFilled}
-                isFullWidth
-                onPress={handleCategoryPress}
-              />
-            </View>
-          )}
 
           {/* Smart Pay */}
           <View style={styles.fabRow}>
@@ -295,9 +274,6 @@ const styles = StyleSheet.create({
     width: '50%',
     paddingHorizontal: Spacing.xs,
     marginBottom: Spacing.sm,
-  },
-  fullWidthTile: {
-    marginBottom: Spacing.xs,
   },
   // Empty state wrapper
   emptyContainer: {

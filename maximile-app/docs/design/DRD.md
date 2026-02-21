@@ -657,19 +657,21 @@ This is the core product screen. It must feel instant, confident, and clear.
 |  +------------------+ +------------------+
 |  |                  | |                  |
 |  |    [laptop]      | |    [cart]        |
-|  |  Online Shopping | |   Groceries      |
+|  |     Online       | |   Groceries      |
 |  |                  | |                  |
 |  +------------------+ +------------------+
 |  +------------------+ +------------------+
 |  |                  | |                  |
-|  |    [fuel]        | |    [plane]       |
-|  |    Petrol        | | Travel / Hotels  |
+|  |    [fuel]        | |    [receipt]     |
+|  |    Petrol        | |     Bills        |
 |  |                  | |                  |
 |  +------------------+ +------------------+
-|  +--------------------------------------+|
-|  |              [card]                  ||
-|  |             General                  ||
-|  +--------------------------------------+|
+|  +------------------+ +------------------+
+|  |                  | |                  |
+|  |    [plane]       | |    [wallet]      |
+|  |    Travel        | |    General       |
+|  |                  | |                  |
+|  +------------------+ +------------------+
 |                                          |
 |  [suggested category highlight pulse]    |
 |                                          |
@@ -775,7 +777,7 @@ This is the core product screen. It must feel instant, confident, and clear.
 ### 6.7 Interaction Notes
 
 - **Category tile tap**: On press, tile scales to 0.96 with 100ms spring animation. On release, navigates to result. Haptic feedback (light) on iOS.
-- **Tile grid layout**: 2-column grid with 12px gap. Last item (General) spans full width. Each tile is a square (aspect ratio 1:1) except General which is shorter (height 64px, full width).
+- **Tile grid layout**: 2-column grid with 12px gap. All 8 category tiles are displayed in a uniform 4-row × 2-column grid. Each tile is a square (aspect ratio 1:1) for visual consistency.
 - **Recommendation load time**: Must be < 1 second. Data should be pre-fetched and cached on app load. The recommendation engine runs locally against cached card data + user spending state.
 - **Progress bar animation**: On screen appear, progress bar animates from 0 to current fill over 400ms. This draws attention to the cap status.
 - **Cap color logic**:
