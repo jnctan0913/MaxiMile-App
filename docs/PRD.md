@@ -1,9 +1,10 @@
 # PRD: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 1.5
-**Last Updated**: 2026-02-20
+**Version**: 1.8
+**Last Updated**: 2026-02-21
 **Author**: PM Agent
 **Status**: Draft
+**Changelog (v1.8)**: Incorporated DRD v1.1 design decisions — onboarding integration (Step 1.5), recommendation match indicator, Smart Pay auto-capture handoff, iOS Shortcut platform constraint clarification
 
 ---
 
@@ -84,7 +85,7 @@ In 3 years, MaxiMile will be the default "which card should I use?" companion fo
 In order to reach our vision, we need to acquire 10,000 active users in Singapore and achieve a 60%+ monthly retention rate within 12 months.
 
 #### Target Condition
-In order to reach our Challenge, we first need to deliver a product that provides accurate, instant card recommendations with <5 second response time and covers the top 30 miles-earning credit cards in Singapore (expanding from initial 20-card MVP to 85% market coverage).
+In order to reach our Challenge, we first need to deliver a product that provides accurate, instant card recommendations with <5 second response time, covers the top 30 miles-earning credit cards in Singapore (expanding from initial 20-card MVP to 85% market coverage), and keeps card rules automatically up-to-date through community-sourced and AI-powered rate change detection.
 
 #### Current State
 No product exists in Singapore that provides real-time, personalized card recommendations at the point of payment. Users rely on static content, manual tracking, or guesswork.
@@ -99,7 +100,7 @@ No product exists in Singapore that provides real-time, personalized card recomm
 | **Constraints** | No direct bank API access (SGFinDex not open to fintechs yet); manual transaction logging in v1; Singapore-only initially |
 | **Relative Costs** | Optimize for unique value (not low cost) — premium positioning for financially literate users |
 | **Growth & Marketing** | PLG (product-led growth): free tier with core recommendations; word-of-mouth via miles community; content partnerships with MileLion/Suitesmile |
-| **Unique Activities** | Maintaining a real-time credit card rules database; building a spending-state engine; community-driven rule verification |
+| **Unique Activities** | Maintaining a real-time credit card rules database (automated via AI + community); building a spending-state engine; community-driven rule verification |
 | **Capabilities** | Card rules database team; mobile engineering; UX for speed-of-checkout scenarios |
 | **Supporting Systems** | Card rules database with version control; user spending tracker; notification engine |
 | **Trade-Offs** | Will NOT be a card comparison/application site (no affiliate revenue from card signups in v1); will NOT track cashback cards (miles-only focus); will NOT require bank login |
@@ -113,6 +114,8 @@ No product exists in Singapore that provides real-time, personalized card recomm
 | Miles earned per dollar (average) | ~1.2 mpd (suboptimal) | ~2.5–4.0 mpd (optimal) | +100–230% improvement |
 | Time to decide which card | 10–30 seconds | <2 seconds | UX & algorithm |
 | User confidence at checkout | Low–Medium | High | Trust through accuracy |
+| Transaction logging effort | ~20 sec manual per txn | ~2-3 sec auto-confirm (Apple Pay) / 0 sec (Android notif.) | F26 iOS Shortcuts + F27 Android NotificationListener |
+| Recommend-to-Log feedback loop | None — recommendation and logging are disconnected | Closed loop: Recommend->Pay->Auto-log->Cap update->Better recommendation | F26/F27 recommendation match indicator on confirmation screen + Smart Pay auto-capture handoff |
 
 ---
 
@@ -164,13 +167,13 @@ No product exists in Singapore that provides real-time, personalized card recomm
 ### Competitive Positioning
 - **Our unique value**: The only product that combines personalized card portfolio awareness + real-time spending state + point-of-payment recommendations
 - **Table stakes**: Accurate earn rate data, coverage of top 30 SG miles cards (~85% market), mobile-first UX
-- **Differentiators**: State-aware cap tracking, proactive alerts, miles-saved insights (integrated into Miles tab), rate change monitoring, spending-pattern-based portfolio suggestions
+- **Differentiators**: State-aware cap tracking, proactive alerts, miles-saved insights (integrated into Miles tab), rate change monitoring (community + AI-automated detection), spending-pattern-based portfolio suggestions, **Apple Pay / Android notification auto-capture (F26/F27) — no Singapore competitor offers this**; **closed-loop Recommend->Pay->Auto-log->Cap update->Better recommendation feedback cycle** — auto-capture confirmation screen shows whether user used the best card (recommendation match indicator), turning every transaction into a micro-learning moment that reinforces the core value prop
 
 ### SWOT Analysis
 
 | | Helpful | Harmful |
 |---|---------|---------|
-| **Internal** | **Strengths**: First-mover in real-time miles optimization; clear value prop; no direct competitor | **Weaknesses**: No bank API access initially; requires manual transaction input; card rules database needs constant maintenance |
+| **Internal** | **Strengths**: First-mover in real-time miles optimization; clear value prop; no direct competitor | **Weaknesses**: No bank API access initially; requires manual transaction input for non-Apple-Pay transactions (partially mitigated by F26/F27 auto-capture); card rules database needs constant maintenance |
 | **External** | **Opportunities**: SGFinDex expansion to fintechs; growing contactless payments; miles community eager for tools; potential bank partnerships | **Threats**: Banks could build this natively; comparison sites could pivot; miles program devaluations reducing user motivation; super apps embedding financial tools |
 
 ### Porter's Five Forces
@@ -228,6 +231,8 @@ A context-aware mobile application that automatically recommends the optimal cre
 | Personalized to actual card portfolio | Generic "best cards" lists | Relevant, not aspirational |
 | Proactive alerts (approaching cap) | Reactive (user must seek info) | System-push, not user-pull |
 | Miles-saved insights (integrated into Miles tab) | No optimization visibility | Tangible proof of value |
+| Auto-capture via Apple Pay / Android notifications (F26/F27) | Manual expense logging or no tracking at all | Passive data capture; "log without lifting a finger" |
+| Recommendation match indicator on every auto-captured transaction | No post-payment feedback in any competitor | Closes the Recommend->Pay->Log loop; every transaction proves value and educates the user |
 
 ---
 
@@ -258,7 +263,9 @@ Enable miles-focused users to consistently use the optimal credit card for every
 ### Leading Indicators
 - Number of cards added per user during onboarding (target: 3+)
 - Frequency of app opens at point of payment (target: 3+/week)
-- Transaction logging rate (target: 70%+ of recommendations result in logged transaction)
+- Transaction logging rate (target: 70%+ of recommendations result in logged transaction; target increases to 85%+ after F26/F27 auto-capture rollout)
+- Auto-capture setup rate (target: 30%+ of iOS users complete Shortcut setup within 7 days of F26 launch)
+- Auto-capture confirmation rate (target: 95%+ of auto-captured transactions confirmed by user)
 
 ### Lagging Indicators
 - User-reported additional miles earned per month
@@ -299,6 +306,10 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | F21 | **Expanded Miles Programs** | Expand from 7 to ~20 programs: add 3 bank points (HSBC Rewards, Amex MR, BOC Points) + 7 airline FFPs (Asia Miles, BA Avios, Qantas FF, Qatar Avios, Flying Blue, Enrich, AirAsia Rewards) | 4500 | 2 | 90% | 2 | 4050 | All 10 bank/transferable programs seeded; top 7 airline FFPs seeded; card-to-program mappings complete; transfer_partners populated |
 | F22 | **Card Coverage Expansion (20→30)** | Add 10 high-priority miles credit cards to the rules database: DBS Vantage, UOB Lady's Solitaire, UOB Visa Signature, OCBC VOYAGE, SC Journey, SC Smart, SC Beyond, Maybank World MC, Maybank XL Rewards, HSBC Premier MC. Increases market coverage from ~60% to ~85%. Includes eligibility metadata for age-restricted (Maybank XL: 21-39) and gender-restricted (UOB Lady's Solitaire: women only) cards. Also reclassifies POSB Everyday Card (cashback-only, not a miles card) | 4500 | 2 | 90% | 3 | 2700 | 10 new cards seeded with earn rules across 7 categories, caps, conditions, program mappings; eligibility_criteria column added; POSB Everyday flagged/removed; all rules verified against bank T&Cs; existing recommendation engine works with new cards without code changes |
 | F23 | **Rate Change Monitoring & Alerts** | Track earn rate changes, cap adjustments, and program devaluations. Alert affected users in-app when their cards' earn rates change. Admin-triggered in v1 with structured change log. Covers events like Amex MR devaluation (Feb 2026, 22-50% increase in transfer costs), DBS Woman's World cap cut (S$1,500→S$1,000), Maybank Horizon rate cut | 3500 | 2 | 60% | 4 | 1050 | Admin can create rate change alerts; affected users see in-app notification with old vs new rate; card detail screen shows "Rate updated [date]" badge; change history log per card; push notification for major devaluations |
+| F24 | **Community-Sourced Rate Change Submissions** | Users report rate/benefit changes they discover via an in-app form. Submissions enter a review queue for admin verification before publishing to rate_changes. Includes evidence attachments (URL/screenshot), dedup fingerprinting, submission status tracking, and contributor recognition badges. Closes the Layer 1 detection gap identified in the Rate Detection Architecture | 3200 | 2 | 80% | 2 | 2560 | User can submit a rate change via structured form (card, change type, old/new values, evidence URL); submission saved as "pending"; admin can approve/reject/edit in dashboard; approved submissions auto-inserted into rate_changes; SHA-256 dedup prevents duplicates; user sees submission status history; "Verified Contributor" badge after 3+ approved submissions |
+| F25 | **Automated Rate Change Detection** | Automated pipeline that monitors bank T&C pages and detects rate/benefit changes using AI classification. GitHub Actions runs Playwright scraper daily against ~50 bank URLs, SHA-256 content hashing gates LLM calls, Gemini 2.5 Flash classifies changes into rate_changes schema with confidence scoring. Entire infrastructure runs at $0/month on free tiers. See `docs/RATE_DETECTION_ARCHITECTURE.md` for full technical spec | 3500 | 3 | 50% | 6 | 875 | Daily scraper checks ~50 bank URLs; content-hash gating eliminates unchanged pages (zero LLM cost on no-change days); Gemini Flash classifies detected changes with structured JSON output; confidence >=0.85 auto-approved from Tier 1 sources; 0.50-0.84 queued for admin review; <0.50 auto-discarded; pipeline health dashboard shows source uptime and detection accuracy; detection latency <48 hours |
+| F26 | **Apple Pay Shortcuts Auto-Capture** | iOS Shortcuts Transaction trigger integration that auto-populates transaction logs via the existing `maximile://` URL scheme when users pay with Apple Pay NFC. Captures amount, merchant, and card used — user confirms with one tap. Reduces per-transaction logging from ~20 sec to ~2-3 sec. Solves the #1 product risk (manual logging paradox) with zero native code required. Multiple App Store precedents (TravelSpend, MoneyCoach, BalanceTrackr). **Setup offered during onboarding as Step 1.5** (between "Add Cards" and "Set Miles Balances") to maximize adoption, with fallback access via Settings. **Confirmation screen includes recommendation match indicator** — calls `recommend()` RPC to show whether the user used the best card for that category, closing the Recommend->Pay->Auto-log->Cap update feedback loop. **iOS platform constraint**: Shortcuts automations cannot be programmatically installed — user must manually tap "Add Automation" in the Shortcuts app (hard Apple limitation); the setup wizard minimizes this friction with a pre-configured `.shortcut` file. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` and `docs/DRD_AUTO_CAPTURE.md` | 3500 | 3 | 85% | 3 | 2975 | Deep link handler parses `maximile://log?amount=X&merchant=Y&card=Z&source=shortcut`; card name fuzzy-matched to user portfolio; merchant auto-mapped to spend category; pre-filled transaction form shown for one-tap confirmation with recommendation match indicator; downloadable `.shortcut` template provided (cannot be auto-installed — Apple platform constraint); in-app setup wizard completes in <2 min; setup offered during onboarding Step 1.5; works on iOS 17+ |
+| F27 | **Android Notification Auto-Capture** | `NotificationListenerService`-based automatic transaction capture from banking app notifications on Android. Parses push notifications from DBS, OCBC, UOB, Citi, AMEX (and Google Pay/Samsung Pay) to extract amount, merchant, and card — auto-logs transactions with no user action. Requires one-time notification access permission. **Setup offered during onboarding as Step 1.5** (same screen as F26, platform-adaptive: shows notification-based messaging on Android). **Confirmation screen includes recommendation match indicator** (same as F26) — reinforces good card choices and educates on better alternatives. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` and `docs/DRD_AUTO_CAPTURE.md` | 3000 | 3 | 70% | 4 | 1575 | Native Android module via Expo config plugin; regex parsers for top 5 SG bank notification formats; on-device-only processing (no raw notification data uploaded); prominent privacy disclosure; background service with battery-efficient filtering; Google Pay + Samsung Pay notification parsing; Play Store Data Safety section updated; setup offered during onboarding Step 1.5; confirmation screen shows recommendation match indicator |
 
 #### P2 — Could Have
 
@@ -336,6 +347,10 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | F21: Expanded Miles Programs | **Performance** | More programs = more complete picture; absence means missing major banks/airlines |
 | F22: Card Coverage Expansion | **Performance** | More cards = more users served; directly correlated with addressable market and MARU |
 | F23: Rate Change Alerts | **Delighter** | Unexpected proactive value; "the app watches out for me"; builds deep trust |
+| F24: Community Rate Submissions | **Performance** | More community input = faster detection = more trust; directly correlated with data freshness |
+| F25: Automated Rate Detection | **Must-Have** (for scale) | Without automation, card rules database degrades over time; manual updates are the #1 operational risk |
+| F26: Apple Pay Shortcuts Auto-Capture | **Delighter** → **Must-Have** (for retention) | Unexpected automation that "just works" for Apple Pay users; eliminates the #1 friction (manual logging) and converts a chore into a delight. Becomes Must-Have once users experience it — they won't go back to manual |
+| F27: Android Notification Auto-Capture | **Delighter** | Same automation delight for Android users; full notification interception feels magical; one-time setup then passive value delivery |
 
 ### Impact-Effort Matrix
 
@@ -348,8 +363,10 @@ Enable miles-focused users to consistently use the optimal credit card for every
      F21 (Programs)|  F5 (Rules DB)
      F20 (Nudges)  |  F18 (Two-Layer)
      F22 (30 Cards)|  F19 (Transfer Map)
-                    |  F13 (Miles Dashboard)
-                    |  F23 (Rate Alerts)
+     F24 (Community)|  F13 (Miles Dashboard)
+   ★ F26 (iOS Auto)|  F23 (Rate Alerts)
+                    |  F25 (Auto Detect)
+                    |  F27 (Android Auto)
   ──────────────────┼──────────────────
                     |
      F8 (Widget)   |  F10 (Portfolio Opt)
@@ -361,6 +378,8 @@ Enable miles-focused users to consistently use the optimal credit card for every
    LOW EFFORT ──────────────── HIGH EFFORT
 ```
 
+> **Note**: F26 (iOS Shortcuts Auto-Capture) is marked with ★ as the highest-value quick win in the matrix — high impact (solves #1 product risk) with low effort (2-3 sprints, zero native code). F27 (Android Notification Auto-Capture) is high impact but higher effort due to native module requirement.
+
 ### Explicitly Out of Scope (v1)
 
 | Feature | Reason | Revisit |
@@ -369,7 +388,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | Cashback card optimization | Miles-only focus for v1; dilutes positioning | v2 if market demands |
 | Card application / affiliate links | Avoid conflict of interest in recommendations; trust-first approach | v1.5 after establishing credibility |
 | International card support | Singapore-only focus for v1 | v2 (Malaysia, Hong Kong) |
-| Apple Wallet / Google Pay integration | Requires OS-level permissions; complex partnership | v3 (long-term vision) |
+| Apple Wallet / Google Pay deep integration | Direct Wallet SDK integration still requires OS-level permissions and Apple/Google partnership. However, **F26 (iOS Shortcuts)** provides a user-side bridge to Apple Pay transaction data via the sanctioned Shortcuts Transaction trigger (note: user must manually add the automation — Apple does not allow programmatic installation), and **F27 (Android NotificationListener)** captures Google Pay/Samsung Pay notifications. Full Wallet SDK integration remains out of scope | v3 (if Apple/Google open APIs) |
 | Invite-only ultra-premium cards (DBS Insignia, Citi ULTIMA, Amex Centurion) | Combined <7.5k holders in SG; rules not publicly verifiable; RICE score 125 (lowest); these holders already have mainstream cards in our DB | v2.0 backlog |
 | Non-miles cards (cashback, rewards-only) | Miles-only focus. POSB Everyday Card reclassified as cashback (earns DBS Daily$, not miles) and removed from miles card database | Only if product pivots to general rewards |
 | Low-priority niche cards (Diners Club, RHB, ICBC) | Negligible miles value; very small user base; poor conversion rates | v2.0 backlog if demand emerges |
@@ -429,6 +448,30 @@ Enable miles-focused users to consistently use the optimal credit card for every
 - As a user, I want to see a "rate updated" indicator on affected cards, so that I know which cards have recently changed and can review the impact
 - As a user, I want to see which cards are eligible for me during setup (filtering by age, gender, banking relationship), so that I don't waste time browsing cards I can't apply for
 
+### Epic 12: Transaction Auto-Capture (F26–F27)
+- As an iPhone user, I want my Apple Pay NFC transactions to auto-populate in MaxiMile, so that I don't have to manually type in every purchase
+- As a new user during onboarding, I want the option to set up auto-capture right after adding my cards (Step 1.5), so that I start capturing transactions from day one without having to find the setting later
+- As a user who skipped auto-capture during onboarding, I want to set it up later via Settings or a discovery nudge on the Log tab, so that I'm not locked out
+- As a user, I want to set up auto-capture in under 2 minutes with a guided wizard, so that the setup doesn't feel burdensome
+- As an iOS user, I understand that I need to manually tap "Add Automation" in the Shortcuts app because Apple does not allow automatic installation, so that I have correct expectations during setup
+- As a user, I want auto-captured transactions to show a pre-filled form for one-tap confirmation, so that I can quickly verify the amount and category before logging
+- As a user, I want to see whether I used the best card for each auto-captured transaction (recommendation match indicator), so that I learn which cards to use over time and see proof that MaxiMile is helping me earn more miles
+- As a user who used a suboptimal card, I want a gentle "tip" nudge showing the better card for next time, so that I gradually improve without feeling shamed
+- As a user, I want the app to auto-detect the spend category from the merchant name, so that I don't have to manually select the category every time
+- As a user, I want the option to enable fully automatic logging (skip confirmation tap), so that my transactions are captured with zero effort
+- As a user who triggered Smart Pay and then paid with Apple Pay, I want the auto-capture to replace the manual amount entry step (within 60 seconds of returning from Wallet), so that the Smart Pay flow completes seamlessly without redundant input
+- As an Android user, I want my banking app notifications to be automatically parsed into transaction logs, so that my cap tracking stays accurate without manual input
+- As an Android user, I want to clearly understand what data MaxiMile reads from my notifications, so that I feel comfortable granting notification access
+- As a user who pays with both Apple Pay and physical cards, I want non-auto-captured transactions to fall back to the existing manual log flow, so that my cap tracking covers all spending
+
+### Epic 11: Rate Change Detection Pipeline (F24–F25)
+- As a user who notices a rate change, I want to submit it via an in-app form with evidence, so that the community benefits from my discovery
+- As a user, I want to see my submission history and whether each was approved/rejected, so that I know my contributions are valued
+- As a contributor with 3+ approved submissions, I want a "Verified Contributor" badge, so that I'm recognised for helping keep data accurate
+- As an admin, I want to review pending community submissions and approve/reject/edit them, so that only verified changes reach users
+- As a product owner, I want automated monitoring of bank T&C pages, so that rate changes are detected within 48 hours without manual effort
+- As an admin, I want a pipeline health dashboard showing scraper uptime and detection accuracy, so that I can monitor system reliability
+
 ---
 
 ## 10. Assumptions & Hypotheses
@@ -437,7 +480,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
 
 | Assumption | Evidence | Risk if Wrong |
 |------------|----------|---------------|
-| Users are willing to manually log transactions in v1 | Seedly users already track expenses manually; miles community is motivated | Core cap tracking feature becomes inaccurate; reduces trust |
+| Users are willing to manually log transactions in v1 | Seedly users already track expenses manually; miles community is motivated. **Mitigation planned**: F26 (iOS Shortcuts) and F27 (Android notification capture) reduce manual logging by ~20-25% of transactions in v1.8+, with further coverage as adoption grows | Core cap tracking feature becomes inaccurate; reduces trust. Auto-capture (F26/F27) is the primary mitigation strategy |
 | Card rules can be sourced from public information (bank websites, T&Cs) | MileLion and Suitesmile already aggregate this info; it's publicly available | Legal/data sourcing risk; delays in rule updates |
 | Users hold 3+ miles cards on average | Community forums show 3–7 cards typical for active optimizers | Product less valuable for 1–2 card users; smaller addressable market |
 | Miles community (MileLion, Telegram) will drive early adoption | Strong, engaged community with shared pain point | Need alternative acquisition channels; higher CAC |
@@ -449,6 +492,8 @@ Enable miles-focused users to consistently use the optimal credit card for every
 |------------|-----------------|------------------|
 | Automated recommendations increase miles earned by 20–40% | A/B comparison: track miles earned with vs without app over 3 months | 20%+ increase in effective mpd |
 | Users will log 70%+ of transactions | In-app tracking of log completion rate | 70%+ transactions logged within 24 hours |
+| Auto-capture (F26) improves retention by reducing logging fatigue | Compare Day-7 and Day-30 retention for users with vs without Shortcut setup | 10%+ retention improvement for auto-capture users |
+| Auto-capture (F26) unlocks the "Passive Peter" persona | Track adoption and retention of users who set up auto-capture but rarely open the app proactively | 20%+ of auto-capture users are "passive" users who wouldn't log manually |
 | Cap alerts reduce cap breaches by 80% | Compare cap breach rate pre/post adoption | 80%+ reduction in months where cap is unknowingly exceeded |
 | Free tier converts 10–15% to premium | Conversion funnel analytics | 10%+ conversion within 3 months |
 
@@ -457,9 +502,12 @@ Enable miles-focused users to consistently use the optimal credit card for every
 ## 11. Constraints
 
 ### Technical Constraints
-- No direct bank API access — transactions must be manually logged by user in v1
+- No direct bank API access — transactions must be manually logged by user in v1. Partially mitigated in v1.8+ by F26 (iOS Shortcuts auto-capture for Apple Pay NFC transactions) and F27 (Android notification auto-capture)
 - Card rules must be manually maintained and updated from public sources
 - SGFinDex is not currently open to fintech developers
+- F27 (Android NotificationListenerService) requires Expo Dev Build with custom native module — not compatible with Expo Go
+- F26 (iOS Shortcuts) requires iOS 17+ — covers ~90%+ of active iPhones in Singapore
+- F26 (iOS Shortcuts) automations **cannot be programmatically installed** — Apple does not allow apps to create Personal Automations via API. User must manually tap "Add Automation" in the Shortcuts app. This is a hard platform constraint
 
 ### Business Constraints
 - Singapore-only market limits total addressable market in v1
@@ -478,7 +526,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | Risk | Likelihood | Impact | Mitigation | Owner |
 |------|------------|--------|------------|-------|
 | **Card rules change without notice** | High | High | Community-sourced verification; automated monitoring of bank T&C pages; rapid update process | Data/Ops Team |
-| **User fatigue from manual transaction logging** | Medium | High | Minimize logging friction (<10 sec); build smart defaults; prioritize bank API integration in v2 | Product/UX |
+| **User fatigue from manual transaction logging** | Medium | High | Minimize logging friction (<10 sec); build smart defaults; **F26/F27 auto-capture reduces logging to ~2-3 sec for Apple Pay / 0 sec for Android notifications**; prioritize bank API integration in v2 | Product/UX |
 | **Banks build competing native features** | Medium | Medium | Move fast to establish user base and brand trust; offer cross-bank value that no single bank can replicate | Product/Strategy |
 | **Low adoption / cold start** | Medium | High | Partner with miles blogs for launch; offer compelling free tier; leverage Telegram communities | Growth/Marketing |
 | **Inaccurate recommendations erode trust** | Low | Critical | Rigorous QA on card rules; community flagging system; transparency in recommendation logic | Data/QA |
@@ -486,6 +534,16 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | **Regulatory issues with financial data/advice** | Low | High | Legal review; position as informational tool, not financial advice; comply with MAS guidelines | Legal |
 | **Transfer rates change without notice** | High | Medium | Automated monitoring of bank transfer pages; community-sourced alerts; version-stamped rates with "last verified" dates shown to users | Data/Ops Team |
 | **User confusion between bank points and airline miles** | Medium | Medium | Two-layer architecture with clear labelling; onboarding tooltip explaining "Points vs Miles"; visual distinction (bank icon vs airline icon) | Product/UX |
+| **AI misclassifies a rate change (false positive)** | Medium | High | Confidence thresholds (>=0.85 auto-approve, <0.50 discard); admin review queue for mid-confidence; user flagging mechanism | AI/Data Team |
+| **Bank T&C page structure changes break scrapers** | High | Medium | CSS selector versioning; fallback to full-page diff; automated alerting on scrape failures; daily health dashboard | Data/Ops Team |
+| **Community submissions are low quality or spam** | Medium | Low | Rate limiting (5/day/user); evidence requirements (URL/screenshot); reputation system; admin verification gate | Product/Community |
+| **Free-tier LLM API limits tightened** | Medium | Low | Dual-provider strategy (Gemini Flash primary + Groq Llama fallback); abstracted provider layer; paid fallback costs only $1-5/mo | Engineering |
+| **Apple changes/removes Shortcuts Transaction trigger** | Low | High | This is a stable, promoted API introduced in iOS 17; monitor WWDC announcements; fallback to manual logging always available | Engineering |
+| **iOS 18+ reliability issues with Shortcuts trigger** | Medium | Medium | Build error reporting and retry mechanism; document known iOS bugs; fallback to manual logging for failed triggers | Engineering |
+| **Users assume auto-capture covers ALL transactions** | Medium | High | Clear messaging: "Works with Apple Pay contactless payments only"; show which transactions were auto-captured vs manually logged; expectation-setting during onboarding Step 1.5 | Product/UX |
+| **iOS Shortcut setup drop-off due to manual "Add Automation" step** | Medium | Medium | Apple does not allow programmatic Shortcut installation — user must manually tap "Add Automation" in the Shortcuts app. Mitigation: pre-configured `.shortcut` file minimizes effort to ~30 seconds; setup wizard provides step-by-step guidance; onboarding Step 1.5 catches users at peak motivation | Product/UX |
+| **Android notification access permission scares users** | Medium | Medium | Prominent privacy disclosure; on-device-only processing; never upload raw notification content; transparent privacy policy; gradual rollout with opt-in | Product/UX |
+| **SG bank notification format changes break Android parsers** | Medium | Low | Regex patterns per bank with version control; community-reported format changes; automated test suite with sample notifications | Engineering |
 
 ---
 
@@ -498,6 +556,8 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | MileLion/Suitesmile partnership | External | Not initiated | Reduces launch reach but not blocking |
 | SGFinDex fintech access | External | Not available | Blocks auto-transaction import (v2 feature) |
 | App Store / Play Store approval | External | N/A | Could delay launch by 1–2 weeks |
+| Apple Shortcuts Transaction trigger API stability (F26) | External | Stable (iOS 17+) | If Apple deprecates trigger, F26 auto-capture becomes unavailable; manual logging remains |
+| Expo Dev Build for native Android module (F27) | Internal | Available | Required for NotificationListenerService; blocks F27 if team is using Expo Go only |
 
 ---
 
@@ -535,7 +595,10 @@ A mobile app where users can:
 | **v1.3** | F15–F16: Miles Redemption Logging + Goal Tracker. **Includes Phase 2 Earning Insights (P1 value deepening)**: I3 Actionable insight cards, I7 Cap utilisation summary. **Phase 3 Earning Insights (P1 engagement loop)**: I4 Goal projection tie-in, I6 Monthly summary notification | Months 6–7 | 25% of users log at least one redemption; 30% create a goal; engagement loop established; actionable tip cards shown for users with underutilised caps; month-end push notification delivered with >20% open rate |
 | **v1.4** | F18–F21: Two-Layer Architecture + Transfer Partners + Expanded Programs + Smart Nudges | Months 7–9 | All 9 SG banks covered; 50%+ of users view Layer 1 (My Miles) daily; transfer nudge CTR > 15%; Asia Miles and KrisFlyer both tracked by 40%+ of active users |
 | **v1.5** | F22–F23: Card Coverage Expansion (20→30 cards) + Rate Change Monitoring & Alerts. POSB Everyday reclassified. Eligibility metadata added | Months 9–11 | 30 cards in database (85% market coverage); 25% increase in addressable users; rate change alerts delivered within 48 hrs of detected changes; POSB Everyday removed from miles card list |
-| **v2.0** | F10–F11: Portfolio optimizer, Promo tracker + bank API exploration + medium/ultra-premium card expansion (35→40+) | Months 12–16 | 10,000 users, 10%+ premium conversion, revenue positive |
+| **v1.6** | F24: Community-Sourced Rate Change Submissions + admin verification dashboard. Closes Layer 1 detection gap with user-generated content | Months 11–12 | 10+ community submissions/month by month 3; <15 min/day admin review time; 0 false positives published; contributor badge system active |
+| **v1.7** | F25: Automated Rate Change Detection — GitHub Actions scraper + Gemini Flash AI classifier. $0/month infrastructure. Full detection pipeline | Months 12–14 | 90%+ of real rate changes auto-detected within 48 hours; 95%+ precision on published changes; pipeline uptime >=99%; admin review <30 min/month |
+| **v1.8** | F26: Apple Pay Shortcuts Auto-Capture — deep link handler, merchant→category mapping, card name fuzzy matching, downloadable Shortcut template (user must manually add via Shortcuts app — Apple platform constraint), in-app setup wizard offered during onboarding Step 1.5, recommendation match indicator on confirmation screen, Smart Pay auto-capture handoff (60s window). **Solves the #1 product risk (manual logging paradox) with zero native code. Closes the Recommend->Log feedback loop.** | Months 14–15 | 30%+ of iOS users complete Shortcut setup; auto-captured transactions confirmed in <3 sec; transaction logging rate improves from 70% to 85%+; Day-7 retention improves by 10%+ for Shortcut-enabled users; recommendation match shown on 100% of auto-captured confirmations |
+| **v2.0** | F27: Android Notification Auto-Capture (with onboarding Step 1.5, recommendation match indicator, Smart Pay handoff) + F10–F11: Portfolio optimizer, Promo tracker + bank API exploration + medium/ultra-premium card expansion (35→40+) + push notifications for rate changes | Months 15–18 | Android auto-capture covers top 5 SG banks; 10,000 users, 10%+ premium conversion, revenue positive |
 
 ---
 
@@ -698,6 +761,124 @@ During card setup, filter cards based on optional user profile. Show eligibility
 
 v1 implementation: Admin-triggered alerts with structured change log. Each alert includes: affected card(s), old vs new rate/cap, user impact summary, and recommended action (e.g., "Consider transferring Amex MR before further devaluation").
 
+### Transaction Auto-Capture Design Notes (F26–F27)
+
+**Feasibility Reference**: See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for the full technical feasibility analysis, including platform comparison, risk assessment, and implementation breakdown.
+
+**Why This Matters — The Manual Logging Paradox**:
+The product's #1 promise is to eliminate manual tracking. Yet cap tracking requires manual transaction logging (~20 sec per transaction). This creates a paradox: the product that claims to save time costs time. Auto-capture is the highest-leverage solution to this paradox.
+
+**F26 — iOS Shortcuts Auto-Capture (P1, v1.8)**:
+
+```
+Apple Pay NFC Tap → iOS Shortcuts Transaction Trigger → maximile://log?amount=X&merchant=Y&card=Z
+    → MaxiMile deep link handler → Card fuzzy match → Merchant→category auto-map
+    → Pre-filled transaction form (with recommendation match indicator) → User confirms (1 tap) → Cap tracker updated
+```
+
+Key design decisions:
+- **Zero native code** — Uses the existing `maximile://` URL scheme already configured in `app.json`
+- **Apple-sanctioned** — Transaction trigger is an official Shortcuts API; zero App Store risk (TravelSpend, MoneyCoach, BalanceTrackr all ship this pattern)
+- **iOS platform constraint** — Shortcuts automations **cannot be programmatically installed**. Apple does not allow apps to create or install Personal Automations via API. User must manually tap "Add Automation" in the Shortcuts app. The setup wizard minimizes this friction by providing a fully pre-configured `.shortcut` file — user taps one button to download, one button to add (~30 seconds of active setup)
+- **Onboarding integration** — Auto-capture setup is offered during onboarding as **Step 1.5** (between "Add Your Cards" and "Set Miles Balances") to maximize adoption. Skippable via "I'll do this later." Also accessible post-onboarding via Settings > Auto-Capture and via periodic discovery nudges on the Log tab
+- **Recommendation match indicator** — Confirmation screen calls `recommend(category)` RPC to compare the auto-captured card against the current top recommendation. Shows green "You used the best card!" banner (match) or gentle blue "Tip" nudge with the better card (mismatch). Creates the closed feedback loop: Recommend -> Pay -> Auto-log -> Cap update -> Better next recommendation
+- **Smart Pay handoff** — When the Smart Pay flow opens Wallet and auto-capture fires within 60 seconds of the user returning, auto-capture replaces the manual amount entry step. If no auto-capture fires within 60 seconds (user paid with physical card), falls back to existing manual logging step
+- **Coverage**: Apple Pay NFC in-store payments only. Online purchases, physical card swipes, and non-Apple-Pay transactions fall back to manual logging
+- **Singapore context**: 70%+ of iPhone users have Apple Pay enabled; ~55% of in-person transactions are contactless; effective auto-capture coverage ~20-25% of all transactions
+- **Card name matching**: Fuzzy match between Apple Wallet card name (e.g., "DBS Altitude Visa") and MaxiMile card portfolio; verification step during setup
+- **Merchant→category mapping**: Merchant name from Shortcuts mapped to MaxiMile spend categories via fuzzy matching + growing merchant database. No MCC code available from Shortcuts
+
+**F27 — Android Notification Auto-Capture (P1, v2.0)**:
+
+```
+Banking app push notification → Android NotificationListenerService → MaxiMile native module
+    → Bank-specific regex parser → Extract amount, merchant, card last-4 → Match to user portfolio
+    → Auto-log transaction (no user action) → Cap tracker updated → Optional confirmation notification
+```
+
+Key design decisions:
+- **Requires native module** — `NotificationListenerService` needs Expo Dev Build with config plugin; not compatible with Expo Go
+- **Sensitive permission** — `BIND_NOTIFICATION_LISTENER_SERVICE` requires clear privacy disclosure; on-device-only processing; never upload raw notification content
+- **Onboarding integration** — Same Step 1.5 screen as iOS, but with platform-adaptive messaging: "MaxiMile reads your banking notifications to log transactions automatically." CTA: "Enable Auto-Capture"
+- **Recommendation match indicator** — Same confirmation-screen behavior as F26: calls `recommend(category)` to show best-card match or improvement tip
+- **Smart Pay handoff** — Same 60-second handoff logic as F26: if notification auto-capture fires within 60s of returning from Wallet, replaces manual amount entry
+- **Bank parsers**: Regex patterns for DBS, OCBC, UOB, Citi, AMEX notification formats (all include amount + last-4-digits + merchant in structured text)
+- **Google Pay + Samsung Pay**: Their notifications are also captured via the same NotificationListenerService
+- **Battery efficiency**: Filter to only process notifications from known banking app package names; no CPU waste on unrelated notifications
+- **Play Store precedent**: FinArt (1M+ downloads), Walnut (5M+), PennyWise AI all use this approach
+
+**Cross-Platform Coverage Summary**:
+| Transaction Type | iOS (F26) | Android (F27) |
+|-----------------|-----------|---------------|
+| Apple Pay NFC in-store | Auto-captured | N/A |
+| Google Pay / Samsung Pay in-store | Manual | Auto-captured (via notification) |
+| Physical card swipe/insert | Manual | Auto-captured (via bank notification) |
+| Online / in-app purchases | Manual | Auto-captured (via bank notification) |
+| Apple Watch / Mac payments | Manual | N/A |
+
+### Rate Change Detection Design Notes (F24–F25)
+
+**Architecture Reference**: See `docs/RATE_DETECTION_ARCHITECTURE.md` for the full technical specification, including database schema (Migration 017-018), AI pipeline design, and infrastructure decisions.
+
+**Three-Layer Architecture**:
+- **Layer 3 — Delivery** (Shipped, Sprint 12): `RateChangeBanner` + `RateUpdatedBadge`, portfolio-filtered via `get_user_rate_changes` RPC
+- **Layer 2 — Processing** (Shipped, Sprint 12): `rate_changes` table (5 change types, 3 severities), `user_alert_reads`, 2 RPCs
+- **Layer 1 — Detection** (F24–F25): The gap being closed. Three sources feeding into the existing `rate_changes` table:
+  1. Manual admin entry (v1.0, shipped)
+  2. Community submissions (F24, v1.6)
+  3. Automated scraping + AI classification (F25, v1.7)
+
+**$0 Infrastructure Stack** (validated — see Architecture doc Section 8):
+| Component | Service | Cost |
+|-----------|---------|------|
+| Scraper + Cron | GitHub Actions (public repo) | $0 |
+| AI Classification | Google Gemini 2.5 Flash (primary) + Groq Llama 3.3 70B (fallback) | $0 |
+| Database + Storage | Supabase (existing, free tier) | $0 |
+| Admin Dashboard | Cloudflare Pages | $0 |
+| **Total** | | **$0/mo** |
+
+**F24 — Community Submissions Flow**:
+```
+User discovers change → "Report a Change" form → Fills structured fields
+    → Submission saved as "pending" → Admin reviews in dashboard
+    → Admin approves/rejects/edits → If approved, inserted into rate_changes
+    → All portfolio-matched users see banner/badge
+```
+
+Key design decisions:
+- Submissions require a card selection + change type + old/new values (structured, not free-text)
+- Optional evidence: source URL and/or screenshot upload
+- Anti-spam: max 5 submissions/day/user, require email verification
+- Dedup: SHA-256 fingerprint of (card_slug + change_type + normalized_new_value + effective_month)
+- Gamification: "Verified Contributor" badge after 3+ approved submissions
+
+**F25 — Automated Detection Pipeline**:
+```
+GitHub Actions (daily cron) → Playwright scrapes ~50 bank URLs
+    → SHA-256 content hash comparison (zero-cost gate)
+    → If changed: Gemini Flash classifies via tool_use structured output
+    → Confidence routing: >=0.85 auto-approve | 0.50-0.84 admin review | <0.50 discard
+    → Approved changes → INSERT into rate_changes
+    → Existing Layer 2+3 delivers to users automatically
+```
+
+Key design decisions:
+- Content-hash gating means LLM is only called when a page actually changes (~5-10% of daily checks)
+- Gemini Flash chosen over Claude Haiku: comparable quality for structured extraction, $0 vs $1-5/mo
+- Groq Llama 3.3 70B as fallback if Gemini limits tighten
+- Scraper auto-commits `last_run.json` to prevent GitHub's 60-day inactivity disable
+- Admin review expected: ~15-30 min/month (most changes auto-approved)
+
+**Detection-Specific Success Metrics**:
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Detection latency | < 48 hours from bank announcement | `effective_date` vs `created_at` delta |
+| Coverage | >= 90% of real rate changes detected | Monthly audit vs forum discussions |
+| Precision | >= 95% of published changes are accurate | User flag rate < 5% |
+| Community participation | >= 10 submissions/month (by v1.6 + 3 months) | `community_submissions` count |
+| Admin review time | < 15 min/day | Pipeline health dashboard |
+| Pipeline uptime | >= 99% scraper success rate | `v_pipeline_health` view |
+
 ---
 
 ## Appendix
@@ -746,7 +927,7 @@ See PRD Section 4 for full competitive matrix, SWOT, and Porter's Five Forces an
 |------------|--------|----------|--------|--------|
 | KR1: Convert free to premium | Conversion rate | 0% | 10% | 🔴 |
 | KR2: Achieve revenue target | MRR | $0 | SGD 15K | 🔴 |
-| KR3: Reduce operational costs | Rules DB update cost | TBD | <SGD 3K/month | 🔴 |
+| KR3: Reduce operational costs | Rules DB update cost | TBD | $0/month infra + <30 min/month admin | 🔴 |
 
 #### KPIs
 
@@ -771,8 +952,11 @@ See PRD Section 4 for full competitive matrix, SWOT, and Porter's Five Forces an
 | **Month 6–7** | Engagement Loop + Earning Insights Phase 2 & 3 | Miles Redemption Logging, Miles Goal Tracker, I3 Actionable insight cards, I7 Cap utilisation summary, I4 Goal projection tie-in, I6 Monthly summary notification | v1.3 Release |
 | **Month 7–9** | Miles Ecosystem — "Your Complete Miles Picture" | Two-Layer Architecture (My Miles + My Points), Transfer Partner Database, Expanded Programs (7→20), Smart Transfer Nudges | v1.4 Release |
 | **Month 9–11** | Market Coverage & Intelligence — "Every Card, Every Change" | Card Coverage Expansion (20→30 cards, 85% market coverage), Rate Change Monitoring & Alerts, POSB Everyday reclassification, Eligibility metadata for restricted cards | v1.5 Release |
-| **Month 12–14** | Smart Portfolio | Portfolio optimizer, Promo & bonus tracker, Medium/ultra-premium card expansion (35→40+) | v2.0 Release |
-| **Month 15–16** | Monetization & Scale | Premium tier launch, Bank partnership exploration, Regional expansion research | Revenue Milestone |
+| **Month 11–12** | Community Intelligence — "Crowdsourced Accuracy" | Community rate change submissions, admin verification dashboard (Cloudflare Pages), dedup fingerprinting, contributor badges, submission status tracking | v1.6 Release |
+| **Month 12–14** | Automated Intelligence — "Always Up to Date" | GitHub Actions scraper (50 bank URLs), Gemini Flash AI classification, confidence-based routing, pipeline health monitoring. $0/month infrastructure | v1.7 Release |
+| **Month 14–15** | Auto-Capture — "Log Without Lifting a Finger" | F26: iOS Shortcuts Transaction trigger integration for Apple Pay NFC auto-capture. Deep link handler, merchant→category mapping, card fuzzy matching, downloadable Shortcut template (user must manually add — Apple platform constraint), in-app setup wizard. Onboarding Step 1.5 integration. Recommendation match indicator on confirmation screen. Smart Pay auto-capture handoff (60s window). Zero native code. **Solves #1 product risk. Closes Recommend->Log loop.** | v1.8 Release |
+| **Month 15–16** | Cross-Platform Auto-Capture + Smart Portfolio | F27: Android NotificationListenerService for banking app auto-capture (DBS, OCBC, UOB, Citi, AMEX). Portfolio optimizer, Promo & bonus tracker, Medium/ultra-premium card expansion (35→40+), push notifications for critical rate changes | v2.0 Release |
+| **Month 17–18** | Monetization & Scale | Premium tier launch, Bank partnership exploration, Regional expansion research | Revenue Milestone |
 
 ### F. Product Backlog
 
@@ -801,11 +985,15 @@ See PRD Section 4 for full competitive matrix, SWOT, and Porter's Five Forces an
 | P1 | F18: Two-Layer Miles Architecture | Feature | Ready | Sprint 10 |
 | P1 | F20: Smart Transfer Nudges | Feature | Ready | Sprint 10 |
 | P1 | F22: Card Coverage Expansion (20→30 cards) | Feature | Ready | Sprint 11 |
-| P1 | F23: Rate Change Monitoring & Alerts | Feature | Ready | Sprint 12 |
-| P1 | F8: Quick-access widget | Feature | Future | Sprint 13+ |
-| P1 | F9: Merchant search (MCC mapping) | Feature | Future | Sprint 13+ |
-| P2 | F10: Portfolio optimizer | Feature | Future | Sprint 14+ |
-| P2 | F11: Promo & bonus tracker | Feature | Future | Sprint 14+ |
+| P1 | F23: Rate Change Monitoring & Alerts | Feature | Shipped | Sprint 12 |
+| P1 | F24: Community-Sourced Rate Change Submissions | Feature | Ready | Sprint 13 |
+| P1 | F25: Automated Rate Change Detection | Feature | Ready | Sprint 14–15 |
+| **P1** | **F26: Apple Pay Shortcuts Auto-Capture** | **Feature** | **Ready** | **Sprint 16–17** |
+| P1 | F27: Android Notification Auto-Capture | Feature | Future | Sprint 18–19 |
+| P1 | F8: Quick-access widget | Feature | Future | Sprint 20+ |
+| P1 | F9: Merchant search (MCC mapping) | Feature | Future | Sprint 20+ |
+| P2 | F10: Portfolio optimizer | Feature | Future | Sprint 20+ |
+| P2 | F11: Promo & bonus tracker | Feature | Future | Sprint 20+ |
 | P2 | F12: Social / community features | Feature | Future | Backlog |
 | P3 | Invite-only ultra-premium cards (Insignia, ULTIMA, Centurion) | Feature | Deferred | v2.0 |
 | P3 | Niche cards (Diners Club, RHB, ICBC) | Feature | Deferred | v2.0 |

@@ -24,6 +24,7 @@ import EligibilityBadge from '../../components/EligibilityBadge';
 import EligibilityTooltip from '../../components/EligibilityTooltip';
 import RateUpdatedBadge from '../../components/RateUpdatedBadge';
 import type { RateChangeDetail } from '../../components/RateUpdatedBadge';
+import SubmissionFormSheet from '../../components/SubmissionFormSheet';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -64,6 +65,7 @@ export default function CardDetailScreen() {
   const [removing, setRemoving] = useState(false);
   const [rateChanges, setRateChanges] = useState<RateChangeDetail[]>([]);
   const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [showSubmissionForm, setShowSubmissionForm] = useState(false);
 
   const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -250,6 +252,14 @@ export default function CardDetailScreen() {
                   <RateUpdatedBadge changes={rateChanges} cardName={card.name} />
                 </View>
               )}
+              <TouchableOpacity
+                style={styles.reportChangeLink}
+                onPress={() => setShowSubmissionForm(true)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="flag-outline" size={14} color={Colors.brandGold} />
+                <Text style={styles.reportChangeLinkText}>Report a Change</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Earn Rates section header */}
@@ -363,6 +373,14 @@ export default function CardDetailScreen() {
           </ScrollView>
         </SafeAreaView>
       </ImageBackground>
+
+      {/* Community submission form */}
+      <SubmissionFormSheet
+        visible={showSubmissionForm}
+        onDismiss={() => setShowSubmissionForm(false)}
+        cardId={id ?? ''}
+        cardName={card.name}
+      />
     </>
   );
 }
@@ -423,6 +441,19 @@ const styles = StyleSheet.create({
   cardMeta: {
     ...Typography.caption,
     color: Colors.textSecondary,
+  },
+
+  // Report a change link
+  reportChangeLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: Spacing.md,
+    gap: Spacing.xs,
+  },
+  reportChangeLinkText: {
+    ...Typography.caption,
+    fontWeight: '600',
+    color: Colors.brandGold,
   },
 
   // Earn rates table

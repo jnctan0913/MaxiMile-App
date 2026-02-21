@@ -180,7 +180,7 @@ describe('Card Rules API', () => {
       expect(card.id).toBe(cardHSBCRevolution.id);
       expect(card.bank).toBe('HSBC');
       expect(card.name).toBe('HSBC Revolution Credit Card');
-      expect(card.earn_rules).toHaveLength(7);
+      expect(card.earn_rules).toHaveLength(8);
       expect(card.caps).toHaveLength(1);
       expect(card.exclusions).toHaveLength(0);
     });
@@ -203,13 +203,13 @@ describe('Card Rules API', () => {
   // 3. Get earn rules for card
   // =========================================================================
   describe('getEarnRulesForCard -- returns category rules with correct mpd values', () => {
-    it('should return 7 earn rules for HSBC Revolution', async () => {
+    it('should return 8 earn rules for HSBC Revolution', async () => {
       setTableData(mock, 'earn_rules', earnRulesHSBC);
 
       const { data, error } = await getEarnRulesForCard(mock.supabase, cardHSBCRevolution.id);
 
       expect(error).toBeNull();
-      expect(data).toHaveLength(7);
+      expect(data).toHaveLength(8);
 
       const rules = data as typeof earnRulesHSBC;
 
@@ -302,19 +302,19 @@ describe('Card Rules API', () => {
   // =========================================================================
   // 5. Get categories
   // =========================================================================
-  describe('getCategories -- returns 7 categories in display order', () => {
-    it('should return all 7 categories sorted by display_order', async () => {
+  describe('getCategories -- returns 8 categories in display order', () => {
+    it('should return all 8 categories sorted by display_order', async () => {
       setTableData(mock, 'categories', mockCategories);
 
       const { data, error } = await getCategories(mock.supabase);
 
       expect(error).toBeNull();
-      expect(data).toHaveLength(7);
+      expect(data).toHaveLength(8);
 
       const categories = data as typeof mockCategories;
       const ids = categories.map(c => c.id);
       expect(ids).toEqual([
-        'dining', 'transport', 'online', 'groceries', 'petrol', 'travel', 'general',
+        'dining', 'transport', 'online', 'groceries', 'petrol', 'bills', 'travel', 'general',
       ]);
 
       // Verify display_order is ascending

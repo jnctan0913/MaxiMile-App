@@ -113,8 +113,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Listen for auth state changes
   // -------------------------------------------------------------------------
   useEffect(() => {
-    // Get the initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Get the initial session — handle stale/invalid refresh tokens gracefully
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (error) {
+        console.warn('Session recovery failed, signing out:', error.message);
+        await supabase.auth.signOut();
+        setState({
+          user: null,
+          session: null,
+          loading: false,
+          needsOnboarding: false,
+          isRecovery: false,
+        });
+        return;
+      }
+
       let needsOnboarding = false;
       if (session?.user) {
         needsOnboarding = await checkOnboardingStatus(session.user.id);
@@ -126,11 +139,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading: false,
         needsOnboarding,
       });
+    }).catch(async () => {
+      await supabase.auth.signOut();
+      setState({
+        user: null,
+        session: null,
+        loading: false,
+        needsOnboarding: false,
+        isRecovery: false,
+      });
     });
 
     // Subscribe to future auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (event === 'TOKEN_REFRESHED' && !session) {
+          await supabase.auth.signOut();
+          setState({
+            user: null,
+            session: null,
+            loading: false,
+            needsOnboarding: false,
+            isRecovery: false,
+          });
+          return;
+        }
+
         let needsOnboarding = false;
         if (session?.user) {
           needsOnboarding = await checkOnboardingStatus(session.user.id);
@@ -159,6 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
+    const inOnboardingAutoCapture = segments[0] === 'onboarding-auto-capture';
     const inOnboardingMiles = segments[0] === 'onboarding-miles';
     const inWelcome = segments[0] === 'welcome';
     const inPrivacyPolicy = segments[0] === 'privacy-policy';
@@ -179,8 +214,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } else if (state.needsOnboarding) {
       // Authenticated but no cards -> redirect to welcome (then onboarding)
-      // Allow onboarding-miles (Step 2) since cards are saved before navigating there
-      if (!inOnboarding && !inOnboardingMiles && !inWelcome) {
+      // Allow onboarding-auto-capture (Step 1.5) and onboarding-miles (Step 2) since cards are saved before navigating there
+      if (!inOnboarding && !inOnboardingAutoCapture && !inOnboardingMiles && !inWelcome) {
         router.replace('/welcome');
       }
     } else {
@@ -227,7 +262,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Force-clear local state even if the server-side sign-out fails
+      // (e.g., expired/invalid refresh token)
+    }
+    setState({
+      user: null,
+      session: null,
+      loading: false,
+      needsOnboarding: false,
+      isRecovery: false,
+    });
   }, []);
 
   const completeOnboarding = useCallback(() => {

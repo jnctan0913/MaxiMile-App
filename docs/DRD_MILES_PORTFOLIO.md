@@ -1,7 +1,7 @@
 # Design Requirements Document: Miles Portfolio (F13-F23)
 
-**Version**: 3.0
-**Last Updated**: 2026-02-20
+**Version**: 4.0
+**Last Updated**: 2026-02-21
 **Author**: UI/UX Designer Agent
 **Status**: Draft
 **PRD Reference**: PRD v1.5, Features F13-F23
@@ -12,6 +12,7 @@
 | 1.0 | 2026-02-20 | Initial DRD covering F13-F17 (Miles Portfolio, Balance Entry, Redemptions, Goals, Insights) |
 | 2.0 | 2026-02-20 | Added Two-Layer Architecture (F18), Transfer Partner Mapping (F19), Smart Transfer Nudges (F20), Expanded Programs (F21). New sections: 4.8-4.12, 5.4, updated 2.2, 2.3, 6, 10, 14 |
 | 3.0 | 2026-02-20 | Added Eligibility Badge (F22), Eligibility Tooltip (F22), Rate Change Notification Banner (F23), Rate Updated Badge (F23). New sections: 4.13-4.16, 5.1c. Updated 1.2, 2.3, 6, 10, 13, 14, 15 |
+| 4.0 | 2026-02-21 | Added Community Submissions UI (F24): Submission Form Bottom Sheet (T13.05), My Submissions Screen (T13.15), Contributor Badge (T13.16), Admin Review Dashboard (T13.10). New section: 16. Updated 1.2, 5.1, 6, 10, 13, 14, 15 |
 
 ---
 
@@ -36,6 +37,7 @@ This document specifies the design requirements for the Miles Portfolio feature 
 | **F21** | **Expanded Miles Programs** | **7→16 programs: 10 bank/transferable + 7 airline FFPs** | **Sprint 9 (DB shipped)** |
 | **F22** | **Card Coverage Expansion** | **20→29 miles cards, eligibility badges for restricted cards** | **Sprint 11** |
 | **F23** | **Rate Change Monitoring** | **Rate change alerts, notification banners, card detail badges** | **Sprint 12** |
+| **F24** | **Community Rate Submissions** | **In-app submission form, My Submissions screen, contributor badges, admin review dashboard (web)** | **Sprint 13** |
 
 ### 1.3 Design Principles
 
@@ -2172,6 +2174,19 @@ CREATE TABLE miles_goals (
 | Rate alert: warning | `warning-outline` | `warning` |
 | Rate alert: info | `information-circle-outline` | `information-circle` |
 | Rate updated badge | `notifications-outline` | `notifications` |
+| Report a change (F24) | `flag-outline` | `flag` |
+| Contributor badge (F24) | `star-outline` | `star` |
+| Screenshot picker (F24) | `camera-outline` | `camera` |
+| Submission pending (F24) | `time-outline` | `time` |
+| Submission under review (F24) | `eye-outline` | `eye` |
+| Submission approved (F24) | `checkmark-circle-outline` | `checkmark-circle` |
+| Submission rejected (F24) | `close-circle-outline` | `close-circle` |
+| Submission merged (F24) | `git-merge-outline` | `git-merge` |
+| Change type: earn rate (F24) | `trending-up` / `trending-down` | -- |
+| Change type: cap (F24) | `bar-chart-outline` | `bar-chart` |
+| Change type: devaluation (F24) | `arrow-down-circle-outline` | `arrow-down-circle` |
+| Change type: partner (F24) | `swap-horizontal-outline` | `swap-horizontal` |
+| Change type: fee (F24) | `cash-outline` | `cash` |
 
 ### B. Color Palette Visual Reference
 
@@ -2201,3 +2216,1011 @@ Border Light:    #F0F0F0  ████████  (progress track)
 - Bottom padding for content: `Spacing.xxxl + 40` (88px) to clear tab bar.
 - SafeAreaView edges: `['bottom']` for tab screens, full edges for modal screens.
 - Keyboard-aware: Use `KeyboardAvoidingView` or ScrollView keyboard dismiss for bottom sheets.
+
+---
+
+## 16. Sprint 13: Community Submissions UI (F24)
+
+**Version**: 4.0
+**Sprint**: 13
+**Feature**: F24 — Community-Sourced Rate Change Submissions
+**Tasks**: T13.05, T13.10, T13.15, T13.16
+**PRD Reference**: PRD v1.6, Feature F24
+**Architecture Reference**: `docs/RATE_DETECTION_ARCHITECTURE.md`
+
+### 16.0 Overview
+
+This section specifies the UI for community-sourced rate change submissions. Users who discover earn rate changes, cap adjustments, devaluations, or fee changes can report them via an in-app form. Admins review submissions in a separate web dashboard (Cloudflare Pages). Users track their submission history in-app, and earn a "Verified Contributor" badge after 3+ approved submissions.
+
+**Design philosophy**:
+- **In-app screens** (submission form, My Submissions, contributor badge): Glassmorphic, gold-accented — consistent with existing app design language.
+- **Admin dashboard** (web app): Clean, functional, table-based — NOT glassmorphic. Optimized for efficiency, not aesthetics.
+
+**Data model reference** (from `RATE_DETECTION_ARCHITECTURE.md`):
+- Table: `community_submissions` — user_id, card_id, change_type, old_value, new_value, evidence_url, screenshot_path, status
+- Enum: `submission_status` — `'pending'`, `'under_review'`, `'approved'`, `'rejected'`, `'merged'`
+- Enum: `rate_change_type` — `'earn_rate'`, `'cap_change'`, `'devaluation'`, `'partner_change'`, `'fee_change'`
+
+---
+
+### 16.1 Submission Form Bottom Sheet (T13.05)
+
+**Trigger**: "Report a Change" link/button on Card Detail screen, positioned near the RateUpdatedBadge component
+**Presentation**: Modal bottom sheet (reuses existing `BottomSheet` component pattern from 5.3)
+**Route context**: Opened from `/cards/[cardId]` (card detail screen)
+
+#### 16.1.1 Entry Point — "Report a Change" Link
+
+Placed on the Card Detail screen, below the card title row, adjacent to the RateUpdatedBadge (if present).
+
+```
+Card detail header:
++--------------------------------------------------+
+| < Back                       [MaxiMile Logo]     |
+|                                                    |
+| DBS Woman's World Card    [Rate Updated]          |
+| 4 miles per dollar                                |
+|                                                    |
+|      [flag-outline] Report a Change               |  <-- entry point link
+|                                                    |
++--------------------------------------------------+
+```
+
+| Component | Type | Token | Notes |
+|-----------|------|-------|-------|
+| Icon | Ionicons | `flag-outline`, size 14, `Colors.brandGold` | Leading icon |
+| Link text | Text | `Typography.caption`, `Colors.brandGold`, fontWeight '500' | "Report a Change" |
+| Touch wrapper | TouchableOpacity | `activeOpacity: 0.7`, `flexDirection: 'row'`, `alignItems: 'center'`, `gap: Spacing.xs` | Min touch target 44x28 |
+| Position | View | `marginTop: Spacing.sm`, `marginLeft: Spacing.xl` | Below card title row |
+
+**Behavior**: Tapping opens the Submission Form Bottom Sheet with `cardId` pre-filled from the current card context.
+
+#### 16.1.2 Bottom Sheet — Component Layout
+
+```
++--------------------------------------------------+
+|  ------  (drag handle)                            |
+|                                                    |
+|  Report a Rate Change                              |
+|                                                    |
+|  Card                                              |
+|  +----------------------------------------------+ |
+|  | [img] DBS Woman's World Card             [v] | |  <-- pre-filled, editable
+|  +----------------------------------------------+ |
+|                                                    |
+|  Change Type                                       |
+|  +----------------------------------------------+ |
+|  | Earn Rate Change                         [v] | |  <-- dropdown
+|  +----------------------------------------------+ |
+|                                                    |
+|  Category (optional)                               |
+|  +----------------------------------------------+ |
+|  | e.g. Dining, Online Shopping                 | |
+|  +----------------------------------------------+ |
+|                                                    |
+|  Old Value                                         |
+|  +----------------------------------------------+ |
+|  | e.g. 4 mpd                                   | |
+|  +----------------------------------------------+ |
+|                                                    |
+|  New Value                                         |
+|  +----------------------------------------------+ |
+|  | e.g. 3 mpd                                   | |
+|  +----------------------------------------------+ |
+|                                                    |
+|  Effective Date                                    |
+|  +----------------------------------------------+ |
+|  | 21 Feb 2026                              [c] | |  <-- date picker
+|  +----------------------------------------------+ |
+|                                                    |
+|  Evidence URL (optional)                           |
+|  +----------------------------------------------+ |
+|  | https://www.dbs.com.sg/...                   | |
+|  +----------------------------------------------+ |
+|                                                    |
+|  Screenshot (optional)                             |
+|  +----------------------------------------------+ |
+|  |  [camera-outline]  Tap to add screenshot     | |  <-- image picker
+|  +----------------------------------------------+ |
+|                                                    |
+|  Notes (optional)                                  |
+|  +----------------------------------------------+ |
+|  | Noticed this change on the DBS website...    | |
+|  |                                              | |
+|  +----------------------------------------------+ |
+|                                                    |
+|  [            Submit Report            ]           |
+|                                                    |
+|  You can track your submission in                  |
+|  Profile > My Submissions                          |
++--------------------------------------------------+
+```
+
+#### 16.1.3 Component Tree
+
+```
+SubmissionFormSheet
+  BottomSheet (existing component)
+    DragHandle
+    SheetTitle ("Report a Rate Change")
+    ScrollView
+      CardSelectorField
+        CardPickerRow (pre-filled, tappable to change)
+      ChangeTypeField
+        DropdownPicker (5 options from rate_change_type)
+      CategoryField
+        TextInput (optional, free-text)
+      OldValueField
+        TextInput (required)
+      NewValueField
+        TextInput (required)
+      EffectiveDateField
+        DatePickerRow (system native picker)
+      EvidenceUrlField
+        TextInput (optional, URL validation)
+      ScreenshotField
+        ImagePickerRow (optional, camera/gallery)
+      NotesField
+        TextInput (multiline, optional)
+      SubmitButton
+        CTA button (gold, full width)
+      HelperText
+        Caption ("You can track your submission in Profile > My Submissions")
+    SuccessState (replaces form on success)
+    ErrorState (inline alert)
+```
+
+#### 16.1.4 Component Table — Field Specifications
+
+| Component | Type | Token | Notes |
+|-----------|------|-------|-------|
+| Drag handle | View | width 40, height 4, `Colors.border`, `BorderRadius.full`, centered | Standard bottom sheet handle |
+| Sheet title | Text | `Typography.subheading`, `Colors.textPrimary` | "Report a Rate Change" |
+| Field label | Text | `Typography.captionBold`, `Colors.textSecondary`, uppercase, letterSpacing 0.5 | "CARD", "CHANGE TYPE", etc. |
+| Card selector | TouchableOpacity | Standard input border style, flexDirection 'row', alignItems 'center', height 48 | Pre-filled from card detail context. Shows card thumbnail (32x22) + card name. Tap opens card picker modal |
+| Card picker chevron | Ionicons | `chevron-down`, size 16, `Colors.textTertiary` | Right-aligned in selector |
+| Change type dropdown | TouchableOpacity | Same input style as card selector, height 48 | Tap opens ActionSheet/Picker with 5 options |
+| Change type options | ActionSheet | System ActionSheet or custom picker | Options: "Earn Rate Change", "Cap Adjustment", "Program Devaluation", "Partner Change", "Fee Change" |
+| Category input | TextInput | `Typography.body`, `Colors.textPrimary`, height 44 | Placeholder: "e.g. Dining, Online Shopping", max 50 chars |
+| Old value input | TextInput | `Typography.body`, `Colors.textPrimary`, height 44 | Placeholder: "e.g. 4 mpd", required, max 100 chars |
+| New value input | TextInput | `Typography.body`, `Colors.textPrimary`, height 44 | Placeholder: "e.g. 3 mpd", required, max 100 chars |
+| Date picker row | TouchableOpacity | Same input style, with calendar icon right-aligned | Opens system date picker, defaults to today |
+| Calendar icon | Ionicons | `calendar-outline`, size 18, `Colors.textTertiary` | Right edge of date input |
+| Evidence URL input | TextInput | `Typography.body`, `Colors.textPrimary`, height 44 | Placeholder: "https://...", `keyboardType="url"`, `autoCapitalize="none"` |
+| Screenshot picker | TouchableOpacity | Dashed border: `borderWidth: 1.5`, `borderStyle: 'dashed'`, `borderColor: Colors.border`, `borderRadius: BorderRadius.md`, height 64, centered content | Tap opens image picker (camera or gallery). After selection, shows thumbnail preview |
+| Screenshot icon | Ionicons | `camera-outline`, size 20, `Colors.textTertiary` | Centered in picker area |
+| Screenshot label | Text | `Typography.caption`, `Colors.textTertiary` | "Tap to add screenshot" |
+| Screenshot preview | Image | width 48, height 48, `borderRadius: BorderRadius.sm` | Shown after image selected, with (X) remove button |
+| Notes input | TextInput | `Typography.body`, `Colors.textPrimary`, minHeight 72, `textAlignVertical: 'top'` | `multiline: true`, placeholder: "Any additional context...", max 500 chars |
+| Input border (default) | View | `borderWidth: 1`, `borderColor: Colors.border`, `borderRadius: BorderRadius.md`, height varies, `paddingHorizontal: Spacing.lg` | Default border |
+| Input border (focused) | View | `borderColor: Colors.brandGold` | Focus state highlight |
+| Input border (error) | View | `borderColor: Colors.danger` | Validation error state |
+| Submit CTA | TouchableOpacity | `Colors.brandGold` fill, `BorderRadius.md`, height 48, full width | Disabled until required fields filled |
+| Submit text | Text | `Typography.bodyBold`, `Colors.brandCharcoal` | "Submit Report" |
+| Helper text | Text | `Typography.caption`, `Colors.textTertiary`, centered, `marginTop: Spacing.md` | "You can track your submission in Profile > My Submissions" |
+| Field spacing | View | `marginBottom: Spacing.lg` (16px) | Between each field group |
+| Sheet background | View | `Colors.surface`, `borderTopLeftRadius: BorderRadius.lg`, `borderTopRightRadius: BorderRadius.lg` | White background with rounded top |
+| Backdrop | TouchableOpacity | `rgba(0, 0, 0, 0.3)`, fills screen behind sheet | Tap to dismiss (with unsaved changes confirmation) |
+
+#### 16.1.5 Change Type Dropdown Options
+
+| Value | Display Label | Icon | Description |
+|-------|--------------|------|-------------|
+| `earn_rate` | Earn Rate Change | `trending-up` / `trending-down` | Base or bonus earn rate increased or decreased |
+| `cap_change` | Cap Adjustment | `bar-chart-outline` | Monthly or annual cap amount changed |
+| `devaluation` | Program Devaluation | `arrow-down-circle-outline` | Transfer ratio or partner rates worsened |
+| `partner_change` | Partner Change | `swap-horizontal-outline` | Transfer partner added or removed |
+| `fee_change` | Fee Change | `cash-outline` | Annual fee, transfer fee, or other fee changed |
+
+#### 16.1.6 Validation Rules
+
+| Field | Rule | Error Message |
+|-------|------|---------------|
+| Card | Required | "Please select a card" |
+| Change type | Required | "Please select a change type" |
+| Old value | Required, 1-100 chars | "Please enter the previous value" |
+| New value | Required, 1-100 chars | "Please enter the new value" |
+| Old value != New value | Values must differ | "Old and new values must be different" |
+| Effective date | Required, not future (max today + 7 days) | "Date cannot be more than 7 days in the future" |
+| Evidence URL | Optional; if provided, must be valid URL (starts with http:// or https://) | "Please enter a valid URL" |
+| Screenshot | Optional; max file size 5 MB, formats: JPEG, PNG | "Image must be under 5 MB" |
+| Notes | Optional, max 500 chars | Character counter shown at 400+ chars |
+| Rate limit | Max 5 submissions per user per day | "You've reached the daily submission limit (5/day). Try again tomorrow." |
+
+**Validation display**: Inline error text below the field in `Typography.caption`, `Colors.danger`. Field border turns red. Errors shown on Submit tap (not on blur, to avoid premature validation during typing).
+
+#### 16.1.7 User Flow
+
+```
+[Card Detail Screen]
+    |
+    +--> [User taps "Report a Change" link]
+              |
+              v
+         [Bottom Sheet slides up — form pre-filled with card context]
+              |
+              +--> [User fills required fields (change type, old/new values, date)]
+              |    [User optionally adds category, evidence URL, screenshot, notes]
+              |         |
+              |         +--> [User taps "Submit Report"]
+              |                   |
+              |                   v
+              |              [Validation passes?]
+              |                   |
+              |              +----+----+
+              |              |         |
+              |             YES        NO
+              |              |         |
+              |              v         v
+              |         [Submit to    [Show inline
+              |          Supabase]     validation errors]
+              |              |
+              |              v
+              |         [Success state replaces form content]
+              |         [Checkmark + "Submission Received!" + status info]
+              |              |
+              |              +--> [Auto-dismiss after 2s OR user taps "Done"]
+              |                        |
+              |                        v
+              |                   [Sheet dismisses]
+              |                   [Card detail screen refreshed]
+              |
+              +--> [User swipes down / taps backdrop]
+                        |
+                        v
+                   [Unsaved changes?]
+                        |
+                   +----+----+
+                   |         |
+                  YES        NO
+                   |         |
+                   v         v
+              [Confirm      [Dismiss sheet,
+               discard       no change]
+               alert]
+```
+
+#### 16.1.8 Success State
+
+After successful submission, the bottom sheet content transitions to a success state:
+
+```
++--------------------------------------------------+
+|  ------  (drag handle)                            |
+|                                                    |
+|           [checkmark-circle]  (48px, gold)         |
+|                                                    |
+|           Submission Received!                     |
+|                                                    |
+|     Your report is now pending review.             |
+|     We'll notify you when it's reviewed.           |
+|                                                    |
+|           Status: [Pending]  (amber pill)          |
+|                                                    |
+|  [              Done              ]                |
++--------------------------------------------------+
+```
+
+| Component | Type | Token | Notes |
+|-----------|------|-------|-------|
+| Checkmark icon | Ionicons | `checkmark-circle`, size 48, `Colors.brandGold` | Centered, scale animation 0->1 (400ms spring) |
+| Title | Text | `Typography.subheading`, `Colors.textPrimary`, centered | "Submission Received!" |
+| Description | Text | `Typography.body`, `Colors.textSecondary`, centered | "Your report is now pending review..." |
+| Status badge | View | Amber pill (see 16.2.3 status badges) | "Pending" |
+| Done CTA | TouchableOpacity | `Colors.brandGold` fill, `BorderRadius.md`, height 48 | Dismisses sheet |
+
+#### 16.1.9 Error State
+
+If the submission fails (network error, rate limit exceeded):
+
+| Component | Type | Token | Notes |
+|-----------|------|-------|-------|
+| Error alert | View | `backgroundColor: 'rgba(234, 67, 53, 0.08)'`, `borderRadius: BorderRadius.md`, padding `Spacing.md`, `marginBottom: Spacing.md` | Red-tinted alert box above Submit button |
+| Error icon | Ionicons | `alert-circle`, size 18, `Colors.danger` | Left of error text |
+| Error text | Text | `Typography.caption`, `Colors.danger` | Error message (network: "Failed to submit. Please try again.", rate limit: "You've reached the daily submission limit.") |
+| Retry | -- | -- | Submit button remains active for retry on network error; disabled + countdown for rate limit |
+
+---
+
+### 16.2 My Submissions Screen (T13.15)
+
+**Route**: `/profile/submissions` (accessible from Profile/Settings section)
+**Layout**: ScrollView with ImageBackground (background.png), Stack.Screen header
+**Header**: Back arrow + "My Submissions" title
+
+#### 16.2.1 Entry Point
+
+Add a row in the Profile/Settings screen:
+
+```
+Profile / Settings:
++--------------------------------------------------+
+|  ...existing settings rows...                     |
+|                                                    |
+|  +----------------------------------------------+ |
+|  | [flag-outline]  My Submissions           [>] | |  <-- NEW entry point
+|  |                 3 submissions                 | |
+|  +----------------------------------------------+ |
+|                                                    |
+|  ...remaining settings rows...                    |
++--------------------------------------------------+
+```
+
+| Component | Type | Token | Notes |
+|-----------|------|-------|-------|
+| Row container | TouchableOpacity | Glassmorphic card style, height 56 | Navigates to `/profile/submissions` |
+| Icon | Ionicons | `flag-outline`, size 20, `Colors.brandGold` | Left icon in gold gradient circle (30x30) |
+| Label | Text | `Typography.body`, `Colors.textPrimary` | "My Submissions" |
+| Count | Text | `Typography.caption`, `Colors.textSecondary` | "{n} submissions" (or hidden if 0) |
+| Chevron | Ionicons | `chevron-forward`, size 18, `Colors.textTertiary` | Right-aligned |
+
+#### 16.2.2 Screen — Component Layout
+
+```
++--------------------------------------------------+
+|  < Back        My Submissions        [MaxiMile]  |
++--------------------------------------------------+
+|                                                    |
+|  [Verified Contributor]          <-- badge (if    |
+|  3 approved submissions           earned, see 16.3)|
+|                                                    |
+|  +----------------------------------------------+ |
+|  | DBS Woman's World Card                        | |
+|  | Earn Rate Change — Dining                     | |
+|  | 4 mpd -> 3 mpd                                | |
+|  | Submitted: 15 Feb 2026         [Approved]     | |  <-- green pill
+|  +----------------------------------------------+ |
+|                                                    |
+|  +----------------------------------------------+ |
+|  | Citi PremierMiles                             | |
+|  | Cap Adjustment                                | |
+|  | S$10,000/yr -> S$8,000/yr                     | |
+|  | Submitted: 18 Feb 2026         [Pending]      | |  <-- amber pill
+|  +----------------------------------------------+ |
+|                                                    |
+|  +----------------------------------------------+ |
+|  | OCBC 90N                                      | |
+|  | Fee Change                                    | |
+|  | S$192.60/yr -> S$214.00/yr                    | |
+|  | Submitted: 20 Feb 2026         [Under Review] | |  <-- blue pill
+|  +----------------------------------------------+ |
+|                                                    |
+|  +----------------------------------------------+ |
+|  | UOB PRVI Miles                                | |
+|  | Partner Change                                | |
+|  | Added EVA Air as transfer partner             | |
+|  | Submitted: 10 Feb 2026         [Rejected]     | |  <-- red pill
+|  |                                                | |
+|  | Reason: Unable to verify this change from     | |
+|  | official sources.                              | |  <-- rejection reason
+|  +----------------------------------------------+ |
+|                                                    |
++--------------------------------------------------+
+|  Recommend | Cards | Caps | Log | Miles           |
++--------------------------------------------------+
+```
+
+#### 16.2.3 Status Badge Variants
+
+| Status | Label | Background | Text Color | Icon | Description |
+|--------|-------|------------|------------|------|-------------|
+| `pending` | "Pending" | `rgba(251, 188, 4, 0.12)` | `#FBBC04` (Colors.warning) | `time-outline` (12px) | Submission awaiting admin review |
+| `under_review` | "Under Review" | `rgba(74, 144, 217, 0.12)` | `#4A90D9` (Colors.primaryLight) | `eye-outline` (12px) | Admin is actively reviewing |
+| `approved` | "Approved" | `rgba(52, 168, 83, 0.12)` | `#34A853` (Colors.success) | `checkmark-circle-outline` (12px) | Verified and accepted |
+| `rejected` | "Rejected" | `rgba(234, 67, 53, 0.12)` | `#EA4335` (Colors.danger) | `close-circle-outline` (12px) | Not verified or inaccurate |
+| `merged` | "Merged" | `rgba(197, 165, 90, 0.12)` | `#C5A55A` (Colors.brandGold) | `git-merge-outline` (12px) | Published to rate_changes table |
+
+**Badge styling** (same pattern as EligibilityBadge):
+
+| Component | Type | Token | Notes |
+|-----------|------|-------|-------|
+| Badge container | View | `flexDirection: 'row'`, `alignItems: 'center'`, `borderRadius: BorderRadius.full`, `paddingHorizontal: Spacing.sm` (8px), `paddingVertical: 2`, `height: 22` | Pill shape, background color per status |
+| Badge icon | Ionicons | Status-specific, size 12, same color as text | `marginRight: 3` |
+| Badge text | Text | `fontSize: 11`, `fontWeight: '600'`, `lineHeight: 16` | Color per status variant |
+
+#### 16.2.4 Submission Card — Component Table
+
+| Component | Type | Token | Notes |
+|-----------|------|-------|-------|
+| Card container | View | Glassmorphic card style (same as `MilesProgramCard`) | One per submission, not tappable in v1 |
+| Card name | Text | `Typography.bodyBold`, `Colors.textPrimary` | e.g. "DBS Woman's World Card" |
+| Change type + category | Text | `Typography.caption`, `Colors.textSecondary` | "Earn Rate Change -- Dining" (category appended if present) |
+| Value change | Text | `Typography.caption`, `Colors.textPrimary` | "{old_value} -> {new_value}" using arrow character |
+| Old value in change line | Text | `Typography.caption`, `Colors.textSecondary` | The old value portion |
+| Arrow | Text | `Typography.caption`, `Colors.textTertiary` | " -> " separator |
+| New value in change line | Text | `Typography.captionBold`, `Colors.textPrimary` | The new value portion (bold) |
+| Submitted date | Text | `Typography.caption`, `Colors.textTertiary` | "Submitted: 15 Feb 2026" |
+| Status badge | StatusBadge component | See 16.2.3 | Right-aligned on date row |
+| Rejection reason container | View | `backgroundColor: 'rgba(234, 67, 53, 0.05)'`, `borderRadius: BorderRadius.sm`, padding `Spacing.sm`, `marginTop: Spacing.sm` | Only shown for rejected submissions |
+| Rejection reason text | Text | `Typography.caption`, `Colors.textSecondary`, `fontStyle: 'italic'` | "Reason: {admin_notes}" |
+| Card separator | View | `height: Spacing.sm` (8px) | Between submission cards |
+
+#### 16.2.5 Component Tree
+
+```
+MySubmissionsScreen
+  SafeAreaView
+    ImageBackground (background.png)
+      Stack.Screen (header: "My Submissions")
+      ScrollView (RefreshControl)
+        ContributorBadgeHeader (if earned — see 16.3)
+        SubmissionCardList
+          SubmissionCard (one per submission)
+            CardName
+            ChangeTypeLabel
+            ValueChangeRow (old -> new)
+            SubmittedDateRow
+              DateText
+              StatusBadge
+            RejectionReason (conditional)
+        EmptyState (if no submissions)
+```
+
+#### 16.2.6 Empty State
+
+When user has no submissions:
+
+```
++--------------------------------------------------+
+|                                                    |
+|           [flag-outline]  (64px, tertiary)         |
+|                                                    |
+|         No submissions yet                         |
+|                                                    |
+|  Noticed a rate change? Report it from any         |
+|  card's detail screen to help keep our             |
+|  data accurate.                                    |
+|                                                    |
++--------------------------------------------------+
+```
+
+| Component | Value |
+|-----------|-------|
+| Icon | `flag-outline` (Ionicons, size 64, `Colors.textTertiary`) |
+| Title | "No submissions yet" |
+| Description | "Noticed a rate change? Report it from any card's detail screen to help keep our data accurate." |
+
+Uses inline centered text layout (same pattern as Layer 1/Layer 2 empty states), not the full-screen `EmptyState` component.
+
+#### 16.2.7 Sorting and Loading
+
+- **Sort order**: Newest first (`created_at` descending)
+- **Pull-to-refresh**: Standard RefreshControl to refetch submission list
+- **Loading state**: `LoadingSpinner` with "Loading submissions..." centered
+- **Pagination**: Not needed in v1 (expect <50 submissions per user)
+- **Data source**: `community_submissions` table filtered by `user_id = auth.uid()`
+
+---
+
+### 16.3 Contributor Badge (T13.16)
+
+**Purpose**: Reward active community members who submit verified rate changes.
+**Threshold**: Earned after 3+ submissions with status `'approved'` or `'merged'`.
+**Visual**: Gold pill badge, similar to `RateUpdatedBadge` styling.
+
+#### 16.3.1 Visual Spec
+
+```
+Badge (collapsed):
+  [star-outline] Verified Contributor
+
+Badge with count:
+  [star-outline] Verified Contributor  ·  5 approved
+```
+
+#### 16.3.2 Component Table
+
+| Component | Type | Token | Notes |
+|-----------|------|-------|-------|
+| Badge container | View | `flexDirection: 'row'`, `alignItems: 'center'`, `backgroundColor: 'rgba(197, 165, 90, 0.12)'`, `borderRadius: BorderRadius.full`, `paddingHorizontal: Spacing.md` (12px), `paddingVertical: Spacing.xs` (4px), `height: 28` | Gold pill — slightly taller than status badges to indicate prominence |
+| Badge icon | Ionicons | `star-outline`, size 14, `Colors.brandGold` | `marginRight: Spacing.xs` (4px) |
+| Badge label | Text | `fontSize: 12`, `fontWeight: '600'`, `Colors.brandGold` | "Verified Contributor" |
+| Separator dot | Text | `fontSize: 12`, `Colors.brandGold`, `opacity: 0.5` | " . " between label and count |
+| Approved count | Text | `fontSize: 11`, `fontWeight: '400'`, `Colors.brandGold`, `opacity: 0.7` | "{n} approved" — shown only on My Submissions screen |
+| Touch wrapper | TouchableOpacity | `activeOpacity: 0.7` | Optional: tap could show tooltip explaining the badge |
+
+#### 16.3.3 Placement
+
+| Context | Position | Variant |
+|---------|----------|---------|
+| My Submissions screen | Top of screen, below header, above submission list | Full badge with count: "Verified Contributor . 5 approved" |
+| Profile / Settings screen | Inline after user name or in settings row | Compact badge: "Verified Contributor" (no count) |
+
+#### 16.3.4 Badge Logic
+
+| Rule | Specification |
+|------|---------------|
+| Threshold | `COUNT(*) >= 3` from `community_submissions` WHERE `status IN ('approved', 'merged')` AND `user_id = auth.uid()` |
+| Display | Badge visible only when threshold met. Below threshold: no badge shown |
+| Persistence | Calculated on screen load — not cached (cheap query) |
+| Edge case: Approved then reverted | If admin changes status from approved to rejected, count decreases. Badge disappears if count drops below 3 |
+| First-time earn | No special animation in v1. Badge simply appears when threshold met |
+
+#### 16.3.5 Design Tokens
+
+```typescript
+const contributorBadge = {
+  backgroundColor: 'rgba(197, 165, 90, 0.12)',  // Same as RateUpdatedBadge
+  borderRadius: BorderRadius.full,                // 9999
+  paddingHorizontal: Spacing.md,                  // 12
+  paddingVertical: Spacing.xs,                    // 4
+  height: 28,
+  flexDirection: 'row',
+  alignItems: 'center',
+  alignSelf: 'flex-start',
+};
+
+const contributorBadgeText = {
+  fontSize: 12,
+  fontWeight: '600',
+  color: Colors.brandGold,                        // #C5A55A
+};
+```
+
+#### 16.3.6 Accessibility
+
+- `accessibilityRole="text"` (informational, not interactive in most contexts)
+- `accessibilityLabel="Verified Contributor badge — you have {n} approved submissions"`
+- On My Submissions screen: announces badge + count on screen reader focus
+
+---
+
+### 16.4 Admin Review Dashboard — Web App (T13.10)
+
+**Platform**: Separate web application deployed on Cloudflare Pages
+**URL**: `admin.maximile.app` or `maximile-admin.pages.dev`
+**Auth**: Supabase Auth — admin role check via `admin_users` table
+**Design language**: Clean, functional, table-based. NOT glassmorphic. Standard web UI patterns.
+
+**Color scheme**:
+- Background: `#F8FAFC` (light gray)
+- Surface: `#FFFFFF` (white cards/panels)
+- Text primary: `#1E293B` (slate-900)
+- Text secondary: `#64748B` (slate-500)
+- Border: `#E2E8F0` (slate-200)
+- Status colors: Same as in-app status badge colors (amber/blue/green/red/gold)
+
+#### 16.4.1 List View — Component Layout
+
+```
++-------------------------------------------------------------------+
+|  [MaxiMile Admin]            Community Submissions    [admin@...]  |
++-------------------------------------------------------------------+
+|                                                                     |
+|  Filters:                                                          |
+|  [Status: All    v]  [Card: All     v]  [Date: Last 30d   v]      |
+|  [Type: All      v]  [Search: ___________________________]        |
+|                                                                     |
+|  Showing 24 submissions (8 pending, 3 under review)                |
+|                                                                     |
+|  +---------------------------------------------------------------+ |
+|  | # | Card            | Type       | Old     | New     | Date   | |
+|  |   |                 |            |         |         |        | |
+|  |---|-----------------|------------|---------|---------|--------| |
+|  |   |                 |            |         |         | Status | |
+|  |---|-----------------|------------|---------|---------|--------| |
+|  | 1 | DBS Woman's     | earn_rate  | 4 mpd   | 3 mpd   | 15 Feb | |
+|  |   | World Card      |            |         |         |[Pending]| |
+|  |---|-----------------|------------|---------|---------|--------| |
+|  | 2 | Citi Premier    | cap_change | S$10k/y | S$8k/y  | 18 Feb | |
+|  |   | Miles           |            |         |         |[Pending]| |
+|  |---|-----------------|------------|---------|---------|--------| |
+|  | 3 | OCBC 90N        | fee_change | S$192   | S$214   | 20 Feb | |
+|  |   |                 |            |         |         |[Review]| |
+|  |---|-----------------|------------|---------|---------|--------| |
+|  | 4 | Amex KF Ascend  | devaluat.  | 1:1     | 1.5:1   | 12 Feb | |
+|  |   |                 |            |         |         |[Approved]|
+|  |---|-----------------|------------|---------|---------|--------| |
+|  | 5 | HSBC Revolution | partner_ch | N/A     | +Qatar  | 10 Feb | |
+|  |   |                 |            |         |         |[Rejected]|
+|  +---------------------------------------------------------------+ |
+|                                                                     |
+|  [< Prev]  Page 1 of 3  [Next >]                                  |
+|                                                                     |
++-------------------------------------------------------------------+
+```
+
+#### 16.4.2 List View — Component Table
+
+| Component | Type | Style | Notes |
+|-----------|------|-------|-------|
+| Page header | `header` | `background: #FFFFFF`, `borderBottom: 1px solid #E2E8F0`, `padding: 16px 24px`, `display: flex`, `justifyContent: space-between` | Logo left, title center, admin email right |
+| Logo | `img` | MaxiMile brand logo, height 28px | Links to dashboard home |
+| Page title | `h1` | `font-size: 20px`, `font-weight: 600`, `color: #1E293B` | "Community Submissions" |
+| Admin email | `span` | `font-size: 13px`, `color: #64748B` | `admin_users.email` |
+| Filter bar | `div` | `display: flex`, `gap: 12px`, `padding: 16px 24px`, `background: #F8FAFC`, `flexWrap: wrap` | Contains all filter controls |
+| Filter dropdown | `select` | `height: 36px`, `border: 1px solid #E2E8F0`, `borderRadius: 6px`, `padding: 0 12px`, `fontSize: 13px` | Status, Card, Date range, Type |
+| Search input | `input` | Same height/border as dropdowns, `width: 240px`, `paddingLeft: 32px` | Search icon prefix. Searches card name, notes |
+| Results summary | `p` | `fontSize: 13px`, `color: #64748B`, `padding: 0 24px 8px` | "Showing 24 submissions (8 pending, 3 under review)" |
+| Table container | `div` | `background: #FFFFFF`, `border: 1px solid #E2E8F0`, `borderRadius: 8px`, `margin: 0 24px`, `overflow: hidden` | Wraps table |
+| Table | `table` | `width: 100%`, `borderCollapse: collapse` | Standard HTML table |
+| Table header | `th` | `fontSize: 12px`, `fontWeight: 600`, `color: #64748B`, `textTransform: uppercase`, `letterSpacing: 0.5px`, `padding: 12px 16px`, `borderBottom: 2px solid #E2E8F0`, `textAlign: left` | Column headers |
+| Table row | `tr` | `borderBottom: 1px solid #F1F5F9`, hover: `background: #F8FAFC`, `cursor: pointer` | Click navigates to detail view |
+| Table cell | `td` | `fontSize: 14px`, `color: #1E293B`, `padding: 12px 16px` | Standard cell |
+| Status badge | `span` | `fontSize: 11px`, `fontWeight: 600`, `borderRadius: 9999px`, `padding: 2px 8px`, status-colored background/text | Same colors as in-app badges |
+| Pagination | `div` | `display: flex`, `justifyContent: center`, `alignItems: center`, `gap: 16px`, `padding: 16px` | Prev/Next + page indicator |
+| Pagination button | `button` | `fontSize: 13px`, `color: #64748B`, `border: 1px solid #E2E8F0`, `borderRadius: 6px`, `padding: 6px 12px`, disabled: `opacity: 0.5` | Prev / Next |
+
+#### 16.4.3 List View — Filter Options
+
+| Filter | Options | Default |
+|--------|---------|---------|
+| Status | All, Pending, Under Review, Approved, Rejected, Merged | Pending (show actionable items first) |
+| Card | All, + dropdown of all 29 active cards | All |
+| Date | Last 7 days, Last 30 days, Last 90 days, All time | Last 30 days |
+| Type | All, Earn Rate Change, Cap Adjustment, Program Devaluation, Partner Change, Fee Change | All |
+| Search | Free-text | Empty |
+
+#### 16.4.4 Detail View — Component Layout
+
+```
++-------------------------------------------------------------------+
+|  [MaxiMile Admin]  < Back to List    Community Submissions         |
++-------------------------------------------------------------------+
+|                                                                     |
+|  Submission #17                              Status: [Pending]     |
+|  Submitted by: user_abc...xyz    on 15 Feb 2026 at 14:23          |
+|                                                                     |
+|  +---------------------------------------------------------------+ |
+|  |  SUBMISSION DETAILS                                            | |
+|  |                                                                | |
+|  |  Card:           DBS Woman's World Card                       | |
+|  |  Change Type:    Earn Rate Change                             | |
+|  |  Category:       Dining                                       | |
+|  |  Old Value:      4 mpd                                        | |
+|  |  New Value:      3 mpd                                        | |
+|  |  Effective Date: 1 Mar 2026                                   | |
+|  |  Evidence URL:   https://www.dbs.com.sg/...  [Open]           | |
+|  |  Screenshot:     [thumbnail]  [View Full Size]                | |
+|  |  Notes:          "Noticed this change on the DBS T&C page     | |
+|  |                   effective March 2026..."                     | |
+|  +---------------------------------------------------------------+ |
+|                                                                     |
+|  +---------------------------------------------------------------+ |
+|  |  DUPLICATE CHECK                                               | |
+|  |                                                                | |
+|  |  [!] Possible duplicate: Submission #12 (approved, 10 Feb)    | |
+|  |      Same card + change type. Old: 4 mpd -> New: 3.5 mpd     | |
+|  |      [View Submission #12]                                     | |
+|  |                                                                | |
+|  |  No matching rate_changes record found.                        | |
+|  +---------------------------------------------------------------+ |
+|                                                                     |
+|  +---------------------------------------------------------------+ |
+|  |  ADMIN ACTIONS                                                 | |
+|  |                                                                | |
+|  |  Admin Notes:                                                  | |
+|  |  +-----------------------------------------------------------+| |
+|  |  |                                                           || |
+|  |  +-----------------------------------------------------------+| |
+|  |                                                                | |
+|  |  [Approve]    [Edit & Approve]    [Reject]                    | |
+|  |                                                                | |
+|  |  Severity (for approve):  [Warning v]                         | |
+|  |  Alert title:  [Rate cut: DBS Woman's World Dining_______]    | |
+|  |  Alert body:   [Dining earn rate reduced from 4 to 3 mpd ]    | |
+|  +---------------------------------------------------------------+ |
+|                                                                     |
+|  REVIEW HISTORY                                                    |
+|  [No review actions yet]                                           |
+|                                                                     |
++-------------------------------------------------------------------+
+```
+
+#### 16.4.5 Detail View — Component Table
+
+| Component | Type | Style | Notes |
+|-----------|------|-------|-------|
+| Back link | `a` | `fontSize: 14px`, `color: #64748B`, hover: `color: #1E293B` | "< Back to List" — navigates to list view |
+| Submission ID | `h2` | `fontSize: 18px`, `fontWeight: 600`, `color: #1E293B` | "Submission #17" |
+| Status badge | `span` | Same as list view badges, larger: `fontSize: 13px`, `padding: 4px 12px` | Right-aligned from title |
+| Submitter info | `p` | `fontSize: 13px`, `color: #64748B` | "Submitted by: {user_id truncated} on {date} at {time}" |
+| Section card | `div` | `background: #FFFFFF`, `border: 1px solid #E2E8F0`, `borderRadius: 8px`, `padding: 24px`, `marginBottom: 16px` | Groups related content |
+| Section title | `h3` | `fontSize: 12px`, `fontWeight: 600`, `color: #64748B`, `textTransform: uppercase`, `letterSpacing: 0.5px`, `marginBottom: 16px` | "SUBMISSION DETAILS", "ADMIN ACTIONS", etc. |
+| Detail row | `div` | `display: flex`, `marginBottom: 12px` | Label + value pair |
+| Detail label | `span` | `fontSize: 14px`, `color: #64748B`, `width: 140px`, `flexShrink: 0` | "Card:", "Change Type:", etc. |
+| Detail value | `span` | `fontSize: 14px`, `color: #1E293B`, `fontWeight: 500` | The submitted value |
+| Evidence link | `a` | `color: #3B82F6` (blue-500), `textDecoration: underline` | Opens in new tab |
+| Screenshot thumbnail | `img` | `width: 80px`, `height: 80px`, `objectFit: cover`, `borderRadius: 6px`, `border: 1px solid #E2E8F0` | Clickable to full-size view |
+| Duplicate alert | `div` | `background: #FFF7ED` (amber-50), `border: 1px solid #FED7AA` (amber-200), `borderRadius: 6px`, `padding: 12px` | Amber warning box for possible duplicates |
+| Duplicate icon | -- | `color: #F59E0B` (amber-500) | Warning triangle icon |
+| Admin notes textarea | `textarea` | `width: 100%`, `minHeight: 80px`, `border: 1px solid #E2E8F0`, `borderRadius: 6px`, `padding: 12px`, `fontSize: 14px`, focus: `borderColor: #3B82F6` | Freeform notes, saved with action |
+| Approve button | `button` | `background: #34A853`, `color: #FFFFFF`, `fontWeight: 600`, `fontSize: 14px`, `borderRadius: 6px`, `padding: 8px 20px`, hover: `background: #2D9249` | Inserts into `rate_changes` table |
+| Edit & Approve button | `button` | `background: #3B82F6` (blue-500), `color: #FFFFFF`, same sizing as Approve | Opens editable fields for old/new value, then approves |
+| Reject button | `button` | `background: #FFFFFF`, `color: #EA4335`, `border: 1px solid #EA4335`, same sizing | Requires admin notes (reason) |
+| Severity selector | `select` | Standard select, same as filter dropdowns | Options: "info", "warning", "critical". Default: "warning" |
+| Alert title input | `input` | `width: 100%`, `height: 36px`, standard border style | Pre-filled from submission: "{change_type}: {card_name}" |
+| Alert body input | `input` | Same style as title input | Pre-filled: "{category} {old_value} to {new_value}" |
+
+#### 16.4.6 Admin Action Flows
+
+**Approve**:
+```
+[Admin clicks "Approve"]
+    |
+    v
+[Confirm dialog: "Approve this submission? This will create a rate_changes record
+ visible to all affected users."]
+    |
+    +--> [Admin confirms]
+    |         |
+    |         v
+    |    [API call: approve_submission(submission_id, severity, alert_title, alert_body, admin_notes)]
+    |         |
+    |         v
+    |    [Backend: UPDATE community_submissions SET status = 'approved', reviewed_by, reviewed_at]
+    |    [Backend: INSERT INTO rate_changes (...) -- with detection_source = 'community']
+    |    [Backend: UPDATE community_submissions SET status = 'merged']
+    |         |
+    |         v
+    |    [UI: Status badge updates to "Merged". Success toast.]
+    |    [All portfolio-matched users now see the banner/badge via existing F23 components]
+    |
+    +--> [Admin cancels]
+              |
+              v
+         [Dialog closes, no change]
+```
+
+**Reject**:
+```
+[Admin clicks "Reject"]
+    |
+    v
+[Admin notes textarea must be non-empty (reason required)]
+    |
+    +--> [Notes empty?] --> [Show validation: "Please provide a reason for rejection"]
+    |
+    +--> [Notes provided] --> [Confirm dialog: "Reject this submission?"]
+              |
+              +--> [Admin confirms]
+              |         |
+              |         v
+              |    [API call: reject_submission(submission_id, admin_notes)]
+              |    [Backend: UPDATE community_submissions SET status = 'rejected', admin_notes, reviewed_by, reviewed_at]
+              |    [UI: Status badge updates to "Rejected". Toast notification.]
+              |
+              +--> [Admin cancels] --> [No change]
+```
+
+**Edit & Approve**:
+```
+[Admin clicks "Edit & Approve"]
+    |
+    v
+[Detail fields become editable: old_value, new_value, category, effective_date]
+[Two additional buttons appear: "Save & Approve" / "Cancel Edit"]
+    |
+    +--> [Admin modifies values] --> [Clicks "Save & Approve"]
+    |         |
+    |         v
+    |    [Same approve flow, but with modified values]
+    |
+    +--> [Admin clicks "Cancel Edit"]
+              |
+              v
+         [Fields revert to read-only, original values restored]
+```
+
+#### 16.4.7 Duplicate Detection Display
+
+The detail view shows a "Duplicate Check" section that queries for:
+1. Existing `community_submissions` with same `card_id` + `change_type` within 30 days
+2. Existing `rate_changes` records with same `card_id` + `change_type` within 90 days
+
+| Scenario | Display |
+|----------|---------|
+| No duplicates found | "No potential duplicates detected." in green text |
+| Similar submission exists | Amber warning: "Possible duplicate: Submission #{id} ({status}, {date}). Same card + change type." with link to view |
+| Matching rate_change exists | Amber warning: "A matching rate change record already exists (created {date}). This submission may be redundant." with link |
+
+#### 16.4.8 Review History
+
+Below the admin actions section, show a log of all review actions taken:
+
+```
+REVIEW HISTORY
+  [2026-02-21 10:15] admin@maximile.app — Changed status to "under_review"
+  [2026-02-21 14:30] admin@maximile.app — Approved. Notes: "Verified via DBS T&C page."
+```
+
+| Component | Type | Style | Notes |
+|-----------|------|-------|-------|
+| History row | `div` | `fontSize: 13px`, `color: #64748B`, `padding: 8px 0`, `borderBottom: 1px solid #F1F5F9` | One per action |
+| Timestamp | `span` | `fontFamily: 'monospace'`, `fontSize: 12px`, `color: #94A3B8` | ISO-ish format: YYYY-MM-DD HH:MM |
+| Admin email | `span` | `fontWeight: 500`, `color: #1E293B` | Who performed the action |
+| Action description | `span` | `color: #64748B` | What was done |
+
+---
+
+### 16.5 New Components to Build (Sprint 13)
+
+| Component | File Path | Description |
+|-----------|-----------|-------------|
+| `SubmissionFormSheet` | `components/SubmissionFormSheet.tsx` | Bottom sheet with rate change submission form. Props: `visible`, `onDismiss`, `cardId?` (pre-fill), `cardName?` |
+| `SubmissionStatusBadge` | `components/SubmissionStatusBadge.tsx` | Pill badge for submission status (5 variants). Props: `status: SubmissionStatus`, `size?: 'sm' | 'md'` |
+| `SubmissionCard` | `components/SubmissionCard.tsx` | Glassmorphic card displaying a single submission in list view. Props: `submission: CommunitySubmission` |
+| `ContributorBadge` | `components/ContributorBadge.tsx` | Gold pill badge for verified contributors. Props: `approvedCount: number`, `showCount?: boolean` |
+
+**Existing components reused**:
+| Component | Usage |
+|-----------|-------|
+| `BottomSheet` | Wraps submission form |
+| `EmptyState` pattern | My Submissions empty state (inline variant) |
+| Glassmorphic card style | Submission cards on My Submissions screen |
+
+**Admin dashboard** (separate repo / directory):
+| File | Purpose |
+|------|---------|
+| `admin/src/pages/submissions.tsx` | List view with table, filters, pagination |
+| `admin/src/pages/submissions/[id].tsx` | Detail view with review actions |
+| `admin/src/components/StatusBadge.tsx` | Web status badge (HTML/CSS) |
+| `admin/src/components/SubmissionTable.tsx` | Sortable, filterable table |
+| `admin/src/components/ReviewActions.tsx` | Approve/Reject/Edit action buttons + forms |
+
+### 16.6 File Structure Update
+
+```
+maximile-app/
+  app/
+    profile/
+      submissions.tsx              -- My Submissions screen (NEW — F24)
+  components/
+    SubmissionFormSheet.tsx         -- Rate change submission bottom sheet (NEW — F24)
+    SubmissionStatusBadge.tsx       -- Status pill badge component (NEW — F24)
+    SubmissionCard.tsx              -- Single submission card display (NEW — F24)
+    ContributorBadge.tsx            -- Verified Contributor badge (NEW — F24)
+
+admin-dashboard/                    -- SEPARATE web app (Cloudflare Pages)
+  src/
+    pages/
+      index.tsx                    -- Dashboard home / submissions list
+      submissions/
+        [id].tsx                   -- Submission detail + review
+    components/
+      StatusBadge.tsx              -- HTML/CSS status badge
+      SubmissionTable.tsx          -- Table with sorting/filtering
+      ReviewActions.tsx            -- Approve/Reject/Edit buttons
+      DuplicateCheck.tsx           -- Duplicate detection display
+    lib/
+      supabase.ts                  -- Supabase client (admin role)
+```
+
+---
+
+### 16.7 Interaction Patterns (Sprint 13 additions)
+
+| Interaction | Target | Behavior |
+|-------------|--------|----------|
+| Tap | "Report a Change" link (card detail) | Open Submission Form Bottom Sheet with card pre-filled |
+| Tap | Submit Report CTA | Validate form, submit to `community_submissions`, show success state |
+| Tap | Screenshot picker | Open system image picker (camera or photo library) |
+| Tap | Change type dropdown | Open ActionSheet with 5 options |
+| Tap | Date picker row | Open system date picker (defaults to today) |
+| Swipe down | Submission form sheet | If unsaved changes: confirm discard. Otherwise: dismiss |
+| Tap | Backdrop (submission form) | Same as swipe down |
+| Tap | "My Submissions" in Profile | Navigate to `/profile/submissions` |
+| Pull down | My Submissions ScrollView | Refresh submission list |
+| Tap | "Done" on success state | Dismiss submission form sheet |
+| Click | Table row (admin list) | Navigate to submission detail view |
+| Click | "Approve" (admin) | Confirm dialog, then approve + insert `rate_changes` |
+| Click | "Reject" (admin) | Requires notes, then confirm dialog, then reject |
+| Click | "Edit & Approve" (admin) | Fields become editable, then approve with modified values |
+
+### 16.8 Animation Specs (Sprint 13)
+
+| Transition | Type | Duration | Easing |
+|------------|------|----------|--------|
+| Submission form sheet open | Slide up from bottom | 250ms | `ease-out` |
+| Submission form sheet dismiss | Slide down | 200ms | `ease-in` |
+| Success state checkmark | Scale 0 to 1 with bounce | 400ms | `spring` (tension 150, friction 12) |
+| Success state transition | Opacity cross-fade (form -> success) | 200ms | `ease-in-out` |
+| Status badge entrance | Fade in | 200ms | `ease-in` |
+| Contributor badge entrance | Fade in | 200ms | `ease-in` |
+| Screenshot thumbnail appear | Scale 0.8 to 1 + fade in | 150ms | `ease-out` |
+
+### 16.9 Accessibility (Sprint 13)
+
+| Component | Requirement |
+|-----------|-------------|
+| "Report a Change" link | `accessibilityRole="button"`, `accessibilityLabel="Report a rate change for {cardName}"` |
+| Submission form fields | All inputs have `accessibilityLabel` matching their label text. Error states announced via `accessibilityLiveRegion="polite"` |
+| Change type dropdown | `accessibilityRole="button"`, `accessibilityLabel="Change type: {selected value}"`, `accessibilityHint="Double tap to change"` |
+| Screenshot picker | `accessibilityRole="button"`, `accessibilityLabel="Add screenshot evidence"`, `accessibilityHint="Opens camera or photo library"` |
+| Submit button | `accessibilityRole="button"`, disabled state: `accessibilityState={{ disabled: true }}`, `accessibilityLabel="Submit rate change report"` |
+| Status badges | `accessibilityRole="text"`, `accessibilityLabel="Status: {status}"` |
+| Submission cards | `accessibilityRole="summary"`, `accessibilityLabel="{card name}. {change type}. {old} to {new}. Status: {status}"` |
+| Contributor badge | `accessibilityRole="text"`, `accessibilityLabel="Verified Contributor — {n} approved submissions"` |
+| My Submissions empty state | `accessibilityRole="text"` on combined title + description |
+| Admin dashboard | Standard web accessibility: `aria-label` on controls, `role="table"` on data table, keyboard-navigable actions |
+
+### 16.10 Edge Cases (Sprint 13)
+
+| Scenario | Behavior |
+|----------|----------|
+| User not signed in | "Report a Change" link hidden. My Submissions not accessible. |
+| User at daily rate limit (5 submissions) | Submit button shows error: "You've reached the daily submission limit (5/day). Try again tomorrow." |
+| Card pre-fill from context not available | Card selector shows "Select a card" placeholder. Required field validation applies. |
+| Very long old/new value text | Truncate with ellipsis at 100 chars. Full text visible in admin detail view. |
+| User submits duplicate (same card + type within 7 days) | Allow submission (user may not know it's a duplicate). Admin dedup section flags it. |
+| Screenshot upload fails | Show retry option inline. Allow submission without screenshot (it's optional). |
+| Large screenshot (>5 MB) | Show validation error: "Image must be under 5 MB". Prevent upload. |
+| Network failure during submit | Error alert above Submit button. Form state preserved. User can retry. |
+| Admin approves but rate_changes insert fails | Transaction rollback. Status reverts to previous. Error toast shown. |
+| No admin_users exist | Dashboard shows "No admin access" screen. Prevents unauthorized actions. |
+| Submission for a card that was deactivated | Still visible in My Submissions. Admin can review based on historical data. |
+| Zero submissions in admin dashboard | Table shows "No submissions match your filters." with clear-filters link. |
+| Admin rejects without providing reason | Validation error: "Please provide a reason for rejection." Reject button stays disabled until notes are entered. |
+| User has exactly 3 approved submissions | Contributor badge appears on next screen load / refresh. |
+| Contributor count drops below 3 (admin reverts approval) | Badge disappears on next screen load. No notification sent. |
+
+---
+
+### 16.11 Acceptance Criteria — Sprint 13 (Design)
+
+#### 16.11.1 Submission Form (T13.05)
+
+- [ ] "Report a Change" link appears on card detail screen below the card title, adjacent to RateUpdatedBadge.
+- [ ] Link uses gold `flag-outline` icon + "Report a Change" text in `Colors.brandGold`.
+- [ ] Tapping link opens a bottom sheet form with the card pre-filled from context.
+- [ ] Form includes all required fields: card selector, change type dropdown (5 types), old value, new value, effective date.
+- [ ] Form includes all optional fields: category, evidence URL, screenshot, notes.
+- [ ] Change type dropdown shows 5 options matching the `rate_change_type` enum.
+- [ ] Date picker defaults to today and disallows dates more than 7 days in the future.
+- [ ] Screenshot picker opens system image picker (camera/gallery) with 5 MB max file size.
+- [ ] Submit CTA is disabled until all required fields are filled and validation passes.
+- [ ] Inline validation errors appear below fields in red on submit attempt.
+- [ ] Success state shows checkmark icon + "Submission Received!" + Pending status badge + Done button.
+- [ ] Dismissing form with unsaved changes shows a confirmation dialog.
+- [ ] Bottom sheet matches existing sheet pattern: drag handle, backdrop, slide animation.
+- [ ] Rate limit enforced: max 5 submissions per user per day with clear error message.
+
+#### 16.11.2 My Submissions Screen (T13.15)
+
+- [ ] Accessible from Profile/Settings via "My Submissions" row with flag icon.
+- [ ] Screen shows all user's submissions sorted newest-first.
+- [ ] Each submission card displays: card name, change type (+ category), old -> new values, submitted date, status badge.
+- [ ] Five status badge variants render correctly: Pending (amber), Under Review (blue), Approved (green), Rejected (red), Merged (gold).
+- [ ] Rejected submissions show the admin's rejection reason in a red-tinted container.
+- [ ] Empty state shows flag icon + "No submissions yet" + instructional text.
+- [ ] Pull-to-refresh updates the submission list.
+- [ ] Screen uses ImageBackground consistent with all other app screens.
+
+#### 16.11.3 Contributor Badge (T13.16)
+
+- [ ] Gold pill badge with star icon + "Verified Contributor" text.
+- [ ] Badge appears only when user has 3+ approved/merged submissions.
+- [ ] On My Submissions screen: badge shown with approved count (e.g., "Verified Contributor . 5 approved").
+- [ ] On Profile screen: compact badge without count.
+- [ ] Badge uses `Colors.brandGold` text and `rgba(197, 165, 90, 0.12)` background — consistent with RateUpdatedBadge.
+- [ ] Badge has appropriate accessibility labels.
+
+#### 16.11.4 Admin Review Dashboard (T13.10)
+
+- [ ] Separate web app with clean, functional design (NOT glassmorphic).
+- [ ] List view shows submissions in a table with columns: #, Card, Type, Old, New, Date, Status.
+- [ ] Filters available: status, card, date range, type, and free-text search.
+- [ ] Default filter: status = "Pending" (shows actionable items).
+- [ ] Clicking a table row navigates to the detail view.
+- [ ] Detail view shows all submitted data including evidence URL (linked) and screenshot (thumbnail + full-size).
+- [ ] Duplicate check section flags similar submissions and existing rate_changes records.
+- [ ] Three action buttons: Approve (green), Edit & Approve (blue), Reject (red outlined).
+- [ ] Approve inserts a new `rate_changes` record with `detection_source = 'community'`.
+- [ ] Reject requires admin notes (reason) before confirming.
+- [ ] Edit & Approve makes old/new value fields editable before approving.
+- [ ] Severity selector and alert title/body fields available for approve actions.
+- [ ] Review history log shows timestamped actions by admin.
+- [ ] Status badges use consistent colors across web and mobile (amber/blue/green/red/gold).
+- [ ] Admin auth checked via `admin_users` table — unauthorized users see access denied screen.
+
+---
+
+### 16.12 Open Design Questions (Sprint 13)
+
+| # | Question | Options | Recommendation | Status |
+|---|----------|---------|----------------|--------|
+| 15 | Should the submission form validate evidence URL reachability (HTTP check)? | (a) Yes, async validation; (b) No, just format check | (b) Format check only -- URL may be behind auth or temporary. Admin verifies manually. | Open |
+| 16 | Should rejected submissions be deletable by the user? | (a) Yes, swipe-to-delete; (b) No, keep for history | (b) No -- maintains audit trail. User can ignore rejected items. | Open |
+| 17 | Should the admin dashboard show user reputation score? | (a) Yes, show approved/total ratio; (b) No, keep simple for v1 | (a) Yes -- helps admin triage. Show "3/5 approved" next to submitter info. Simple to compute. | Open |
+| 18 | Should the "Report a Change" entry point appear on ALL card detail screens or only cards with existing rate_changes? | (a) All cards; (b) Only cards with rate change history | (a) All cards -- users may discover changes for cards without existing records. The entry point should be universal. | Open |
+| 19 | Should the admin dashboard be SSR (server-side rendered) or SPA? | (a) SPA with Supabase client; (b) SSR with Cloudflare Workers | (a) SPA -- simpler, Supabase JS client works client-side, no server logic needed. Use React + Vite on Cloudflare Pages (static). | Open |

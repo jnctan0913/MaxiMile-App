@@ -1,7 +1,7 @@
 // =============================================================================
 // MaxiMile — Spend Categories
 // =============================================================================
-// The 7 fixed spend categories used throughout the app.
+// The 8 fixed spend categories used throughout the app.
 // These match the categories table in the database (database/schema/card_rules.sql).
 // =============================================================================
 
@@ -16,7 +16,7 @@ export interface CategoryInfo {
 }
 
 /**
- * The 7 spend categories for Singapore miles credit card optimization.
+ * The 8 spend categories for Singapore miles credit card optimization.
  * Order matches UI display order (display_order ascending).
  */
 export const CATEGORIES: CategoryInfo[] = [
@@ -48,22 +48,22 @@ export const CATEGORIES: CategoryInfo[] = [
     description: 'E-commerce, online shopping, subscriptions',
   },
   {
-    id: 'travel',
-    name: 'Travel',
-    emoji: '\u2708\uFE0F',
-    icon: 'airplane-outline',
-    iconFilled: 'airplane',
-    displayOrder: 3,
-    description: 'Airlines, hotels, travel agencies, booking platforms',
-  },
-  {
     id: 'groceries',
     name: 'Groceries',
     emoji: '\uD83E\uDED2',
     icon: 'cart-outline',
     iconFilled: 'cart',
-    displayOrder: 4,
+    displayOrder: 3,
     description: 'Supermarkets, convenience stores, wet markets',
+  },
+  {
+    id: 'petrol',
+    name: 'Petrol',
+    emoji: '\u26FD',
+    icon: 'speedometer-outline',
+    iconFilled: 'speedometer',
+    displayOrder: 4,
+    description: 'Petrol stations, fuel',
   },
   {
     id: 'bills',
@@ -75,12 +75,21 @@ export const CATEGORIES: CategoryInfo[] = [
     description: 'Utilities, insurance, telco, recurring payments',
   },
   {
+    id: 'travel',
+    name: 'Travel',
+    emoji: '\u2708\uFE0F',
+    icon: 'airplane-outline',
+    iconFilled: 'airplane',
+    displayOrder: 6,
+    description: 'Airlines, hotels, travel agencies, booking platforms',
+  },
+  {
     id: 'general',
     name: 'General',
     emoji: '\uD83D\uDCB0',
     icon: 'wallet-outline',
     iconFilled: 'wallet',
-    displayOrder: 6,
+    displayOrder: 7,
     description: 'Everything else not covered by specific categories',
   },
 ];

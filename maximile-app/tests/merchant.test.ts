@@ -75,9 +75,32 @@ describe('Merchant Detection Module', () => {
       expect(result.categoryName).toBe('Transport');
     });
 
-    it('should map gas_station to transport', () => {
+    it('should map gas_station to petrol', () => {
       const result = mapTypesToCategory(['gas_station', 'establishment']);
-      expect(result.categoryId).toBe('transport');
+      expect(result.categoryId).toBe('petrol');
+      expect(result.categoryName).toBe('Petrol');
+    });
+  });
+
+  // =========================================================================
+  // 2b. Petrol types
+  // =========================================================================
+  describe('Type → Category mapping: Petrol', () => {
+    it('should map gas_station to petrol with medium confidence', () => {
+      const result = mapTypesToCategory(['gas_station', 'point_of_interest']);
+      expect(result.categoryId).toBe('petrol');
+      expect(result.confidence).toBe('medium');
+    });
+  });
+
+  // =========================================================================
+  // 2c. Bills types
+  // =========================================================================
+  describe('Type → Category mapping: Bills', () => {
+    it('should map insurance_agency to bills', () => {
+      const result = mapTypesToCategory(['insurance_agency', 'establishment']);
+      expect(result.categoryId).toBe('bills');
+      expect(result.categoryName).toBe('Bills');
     });
   });
 

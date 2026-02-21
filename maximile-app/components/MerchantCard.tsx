@@ -27,6 +27,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   online: 'laptop',
   travel: 'airplane',
   groceries: 'cart',
+  petrol: 'speedometer',
   bills: 'receipt',
   general: 'wallet',
 };

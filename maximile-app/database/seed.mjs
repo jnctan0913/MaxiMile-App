@@ -53,8 +53,9 @@ const categories = [
   { id: 'online',    name: 'Online Shopping',   display_order: 3, icon: 'globe',         mccs: ['5262','5310','5311','5399','5944','5945','5946','5947','5964','5965','5966','5967','5968','5969','7372','5818','5816','5817'], description: 'E-commerce, online subscriptions, digital goods' },
   { id: 'groceries', name: 'Groceries',         display_order: 4, icon: 'shopping-cart',  mccs: ['5411','5422','5441','5451','5462','5499'], description: 'Supermarkets, bakeries, specialty food stores' },
   { id: 'petrol',    name: 'Petrol',            display_order: 5, icon: 'fuel',           mccs: ['5541','5542','5983'], description: 'Petrol stations, fuel dispensers' },
-  { id: 'travel',    name: 'Travel',            display_order: 6, icon: 'plane',          mccs: [...Array.from({length: 300}, (_, i) => String(3000 + i)), '3501','3502','3503','3504','3505','7011','4411','4511','4722','7991'], description: 'Flights, hotels, cruises, travel agencies' },
-  { id: 'general',   name: 'General',           display_order: 7, icon: 'circle',         mccs: [], description: 'All other spending' },
+  { id: 'bills',     name: 'Bills',             display_order: 6, icon: 'receipt',        mccs: ['4812','4814','4899','4900','6300','6381','6399','4816'], description: 'Utilities, insurance, telco, recurring payments' },
+  { id: 'travel',    name: 'Travel',            display_order: 7, icon: 'plane',          mccs: [...Array.from({length: 300}, (_, i) => String(3000 + i)), '3501','3502','3503','3504','3505','7011','4411','4511','4722','7991'], description: 'Flights, hotels, cruises, travel agencies' },
+  { id: 'general',   name: 'General',           display_order: 8, icon: 'circle',         mccs: [], description: 'All other spending' },
 ];
 
 // =============================================================================
@@ -87,7 +88,7 @@ const cards = [
 ];
 
 // =============================================================================
-// DATA: Earn Rules (7 categories × 20 cards = 140 rows)
+// DATA: Earn Rules (8 categories × 20 cards = 160 rows)
 // =============================================================================
 const earnRules = [
   // Card 1: DBS Altitude Visa (1.2 mpd flat, 4 mpd travel portal)
@@ -96,6 +97,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000001', category_id: 'online',    earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000001', category_id: 'groceries', earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000001', category_id: 'petrol',    earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000001', category_id: 'bills',     earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000001', category_id: 'travel',    earn_rate_mpd: 4.0, is_bonus: true,  conditions: { online_travel_portal: true }, conditions_note: 'Up to 10X DBS Points (4 mpd) for online travel bookings.', source_url: 'https://www.dbs.com.sg/personal/cards/credit-cards/altitude-visa-signature-card' },
   { card_id: '00000000-0000-0000-0001-000000000001', category_id: 'general',   earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -105,6 +107,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000002', category_id: 'online',    earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000002', category_id: 'groceries', earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000002', category_id: 'petrol',    earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000002', category_id: 'bills',     earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000002', category_id: 'travel',    earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: 'Overseas travel spend earns 2 mpd.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000002', category_id: 'general',   earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -114,6 +117,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000003', category_id: 'online',    earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000003', category_id: 'groceries', earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000003', category_id: 'petrol',    earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000003', category_id: 'bills',     earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000003', category_id: 'travel',    earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: 'Overseas travel spend earns 2.4 mpd.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000003', category_id: 'general',   earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -123,6 +127,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000004', category_id: 'online',    earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000004', category_id: 'groceries', earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000004', category_id: 'petrol',    earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000004', category_id: 'bills',     earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000004', category_id: 'travel',    earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: 'Overseas travel spend earns 2.1 mpd.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000004', category_id: 'general',   earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -132,6 +137,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000005', category_id: 'online',    earn_rate_mpd: 2.0, is_bonus: true,  conditions: {}, conditions_note: 'Earn 2 mpd on online spend.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000005', category_id: 'groceries', earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000005', category_id: 'petrol',    earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000005', category_id: 'bills',     earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000005', category_id: 'travel',    earn_rate_mpd: 3.0, is_bonus: true,  conditions: { merchant: 'SIA' }, conditions_note: 'Earn 3 mpd on SIA purchases.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000005', category_id: 'general',   earn_rate_mpd: 1.2, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -141,6 +147,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000006', category_id: 'online',    earn_rate_mpd: 4.0, is_bonus: true,  conditions: {}, conditions_note: 'Earn 4 mpd on online spend (10X). Capped at $1,000/month.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000006', category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000006', category_id: 'petrol',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000006', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000006', category_id: 'travel',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000006', category_id: 'general',   earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -150,6 +157,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000007', category_id: 'online',    earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000007', category_id: 'groceries', earn_rate_mpd: 2.0, is_bonus: true,  conditions: {}, conditions_note: 'Earn 2 KrisFlyer miles per $1 at supermarkets. Capped at $2,500/month.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000007', category_id: 'petrol',    earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000007', category_id: 'bills',     earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000007', category_id: 'travel',    earn_rate_mpd: 2.0, is_bonus: true,  conditions: {}, conditions_note: 'Earn 2 mpd on travel. 3 mpd on SIA. Capped at $2,500/month.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000007', category_id: 'general',   earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -159,6 +167,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000008', category_id: 'online',    earn_rate_mpd: 1.5, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000008', category_id: 'groceries', earn_rate_mpd: 1.5, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000008', category_id: 'petrol',    earn_rate_mpd: 1.5, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000008', category_id: 'bills',     earn_rate_mpd: 1.5, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000008', category_id: 'travel',    earn_rate_mpd: 1.5, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000008', category_id: 'general',   earn_rate_mpd: 1.5, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -168,6 +177,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000009', category_id: 'online',    earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000009', category_id: 'groceries', earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000009', category_id: 'petrol',    earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000009', category_id: 'bills',     earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000009', category_id: 'travel',    earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: 'Overseas travel spend earns 3 mpd.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000009', category_id: 'general',   earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -177,6 +187,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0001-000000000010', category_id: 'online',    earn_rate_mpd: 4.0, is_bonus: true,  conditions: {}, conditions_note: 'Earn 4 mpd (10X DBS Points) on online spend. Capped at $2,000/month.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000010', category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000010', category_id: 'petrol',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0001-000000000010', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000010', category_id: 'travel',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0001-000000000010', category_id: 'general',   earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -186,6 +197,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000011', category_id: 'online',    earn_rate_mpd: 4.0, is_bonus: true,  conditions: { category_restriction: 'fashion_beauty_bags_shoes' }, conditions_note: 'Earn 4 mpd (10X UNI$) on online fashion, beauty, bags and shoes.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000011', category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000011', category_id: 'petrol',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000011', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000011', category_id: 'travel',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000011', category_id: 'general',   earn_rate_mpd: 4.0, is_bonus: true,  conditions: { category_restriction: 'fashion_beauty_bags_shoes' }, conditions_note: 'Earn 4 mpd (10X UNI$) on in-store fashion, beauty, bags and shoes.', source_url: null },
 
@@ -195,6 +207,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000012', category_id: 'online',    earn_rate_mpd: 4.0, is_bonus: true,  conditions: {}, conditions_note: 'Earn 4 mpd (10X OCBC$) on online shopping. Capped at $1,000/month.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000012', category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000012', category_id: 'petrol',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000012', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000012', category_id: 'travel',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000012', category_id: 'general',   earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -204,6 +217,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000013', category_id: 'online',    earn_rate_mpd: 1.0, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000013', category_id: 'groceries', earn_rate_mpd: 1.0, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000013', category_id: 'petrol',    earn_rate_mpd: 1.0, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000013', category_id: 'bills',     earn_rate_mpd: 1.0, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000013', category_id: 'travel',    earn_rate_mpd: 1.0, is_bonus: false, conditions: {}, conditions_note: 'Overseas travel earns 2.7 mpd.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000013', category_id: 'general',   earn_rate_mpd: 1.0, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -213,6 +227,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000014', category_id: 'online',    earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000014', category_id: 'groceries', earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000014', category_id: 'petrol',    earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000014', category_id: 'bills',     earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000014', category_id: 'travel',    earn_rate_mpd: 2.0, is_bonus: true,  conditions: { merchant: 'SIA' }, conditions_note: 'Earn 2 mpd on SIA purchases.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000014', category_id: 'general',   earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -222,6 +237,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000015', category_id: 'online',    earn_rate_mpd: 3.3, is_bonus: true,  conditions: { min_spend_monthly: 500 }, conditions_note: 'Earn 3.3 mpd with min spend $500/month.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000015', category_id: 'groceries', earn_rate_mpd: 3.3, is_bonus: true,  conditions: { min_spend_monthly: 500 }, conditions_note: 'Earn 3.3 mpd with min spend $500/month.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000015', category_id: 'petrol',    earn_rate_mpd: 3.3, is_bonus: true,  conditions: { min_spend_monthly: 500 }, conditions_note: 'Earn 3.3 mpd with min spend $500/month.', source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000015', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000015', category_id: 'travel',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Travel does not earn bonus rate.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000015', category_id: 'general',   earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -231,6 +247,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000016', category_id: 'online',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000016', category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000016', category_id: 'petrol',    earn_rate_mpd: 1.6, is_bonus: true,  conditions: { min_spend_monthly: 300 }, conditions_note: 'Earn up to 1.6 mpd with min spend $300/month.', source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000016', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000016', category_id: 'travel',    earn_rate_mpd: 1.6, is_bonus: true,  conditions: { min_spend_monthly: 300 }, conditions_note: 'Earn up to 1.6 mpd local. Overseas up to 3.2 mpd.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000016', category_id: 'general',   earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -240,6 +257,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000017', category_id: 'online',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000017', category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000017', category_id: 'petrol',    earn_rate_mpd: 1.6, is_bonus: true,  conditions: { min_spend_monthly: 300 }, conditions_note: 'Earn up to 1.6 mpd with min spend $300/month.', source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000017', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000017', category_id: 'travel',    earn_rate_mpd: 1.6, is_bonus: true,  conditions: { min_spend_monthly: 300 }, conditions_note: 'Earn up to 1.6 mpd. Overseas up to 3.2 mpd.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000017', category_id: 'general',   earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 
@@ -249,6 +267,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000018', category_id: 'online',    earn_rate_mpd: 4.0, is_bonus: true,  conditions: {}, conditions_note: 'Earn 4 mpd (10X) on online shopping. Capped at $1,000/month.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000018', category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000018', category_id: 'petrol',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000018', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000018', category_id: 'travel',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000018', category_id: 'general',   earn_rate_mpd: 4.0, is_bonus: true,  conditions: {}, conditions_note: 'Earn 4 mpd (10X) on in-store shopping. Capped at $1,000/month.', source_url: null },
 
@@ -258,6 +277,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000019', category_id: 'online',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000019', category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000019', category_id: 'petrol',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000019', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000019', category_id: 'travel',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000019', category_id: 'general',   earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Primarily cashback-focused; miles conversion is secondary.', source_url: null },
 
@@ -267,6 +287,7 @@ const earnRules = [
   { card_id: '00000000-0000-0000-0002-000000000020', category_id: 'online',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000020', category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000020', category_id: 'petrol',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
+  { card_id: '00000000-0000-0000-0002-000000000020', category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000020', category_id: 'travel',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
   { card_id: '00000000-0000-0000-0002-000000000020', category_id: 'general',   earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, source_url: null },
 ];
@@ -423,6 +444,48 @@ async function seedCaps() {
   console.log(`  ✅ ${caps.length} caps inserted`);
 }
 
+async function seedCardProgramMapping() {
+  console.log('Mapping cards to miles programs...');
+
+  const { data: programs, error: progErr } = await supabase
+    .from('miles_programs')
+    .select('id, name');
+
+  if (progErr || !programs || programs.length === 0) {
+    console.warn('  ⚠️  No miles_programs found — skipping card→program mapping');
+    return;
+  }
+
+  const programByName = Object.fromEntries(programs.map(p => [p.name, p.id]));
+
+  const mapping = [
+    { program: 'KrisFlyer', patterns: ['Altitude', 'PRVI Miles', '90°N', 'KrisFlyer UOB', 'HSBC Revolution', 'KrisFlyer Ascend', 'BOC Elite', 'Visa Infinite', 'TravelOne', 'KrisFlyer Credit', "Woman's World"] },
+    { program: 'Citi Miles', patterns: ['PremierMiles', 'Citi Rewards'] },
+    { program: 'UNI$', patterns: ["Lady's Card", 'Preferred Platinum'] },
+    { program: 'OCBC$', patterns: ['Titanium Rewards'] },
+    { program: '360 Rewards', patterns: ['X Credit Card'] },
+    { program: 'TreatsPoints', patterns: ['Horizon Visa', 'FC Barcelona'] },
+    { program: 'DBS Points', patterns: ['POSB Everyday'] },
+  ];
+
+  let updated = 0;
+  for (const { program, patterns } of mapping) {
+    const programId = programByName[program];
+    if (!programId) continue;
+
+    for (const card of cards) {
+      if (patterns.some(p => card.name.includes(p))) {
+        const { error } = await supabase
+          .from('cards')
+          .update({ miles_program_id: programId })
+          .eq('id', card.id);
+        if (!error) updated++;
+      }
+    }
+  }
+  console.log(`  ✅ ${updated} cards mapped to miles programs`);
+}
+
 async function seedExclusions() {
   console.log('Seeding exclusions...');
   // Delete existing exclusions first (no good upsert key for exclusions)
@@ -455,10 +518,10 @@ async function verify() {
   console.log(`  Caps:       ${capCount}`);
   console.log(`  Exclusions: ${exclCount}`);
 
-  if (cardCount === 20 && ruleCount === 140) {
+  if (cardCount === 20 && ruleCount === 160) {
     console.log('\n🎉 All 20 cards seeded successfully!');
   } else {
-    console.warn(`\n⚠️  Expected 20 cards and 140 earn rules, got ${cardCount} and ${ruleCount}`);
+    console.warn(`\n⚠️  Expected 20 cards and 160 earn rules, got ${cardCount} and ${ruleCount}`);
   }
 }
 
@@ -470,6 +533,7 @@ async function main() {
   try {
     await seedCategories();
     await seedCards();
+    await seedCardProgramMapping();
     await seedEarnRules();
     await seedCaps();
     await seedExclusions();

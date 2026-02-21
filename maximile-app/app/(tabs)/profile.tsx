@@ -111,6 +111,11 @@ export default function ProfileScreen() {
             onPress={() => router.push('/feedback')}
           />
           <MenuItem
+            icon="flag-outline"
+            label="Report Rate Changes"
+            onPress={() => router.push('/my-submissions')}
+          />
+          <MenuItem
             icon="information-circle-outline"
             label="About MaxiMile"
             onPress={() => setShowAboutModal(true)}

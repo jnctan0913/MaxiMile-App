@@ -44,26 +44,46 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
 async function main() {
   console.log('=== Clearing All User Data ===\n');
 
-  // 1. Clear user data tables (order matters due to foreign keys)
-  const tables = [
+  // 1. Clear user data tables — order matters due to foreign keys.
+  //    Tables with a uuid `id` PK use .gte('id', '00000000...')
+  //    Tables with a composite PK (user_id + something) use .neq('user_id', ...)
+  const byId = [
     'analytics_events',
     'feedback',
-    'spending_state',
     'transactions',
-    'user_cards',
+    'miles_transactions',
+    'miles_goals',
+    'community_submissions',
+    'detected_changes',
+    'user_alert_reads',
   ];
 
-  for (const table of tables) {
-    // Use user_id filter for user-scoped tables without an id column
-    const useUserId = ['user_cards', 'spending_state'].includes(table);
-    const query = useUserId
-      ? supabase.from(table).delete().neq('user_id', '00000000-0000-0000-0000-000000000000')
-      : supabase.from(table).delete().gte('id', '00000000-0000-0000-0000-000000000000');
-    const { error } = await query;
-    if (error) {
-      console.error(`  Failed to clear ${table}: ${error.message}`);
+  const byUserId = [
+    'user_cards',
+    'spending_state',
+    'miles_balances',
+    'privacy_consents',
+    'user_merchant_overrides',
+    'card_name_mappings',
+  ];
+
+  const NULL_UUID = '00000000-0000-0000-0000-000000000000';
+
+  for (const table of byId) {
+    const { error } = await supabase.from(table).delete().gte('id', NULL_UUID);
+    if (error && error.code !== '42P01') {
+      console.error(`  ✗ ${table}: ${error.message}`);
     } else {
-      console.log(`  Cleared ${table}`);
+      console.log(`  ✓ ${table}`);
+    }
+  }
+
+  for (const table of byUserId) {
+    const { error } = await supabase.from(table).delete().neq('user_id', NULL_UUID);
+    if (error && error.code !== '42P01') {
+      console.error(`  ✗ ${table}: ${error.message}`);
+    } else {
+      console.log(`  ✓ ${table}`);
     }
   }
 

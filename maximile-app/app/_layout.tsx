@@ -6,11 +6,13 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { Stack, SplashScreen } from 'expo-router';
+import { Stack, SplashScreen, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as Linking from 'expo-linking';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { Colors } from '../constants/theme';
+import { parseAutoCaptureUrl } from '../lib/deep-link';
 
 // Prevent the splash screen from auto-hiding before auth state is resolved
 SplashScreen.preventAutoHideAsync();
@@ -36,6 +38,7 @@ export default function RootLayout() {
  */
 function RootContent() {
   const { loading } = useAuth();
+  const router = useRouter();
 
   // Animations
   const logoScale = useRef(new Animated.Value(0.8)).current;
@@ -95,6 +98,31 @@ function RootContent() {
     }
   }, [loading]);
 
+  // Deep link handler — route maximile://log URLs to auto-capture screen
+  useEffect(() => {
+    const handleUrl = ({ url }: { url: string }) => {
+      const params = parseAutoCaptureUrl(url);
+      if (params) {
+        router.push({
+          pathname: '/auto-capture',
+          params: {
+            amount: params.amount?.toString() ?? '',
+            merchant: params.merchant ?? '',
+            card: params.card ?? '',
+            source: params.source,
+          },
+        });
+      }
+    };
+
+    Linking.getInitialURL().then((url) => {
+      if (url) handleUrl({ url });
+    });
+
+    const subscription = Linking.addEventListener('url', handleUrl);
+    return () => subscription.remove();
+  }, [router]);
+
   return (
     <View style={styles.root}>
       <Stack
@@ -106,6 +134,7 @@ function RootContent() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="welcome" />
         <Stack.Screen name="onboarding" />
+        <Stack.Screen name="onboarding-auto-capture" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding-miles" />
         <Stack.Screen
           name="recommend/[category]"
@@ -240,6 +269,9 @@ function RootContent() {
             },
           }}
         />
+        <Stack.Screen name="auto-capture" options={{ headerShown: false }} />
+        <Stack.Screen name="auto-capture-setup" options={{ headerShown: false }} />
+        <Stack.Screen name="auto-capture-settings" options={{ headerShown: false }} />
         <Stack.Screen
           name="reset-password"
           options={{

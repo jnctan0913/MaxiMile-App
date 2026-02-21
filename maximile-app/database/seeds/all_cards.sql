@@ -39,7 +39,7 @@
 BEGIN;
 
 -- ============================================================
--- SECTION 1: CATEGORIES (7 fixed spend categories)
+-- SECTION 1: CATEGORIES (8 fixed spend categories)
 -- ============================================================
 -- Must be seeded FIRST as earn_rules, caps, and exclusions reference category IDs.
 
@@ -139,11 +139,30 @@ VALUES
   'Petrol stations (Shell, Esso, Caltex, SPC), fuel dispensers'
 ),
 
--- 6. Travel / Hotels
+-- 6. Bills
+(
+  'bills',
+  'Bills',
+  6,
+  'receipt',
+  ARRAY[
+    '4812',  -- Telecommunication Equipment and Telephone Sales
+    '4814',  -- Telecommunication Services
+    '4899',  -- Cable, Satellite, Pay Television, Radio Services
+    '4900',  -- Utilities — Electric, Gas, Water, Sanitary
+    '6300',  -- Insurance Sales, Underwriting
+    '6381',  -- Insurance Premiums
+    '6399',  -- Insurance — Not Elsewhere Classified
+    '4816'   -- Computer Network/Information Services (internet providers)
+  ],
+  'Utilities, insurance, telco, recurring payments'
+),
+
+-- 7. Travel / Hotels
 (
   'travel',
   'Travel',
-  6,
+  7,
   'plane',
   ARRAY[
     -- Airlines (MCC 3000-3299 range — major airlines)
@@ -190,11 +209,11 @@ VALUES
   'Flights, hotels, cruises, travel agencies, tour bookings'
 ),
 
--- 7. General / Others (catch-all)
+-- 8. General / Others (catch-all)
 (
   'general',
   'General',
-  7,
+  8,
   'circle',
   ARRAY[]::TEXT[],  -- Empty array = catch-all for all MCCs not in other categories
   'All other spending not classified in the above categories'
@@ -518,7 +537,7 @@ ON CONFLICT (id) DO UPDATE SET
 
 
 -- ============================================================
--- SECTION 3: EARN RULES (7 categories x 20 cards = 140 rows)
+-- SECTION 3: EARN RULES (8 categories x 20 cards = 160 rows)
 -- ============================================================
 -- Convention:
 --   is_bonus = TRUE  -> this is the accelerated/bonus rate for this category
@@ -545,6 +564,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000001', 'online',     1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000001', 'groceries',  1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000001', 'petrol',     1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000001', 'bills',      1.2,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000001', 'travel',     4.0,  TRUE,  '{"online_travel_portal": true}', 'Up to 10X DBS Points (4 mpd) for online travel bookings. Standard 1.2 mpd at travel agencies.', 'https://www.dbs.com.sg/personal/cards/credit-cards/altitude-visa-signature-card'),
 ('00000000-0000-0000-0001-000000000001', 'general',    1.2,  FALSE, '{}', NULL, NULL),
 
@@ -557,6 +577,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000002', 'online',     1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000002', 'groceries',  1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000002', 'petrol',     1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000002', 'bills',      1.2,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000002', 'travel',     1.2,  FALSE, '{}', 'Overseas travel spend earns 2 mpd. Local travel agencies earn 1.2 mpd.', NULL),
 ('00000000-0000-0000-0001-000000000002', 'general',    1.2,  FALSE, '{}', NULL, NULL),
 
@@ -569,6 +590,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000003', 'online',     1.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000003', 'groceries',  1.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000003', 'petrol',     1.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000003', 'bills',      1.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000003', 'travel',     1.4,  FALSE, '{}', 'Overseas travel spend earns 2.4 mpd.', NULL),
 ('00000000-0000-0000-0001-000000000003', 'general',    1.4,  FALSE, '{}', NULL, NULL),
 
@@ -581,6 +603,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000004', 'online',     1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000004', 'groceries',  1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000004', 'petrol',     1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000004', 'bills',      1.2,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000004', 'travel',     1.2,  FALSE, '{}', 'Overseas travel spend earns 2.1 mpd.', NULL),
 ('00000000-0000-0000-0001-000000000004', 'general',    1.2,  FALSE, '{}', NULL, NULL),
 
@@ -593,6 +616,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000005', 'online',     2.0,  TRUE,  '{}', 'Earn 2 mpd on online spend.', NULL),
 ('00000000-0000-0000-0001-000000000005', 'groceries',  1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000005', 'petrol',     1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000005', 'bills',      1.2,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000005', 'travel',     3.0,  TRUE,  '{"merchant": "SIA"}', 'Earn 3 mpd on SIA purchases (flights, SIA website). 1.2 mpd on other travel.', NULL),
 ('00000000-0000-0000-0001-000000000005', 'general',    1.2,  FALSE, '{}', NULL, NULL),
 
@@ -605,6 +629,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000006', 'online',     4.0,  TRUE,  '{}', 'Earn 4 mpd on online spend (10X HSBC rewards). Capped at $1,000/month across bonus categories.', NULL),
 ('00000000-0000-0000-0001-000000000006', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000006', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000006', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000006', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000006', 'general',    0.4,  FALSE, '{}', NULL, NULL),
 
@@ -617,6 +642,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000007', 'online',     1.1,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000007', 'groceries',  2.0,  TRUE,  '{}', 'Earn 2 KrisFlyer miles per $1 at supermarkets. Capped at $2,500/month.', NULL),
 ('00000000-0000-0000-0001-000000000007', 'petrol',     1.1,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000007', 'bills',      1.1,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000007', 'travel',     2.0,  TRUE,  '{}', 'Earn 2 KrisFlyer miles per $1 on travel. 3 mpd on SIA purchases. Capped at $2,500/month.', NULL),
 ('00000000-0000-0000-0001-000000000007', 'general',    1.1,  FALSE, '{}', NULL, NULL),
 
@@ -629,6 +655,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000008', 'online',     1.5,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000008', 'groceries',  1.5,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000008', 'petrol',     1.5,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000008', 'bills',      1.5,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000008', 'travel',     1.5,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000008', 'general',    1.5,  FALSE, '{}', NULL, NULL),
 
@@ -641,6 +668,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000009', 'online',     1.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000009', 'groceries',  1.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000009', 'petrol',     1.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000009', 'bills',      1.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000009', 'travel',     1.4,  FALSE, '{}', 'Overseas travel spend earns 3 mpd.', NULL),
 ('00000000-0000-0000-0001-000000000009', 'general',    1.4,  FALSE, '{}', NULL, NULL),
 
@@ -653,6 +681,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000010', 'online',     4.0,  TRUE,  '{}', 'Earn 4 mpd (10X DBS Points) on online spend. Capped at $2,000/month.', NULL),
 ('00000000-0000-0000-0001-000000000010', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000010', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000010', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0001-000000000010', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000010', 'general',    0.4,  FALSE, '{}', NULL, NULL),
 
@@ -669,6 +698,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000011', 'online',     4.0,  TRUE,  '{"category_restriction": "fashion_beauty_bags_shoes"}', 'Earn 4 mpd (10X UNI$) on online fashion, beauty, bags and shoes merchants. Other online merchants earn 0.4 mpd. [VERIFIED]', NULL),
 ('00000000-0000-0000-0002-000000000011', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000011', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0002-000000000011', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000011', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000011', 'general',    4.0,  TRUE,  '{"category_restriction": "fashion_beauty_bags_shoes"}', 'Earn 4 mpd (10X UNI$) on in-store fashion, beauty, bags and shoes merchants. Other general merchants earn 0.4 mpd. [VERIFIED]', NULL),
 
@@ -681,6 +711,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000012', 'online',     4.0,  TRUE,  '{}', 'Earn 4 mpd (10X OCBC$) on online shopping. Capped at $1,000/month across bonus categories. [VERIFIED]', NULL),
 ('00000000-0000-0000-0002-000000000012', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000012', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0002-000000000012', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000012', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000012', 'general',    0.4,  FALSE, '{}', NULL, NULL),
 
@@ -693,6 +724,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000013', 'online',     1.0,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000013', 'groceries',  1.0,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000013', 'petrol',     1.0,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0002-000000000013', 'bills',      1.0,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000013', 'travel',     1.0,  FALSE, '{}', 'Overseas travel spend earns 2.7 mpd. Local travel agencies earn 1 mpd. [VERIFIED]', NULL),
 ('00000000-0000-0000-0002-000000000013', 'general',    1.0,  FALSE, '{}', NULL, NULL),
 
@@ -705,6 +737,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000014', 'online',     1.1,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000014', 'groceries',  1.1,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000014', 'petrol',     1.1,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0002-000000000014', 'bills',      1.1,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000014', 'travel',     2.0,  TRUE,  '{"merchant": "SIA"}', 'Earn 2 KrisFlyer miles per $1 on SIA purchases. 1.1 mpd on other travel. [VERIFIED]', NULL),
 ('00000000-0000-0000-0002-000000000014', 'general',    1.1,  FALSE, '{}', NULL, NULL),
 
@@ -717,6 +750,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000015', 'online',     3.3,  TRUE,  '{"min_spend_monthly": 500}', 'Earn 3.3 mpd on online shopping with min spend $500/month. Otherwise 0.4 mpd. [ESTIMATED]', NULL),
 ('00000000-0000-0000-0002-000000000015', 'groceries',  3.3,  TRUE,  '{"min_spend_monthly": 500}', 'Earn 3.3 mpd on groceries with min spend $500/month. Otherwise 0.4 mpd. [ESTIMATED]', NULL),
 ('00000000-0000-0000-0002-000000000015', 'petrol',     3.3,  TRUE,  '{"min_spend_monthly": 500}', 'Earn 3.3 mpd on petrol with min spend $500/month. Otherwise 0.4 mpd. [ESTIMATED]', NULL),
+('00000000-0000-0000-0002-000000000015', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000015', 'travel',     0.4,  FALSE, '{}', 'Travel does not earn bonus rate on SC X Card. Base 0.4 mpd. [ESTIMATED]', NULL),
 ('00000000-0000-0000-0002-000000000015', 'general',    0.4,  FALSE, '{}', NULL, NULL),
 
@@ -729,6 +763,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000016', 'online',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000016', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000016', 'petrol',     1.6,  TRUE,  '{"min_spend_monthly": 300}', 'Earn up to 1.6 mpd on petrol with min spend $300/month. 0.4 mpd otherwise. [ESTIMATED]', NULL),
+('00000000-0000-0000-0002-000000000016', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000016', 'travel',     1.6,  TRUE,  '{"min_spend_monthly": 300}', 'Earn up to 1.6 mpd on local travel. Overseas travel up to 3.2 mpd. 0.4 mpd if conditions not met. [ESTIMATED]', NULL),
 ('00000000-0000-0000-0002-000000000016', 'general',    0.4,  FALSE, '{}', NULL, NULL),
 
@@ -741,6 +776,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000017', 'online',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000017', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000017', 'petrol',     1.6,  TRUE,  '{"min_spend_monthly": 300}', 'Earn up to 1.6 mpd on petrol with min spend $300/month. 0.4 mpd otherwise. [ESTIMATED]', NULL),
+('00000000-0000-0000-0002-000000000017', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000017', 'travel',     1.6,  TRUE,  '{"min_spend_monthly": 300}', 'Earn up to 1.6 mpd on travel. Overseas up to 3.2 mpd. [ESTIMATED]', NULL),
 ('00000000-0000-0000-0002-000000000017', 'general',    0.4,  FALSE, '{}', NULL, NULL),
 
@@ -753,6 +789,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000018', 'online',     4.0,  TRUE,  '{}', 'Earn 4 mpd (10X Citi ThankYou Points) on online shopping. Capped at $1,000/month. [VERIFIED]', NULL),
 ('00000000-0000-0000-0002-000000000018', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000018', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0002-000000000018', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000018', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000018', 'general',    4.0,  TRUE,  '{}', 'Earn 4 mpd (10X Citi ThankYou Points) on in-store shopping (department stores, fashion). Capped at $1,000/month combined with online. [VERIFIED]', NULL),
 
@@ -765,6 +802,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000019', 'online',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000019', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000019', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0002-000000000019', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000019', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000019', 'general',    0.4,  FALSE, '{}', 'POSB Everyday earns flat 0.4 mpd across all categories. This card is primarily cashback-focused; miles conversion is secondary. [ESTIMATED]', NULL),
 
@@ -777,6 +815,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000020', 'online',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000020', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000020', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0002-000000000020', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000020', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000020', 'general',    0.4,  FALSE, '{}', NULL, NULL)
 

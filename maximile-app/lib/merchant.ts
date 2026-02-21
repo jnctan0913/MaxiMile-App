@@ -54,11 +54,13 @@ const TYPE_TO_CATEGORY: [string[], string, string][] = [
   // Dining
   [['restaurant', 'food', 'cafe', 'bakery', 'bar', 'meal_delivery', 'meal_takeaway'], 'dining', 'Dining'],
   // Transport
-  [['taxi_stand', 'transit_station', 'bus_station', 'train_station', 'subway_station', 'light_rail_station', 'car_rental', 'gas_station', 'parking'], 'transport', 'Transport'],
+  [['taxi_stand', 'transit_station', 'bus_station', 'train_station', 'subway_station', 'light_rail_station', 'car_rental', 'parking'], 'transport', 'Transport'],
   // Travel
   [['airport', 'travel_agency', 'lodging', 'hotel'], 'travel', 'Travel'],
   // Groceries
   [['supermarket', 'grocery_or_supermarket', 'convenience_store'], 'groceries', 'Groceries'],
+  // Petrol
+  [['gas_station'], 'petrol', 'Petrol'],
   // Online — not mappable from physical locations
   // Bills
   [['insurance_agency', 'post_office', 'local_government_office'], 'bills', 'Bills'],

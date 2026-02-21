@@ -39,6 +39,7 @@ const ICON_PALETTES: Record<string, [string, string]> = {
   online:    ['#7EC8E3', '#5EB0D0'],   // baby blue
   travel:    ['#3D7A8B', '#2D5E6A'],   // teal (charcoal-blue blend)
   groceries: ['#5BAD7A', '#3D8F5C'],   // sage green
+  petrol:    ['#E8A44D', '#D08A2D'],   // warm amber
   bills:     ['#A78BDA', '#8B6FC0'],   // lilac
   general:   ['#5F6D7E', '#4A5568'],   // slate grey
 };

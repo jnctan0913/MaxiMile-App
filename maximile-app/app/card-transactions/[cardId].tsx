@@ -51,6 +51,7 @@ const ICON_PALETTES: Record<string, [string, string]> = {
   online:    ['#7EC8E3', '#5EB0D0'],
   travel:    ['#3D7A8B', '#2D5E6A'],
   groceries: ['#5BAD7A', '#3D8F5C'],
+  petrol:    ['#E8A44D', '#D08A2D'],
   bills:     ['#A78BDA', '#8B6FC0'],
   general:   ['#5F6D7E', '#4A5568'],
 };

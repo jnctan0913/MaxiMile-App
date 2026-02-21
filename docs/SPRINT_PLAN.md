@@ -1,11 +1,11 @@
 # Sprint Plan: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 5.0
+**Version**: 8.0
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
-**Source**: PRD v1.5, EPICS_AND_USER_STORIES v1.4
+**Source**: PRD v1.7, EPICS_AND_USER_STORIES v1.7, NOTIFICATION_CAPTURE_FEASIBILITY v1.0, DRD_AUTO_CAPTURE v1.1
 **Status**: Draft — Awaiting Stakeholder Review
-**Change Log**: v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). Adds 10 new credit cards with eligibility metadata, reclassifies POSB Everyday, and builds rate change alert system. v4.0 — Added Sprint 9 ("Miles Ecosystem Foundation": F21+F19) and Sprint 10 ("Miles Ecosystem Presentation": F18+F20) with full story breakdowns, task estimates, dependency maps, DoR/DoD, and risks. Expands miles programs from 7 to ~20, adds transfer partner mapping, two-layer UI architecture, and smart transfer nudges. v3.0 — Added Sprint 7 ("Miles Portfolio MVP": F13+F14) and Sprint 8 ("Engagement Loop": F15+F16) with full story breakdowns, task estimates, dependency maps, DoR/DoD, and risks. v2.0 — Compressed from 8-week (5-sprint) plan to 2-week (4-phase) plan. Pre-decisions made to eliminate blockers. v2.1 — Restored full 20-card coverage (batched: 10 cards D1–3, 10 cards D4–6).
+**Change Log**: v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
 
@@ -100,6 +100,9 @@ All 5 agents work **simultaneously across 4 phases** with staggered starts:
 | **E7** | Smart Portfolio | F11, F12 | P2 | Future |
 | **E8** | Miles Portfolio & Goal Tracking | F13, F14, F15, F16 | P1 | Sprint 7–8 (Shipped) |
 | **E9** | Miles Ecosystem — Two-Layer Architecture | F18, F19, F20, F21 | P1 | Sprint 9–10 |
+| **E10** | Card Coverage Expansion & Rate Monitoring | F22, F23 | P1 | Sprint 11–12 (Shipped) |
+| **E11** | Rate Change Detection Pipeline | F24, F25 | P1 | Sprint 13–15 |
+| **E12** | Transaction Auto-Capture | F26, F27 | P1 | Sprint 16–17 |
 
 **Critical Path**: F5 (Rules DB) → F1 (Card Setup) → F2 (Recommendation) → F4 (Transaction Log) → F3 (Cap Tracker)
 
@@ -2186,4 +2189,1102 @@ Day 5–7:  T11.24–11.29 Card browser UI      Day 7–8:  S12.6 E2E testing + 
 Day 6–8:  S11.5 Recommendation validation   Day 9:    Stabilize
 Day 8–9:  S11.6 E2E testing + regression    Day 10:   Ship v1.5 beta
 Day 10:   Stabilize + ship v1.5 Phase 1
+```
+
+---
+
+## Sprint 13: "Crowdsourced Accuracy" (F24 — Community Rate Change Submissions)
+
+**Duration**: 2 weeks (10 working days)
+**Goal**: Enable users to submit rate changes they discover, with admin verification via a Cloudflare Pages dashboard before publishing to the existing `rate_changes` table. Closes Layer 1 detection gap with community-sourced data.
+**Epic**: E11 — Rate Change Detection Pipeline
+**Prerequisite**: Sprint 12 complete (rate_changes table + RPCs + UI components exist)
+**Infrastructure cost**: $0/month (Supabase free tier + Cloudflare Pages free tier)
+
+### Sprint 13 — Stories
+
+| ID | Story | Feature | Size | Points | Owner |
+|----|-------|---------|------|--------|-------|
+| **S13.1** | Submit a Rate Change Report | F24 | M | 5 | Developer |
+| **S13.2** | Attach Evidence to Submission | F24 | S | 3 | Developer |
+| **S13.3** | Admin Review Dashboard | F24 | L | 5 | Developer |
+| **S13.4** | Submission Status Tracking | F24 | S | 2 | Developer |
+| **S13.5** | Contributor Recognition Badge | F24 | XS | 2 | Developer |
+| **S13.6** | Community Submissions E2E Testing | F24 | M | 3 | Tester |
+| **Total** | | | | **20** | |
+
+### Sprint 13 — Task Breakdown
+
+| Task | Description | Owner | Day | Size | Dependencies |
+|------|-------------|-------|-----|------|-------------|
+| **T13.01** | Design `community_submissions` table schema | Data Engineer | 1 | S | — |
+| **T13.02** | Write Migration 017: community_submissions + detection_source column | Data Engineer | 1 | M | T13.01 |
+| **T13.03** | Add RLS policies: users can insert own submissions, read own status | Software Engineer | 1 | S | T13.02 |
+| **T13.04** | Create `fn_compute_dedup_fingerprint()` function | Software Engineer | 1–2 | S | T13.02 |
+| **T13.05** | Create submission form UI (card selector, change type, old/new, date, URL) | Developer | 2–4 | L | T13.02 |
+| **T13.06** | Wire submission form to Supabase insert | Developer | 4 | S | T13.05 |
+| **T13.07** | Add screenshot upload to Supabase Storage | Developer | 4–5 | M | T13.05 |
+| **T13.08** | Implement rate limiting (5/day/user) | Software Engineer | 3 | S | T13.03 |
+| **T13.09** | Implement dedup check on submission (warn if similar exists) | Software Engineer | 3–4 | M | T13.04 |
+| **T13.10** | Design admin dashboard wireframe | Designer | 1–2 | M | — |
+| **T13.11** | Build admin dashboard (Cloudflare Pages, React) | Developer | 3–6 | L | T13.10, T13.02 |
+| **T13.12** | Admin approve flow: insert into rate_changes with detection_source='community' | Software Engineer | 5–6 | M | T13.11 |
+| **T13.13** | Admin reject flow: update status + record reason | Developer | 6 | S | T13.11 |
+| **T13.14** | Admin edit-before-approve flow | Developer | 6–7 | S | T13.12 |
+| **T13.15** | Build "My Submissions" screen (status list) | Developer | 5–6 | S | T13.06 |
+| **T13.16** | Contributor badge logic (count approved, show badge at 3+) | Developer | 7 | S | T13.12 |
+| **T13.17** | Add "Report a Rate Change" entry point to card detail screen | Developer | 4 | XS | T13.05 |
+| **T13.18** | Analytics tracking: submission events, approval events | Developer | 7 | XS | T13.06, T13.12 |
+| **T13.19** | Write E2E tests: submission flow, dedup, approval, rate_changes insertion | Tester | 7–9 | L | T13.12 |
+| **T13.20** | Write E2E tests: rate limiting, status tracking, contributor badge | Tester | 8–9 | M | T13.16 |
+| **T13.21** | Regression testing (480 existing tests must pass) | Tester | 9–10 | M | T13.19 |
+| **T13.22** | Stabilize + bug fixes | All | 10 | S | T13.21 |
+
+### Sprint 13 — Dependency Map
+
+```
+T13.01 (Schema Design)
+    └── T13.02 (Migration 017)
+            ├── T13.03 (RLS Policies) ── T13.08 (Rate Limiting)
+            ├── T13.04 (Dedup Function) ── T13.09 (Dedup Check)
+            ├── T13.05 (Submission Form UI)
+            │       ├── T13.06 (Wire to Supabase) ── T13.17 (Entry Point)
+            │       └── T13.07 (Screenshot Upload)
+            └── T13.11 (Admin Dashboard) ← T13.10 (Wireframe)
+                    ├── T13.12 (Approve Flow) ── T13.14 (Edit+Approve)
+                    ├── T13.13 (Reject Flow)
+                    └── T13.15 (My Submissions)
+
+T13.12 + T13.16 ── T13.18 (Analytics) ── T13.19 (E2E Tests) ── T13.21 (Regression)
+```
+
+### Sprint 13 — DoR (Definition of Ready)
+
+| # | Criterion | Status |
+|---|-----------|--------|
+| 1 | PRD v1.6 F24 acceptance criteria defined | ✅ |
+| 2 | Rate Detection Architecture doc reviewed | ✅ |
+| 3 | Migration 015-016 (rate_changes system) shipped and stable | ✅ |
+| 4 | Supabase Storage configured for screenshot uploads | Ready |
+| 5 | Cloudflare Pages account created | Ready |
+| 6 | Admin auth strategy decided (Supabase Auth role or separate) | Open |
+
+### Sprint 13 — DoD (Definition of Done)
+
+| # | Criterion |
+|---|-----------|
+| 1 | Users can submit rate change reports with all required fields |
+| 2 | Submissions support optional screenshot upload and source URL |
+| 3 | Rate limiting enforced (5/day/user) |
+| 4 | Dedup fingerprint warns on potential duplicates |
+| 5 | Admin dashboard on Cloudflare Pages: view, approve, reject, edit |
+| 6 | Approved submissions insert into rate_changes with detection_source='community' |
+| 7 | Users can view their submission history with status badges |
+| 8 | Contributor badge appears after 3+ approved submissions |
+| 9 | All new E2E tests pass |
+| 10 | All 480 existing tests still pass (0 regressions) |
+
+### Sprint 13 — Risks & Mitigations
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|----|------|------------|--------|------------|
+| R13.1 | Low community participation — users don't submit reports | **Medium** | **Medium** | Prominent "Report a Change" button on card detail; in-app prompt when user views rate change banner ("Did you spot this change? Help others!") |
+| R13.2 | Spam submissions overwhelm admin queue | **Low** | **Low** | Rate limiting (5/day); require email verification; dedup fingerprinting catches obvious duplicates |
+| R13.3 | Admin dashboard scope creep — becomes a full CMS | **Medium** | **Medium** | Strict scope: list + approve/reject/edit only. No analytics, no user management, no content editing beyond rate changes |
+| R13.4 | Supabase Storage limits for screenshots | **Low** | **Low** | 1 GB free tier; compress images to max 500 KB on upload; cleanup old rejected submission screenshots monthly |
+| R13.5 | Cloudflare Pages deployment issues | **Low** | **Medium** | Simple React SPA; minimal dependencies; fallback to Vercel Hobby if needed |
+
+---
+
+## Sprint 14: "Detection Foundation" (F25 Part 1 — Scraper + Hashing)
+
+**Duration**: 2 weeks (10 working days)
+**Goal**: Build the automated page monitoring foundation: source configuration, GitHub Actions Playwright scraper, content-hash change detection, and snapshot storage. No AI classification yet — this sprint delivers the data collection layer.
+**Epic**: E11 — Rate Change Detection Pipeline
+**Prerequisite**: Sprint 13 complete (community_submissions table, detection_source column on rate_changes)
+**Infrastructure cost**: $0/month (GitHub Actions free tier for public repos)
+
+### Sprint 14 — Stories
+
+| ID | Story | Feature | Size | Points | Owner |
+|----|-------|---------|------|--------|-------|
+| **S14.1** | Source Configuration & Snapshot Storage | F25 | L | 5 | Data Engineer + SWE |
+| **S14.2** | GitHub Actions Scraper Workflow | F25 | L | 8 | Software Engineer |
+| **S14.3** | Content Hash Gating | F25 | M | 3 | Software Engineer |
+| **Total** | | | | **16** | |
+
+### Sprint 14 — Task Breakdown
+
+| Task | Description | Owner | Day | Size | Dependencies |
+|------|-------------|-------|-----|------|-------------|
+| **T14.01** | Design source_configs + source_snapshots schema | Data Engineer | 1 | M | — |
+| **T14.02** | Design pipeline_runs schema | Data Engineer | 1 | S | — |
+| **T14.03** | Write Migration 018: source_configs, source_snapshots, detected_changes, pipeline_runs tables + enums | Data Engineer | 1–2 | L | T14.01, T14.02 |
+| **T14.04** | Create helper functions: fn_compute_content_hash, fn_get_sources_due_for_check, fn_cleanup_old_snapshots | Software Engineer | 2–3 | M | T14.03 |
+| **T14.05** | Seed source_configs with ~50 bank T&C URLs (all 9 SG banks) | Data Engineer | 2–4 | L | T14.03 |
+| **T14.06** | Research and document CSS selectors for each bank page | Data Engineer | 3–5 | L | T14.05 |
+| **T14.07** | Create GitHub repo for scraper (public, for free Actions) | Software Engineer | 2 | XS | — |
+| **T14.08** | Write Playwright scraper script (fetch page, extract via CSS selector, hash content) | Software Engineer | 3–6 | L | T14.06, T14.07 |
+| **T14.09** | Write GitHub Actions workflow YAML (cron schedule, Playwright install, env vars) | Software Engineer | 4–5 | M | T14.08 |
+| **T14.10** | Implement content-hash comparison (SHA-256, compare with previous snapshot) | Software Engineer | 5–6 | M | T14.04, T14.08 |
+| **T14.11** | Implement Supabase client in scraper (read source_configs, write snapshots + pipeline_runs) | Software Engineer | 5–6 | M | T14.08, T14.03 |
+| **T14.12** | Add last_run.json auto-commit (prevent GitHub 60-day inactivity disable) | Software Engineer | 6 | XS | T14.09 |
+| **T14.13** | Implement error handling: retry logic, failure counting, source status updates | Software Engineer | 6–7 | M | T14.11 |
+| **T14.14** | Create v_pipeline_health view (per-source uptime, last check, error rate) | Data Engineer | 7 | S | T14.03, T14.13 |
+| **T14.15** | Manual test: trigger GitHub Actions workflow, verify snapshots stored | Software Engineer | 7–8 | M | T14.09, T14.11 |
+| **T14.16** | Write unit tests for hash comparison, snapshot storage, error handling | Tester | 8–9 | M | T14.10, T14.13 |
+| **T14.17** | Regression testing (all existing tests must pass) | Tester | 9–10 | M | T14.16 |
+| **T14.18** | Stabilize + bug fixes | All | 10 | S | T14.17 |
+
+### Sprint 14 — Dependency Map
+
+```
+T14.01 (source_configs schema) + T14.02 (pipeline_runs schema)
+    └── T14.03 (Migration 018)
+            ├── T14.04 (Helper Functions)
+            │       └── T14.10 (Hash Comparison)
+            ├── T14.05 (Seed 50 URLs)
+            │       └── T14.06 (CSS Selectors)
+            │               └── T14.08 (Playwright Script)
+            │                       ├── T14.09 (GH Actions YAML) ── T14.12 (last_run.json)
+            │                       └── T14.11 (Supabase Client) ── T14.13 (Error Handling)
+            └── T14.14 (Pipeline Health View)
+
+T14.15 (Manual Test) ← T14.09 + T14.11
+T14.16 (Unit Tests) ← T14.10 + T14.13 ── T14.17 (Regression)
+```
+
+### Sprint 14 — DoR
+
+| # | Criterion | Status |
+|---|-----------|--------|
+| 1 | PRD v1.6 F25 acceptance criteria defined | ✅ |
+| 2 | Rate Detection Architecture doc reviewed | ✅ |
+| 3 | Sprint 13 complete (community_submissions, detection_source column) | Prerequisite |
+| 4 | List of ~50 bank T&C URLs compiled | Open (T14.05-06) |
+| 5 | GitHub repo created (public, for free Actions) | Ready |
+| 6 | Supabase project env vars available for GitHub Actions secrets | Ready |
+
+### Sprint 14 — DoD
+
+| # | Criterion |
+|---|-----------|
+| 1 | source_configs table seeded with ~50 bank URLs across 9 banks |
+| 2 | GitHub Actions workflow runs daily on cron schedule |
+| 3 | Playwright successfully fetches pages and stores snapshots |
+| 4 | SHA-256 hash comparison correctly identifies unchanged pages (no downstream processing) |
+| 5 | SHA-256 hash comparison correctly flags changed pages for AI processing (Sprint 15) |
+| 6 | Pipeline health view shows per-source uptime and error rates |
+| 7 | Error handling: 3 consecutive failures marks source as "broken" |
+| 8 | last_run.json auto-committed to prevent GitHub inactivity disable |
+| 9 | All new tests pass + all existing tests pass (0 regressions) |
+
+### Sprint 14 — Risks & Mitigations
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|----|------|------------|--------|------------|
+| R14.1 | Bank pages use heavy JavaScript rendering that Playwright can't handle | **Low** | **High** | Test all 50 URLs during T14.06; fall back to HTTP+cheerio for static pages; document rendering requirements per source |
+| R14.2 | CSS selectors break due to bank page redesigns | **High** | **Medium** | Version selectors in source_configs; fallback to full-page content hash if selector extraction fails; alerting on extraction errors |
+| R14.3 | GitHub Actions runner environment changes break Playwright | **Low** | **Medium** | Pin Playwright version in workflow; use ubuntu-22.04 runner (LTS); test locally before deploying |
+| R14.4 | Supabase connection from GitHub Actions fails (CORS/auth) | **Low** | **High** | Use Supabase service_role key in GitHub Secrets; test connection in T14.07 before building full pipeline |
+| R14.5 | Compiling 50 bank T&C URLs takes longer than estimated | **Medium** | **Low** | Start with top 20 most important sources (covering the 29 cards in our DB); expand to 50 in Sprint 15 |
+
+---
+
+## Sprint 15: "Always Up to Date" (F25 Part 2 — AI Classification + Pipeline Health)
+
+**Duration**: 2 weeks (10 working days)
+**Goal**: Wire the AI classification pipeline (Gemini Flash + Groq fallback), implement confidence-based routing, build the pipeline health monitoring dashboard, and run comprehensive E2E testing. After this sprint, the full detection pipeline runs autonomously at $0/month.
+**Epic**: E11 — Rate Change Detection Pipeline
+**Prerequisite**: Sprint 14 complete (scraper running, snapshots stored, hashes computed)
+**Infrastructure cost**: $0/month (Gemini Flash free tier: 250 req/day, Groq free tier: 1,000 req/day)
+
+### Sprint 15 — Stories
+
+| ID | Story | Feature | Size | Points | Owner |
+|----|-------|---------|------|--------|-------|
+| **S15.1** | AI Classification Pipeline | F25 | L | 8 | AI Engineer + SWE |
+| **S15.2** | Confidence-Based Routing | F25 | M | 5 | Software Engineer |
+| **S15.3** | Pipeline Health & E2E Testing | F25 | M | 5 | Tester + SWE |
+| **Total** | | | | **18** | |
+
+### Sprint 15 — Task Breakdown
+
+| Task | Description | Owner | Day | Size | Dependencies |
+|------|-------------|-------|-----|------|-------------|
+| **T15.01** | Design Gemini Flash system prompt with few-shot examples (5 seed records) | AI Engineer | 1 | M | — |
+| **T15.02** | Define tool_use schema for structured rate_change output | AI Engineer | 1 | S | T15.01 |
+| **T15.03** | Implement Gemini Flash API client (structured output, retry logic) | Software Engineer | 2–3 | M | T15.02 |
+| **T15.04** | Implement Groq Llama fallback client (same prompt, JSON mode) | Software Engineer | 3–4 | M | T15.02 |
+| **T15.05** | Wire AI classifier into scraper pipeline (after hash-diff detects change) | Software Engineer | 4–5 | M | T15.03, Sprint 14 scraper |
+| **T15.06** | Implement confidence scoring extraction from model response | Software Engineer | 4 | S | T15.03 |
+| **T15.07** | Implement auto-approve routing (confidence >= 0.85, Tier 1 source) | Software Engineer | 5–6 | M | T15.06 |
+| **T15.08** | Implement review queue routing (confidence 0.50–0.84 → detected_changes table) | Software Engineer | 5–6 | S | T15.06 |
+| **T15.09** | Implement auto-discard routing (confidence < 0.50, log only) | Software Engineer | 5 | XS | T15.06 |
+| **T15.10** | Implement dedup fingerprint check before auto-approve | Software Engineer | 6 | S | T15.07 |
+| **T15.11** | Add AI-detected changes to admin review dashboard (extend Sprint 13 dashboard) | Developer | 5–7 | M | T15.08, Sprint 13 dashboard |
+| **T15.12** | Build pipeline health dashboard page (source uptime, detection stats, error rates) | Developer | 6–8 | M | T14.14 (v_pipeline_health view) |
+| **T15.13** | Admin daily digest notification (auto-approved changes summary) | Software Engineer | 7 | S | T15.07 |
+| **T15.14** | Prompt tuning: test against 5 known rate changes, adjust few-shot examples | AI Engineer | 7–8 | M | T15.05 |
+| **T15.15** | Write E2E tests: hash gating (no-change → no LLM call) | Tester | 7–8 | M | T15.05 |
+| **T15.16** | Write E2E tests: change detection → LLM → confidence routing | Tester | 8–9 | M | T15.07, T15.08, T15.09 |
+| **T15.17** | Write E2E tests: dedup, Groq fallback, pipeline_runs logging | Tester | 8–9 | M | T15.10, T15.04 |
+| **T15.18** | Full regression testing (all project tests: 480+ existing + Sprint 13-15 new) | Tester | 9–10 | L | T15.15, T15.16, T15.17 |
+| **T15.19** | Stabilize + bug fixes + prompt refinement | All | 10 | S | T15.18 |
+
+### Sprint 15 — Dependency Map
+
+```
+T15.01 (System Prompt) ── T15.02 (Tool Schema)
+    ├── T15.03 (Gemini Client) ── T15.05 (Wire to Pipeline) ── T15.06 (Confidence)
+    │                                                              ├── T15.07 (Auto-approve) ── T15.10 (Dedup)
+    │                                                              ├── T15.08 (Review Queue)
+    │                                                              └── T15.09 (Auto-discard)
+    └── T15.04 (Groq Fallback)
+
+T15.08 ── T15.11 (Extend Admin Dashboard)
+T14.14 ── T15.12 (Pipeline Health UI)
+T15.07 ── T15.13 (Daily Digest)
+T15.05 ── T15.14 (Prompt Tuning)
+
+T15.05 + T15.07-09 + T15.10 + T15.04 ── T15.15-17 (E2E Tests) ── T15.18 (Regression)
+```
+
+### Sprint 15 — DoR
+
+| # | Criterion | Status |
+|---|-----------|--------|
+| 1 | Sprint 14 complete (scraper running, snapshots stored) | Prerequisite |
+| 2 | Gemini API key provisioned (free tier) | Ready |
+| 3 | Groq API key provisioned (free tier) | Ready |
+| 4 | 5 seed rate change records available as few-shot examples | ✅ (Migration 015) |
+| 5 | detected_changes table created (Migration 018 in Sprint 14) | Prerequisite |
+
+### Sprint 15 — DoD
+
+| # | Criterion |
+|---|-----------|
+| 1 | Gemini Flash classifies detected page changes into rate_changes schema |
+| 2 | Groq Llama 3.3 70B works as fallback when Gemini is unavailable |
+| 3 | Confidence >= 0.85 from Tier 1 sources auto-inserts into rate_changes |
+| 4 | Confidence 0.50–0.84 queued in detected_changes for admin review |
+| 5 | Confidence < 0.50 auto-discarded with logging |
+| 6 | Dedup fingerprint prevents duplicate rate_changes entries |
+| 7 | Admin dashboard shows AI-detected changes alongside community submissions |
+| 8 | Pipeline health dashboard shows source uptime, detection stats, error rates |
+| 9 | All E2E tests pass (hash gating, classification, routing, dedup, fallback) |
+| 10 | All project tests pass (480+ existing + Sprint 13-15 new), 0 regressions |
+| 11 | Full pipeline runs autonomously at $0/month infrastructure cost |
+
+### Sprint 15 — Risks & Mitigations
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|----|------|------------|--------|------------|
+| R15.1 | Gemini Flash produces inconsistent structured output | **Medium** | **High** | tool_use schema enforcement; validate all fields before accepting; retry with temperature=0 on parsing failure |
+| R15.2 | Confidence scores are poorly calibrated (too many auto-approves or too many reviews) | **Medium** | **Medium** | Start conservative (0.85 threshold); tune based on first 2 weeks of data; admin can adjust threshold in source_configs |
+| R15.3 | Groq fallback produces lower quality than Gemini | **Medium** | **Low** | Groq uses Llama 3.3 70B (strong model); same prompt/schema; test equivalence during T15.14 |
+| R15.4 | False positives overwhelm admin review queue | **Low** | **Medium** | Max 5 items/day in review queue (excess auto-discarded); admin can bulk-reject; tune prompt to reduce false positives |
+| R15.5 | Pipeline E2E tests are flaky due to external API calls | **High** | **Medium** | Mock Gemini/Groq responses in E2E tests; integration tests use real APIs with test-specific prompts; separate unit and integration test suites |
+
+---
+
+### Sprint 13 + 14 + 15 Combined Timeline
+
+```
+SPRINT 13 (Weeks 1–2)                SPRINT 14 (Weeks 3–4)                SPRINT 15 (Weeks 5–6)
+"Crowdsourced Accuracy"              "Detection Foundation"               "Always Up to Date"
+═══════════════════                  ═══════════════════                  ═══════════════════
+Day 1:    Migration 017              Day 1:    Migration 018              Day 1:    AI prompt design
+          (community_submissions)              (source_configs +                    + tool schema
+Day 1–2:  RLS + dedup function                 snapshots + pipeline)     Day 2–4:  Gemini + Groq
+Day 2–4:  Submission form UI         Day 2–4:  Seed 50 URLs +                      API clients
+Day 3–6:  Admin dashboard                      CSS selectors            Day 4–6:  Wire to pipeline
+          (Cloudflare Pages)         Day 3–6:  Playwright scraper                  + confidence routing
+Day 5–6:  Status tracking +         Day 5–6:  Hash comparison +          Day 5–7:  Extend admin dashboard
+          approve/reject flows                 Supabase client                     + pipeline health UI
+Day 7:    Contributor badges         Day 6–7:  Error handling +           Day 7–8:  Prompt tuning
+          + analytics                          health view                         + daily digest
+Day 7–9:  E2E testing               Day 7–9:  Manual + unit tests        Day 7–9:  E2E tests
+Day 10:   Stabilize                  Day 10:   Stabilize                  Day 10:   Full regression
+                                                                                   + ship v1.7
+```
+
+---
+
+## Sprint 16: "Smart Logging: iOS" (F26 — Apple Pay Shortcuts Auto-Capture)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: iOS users with Apple Pay can have in-store NFC transactions automatically logged in MaxiMile via iOS Shortcuts, reducing per-transaction effort from ~20 seconds to ~2-3 seconds (one-tap confirm). This sprint delivers the deep link handler, merchant-to-category mapping, card fuzzy matching, a downloadable Shortcut template, and an in-app setup wizard.
+**Epic**: E12 — Transaction Auto-Capture
+**PRD Features**: F26 (Apple Pay Shortcuts Auto-Capture)
+**Prerequisite**: Sprints 1-6 (MVP shipped; transaction logging, card portfolio, and spend categories are prerequisites). URL scheme `maximile://` already configured in `app.json`.
+**Estimated Effort**: 2-3 sprints of work compressed into a focused 2-week sprint
+**Feasibility Reference**: `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` — Approach A (iOS Shortcuts Transaction Trigger)
+**Infrastructure cost**: $0 (no server-side components; all processing on-device)
+**App Store risk**: None — Apple-sanctioned Shortcuts API with multiple App Store precedents (TravelSpend, BalanceTrackr, MoneyCoach, Skwad)
+
+---
+
+### Sprint 16 — Definition of Ready (DoR) Checklist
+
+Before any story enters the sprint, it must satisfy:
+
+- [ ] User story has clear "As a... I want... So that..." statement
+- [ ] Acceptance criteria defined and reviewed by PM + Tech Lead
+- [ ] T-shirt size estimated by the team
+- [ ] Dependencies identified — MVP (Sprints 1-6) fully shipped; transaction logging and card portfolio functional
+- [ ] URL scheme `maximile://` confirmed in `app.json` (already exists)
+- [ ] Merchant-to-category mapping approach agreed (fuzzy match on existing 7 categories)
+- [ ] Apple Pay Shortcuts Transaction trigger tested manually on test device (iOS 17+)
+- [ ] Downloadable `.shortcut` file format researched and prototyped
+
+### Sprint 16 — Definition of Done (DoD) Checklist
+
+A story is "Done" when:
+
+- [ ] Feature works as described in all acceptance criteria
+- [ ] Unit tests written and passing (happy path + key edge cases)
+- [ ] Integration test confirms deep link → parse → category map → pre-fill → confirm flow
+- [ ] No P0 or P1 bugs remaining
+- [ ] Code committed to main branch and peer-reviewed
+- [ ] Works on iOS (TestFlight) — this sprint is iOS-only
+- [ ] Setup wizard tested with 3 users; >80% complete setup within 3 minutes
+- [ ] Fuzzy matching correctly resolves >90% of common SG merchant names to categories
+- [ ] Card name matching correctly resolves Apple Wallet card names to MaxiMile portfolio entries
+
+---
+
+### Sprint 16 — Stories
+
+| ID | Story | Feature | Size | Points | Owner |
+|----|-------|---------|------|--------|-------|
+| **S16.1** | Deep Link Handler for Auto-Capture | F26 | M | 5 | Software Engineer |
+| **S16.2** | Merchant-to-Category Mapping Engine | F26 | L | 8 | Software Engineer + Data Engineer |
+| **S16.3** | Card Name Fuzzy Matching | F26 | M | 5 | Software Engineer |
+| **S16.4** | Downloadable Shortcut Template | F26 | M | 5 | Developer |
+| **S16.5** | In-App Setup Wizard | F26 | L | 8 | Developer + Designer |
+| **S16.6** | Auto-Capture Confirmation Flow | F26 | M | 5 | Developer + Designer |
+| **S16.7** | Onboarding Step 1.5 — Auto-Capture Setup | F26/F27 | S–M | 4 | Developer + Designer |
+| **S16.8** | Recommendation Match Indicator | F26/F27 | M | 5 | Developer + Software Engineer |
+| **S16.9** | Smart Pay → Auto-Capture Handoff | F26/F27 | M | 5 | Developer + Software Engineer |
+| **Total** | | | | **50** | |
+
+---
+
+### Story S16.1: Deep Link Handler for Auto-Capture
+
+> **As a** user with Apple Pay,
+> **I want** MaxiMile to receive transaction data from iOS Shortcuts via a deep link,
+> **So that** my Apple Pay transactions are automatically pre-filled in the transaction log.
+
+**Priority**: P0 (Must Have — blocks all other Sprint 16 stories)
+**T-Shirt Size**: **M** (Medium) — ~3 days
+**Feature**: F26
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | The app is installed | A URL `maximile://log?amount=42.50&merchant=COLD+STORAGE&card=DBS+Altitude+Visa&source=shortcut` is opened | The app launches and navigates to the transaction log screen with amount, merchant, and card pre-filled |
+| AC2 | The URL contains an amount parameter | The deep link is parsed | The amount is extracted as a numeric value, stripping any currency symbols (e.g., "S$42.50" → 42.50) |
+| AC3 | The URL contains a merchant parameter | The deep link is parsed | The merchant name is URL-decoded and normalized (e.g., "COLD+STORAGE+GREAT+WORLD" → "Cold Storage Great World") |
+| AC4 | The URL is missing required parameters (amount) | The deep link is parsed | The app opens the transaction log screen with a graceful fallback (empty form with a note: "Some data could not be captured — please fill in manually") |
+| AC5 | The app is in the background or closed | The deep link is triggered | The app foregrounds or cold-launches and navigates directly to the pre-filled log screen |
+| AC6 | The source=shortcut parameter is present | The transaction is logged | The transaction record includes `source = 'shortcut'` for analytics tracking |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T16.01: Register `maximile://log` deep link route in Expo Router | Software Engineer | 0.5d | None |
+| T16.02: Build URL parameter parser (amount, merchant, card, source) with sanitization | Software Engineer | 0.5d | T16.01 |
+| T16.03: Implement navigation from deep link to pre-filled transaction log screen | Software Engineer | 1d | T16.02 |
+| T16.04: Handle edge cases: missing params, malformed URLs, app cold start | Software Engineer | 0.5d | T16.03 |
+| T16.05: Unit tests — valid URL, partial URL, malformed URL, special characters in merchant names | Tester | 0.5d | T16.03 |
+
+---
+
+### Story S16.2: Merchant-to-Category Mapping Engine
+
+> **As a** user,
+> **I want** auto-captured transactions to show the correct spending category based on the merchant name,
+> **So that** my cap tracking is accurate without me having to manually select the category every time.
+
+**Priority**: P0 (Must Have)
+**T-Shirt Size**: **L** (Large) — ~4 days
+**Feature**: F26
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | A transaction from "COLD STORAGE GREAT WORLD" is received | The merchant mapper runs | The category is resolved to "Groceries" |
+| AC2 | A transaction from "GRABCAR" or "GRAB TRANSPORT" is received | The merchant mapper runs | The category is resolved to "Transport" |
+| AC3 | A transaction from "SUSHI TEI VIVOCITY" is received | The merchant mapper runs | The category is resolved to "Dining" |
+| AC4 | A transaction from an unrecognized merchant (e.g., "ABC PTE LTD") is received | The merchant mapper runs | The category defaults to "General/Others" and the user is prompted to select the correct category |
+| AC5 | The system has a merchant keyword lookup table | I query it | At minimum 200 common SG merchants are mapped to one of the 7 spend categories |
+| AC6 | A user corrects a merchant's category | The correction is saved | Future transactions from that merchant use the corrected category for that user (user-level override) |
+| AC7 | The fuzzy match runs | I observe performance | Category resolution completes in <100ms |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T16.06: Design merchant keyword lookup table schema (merchant_patterns: pattern, category, confidence) | Data Engineer | 0.5d | None |
+| T16.07: Seed 200+ common SG merchants with category mappings (dining chains, supermarkets, transport, petrol, travel) | Data Engineer | 1d | T16.06 |
+| T16.08: Implement fuzzy match engine (keyword match → Levenshtein distance fallback → default "General") | Software Engineer | 1d | T16.06 |
+| T16.09: Implement user-level category override (user_merchant_overrides table) | Software Engineer | 0.5d | T16.08 |
+| T16.10: Unit tests — exact match, fuzzy match, no match, user override | Tester | 0.5d | T16.08, T16.09 |
+| T16.11: Performance test — 200-entry lookup completes in <100ms | Tester | 0.25d | T16.08 |
+
+---
+
+### Story S16.3: Card Name Fuzzy Matching
+
+> **As a** user,
+> **I want** the card name from Apple Pay (e.g., "DBS Altitude Visa") to correctly match to my MaxiMile portfolio card (e.g., "DBS Altitude"),
+> **So that** auto-captured transactions are attributed to the right card without manual selection.
+
+**Priority**: P0 (Must Have)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F26
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Apple Wallet reports "DBS Altitude Visa" and my portfolio has "DBS Altitude" | The card matcher runs | It matches with high confidence (>0.8) to "DBS Altitude" |
+| AC2 | Apple Wallet reports "Citi PremierMiles Visa Signature" and my portfolio has "Citi PremierMiles" | The card matcher runs | It matches correctly, ignoring the network suffix |
+| AC3 | Apple Wallet reports a card name that does not match any portfolio card | The card matcher runs | The user is shown a selection prompt: "Which card did you use?" with their portfolio listed |
+| AC4 | During setup, the user verifies card name mappings | The setup wizard shows the mapping | The user can confirm or correct the Wallet → MaxiMile card mapping, which is persisted for future transactions |
+| AC5 | A user has verified a card mapping | A future transaction uses that Wallet card name | The verified mapping is used directly without re-matching |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T16.12: Implement card name fuzzy matcher (normalize → tokenize → Levenshtein → threshold) | Software Engineer | 1d | None |
+| T16.13: Build card_name_mappings table (wallet_name, maximile_card_id, user_id) for verified mappings | Software Engineer | 0.5d | T16.12 |
+| T16.14: Implement fallback UI: "Which card did you use?" selection when confidence is low | Developer | 0.5d | T16.12, T16.03 |
+| T16.15: Unit tests — exact match, partial match, no match, verified override | Tester | 0.5d | T16.12, T16.13 |
+
+---
+
+### Story S16.4: Downloadable Shortcut Template
+
+> **As a** user who wants to set up Apple Pay auto-capture,
+> **I want to** download a ready-made iOS Shortcut that triggers on every Apple Pay transaction and sends data to MaxiMile,
+> **So that** I don't have to build the automation from scratch.
+
+**Priority**: P0 (Must Have)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F26
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I tap "Download Shortcut" in the MaxiMile setup wizard | The `.shortcut` file is downloaded | iOS Shortcuts app opens with an import prompt showing the pre-built automation |
+| AC2 | I import the Shortcut | I view its actions | The Shortcut: (1) triggers on any Apple Pay transaction, (2) extracts Amount, Merchant, Card from Shortcut Input, (3) constructs the `maximile://log` URL with parameters, (4) opens the URL |
+| AC3 | I make an Apple Pay NFC payment at a store | The Shortcut fires | MaxiMile opens with amount, merchant, and card pre-filled; I confirm with one tap |
+| AC4 | The Shortcut is hosted | I access the download URL | The `.shortcut` file is hosted on a stable CDN or the MaxiMile website, accessible via HTTPS |
+| AC5 | A user runs iOS 17+ | They can use the Transaction trigger | The Shortcut uses the "Transaction" Personal Automation trigger available in iOS 17+ |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T16.16: Build the iOS Shortcut automation (Transaction trigger → extract vars → construct URL → open) | Developer | 1d | T16.01 (URL scheme working) |
+| T16.17: Export as `.shortcut` file and host on CDN/website | Developer | 0.5d | T16.16 |
+| T16.18: Test Shortcut on iOS 17 and iOS 18 devices; document any version-specific issues | Tester | 0.5d | T16.16 |
+
+**Platform Constraint (iOS Shortcut)**: Apple does NOT allow apps to programmatically install Personal Automations. The user MUST manually tap "Add Automation" in the Shortcuts app. MaxiMile provides a fully pre-configured `.shortcut` file (user doesn't need to build anything), but the final "Add Automation" tap is an unavoidable Apple requirement. See `docs/DRD_AUTO_CAPTURE.md` Section 1.4 for details.
+
+---
+
+### Story S16.5: In-App Setup Wizard
+
+> **As a** user,
+> **I want to** see a step-by-step setup wizard that guides me through enabling Apple Pay auto-capture,
+> **So that** I can set it up in under 3 minutes without needing external instructions.
+
+**Priority**: P1 (Should Have)
+**T-Shirt Size**: **L** (Large) — ~4 days
+**Feature**: F26
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I navigate to Settings → "Auto-Capture Setup" | I see the setup wizard | Step 1: "How It Works" explanation with a visual diagram of the Apple Pay → Shortcut → MaxiMile flow |
+| AC2 | I proceed to Step 2 | I see the download step | Step 2: "Download Shortcut" button + instructions to import it into the Shortcuts app |
+| AC3 | I proceed to Step 3 | I see card verification | Step 3: "Verify Your Cards" — shows Apple Wallet card names detected (or asks user to enter them) alongside MaxiMile portfolio card names; user confirms or adjusts mappings |
+| AC4 | I proceed to Step 4 | I see the test step | Step 4: "Test It" — instructs user to make a small Apple Pay purchase (or simulate) to verify the flow works end-to-end |
+| AC5 | I complete all steps | I see a confirmation | "You're all set! Future Apple Pay transactions will be auto-logged." with a summary of mapped cards |
+| AC6 | I want to skip setup for now | I can dismiss the wizard | A "Set up later" option is always visible; the wizard can be re-accessed from Settings |
+| AC7 | I complete the wizard | I view my profile/settings | A badge shows "Auto-Capture: Active (iOS Shortcuts)" |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T16.19: Design setup wizard screens (4 steps: How It Works, Download, Verify Cards, Test) | Designer | 1d | None |
+| T16.20: Build wizard UI — multi-step flow with progress indicator | Developer | 1.5d | T16.19 |
+| T16.21: Implement card verification step — display Wallet names, match to portfolio, allow edits | Developer | 1d | T16.12 (fuzzy matcher), T16.13 (mapping table) |
+| T16.22: Implement "Test It" step — listen for deep link arrival, show success/failure feedback | Developer | 0.5d | T16.03 (deep link handler) |
+| T16.23: Add "Auto-Capture Setup" entry to Settings screen | Developer | 0.25d | T16.20 |
+| T16.24: E2E test — wizard completion, card mapping saved, test transaction received | Tester | 0.5d | T16.20, T16.21, T16.22 |
+
+---
+
+### Story S16.6: Auto-Capture Confirmation Flow
+
+> **As a** user,
+> **I want to** confirm or edit auto-captured transactions before they are saved,
+> **So that** I can correct any errors and maintain accurate cap tracking data.
+
+**Priority**: P0 (Must Have)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F26
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | An Apple Pay transaction triggers the deep link | MaxiMile opens | I see a pre-filled transaction form showing: amount, merchant name, inferred category (from S16.2), matched card (from S16.3) |
+| AC2 | All fields are correctly pre-filled | I tap "Confirm" | The transaction is logged in <3 seconds total interaction time; spending state and cap tracking update immediately |
+| AC3 | The category is wrong | I tap the category field | I can select the correct category from the 7 options; my correction is saved as a user override for future transactions from this merchant |
+| AC4 | The card match is wrong | I tap the card field | I can select the correct card from my portfolio; my correction is saved as a verified card mapping |
+| AC5 | I don't want to log this transaction | I tap "Dismiss" or swipe away | The transaction is discarded; no data is saved |
+| AC6 | The confirmation screen appears | I view the source indicator | I see a subtle "Via Apple Pay" badge indicating this was auto-captured, not manually entered |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T16.25: Design auto-capture confirmation screen (pre-filled form with source badge) | Designer | 0.5d | None |
+| T16.26: Build confirmation UI — reuse transaction log form with pre-filled values and source badge | Developer | 0.5d | T16.25, T16.03 |
+| T16.27: Wire confirm action to transaction storage + cap tracking update | Developer | 0.5d | T16.26 |
+| T16.28: Wire category correction to user_merchant_overrides (S16.2) | Developer | 0.25d | T16.09, T16.26 |
+| T16.29: Wire card correction to card_name_mappings (S16.3) | Developer | 0.25d | T16.13, T16.26 |
+| T16.30: Integration test — full flow: deep link → parse → match → confirm → log → cap update | Tester | 0.5d | T16.27 |
+
+---
+
+### Story S16.7: Onboarding Step 1.5 — Auto-Capture Setup
+
+> **As a** new user who just added my cards,
+> **I want to** see an optional auto-capture setup step in onboarding (between Add Cards and Set Miles Balances),
+> **So that** I can enable auto-capture from the very first session without hunting for it in Settings later.
+
+**Priority**: P1 (Should Have)
+**T-Shirt Size**: **S–M** (Small–Medium) — ~2 days
+**Feature**: F26 / F27 (onboarding integration — platform-adaptive)
+**DRD Reference**: `docs/DRD_AUTO_CAPTURE.md` v1.1, Section 2.1 Phase A (Onboarding Path) + Section 3.2
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I complete onboarding Step 1 (Add Your Cards) | Onboarding advances | I see new Step 1.5: "Log Without Typing" with a value-prop pitch and "Set Up Auto-Capture" CTA |
+| AC2 | I am on iOS | I view Step 1.5 | The pitch reads: "Pay with Apple Pay, and MaxiMile logs it for you." CTA: "Set Up Auto-Capture" (opens the setup wizard inline) |
+| AC3 | I am on Android | I view Step 1.5 | The pitch reads: "MaxiMile reads your banking notifications to log transactions automatically." CTA: "Enable Auto-Capture" (opens privacy disclosure) |
+| AC4 | I don't want to set up now | I tap "I'll do this later" | Onboarding proceeds to Step 2 (Set Miles Balances); auto-capture status defaults to inactive |
+| AC5 | I skipped during onboarding | I go to Settings → Auto-Capture | The same setup flow is available and fully functional |
+| AC6 | I complete auto-capture setup from Step 1.5 | Onboarding advances | Onboarding proceeds to Step 2; auto-capture status is now "Active" in Settings |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T16.31: Design onboarding Step 1.5 screen — platform-adaptive layout (iOS Apple Pay variant, Android Notification variant) | Designer | 0.5d | None |
+| T16.32: Build Step 1.5 screen in onboarding flow — insert between Add Cards and Set Miles Balances | Developer | 0.5d | T16.31 |
+| T16.33: Implement platform detection — show iOS (Apple Pay) or Android (Notifications) copy and CTA | Developer | 0.25d | T16.32 |
+| T16.34: Wire "Set Up Auto-Capture" CTA to setup wizard (iOS) or privacy disclosure (Android) | Developer | 0.25d | T16.20, T17.17 |
+| T16.35: Wire "I'll do this later" skip to proceed to Step 2 (Miles Balances) | Developer | 0.25d | T16.32 |
+| T16.36: Pass auto-capture status to Step 2 via route params (same pattern as cardIds) | Developer | 0.25d | T16.34 |
+| T16.37: E2E test — onboarding: Add Cards → Step 1.5 → setup → Step 2; also skip path | Tester | 0.5d | T16.32, T16.34, T16.35 |
+
+---
+
+### Story S16.8: Recommendation Match Indicator on Confirmation Screen
+
+> **As a** user who just auto-captured a transaction,
+> **I want to** see whether the card I used was the best option for that spending category,
+> **So that** I learn from every transaction and gradually build the habit of using the optimal card.
+
+**Priority**: P1 (Should Have)
+**T-Shirt Size**: **M** (Medium) — ~3 days
+**Feature**: F26 / F27 (cross-platform — shared confirmation screen component)
+**DRD Reference**: `docs/DRD_AUTO_CAPTURE.md` v1.1, Section 3.2.3 (Recommendation Match Indicator) + Section 4.1 (Confirmation Screen Layout)
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | An auto-captured transaction with category "Groceries" and card "DBS Altitude" is on the confirmation screen | The system calls `recommend('Groceries')` RPC | The top recommended card for Groceries is retrieved and compared with the auto-captured card |
+| AC2 | The auto-captured card matches the recommended card | The confirmation screen renders | A green banner shows: "You used the best card! DBS Altitude earns X mpd for Groceries (vs Y avg)" |
+| AC3 | The auto-captured card does NOT match the recommended card | The confirmation screen renders | A blue "Tip" nudge shows: "[Best card] earns X mpd for [Category] (vs Y for this card). Try it next time!" |
+| AC4 | The recommended card has its cap exhausted for this category | The confirmation screen renders | The recommendation match banner is hidden (the recommendation would have changed anyway) |
+| AC5 | The inferred category is "General/Others" or could not be determined | The confirmation screen renders | The recommendation match banner is hidden (category too ambiguous for a meaningful recommendation) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T16.38: Design recommendation match banner — green "best card" variant and blue "tip" nudge variant | Designer | 0.5d | T16.25 |
+| T16.39: Implement `recommend(category)` call on confirmation screen load — reuse existing RPC, no new endpoint | Software Engineer | 0.5d | T16.26, T2.08 (existing RPC) |
+| T16.40: Implement match comparison logic — compare auto-captured card_id vs recommended card_id | Software Engineer | 0.25d | T16.39 |
+| T16.41: Build match banner UI — green variant (match), blue variant (mismatch), hidden state (cap exhausted / ambiguous category) | Developer | 0.5d | T16.38, T16.40 |
+| T16.42: Wire banner to confirmation screen — insert below card field, above action buttons | Developer | 0.25d | T16.41, T16.26 |
+| T16.43: Unit tests — match, mismatch, cap exhausted, ambiguous category | Tester | 0.5d | T16.40, T16.41 |
+| T16.44: Analytics events — track `auto_capture_recommendation_match` and `auto_capture_recommendation_nudge_shown` | Developer | 0.25d | T16.42 |
+
+---
+
+### Story S16.9: Smart Pay → Auto-Capture Handoff
+
+> **As a** user who just paid via the Smart Pay flow (Wallet opened → tapped card),
+> **I want** the app to automatically detect the auto-captured transaction instead of asking me to enter the amount manually,
+> **So that** the Smart Pay → Wallet → Log loop closes seamlessly without redundant data entry.
+
+**Priority**: P1 (Should Have)
+**T-Shirt Size**: **M** (Medium) — ~3 days
+**Feature**: F26 / F27 (cross-platform — Smart Pay integration)
+**DRD Reference**: `docs/DRD_AUTO_CAPTURE.md` v1.1, Section 3.2.4 (Smart Pay → Auto-Capture Handoff)
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I am in the Smart Pay flow and have just returned from Wallet after paying | The app detects my return | The app listens for an incoming auto-capture deep link or notification for up to 60 seconds |
+| AC2 | An auto-capture event fires within the 60-second window | The Smart Pay flow detects it | Smart Pay skips its manual amount entry step and navigates to the auto-capture confirmation screen instead |
+| AC3 | The auto-capture confirmation screen appears via Smart Pay handoff | I view the screen | The source badge shows dual attribution (e.g., "Via Apple Pay" + "Smart Pay"); the recommendation match indicator is pre-populated (Smart Pay already knows which card was recommended) |
+| AC4 | No auto-capture event fires within 60 seconds | The timer expires | The Smart Pay flow falls back to its existing manual logging step (amount keypad with category + card pre-filled) |
+| AC5 | The handoff transaction is logged | I view the transaction in history | The `source` field is `shortcut_smart_pay` (iOS) or `notification_smart_pay` (Android) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T16.45: Implement 60-second listener in Smart Pay State 5→6 transition — listen for incoming deep link / notification event | Software Engineer | 1d | T16.03 (deep link handler), Smart Pay flow (existing) |
+| T16.46: Implement handoff logic — if auto-capture fires within 60s, skip manual entry and navigate to auto-capture confirmation | Software Engineer | 0.5d | T16.45, T16.26 |
+| T16.47: Pass Smart Pay recommendation context to confirmation screen — pre-populate match indicator with the card that was recommended | Developer | 0.5d | T16.46, T16.39 |
+| T16.48: Add dual source badge — "Via Apple Pay" + "Smart Pay" (or "Via Bank Notification" + "Smart Pay") | Developer | 0.25d | T16.46, T16.26 |
+| T16.49: Implement 60-second timeout fallback — if no auto-capture, resume existing manual flow | Software Engineer | 0.25d | T16.45 |
+| T16.50: Set transaction source to `shortcut_smart_pay` or `notification_smart_pay` for handoff transactions | Developer | 0.25d | T16.46 |
+| T16.51: Integration test — Smart Pay → Wallet → return → auto-capture fires → confirmation → log; also timeout fallback path | Tester | 0.5d | T16.46, T16.49 |
+| T16.52: Analytics event — track `smart_pay_auto_capture_handoff` | Developer | 0.25d | T16.46 |
+
+---
+
+### Sprint 16 — Dependencies Map
+
+```
+                                SPRINT 16 DEPENDENCY FLOW
+                                =========================
+
+S16.1 Deep Link Handler ──────────────────────────────────────────────────────┐
+  T16.01 Register route                                                       │
+    ↓                                                                         │
+  T16.02 URL parser                                                           │
+    ↓                                                                         │
+  T16.03 Navigate to pre-filled form ──→ T16.04 Edge cases                    │
+    ↓                                         ↓                               │
+  T16.05 Unit tests                      T16.14 Fallback card UI              │
+                                                                              │
+S16.2 Merchant→Category Mapping ◄──── (can parallel with S16.1) ─────────────┤
+  T16.06 Schema                                                               │
+    ↓                                                                         │
+  T16.07 Seed 200+ merchants                                                  │
+  T16.08 Fuzzy match engine ──→ T16.09 User overrides                         │
+    ↓                                 ↓                                       │
+  T16.10 Unit tests              T16.11 Performance test                      │
+                                                                              │
+S16.3 Card Name Matching ◄──── (can parallel with S16.1 + S16.2) ────────────┤
+  T16.12 Fuzzy matcher ──→ T16.13 Mapping table                              │
+    ↓                          ↓                                              │
+  T16.14 Fallback UI      T16.15 Unit tests                                  │
+                                                                              │
+S16.4 Shortcut Template ◄──── (BLOCKED until S16.1 URL scheme working) ──────┤
+  T16.16 Build Shortcut ──→ T16.17 Host .shortcut file                        │
+    ↓                                                                         │
+  T16.18 Test on iOS 17/18                                                    │
+                                                                              │
+S16.5 Setup Wizard ◄──── (BLOCKED until S16.3 + S16.4 complete) ─────────────┤
+  T16.19 Design ──→ T16.20 Build UI ──→ T16.21 Card verification step        │
+                                    ──→ T16.22 Test step                      │
+                                    ──→ T16.23 Settings entry                 │
+                                         ↓                                    │
+                                    T16.24 E2E test                           │
+                                                                              │
+S16.6 Confirmation Flow ◄──── (BLOCKED until S16.1 + S16.2 + S16.3) ────────┘
+  T16.25 Design ──→ T16.26 Build UI ──→ T16.27 Confirm + log
+                                    ──→ T16.28 Category correction
+                                    ──→ T16.29 Card correction
+                                         ↓
+                                    T16.30 Integration test (full flow)
+
+S16.7 Onboarding Step 1.5 ◄──── (BLOCKED until S16.5 wizard + S17.3 privacy)
+  T16.31 Design ──→ T16.32 Build Step 1.5 ──→ T16.33 Platform detect
+                                           ──→ T16.34 Wire CTA to wizard/privacy
+                                           ──→ T16.35 Skip path
+                                           ──→ T16.36 Route params
+                                                ↓
+                                           T16.37 E2E test
+
+S16.8 Recommendation Match ◄──── (BLOCKED until S16.6 confirmation + recommend RPC)
+  T16.38 Design ──→ T16.39 Call recommend() ──→ T16.40 Match logic
+                                                  ↓
+                 T16.41 Banner UI ──→ T16.42 Wire to confirmation
+                                          ↓
+                                    T16.43 Unit tests
+                                    T16.44 Analytics
+
+S16.9 Smart Pay Handoff ◄──── (BLOCKED until S16.6 confirmation + S16.8 match indicator)
+  T16.45 60s listener ──→ T16.46 Handoff logic ──→ T16.47 Pass recommendation context
+                                               ──→ T16.48 Dual source badge
+                                               ──→ T16.50 Source field
+  T16.49 Timeout fallback ──────────────────────┘
+                                                    ↓
+                                               T16.51 Integration test
+                                               T16.52 Analytics
+```
+
+**Critical Path**: S16.1 (deep link) + S16.2 (merchant mapping) + S16.3 (card matching) → S16.6 (confirmation) → S16.8 (match indicator) → S16.9 (Smart Pay handoff)
+
+**Parallel Tracks**:
+- S16.1, S16.2, and S16.3 can all proceed in parallel from Day 1
+- S16.4 requires only S16.1 (URL scheme) and can start by Day 3
+- S16.5 and S16.6 require S16.1 + S16.2 + S16.3 and start in the second week
+- S16.7 (onboarding) requires S16.5 (wizard) and can proceed in parallel with S16.8/S16.9
+- S16.8 (match indicator) requires S16.6 (confirmation) and the existing recommend() RPC
+- S16.9 (Smart Pay handoff) requires S16.6 + S16.8 and the existing Smart Pay flow
+
+---
+
+### Sprint 16 — Risks & Mitigations
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|----|------|------------|--------|------------|
+| R16.1 | Card names in Apple Wallet vary by bank/card network — fuzzy matching has low accuracy | **Medium** | **High** | Build verified card_name_mappings table; during setup wizard, user confirms each mapping once; use confirmed mappings for all future transactions |
+| R16.2 | Merchant names from Apple Pay are abbreviated/encoded (e.g., "NTUC FP-JURONG PT" instead of "NTUC FairPrice Jurong Point") — category mapping fails | **Medium** | **High** | Seed merchant patterns table with common SG abbreviations; implement keyword-based matching (not just exact string match); allow user corrections that persist |
+| R16.3 | iOS 18 intermittently fails to trigger Shortcuts on Apple Pay transactions (known Apple bug) | **Medium** | **Medium** | Document the limitation; build a "retry" manual trigger within the Shortcut; monitor Apple developer forums for fix; provide manual log fallback |
+| R16.4 | Users struggle with Shortcuts setup despite wizard | **Medium** | **High** | Provide downloadable `.shortcut` file (one-tap import); video walkthrough in wizard; test with 3 non-technical users before launch |
+| R16.5 | Scope creep — team wants to add auto-confirmation mode (skip confirm tap) | **High** | **Medium** | Strict scope: Sprint 16 is always-confirm mode. Auto-confirm is a P2 enhancement for a future sprint. |
+| R16.6 | Coverage disappointment — users expect ALL transactions captured, not just Apple Pay NFC | **Medium** | **High** | Clear messaging in setup wizard: "Works with Apple Pay contactless payments at stores. Online and physical card transactions still require manual logging." |
+
+---
+
+## Sprint 17: "Smart Logging: Android" (F27 — Android Notification Auto-Capture)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Android users can have their banking app transaction notifications automatically parsed and pre-filled in MaxiMile's transaction log, providing cross-platform auto-capture coverage. This sprint delivers the NotificationListenerService native module, SG bank notification regex parsers, privacy/permission flows, and Google Pay notification support.
+**Epic**: E12 — Transaction Auto-Capture
+**PRD Features**: F27 (Android Notification Auto-Capture)
+**Prerequisite**: Sprint 16 complete (merchant→category mapping engine, card matching, and confirmation flow are reused). Also requires Expo Dev Build (not compatible with Expo Go).
+**Estimated Effort**: 3-4 sprints of work compressed into a focused 2-week sprint; overflow tasks may spill into Sprint 18
+**Feasibility Reference**: `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` — Approach C (Android NotificationListenerService)
+**Infrastructure cost**: $0 (all processing on-device; no server-side notification storage)
+**Play Store risk**: Medium — requires prominent privacy disclosure under Google Play Data Safety; `BIND_NOTIFICATION_LISTENER_SERVICE` permission requires justification. Multiple Play Store precedents exist (FinArt 1M+, Walnut 5M+, PennyWise).
+
+---
+
+### Sprint 17 — Definition of Ready (DoR) Checklist
+
+Before any story enters the sprint, it must satisfy:
+
+- [ ] User story has clear "As a... I want... So that..." statement
+- [ ] Acceptance criteria defined and reviewed by PM + Tech Lead
+- [ ] T-shirt size estimated by the team
+- [ ] Dependencies identified — Sprint 16 fully shipped; merchant→category mapping and card matching are reusable
+- [ ] Expo Dev Build configured (cannot use Expo Go for native notification module)
+- [ ] `react-native-notification-listener` community package evaluated and compatible with current RN version
+- [ ] SG bank notification formats documented with sample text (DBS, OCBC, UOB, Citi, AMEX — per feasibility doc Section 4.2)
+- [ ] Privacy disclosure text drafted and reviewed by PM/legal
+- [ ] Google Play Data Safety section requirements documented
+
+### Sprint 17 — Definition of Done (DoD) Checklist
+
+A story is "Done" when:
+
+- [ ] Feature works as described in all acceptance criteria
+- [ ] Unit tests written and passing (happy path + key edge cases per bank format)
+- [ ] Integration test confirms notification → parse → category map → pre-fill → confirm flow
+- [ ] No P0 or P1 bugs remaining
+- [ ] Code committed to main branch and peer-reviewed
+- [ ] Works on Android (APK via Expo Dev Build) — this sprint is Android-only
+- [ ] Privacy disclosure displayed and consent captured before notification access is requested
+- [ ] Battery impact measured: background service adds <2% additional drain per day
+- [ ] All 5 SG bank notification formats correctly parsed (DBS, OCBC, UOB, Citi, AMEX)
+
+---
+
+### Sprint 17 — Stories
+
+| ID | Story | Feature | Size | Points | Owner |
+|----|-------|---------|------|--------|-------|
+| **S17.1** | NotificationListenerService Native Module | F27 | XL | 13 | Software Engineer (native) |
+| **S17.2** | SG Bank Notification Regex Parsers | F27 | L | 8 | Software Engineer + Data Engineer |
+| **S17.3** | Privacy Disclosure & Permission Flow | F27 | M | 5 | Developer + Designer |
+| **S17.4** | Google Pay Notification Parsing | F27 | M | 5 | Software Engineer |
+| **S17.5** | Android Auto-Capture E2E Testing | F27 | M | 5 | Tester |
+| **Total** | | | | **36** | |
+
+---
+
+### Story S17.1: NotificationListenerService Native Module
+
+> **As an** Android user,
+> **I want** MaxiMile to read my banking app notifications in the background,
+> **So that** my credit card transactions are automatically detected and pre-filled for logging.
+
+**Priority**: P0 (Must Have — blocks all other Sprint 17 stories)
+**T-Shirt Size**: **XL** (Extra Large) — ~5 days
+**Feature**: F27
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I have granted notification access permission | A banking app sends a transaction notification | MaxiMile's NotificationListenerService receives the notification content (title, text, sub-text, extras) |
+| AC2 | The service receives a notification | It checks the source package | Only notifications from whitelisted banking app packages (DBS, OCBC, UOB, Citi, AMEX) are processed; all others are ignored |
+| AC3 | The service receives a matching notification | It processes the text | The notification text is passed to the JavaScript layer via the React Native bridge for regex parsing |
+| AC4 | The app is in the background or closed | A banking notification arrives | The service still receives and processes it (foreground service behavior) |
+| AC5 | The service is running | I check battery usage | The service adds less than 2% additional battery drain per day (efficient filtering — only process whitelisted packages) |
+| AC6 | The native module is integrated | I build the app | The Expo config plugin correctly adds the NotificationListenerService to the Android manifest |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T17.01: Evaluate and integrate `react-native-notification-listener` package (or build custom native module) | Software Engineer | 1d | None |
+| T17.02: Create Expo config plugin to register NotificationListenerService in AndroidManifest.xml | Software Engineer | 1d | T17.01 |
+| T17.03: Implement notification filter — whitelist banking app package names (com.dbs.*, com.ocbc.*, etc.) | Software Engineer | 0.5d | T17.01 |
+| T17.04: Build React Native bridge — forward notification text from native to JS layer | Software Engineer | 1d | T17.01 |
+| T17.05: Implement efficient background processing (batch notifications, debounce rapid-fire alerts) | Software Engineer | 0.5d | T17.04 |
+| T17.06: Battery impact testing — measure drain with service active over 24 hours | Tester | 0.5d | T17.04 |
+| T17.07: Build EAS Dev Build with native module; verify on 3 Android devices (Samsung, Pixel, Xiaomi) | Developer | 0.5d | T17.02 |
+
+---
+
+### Story S17.2: SG Bank Notification Regex Parsers
+
+> **As an** Android user with Singapore bank cards,
+> **I want** MaxiMile to correctly parse the amount, merchant, and card from my banking notifications,
+> **So that** auto-captured transactions have accurate data.
+
+**Priority**: P0 (Must Have)
+**T-Shirt Size**: **L** (Large) — ~4 days
+**Feature**: F27
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | DBS sends: "Your DBS/POSB Card ending 1234 was used for SGD 42.50 at COLD STORAGE on 21 Feb" | The parser processes it | Amount = 42.50, merchant = "COLD STORAGE", card_last4 = "1234", bank = "DBS" |
+| AC2 | OCBC sends: "Card xxxx1234 txn SGD 42.50 at MERCHANT NAME on 21/02" | The parser processes it | Amount = 42.50, merchant = "MERCHANT NAME", card_last4 = "1234", bank = "OCBC" |
+| AC3 | UOB sends: "UOB Card ending 1234: SGD 42.50 at MERCHANT. Date: 21 Feb 2026" | The parser processes it | Amount = 42.50, merchant = "MERCHANT", card_last4 = "1234", bank = "UOB" |
+| AC4 | Citi sends: "Citi Card x1234 SGD 42.50 MERCHANT NAME 21FEB" | The parser processes it | Amount = 42.50, merchant = "MERCHANT NAME", card_last4 = "1234", bank = "Citi" |
+| AC5 | AMEX sends: "A charge of SGD 42.50 was made on your AMEX card ending 1234 at MERCHANT" | The parser processes it | Amount = 42.50, merchant = "MERCHANT", card_last4 = "1234", bank = "AMEX" |
+| AC6 | A notification format doesn't match any known regex | The parser processes it | The notification is silently ignored (not an error); logged for future format analysis |
+| AC7 | The parsed card_last4 is available | The system matches to portfolio | The card_last4 is matched against the user's portfolio cards (user must have entered last 4 digits during card setup, or this is matched via bank + card type) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T17.08: Collect 10+ sample notifications per bank (DBS, OCBC, UOB, Citi, AMEX) — real and documented formats | Data Engineer | 1d | None |
+| T17.09: Write regex parser for DBS notification format (with variants for DBS/POSB cards) | Software Engineer | 0.5d | T17.08 |
+| T17.10: Write regex parser for OCBC notification format | Software Engineer | 0.5d | T17.08 |
+| T17.11: Write regex parser for UOB notification format | Software Engineer | 0.5d | T17.08 |
+| T17.12: Write regex parser for Citi notification format | Software Engineer | 0.5d | T17.08 |
+| T17.13: Write regex parser for AMEX notification format | Software Engineer | 0.5d | T17.08 |
+| T17.14: Implement parser router — detect bank from package name, route to correct regex | Software Engineer | 0.5d | T17.09–T17.13 |
+| T17.15: Unit tests — 5+ test cases per bank format (normal, edge cases, foreign currency, declined) | Tester | 1d | T17.09–T17.14 |
+
+---
+
+### Story S17.3: Privacy Disclosure & Permission Flow
+
+> **As a** user,
+> **I want** clear privacy disclosures about what notification data MaxiMile accesses and how it is used,
+> **So that** I can make an informed decision about granting notification access.
+
+**Priority**: P0 (Must Have — required by Google Play policy)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F27
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I tap "Enable Auto-Capture" on Android | I see a privacy disclosure screen | The screen clearly states: (1) what data is accessed (banking notification text only), (2) what is extracted (amount, merchant, card), (3) that all processing happens on-device, (4) that no raw notification content is stored or uploaded |
+| AC2 | I read the disclosure and tap "Grant Access" | The Android notification access settings open | I am taken directly to the notification access permission screen for MaxiMile |
+| AC3 | I grant the permission and return to MaxiMile | The app detects the permission | A confirmation screen shows: "Auto-capture is now active. Your banking notifications will be used to pre-fill transactions." |
+| AC4 | I do not grant the permission | I return to MaxiMile | The app shows a graceful fallback: "No problem — you can always log transactions manually. You can enable auto-capture later in Settings." |
+| AC5 | I want to revoke access later | I go to MaxiMile Settings → Auto-Capture | I see a toggle to disable auto-capture, with a link to Android notification access settings for full revocation |
+| AC6 | Google Play Data Safety section | The app listing is reviewed | Notification access is disclosed under "Data collected" with purpose "App functionality — transaction logging" |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T17.16: Design privacy disclosure screen (what, why, how, on-device badge) | Designer | 0.5d | None |
+| T17.17: Build privacy disclosure UI with "Grant Access" and "Not Now" buttons | Developer | 0.5d | T17.16 |
+| T17.18: Implement permission check + deep link to Android notification access settings | Developer | 0.5d | T17.01 |
+| T17.19: Implement permission state detection (granted/denied) with appropriate UI feedback | Developer | 0.5d | T17.18 |
+| T17.20: Add auto-capture toggle + revocation link to Settings screen | Developer | 0.25d | T17.19 |
+| T17.21: Draft Google Play Data Safety disclosure text for notification access | PM | 0.25d | None |
+
+---
+
+### Story S17.4: Google Pay Notification Parsing
+
+> **As an** Android user who pays with Google Pay,
+> **I want** my Google Pay transaction notifications to be auto-captured,
+> **So that** mobile wallet payments are logged just like banking app notifications.
+
+**Priority**: P1 (Should Have)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F27
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I make a Google Pay NFC payment | Google Pay sends a notification | MaxiMile captures the notification and parses: amount, merchant, and partial card info |
+| AC2 | The Google Pay notification contains amount and merchant | The parser processes it | Amount and merchant are correctly extracted; card is matched via last-4-digits if available |
+| AC3 | The Google Pay notification format changes | The parser encounters an unrecognized format | The notification is silently logged for future analysis; not treated as an error |
+| AC4 | Google Pay and the banking app both send notifications for the same transaction | Both are received | MaxiMile deduplicates: only one pre-filled transaction is shown (prefer the one with more data) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T17.22: Collect Google Pay notification samples (10+); document format variations | Data Engineer | 0.5d | None |
+| T17.23: Write regex parser for Google Pay notification format | Software Engineer | 0.5d | T17.22 |
+| T17.24: Add Google Pay package to notification whitelist | Software Engineer | 0.25d | T17.03 |
+| T17.25: Implement dedup logic — same amount + merchant + timestamp within 60 seconds = duplicate | Software Engineer | 0.5d | T17.14, T17.23 |
+| T17.26: Unit tests — Google Pay parsing, dedup with banking notification | Tester | 0.5d | T17.23, T17.25 |
+
+---
+
+### Story S17.5: Android Auto-Capture E2E Testing
+
+> **As a** tester,
+> **I want to** validate the full Android auto-capture flow end-to-end across all 5 banks and Google Pay,
+> **So that** we can ship with confidence that the feature works reliably.
+
+**Priority**: P0 (Must Have)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F27
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | All parsers are implemented | I run the test suite | Tests cover all 5 bank formats + Google Pay with 5+ cases each (standard, edge cases, foreign currency, declined) |
+| AC2 | The full flow is tested | I simulate a DBS notification | The notification is received → parsed → merchant mapped to category → card matched → confirmation screen shown with correct pre-filled data |
+| AC3 | Battery tests are complete | I review results | Background service adds <2% battery drain over 24 hours on test devices |
+| AC4 | Permission flow is tested | I test grant and deny paths | Both paths work correctly: granted → service starts; denied → graceful fallback shown |
+| AC5 | Sprint 16 features still work on iOS | I run regression tests | iOS Shortcuts auto-capture is unaffected by Sprint 17 changes |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T17.27: Write E2E test suite — notification → parse → map → match → confirm → log for each bank | Tester | 1d | T17.14, T16.08, T16.12 |
+| T17.28: Test permission flow — grant, deny, revoke, re-grant | Tester | 0.25d | T17.19 |
+| T17.29: Battery impact test — 24-hour test with service active on 3 devices | Tester | 0.5d | T17.05 |
+| T17.30: Regression test — Sprint 16 iOS features + existing transaction logging unaffected | Tester | 0.5d | All Sprint 17 stories |
+
+---
+
+### Sprint 17 — Dependencies Map
+
+```
+                                SPRINT 17 DEPENDENCY FLOW
+                                =========================
+
+PREREQUISITE: Sprint 16 complete (deep link handler, merchant→category mapping,
+              card matching, confirmation flow — all reused on Android)
+                                        │
+                                        ▼
+S17.1 NotificationListenerService ─────────────────────────────────────────────┐
+  T17.01 Integrate native module                                               │
+    ↓                                                                         │
+  T17.02 Expo config plugin                                                    │
+    ↓                                                                         │
+  T17.03 Package whitelist ──→ T17.04 RN bridge ──→ T17.05 Background opt     │
+    │                                   ↓                                     │
+    │                              T17.06 Battery test                        │
+    │                              T17.07 Dev build test                      │
+    │                                                                         │
+S17.2 Bank Parsers ◄──── (BLOCKED until S17.1 bridge working) ───────────────┤
+  T17.08 Sample collection                                                     │
+    ↓                                                                         │
+  T17.09 DBS parser ──┐                                                        │
+  T17.10 OCBC parser ─┤                                                        │
+  T17.11 UOB parser ──┼──→ T17.14 Parser router ──→ T17.15 Unit tests         │
+  T17.12 Citi parser ─┤                                                        │
+  T17.13 AMEX parser ─┘                                                        │
+                                                                              │
+S17.3 Privacy & Permissions ◄──── (can parallel with S17.2) ─────────────────┤
+  T17.16 Design ──→ T17.17 Build UI ──→ T17.18 Permission deep link           │
+                                    ──→ T17.19 Permission detection            │
+                                    ──→ T17.20 Settings toggle                 │
+  T17.21 Data Safety text (parallel)                                           │
+                                                                              │
+S17.4 Google Pay ◄──── (BLOCKED until S17.1 + S17.2 parser infra) ───────────┤
+  T17.22 Sample collection                                                     │
+  T17.23 Google Pay parser                                                     │
+  T17.24 Package whitelist ──→ T17.25 Dedup logic                              │
+  T17.26 Unit tests                                                            │
+                                                                              │
+S17.5 E2E Testing ◄──── (BLOCKED until S17.1-S17.4 complete) ────────────────┘
+  T17.27 E2E test suite (all banks + GPay)
+  T17.28 Permission flow tests
+  T17.29 Battery impact test
+  T17.30 Regression test (Sprint 16 iOS + existing features)
+```
+
+**Critical Path**: S17.1 (native module) → S17.2 (bank parsers) → S17.5 (E2E testing)
+
+**Parallel Tracks**:
+- S17.3 (privacy/permissions) can proceed in parallel with S17.2 once S17.1 is started
+- S17.4 (Google Pay) can proceed in parallel with S17.3 once S17.2 parser infra exists
+- T17.08 (sample collection) can start Day 1, independent of native module work
+
+---
+
+### Sprint 17 — Risks & Mitigations
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|----|------|------------|--------|------------|
+| R17.1 | `react-native-notification-listener` package is incompatible with current Expo/RN version | **Medium** | **High** | Evaluate on Day 1; fallback to building custom native module (adds ~2 days); consider `expo-notification-listener` if available |
+| R17.2 | SG bank notification formats change without notice — parsers break | **Medium** | **High** | Build format versioning; log unrecognized notifications for analysis; enable community format reporting (tie into Sprint 13 community submissions); design parsers to be regex-configurable without code changes |
+| R17.3 | Google Play rejects the app for notification access without sufficient justification | **Low** | **Critical** | Draft comprehensive Data Safety disclosure; emphasize on-device-only processing; cite Play Store precedents (FinArt, Walnut); prepare appeal with documentation |
+| R17.4 | Battery drain exceeds 2% threshold on some Android devices (OEM-specific background service behavior) | **Medium** | **Medium** | Test on Samsung, Pixel, Xiaomi (top 3 SG Android brands); implement adaptive polling; add battery usage monitoring in Settings; allow user to disable if concerned |
+| R17.5 | Duplicate notifications from Google Pay + banking app confuse users (two confirmation prompts) | **Medium** | **Medium** | T17.25 dedup logic: same amount + merchant within 60-second window = duplicate; prefer the notification with more data fields |
+| R17.6 | Sprint scope overflow — 36 story points may not fit in 2 weeks given native module complexity | **High** | **Medium** | Prioritize: S17.1 → S17.2 → S17.3 are P0; S17.4 (Google Pay) can spill to Sprint 18; E2E testing (S17.5) is non-negotiable |
+
+---
+
+### Sprint 16 + 17 Combined Timeline
+
+```
+SPRINT 16 (Weeks 1–2)                    SPRINT 17 (Weeks 3–4)
+"Smart Logging: iOS"                     "Smart Logging: Android"
+═══════════════════                      ═══════════════════
+Day 1–3:  S16.1 Deep link handler        Day 1–3:  S17.1 Native module + config plugin
+Day 1–4:  S16.2 Merchant→category map    Day 1:    T17.08 Bank notification samples
+Day 1–2:  S16.3 Card name matching       Day 3–6:  S17.2 Bank regex parsers (5 banks)
+Day 3–5:  S16.4 Shortcut template        Day 3–5:  S17.3 Privacy disclosure + permissions
+Day 5–8:  S16.5 Setup wizard             Day 5–7:  S17.4 Google Pay parsing + dedup
+Day 5–8:  S16.6 Confirmation flow        Day 7–9:  S17.5 E2E testing (all banks + GPay)
+Day 6–7:  S16.7 Onboarding Step 1.5      Day 9:    Battery impact testing
+Day 7–8:  S16.8 Recommendation match     Day 10:   Regression testing + stabilize
+Day 8–9:  S16.9 Smart Pay handoff                  + ship v2.0 beta
+Day 9–10: Integration testing + fixes
 ```

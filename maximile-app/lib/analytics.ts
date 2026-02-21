@@ -66,7 +66,10 @@ export type AnalyticsEvent =
   | 'goal_created'
   | 'goal_deleted'
   | 'rate_alert_dismissed'
-  | 'rate_alert_viewed';
+  | 'rate_alert_viewed'
+  | 'rate_change_submitted'
+  | 'submission_form_opened'
+  | 'my_submissions_viewed';
 
 export interface AnalyticsPayload {
   event: AnalyticsEvent;

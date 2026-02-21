@@ -228,11 +228,11 @@ describe('E2E Scenario 1: New User Complete Flow', () => {
       .order('display_order', { ascending: true });
 
     expect(error).toBeNull();
-    expect(data).toHaveLength(7);
+    expect(data).toHaveLength(8);
 
     const categories = data as typeof mockCategories;
     expect(categories.map(c => c.id)).toEqual([
-      'dining', 'transport', 'online', 'groceries', 'petrol', 'travel', 'general',
+      'dining', 'transport', 'online', 'groceries', 'petrol', 'bills', 'travel', 'general',
     ]);
   });
 

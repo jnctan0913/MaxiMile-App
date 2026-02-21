@@ -14,6 +14,7 @@ import {
   AppState,
   AppStateStatus,
   ImageSourcePropType,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -37,6 +38,8 @@ import GlassCard from '../../components/GlassCard';
 import MerchantCard from '../../components/MerchantCard';
 import CapProgressBar from '../../components/CapProgressBar';
 import { track } from '../../lib/analytics';
+import * as Linking from 'expo-linking';
+import { parseAutoCaptureUrl } from '../../lib/deep-link';
 import { getCardImage } from '../../constants/cardImages';
 import type { RecommendResult } from '../../lib/supabase-types';
 import type { LocationResult, LocationError } from '../../lib/location';
@@ -106,6 +109,11 @@ export default function PayScreen() {
 
   // Category override
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+
+  // Auto-capture handoff (S16.9)
+  const [waitingForAutoCapture, setWaitingForAutoCapture] = useState(false);
+  const autoCaptureTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   // Mount timestamp for flow duration tracking
   const mountTime = useRef(Date.now());
@@ -331,6 +339,23 @@ export default function PayScreen() {
   }, [recommendation, user]);
 
   // -------------------------------------------------------------------------
+  // Start auto-capture handoff (S16.9)
+  // -------------------------------------------------------------------------
+  const startAutoCaptureHandoff = useCallback(() => {
+    setState('logging');
+    setWaitingForAutoCapture(true);
+
+    if (autoCaptureTimerRef.current) {
+      clearTimeout(autoCaptureTimerRef.current);
+    }
+
+    autoCaptureTimerRef.current = setTimeout(() => {
+      setWaitingForAutoCapture(false);
+      autoCaptureTimerRef.current = null;
+    }, 60_000);
+  }, []);
+
+  // -------------------------------------------------------------------------
   // State 5→6: Return from wallet (AppState listener)
   // -------------------------------------------------------------------------
   useEffect(() => {
@@ -341,7 +366,7 @@ export default function PayScreen() {
         const elapsed = Date.now() - walletOpenTime.current;
         // Only treat as wallet return if within 60s
         if (elapsed < 60_000) {
-          setState('logging');
+          startAutoCaptureHandoff();
         }
         walletOpenTime.current = 0;
       }
@@ -349,7 +374,77 @@ export default function PayScreen() {
 
     const sub = AppState.addEventListener('change', handleAppState);
     return () => sub.remove();
-  }, [state]);
+  }, [state, startAutoCaptureHandoff]);
+
+  // -------------------------------------------------------------------------
+  // Auto-capture deep link listener (S16.9)
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    if (!waitingForAutoCapture) return;
+
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.4,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulse.start();
+
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      const parsed = parseAutoCaptureUrl(url);
+      if (!parsed) return;
+
+      if (autoCaptureTimerRef.current) {
+        clearTimeout(autoCaptureTimerRef.current);
+        autoCaptureTimerRef.current = null;
+      }
+      setWaitingForAutoCapture(false);
+
+      const handoffSource =
+        parsed.source === 'notification'
+          ? 'notification_smart_pay'
+          : 'shortcut_smart_pay';
+
+      track('auto_capture_handoff', {
+        source: handoffSource,
+        amount: parsed.amount,
+        merchant: parsed.merchant,
+        has_recommendation: !!recommendation,
+      }, user?.id);
+
+      router.push({
+        pathname: '/auto-capture',
+        params: {
+          amount: parsed.amount?.toString() ?? '',
+          merchant: parsed.merchant ?? merchant?.name ?? '',
+          card: parsed.card ?? recommendation?.card_name ?? '',
+          source: handoffSource,
+        },
+      });
+    });
+
+    return () => {
+      pulse.stop();
+      sub.remove();
+    };
+  }, [waitingForAutoCapture, recommendation, merchant, user, router, pulseAnim]);
+
+  // Clean up auto-capture timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoCaptureTimerRef.current) {
+        clearTimeout(autoCaptureTimerRef.current);
+      }
+    };
+  }, []);
 
   // -------------------------------------------------------------------------
   // State 6: Log transaction
@@ -482,6 +577,17 @@ export default function PayScreen() {
     }, user?.id);
     router.back();
   }, [user, router]);
+
+  const handleEnterManually = useCallback(() => {
+    if (autoCaptureTimerRef.current) {
+      clearTimeout(autoCaptureTimerRef.current);
+      autoCaptureTimerRef.current = null;
+    }
+    setWaitingForAutoCapture(false);
+    track('auto_capture_manual_fallback', {
+      reason: 'user_tap',
+    }, user?.id);
+  }, [user]);
 
   // -------------------------------------------------------------------------
   // Category override
@@ -772,7 +878,7 @@ export default function PayScreen() {
                 </Text>
                 <TouchableOpacity
                   style={[styles.retryButton, { marginTop: Spacing.xl }]}
-                  onPress={() => setState('logging')}
+                  onPress={startAutoCaptureHandoff}
                 >
                   <Text style={styles.retryButtonText}>I'm Back — Log Transaction</Text>
                 </TouchableOpacity>
@@ -784,6 +890,27 @@ export default function PayScreen() {
             {/* ============================================================= */}
             {!error && state === 'logging' && recommendation ? (
               <View>
+                {waitingForAutoCapture ? (
+                  <View style={styles.autoCaptureWaiting}>
+                    <Animated.View style={{ opacity: pulseAnim }}>
+                      <Ionicons name="radio-outline" size={48} color={Colors.brandGold} />
+                    </Animated.View>
+                    <Text style={styles.autoCaptureTitle}>
+                      Listening for auto-capture...
+                    </Text>
+                    <Text style={styles.autoCaptureSubtitle}>
+                      Complete your payment — we'll capture the amount automatically
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.enterManuallyButton}
+                      onPress={handleEnterManually}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.enterManuallyText}>Enter manually</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <>
                 <Text style={styles.logPromptTitle}>Log This Transaction?</Text>
                 <Text style={styles.logPromptSubtitle}>
                   {recommendation.bank} {recommendation.card_name} — {categoryName}
@@ -850,6 +977,8 @@ export default function PayScreen() {
                 >
                   <Text style={styles.skipButtonText}>Skip</Text>
                 </TouchableOpacity>
+                  </>
+                )}
               </View>
             ) : null}
           </ScrollView>
@@ -1333,6 +1462,38 @@ const styles = StyleSheet.create({
   skipButtonText: {
     ...Typography.captionBold,
     color: Colors.textSecondary,
+  },
+
+  // Auto-capture handoff
+  autoCaptureWaiting: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.xxxl * 2,
+  },
+  autoCaptureTitle: {
+    ...Typography.subheading,
+    color: Colors.textPrimary,
+    marginTop: Spacing.lg,
+    textAlign: 'center',
+  },
+  autoCaptureSubtitle: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginTop: Spacing.xs,
+    textAlign: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
+  enterManuallyButton: {
+    marginTop: Spacing.xl,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1.5,
+    borderColor: Colors.brandGold,
+  },
+  enterManuallyText: {
+    ...Typography.captionBold,
+    color: Colors.brandGold,
   },
 
   // Category picker modal

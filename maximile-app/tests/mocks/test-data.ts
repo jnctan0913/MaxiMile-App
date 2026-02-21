@@ -41,7 +41,7 @@ export const mockSession = {
 };
 
 // ---------------------------------------------------------------------------
-// Categories (all 7)
+// Categories (all 8)
 // ---------------------------------------------------------------------------
 
 export const mockCategories: Category[] = [
@@ -96,9 +96,19 @@ export const mockCategories: Category[] = [
     updated_at: '2026-02-01T00:00:00+08:00',
   },
   {
+    id: 'bills',
+    name: 'Bills',
+    display_order: 6,
+    icon: null,
+    mccs: ['4812', '4814', '4899', '4900', '6300', '6381', '6399', '4816'],
+    description: 'Utilities, insurance, telco, recurring payments',
+    created_at: '2026-02-01T00:00:00+08:00',
+    updated_at: '2026-02-01T00:00:00+08:00',
+  },
+  {
     id: 'travel',
     name: 'Travel / Hotels',
-    display_order: 6,
+    display_order: 7,
     icon: null,
     mccs: ['4411', '7011'],
     description: 'Airlines, hotels, travel agencies',
@@ -108,7 +118,7 @@ export const mockCategories: Category[] = [
   {
     id: 'general',
     name: 'General / Others',
-    display_order: 7,
+    display_order: 8,
     icon: null,
     mccs: [],
     description: 'All other spending',
@@ -198,7 +208,7 @@ export const mockCards: Card[] = [
 export const mockCardsWithInactive: Card[] = [...mockCards, cardInactive];
 
 // ---------------------------------------------------------------------------
-// Earn Rules (for the 3 mock cards, across 7 categories)
+// Earn Rules (for the 3 mock cards, across 8 categories)
 // ---------------------------------------------------------------------------
 
 const ts = '2026-02-01T00:00:00+08:00';
@@ -209,6 +219,7 @@ export const earnRulesHSBC: EarnRule[] = [
   { id: 'er-hsbc-online',    card_id: cardHSBCRevolution.id, category_id: 'online',    earn_rate_mpd: 4.0, is_bonus: true,  conditions: {}, conditions_note: 'Capped at $1,000/month.', effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-hsbc-groceries', card_id: cardHSBCRevolution.id, category_id: 'groceries', earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-hsbc-petrol',    card_id: cardHSBCRevolution.id, category_id: 'petrol',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
+  { id: 'er-hsbc-bills',     card_id: cardHSBCRevolution.id, category_id: 'bills',     earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-hsbc-travel',    card_id: cardHSBCRevolution.id, category_id: 'travel',    earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-hsbc-general',   card_id: cardHSBCRevolution.id, category_id: 'general',   earn_rate_mpd: 0.4, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
 ];
@@ -219,6 +230,7 @@ export const earnRulesUOB: EarnRule[] = [
   { id: 'er-uob-online',    card_id: cardUOBPRVI.id, category_id: 'online',    earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-uob-groceries', card_id: cardUOBPRVI.id, category_id: 'groceries', earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-uob-petrol',    card_id: cardUOBPRVI.id, category_id: 'petrol',    earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
+  { id: 'er-uob-bills',     card_id: cardUOBPRVI.id, category_id: 'bills',     earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-uob-travel',    card_id: cardUOBPRVI.id, category_id: 'travel',    earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-uob-general',   card_id: cardUOBPRVI.id, category_id: 'general',   earn_rate_mpd: 1.4, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
 ];
@@ -229,6 +241,7 @@ export const earnRulesAmex: EarnRule[] = [
   { id: 'er-amex-online',    card_id: cardAmexAscend.id, category_id: 'online',    earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-amex-groceries', card_id: cardAmexAscend.id, category_id: 'groceries', earn_rate_mpd: 2.0, is_bonus: true,  conditions: {}, conditions_note: 'Capped at $2,500/month.', effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-amex-petrol',    card_id: cardAmexAscend.id, category_id: 'petrol',    earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
+  { id: 'er-amex-bills',     card_id: cardAmexAscend.id, category_id: 'bills',     earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: 'Base rate on bills/utilities.', effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-amex-travel',    card_id: cardAmexAscend.id, category_id: 'travel',    earn_rate_mpd: 2.0, is_bonus: true,  conditions: {}, conditions_note: 'Capped at $2,500/month.', effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
   { id: 'er-amex-general',   card_id: cardAmexAscend.id, category_id: 'general',   earn_rate_mpd: 1.1, is_bonus: false, conditions: {}, conditions_note: null, effective_from: '2026-01-01', effective_to: null, source_url: null, created_at: ts, updated_at: ts },
 ];
