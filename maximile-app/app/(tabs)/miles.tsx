@@ -14,7 +14,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Colors, Spacing, Typography, BorderRadius } from '../../constants/theme';
@@ -31,6 +30,11 @@ import { showNetworkErrorAlert } from '../../lib/error-handler';
 import { track } from '../../lib/analytics';
 import { useDemoNotification } from '../../contexts/DemoNotificationContext';
 import { DEMO_NOTIFICATIONS } from '../../lib/demo-notifications';
+
+// ---------------------------------------------------------------------------
+// Session-based flag for demo notification (resets on app restart)
+// ---------------------------------------------------------------------------
+let demoNotificationShownThisSession = false;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -288,34 +292,26 @@ export default function MilesScreen() {
   );
 
   // -------------------------------------------------------------------------
-  // Demo Mode: Auto-trigger notification on first visit
+  // Demo Mode: Auto-trigger notification on first visit per session
   // -------------------------------------------------------------------------
   useEffect(() => {
-    async function checkAndShowDemoNotif() {
+    function checkAndShowDemoNotif() {
       const isDemoMode = process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
       if (!isDemoMode) return;
 
-      try {
-        const hasShown = await AsyncStorage.getItem('demo_notification_shown');
+      // Only show once per app session (resets when app is closed/reopened)
+      if (!demoNotificationShownThisSession) {
+        // Show notification 1 second after Miles tab loads
+        setTimeout(() => {
+          showDemoNotification({
+            type: DEMO_NOTIFICATIONS.rateChange.critical.type,
+            title: DEMO_NOTIFICATIONS.rateChange.critical.title,
+            body: DEMO_NOTIFICATIONS.rateChange.critical.body,
+          });
 
-        if (!hasShown) {
-          // Show notification 1 second after Miles tab loads
-          setTimeout(() => {
-            showDemoNotification({
-              type: DEMO_NOTIFICATIONS.rateChange.critical.type,
-              title: DEMO_NOTIFICATIONS.rateChange.critical.title,
-              body: DEMO_NOTIFICATIONS.rateChange.critical.body,
-            });
-
-            // Mark as shown so it doesn't trigger again
-            AsyncStorage.setItem('demo_notification_shown', 'true');
-          }, 1000);
-        }
-      } catch (err) {
-        // Silent fail — demo notification is non-critical
-        if (__DEV__) {
-          console.warn('[Demo Mode] Failed to check/show demo notification:', err);
-        }
+          // Mark as shown for this session
+          demoNotificationShownThisSession = true;
+        }, 1000);
       }
     }
 
