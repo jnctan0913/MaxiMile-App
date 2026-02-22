@@ -73,7 +73,7 @@ export default function MerchantCard({
 
         <View style={[styles.confidenceBadge, { backgroundColor: badgeColor }]}>
           <Text style={styles.confidenceText}>
-            {confidence?.toUpperCase() ?? 'MEDIUM'}
+            {(confidence || 'medium').toString().toUpperCase()}
           </Text>
         </View>
 
