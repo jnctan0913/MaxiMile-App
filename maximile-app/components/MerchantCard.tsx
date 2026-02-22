@@ -12,7 +12,7 @@ export interface MerchantCardProps {
   merchantName: string;
   category: string;
   categoryId: string;
-  confidence: 'high' | 'medium' | 'low';
+  confidence?: 'high' | 'medium' | 'low';
   address?: string;
   onChangeCategory?: () => void;
 }
@@ -46,12 +46,12 @@ export default function MerchantCard({
   merchantName,
   category,
   categoryId,
-  confidence,
+  confidence = 'medium',
   address,
   onChangeCategory,
 }: MerchantCardProps) {
   const iconName = CATEGORY_ICONS[categoryId] ?? 'wallet';
-  const badgeColor = CONFIDENCE_COLORS[confidence];
+  const badgeColor = CONFIDENCE_COLORS[confidence] ?? Colors.warning;
 
   return (
     <GlassCard>
