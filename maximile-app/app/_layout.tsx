@@ -9,6 +9,7 @@ import {
 import { Stack, SplashScreen, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Linking from 'expo-linking';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { AndroidAutoCaptureProvider } from '../contexts/AndroidAutoCaptureContext';
@@ -24,16 +25,18 @@ SplashScreen.preventAutoHideAsync();
  */
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <DemoNotificationProvider>
-          <AndroidAutoCaptureProvider>
-            <RootContent />
-          </AndroidAutoCaptureProvider>
-        </DemoNotificationProvider>
-      </AuthProvider>
-      <StatusBar style="auto" />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <DemoNotificationProvider>
+            <AndroidAutoCaptureProvider>
+              <RootContent />
+            </AndroidAutoCaptureProvider>
+          </DemoNotificationProvider>
+        </AuthProvider>
+        <StatusBar style="auto" />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
