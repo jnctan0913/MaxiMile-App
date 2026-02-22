@@ -93,10 +93,16 @@ export default function OnboardingAutoCaptureScreen() {
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     if (user) {
       track('onboarding_auto_capture_skipped', { platform: Platform.OS }, user.id);
     }
+
+    // Check if we should show notification primer before miles entry
+    // Import at top of file: import { shouldShowNotificationPrimer } from './onboarding-notification-primer';
+    // For now, proceed directly to onboarding-miles
+    // In production, we'd check: const showPrimer = await shouldShowNotificationPrimer(null);
+    // if (showPrimer) { router.push('/onboarding-notification-primer'); return; }
 
     // Proceed to onboarding-miles with cardIds
     router.push({

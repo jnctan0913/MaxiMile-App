@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Colors, Spacing, Typography, BorderRadius } from '../../constants/theme';
@@ -28,6 +29,8 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import BottomSheet from '../../components/BottomSheet';
 import { showNetworkErrorAlert } from '../../lib/error-handler';
 import { track } from '../../lib/analytics';
+import { useDemoNotification } from '../../contexts/DemoNotificationContext';
+import { DEMO_NOTIFICATIONS } from '../../lib/demo-notifications';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -110,6 +113,7 @@ export default function MilesScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
+  const { showDemoNotification } = useDemoNotification();
 
   const [activeSegment, setActiveSegment] = useState(MY_MILES);
   const [loading, setLoading] = useState(true);
@@ -282,6 +286,41 @@ export default function MilesScreen() {
       fetchMilesPortfolio();
     }, [fetchMilesPortfolio])
   );
+
+  // -------------------------------------------------------------------------
+  // Demo Mode: Auto-trigger notification on first visit
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    async function checkAndShowDemoNotif() {
+      const isDemoMode = process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
+      if (!isDemoMode) return;
+
+      try {
+        const hasShown = await AsyncStorage.getItem('demo_notification_shown');
+
+        if (!hasShown) {
+          // Show notification 1 second after Miles tab loads
+          setTimeout(() => {
+            showDemoNotification({
+              type: DEMO_NOTIFICATIONS.rateChange.critical.type,
+              title: DEMO_NOTIFICATIONS.rateChange.critical.title,
+              body: DEMO_NOTIFICATIONS.rateChange.critical.body,
+            });
+
+            // Mark as shown so it doesn't trigger again
+            AsyncStorage.setItem('demo_notification_shown', 'true');
+          }, 1000);
+        }
+      } catch (err) {
+        // Silent fail — demo notification is non-critical
+        if (__DEV__) {
+          console.warn('[Demo Mode] Failed to check/show demo notification:', err);
+        }
+      }
+    }
+
+    checkAndShowDemoNotif();
+  }, [showDemoNotification]);
 
   const handleRefresh = () => {
     setRefreshing(true);

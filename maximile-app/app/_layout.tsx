@@ -12,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Linking from 'expo-linking';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { AndroidAutoCaptureProvider } from '../contexts/AndroidAutoCaptureContext';
+import { DemoNotificationProvider } from '../contexts/DemoNotificationContext';
 import { Colors } from '../constants/theme';
 import { parseAutoCaptureUrl } from '../lib/deep-link';
 
@@ -25,9 +26,11 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <AndroidAutoCaptureProvider>
-          <RootContent />
-        </AndroidAutoCaptureProvider>
+        <DemoNotificationProvider>
+          <AndroidAutoCaptureProvider>
+            <RootContent />
+          </AndroidAutoCaptureProvider>
+        </DemoNotificationProvider>
       </AuthProvider>
       <StatusBar style="auto" />
     </SafeAreaProvider>
@@ -276,6 +279,15 @@ function RootContent() {
         <Stack.Screen name="auto-capture-setup" options={{ headerShown: false }} />
         <Stack.Screen name="android-auto-capture-setup" options={{ headerShown: false }} />
         <Stack.Screen name="auto-capture-settings" options={{ headerShown: false }} />
+        <Stack.Screen name="demo-controls" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="notification-settings"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="notification-history"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="reset-password"
           options={{

@@ -69,7 +69,43 @@ export type AnalyticsEvent =
   | 'rate_alert_viewed'
   | 'rate_change_submitted'
   | 'submission_form_opened'
-  | 'my_submissions_viewed';
+  | 'my_submissions_viewed'
+  | 'notification_primer_shown'
+  | 'notification_primer_accepted'
+  | 'notification_primer_skipped'
+  | 'notification_permission_granted'
+  | 'notification_permission_denied'
+  | 'push_permission_requested'
+  | 'push_token_registered'
+  | 'push_token_save_failed'
+  | 'push_notifications_disabled'
+  | 'push_registration_error'
+  | 'push_critical_sent'
+  | 'push_queued_quiet_hours'
+  | 'push_queued_batched'
+  | 'push_queued_digest'
+  | 'push_sent_instant'
+  | 'push_trigger_error'
+  | 'cap_alert_sent'
+  | 'cap_alert_check_error'
+  | 'cap_alert_send_error'
+  | 'notification_tapped'
+  | 'notification_tap_card_detail'
+  | 'notification_tap_cap_status'
+  | 'notification_tap_history'
+  | 'notification_tap_rate_changes'
+  | 'notification_deep_link_error'
+  | 'notification_received_foreground'
+  | 'notification_settings_updated'
+  | 'test_notification_sent'
+  | 'notification_history_cleared'
+  | 'notification_history_cleared_all'
+  | 'notification_history_cleared_old'
+  | 'notification_history_tapped'
+  | 'add_program_sheet_opened'
+  | 'program_added_manually'
+  | 'onboarding_auto_capture_cta_tapped'
+  | 'onboarding_auto_capture_skipped';
 
 export interface AnalyticsPayload {
   event: AnalyticsEvent;
@@ -215,4 +251,18 @@ export async function clearBuffer(): Promise<void> {
 export async function getBufferCount(): Promise<number> {
   const events = await getBufferedEvents();
   return events.length;
+}
+
+/**
+ * Convenience wrapper for tracking events (shorter function name).
+ */
+export function trackEvent(
+  event: AnalyticsEvent,
+  properties?: Record<string, string | number | boolean | null>,
+  userId?: string
+): void {
+  // Fire and forget — don't await
+  track(event, properties, userId).catch(() => {
+    // Silent fail
+  });
 }

@@ -1,9 +1,11 @@
 # PRD: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 1.9
-**Last Updated**: 2026-02-21
+**Version**: 2.1
+**Last Updated**: 2026-02-22
 **Author**: PM Agent
 **Status**: Draft
+**Changelog (v2.1)**: Updated F29 Push Notifications strategy — changed from 4-phase gradual rollout to single-sprint complete system build with demo mode. System production-ready but not user-enabled pending business launch decision.
+**Changelog (v2.0)**: Added F29 Push Notifications for Rate Change Alerts — proactive mobile notifications with portfolio-aware filtering, severity-based batching, and F6 integration. See comprehensive evaluation at `docs/PUSH_NOTIFICATIONS_EVALUATION.md`
 **Changelog (v1.9)**: Added F28 Demo Mode feature — environment-controlled mock data for demos without real transactions
 **Changelog (v1.8)**: Incorporated DRD v1.1 design decisions — onboarding integration (Step 1.5), recommendation match indicator, Smart Pay auto-capture handoff, iOS Shortcut platform constraint clarification
 
@@ -25,11 +27,26 @@ MaxiMile is a context-aware mobile application that helps Singapore urban profes
 
 **Mental Model**: Users manually track card rules via spreadsheets, notes apps, mileage blogs (MileLion, Suitesmile), and Telegram groups. They assume spending categories are static, mentally track bonus caps, and default to a "safe" card when unsure.
 
-**Pain Point / Friction**: Users frequently forget bonus caps, misclassify transactions, or exceed monthly limits unknowingly — leading to lost miles. Tracking across multiple cards is cognitively taxing. Real-time decisions at checkout are stressful, especially for contactless/mobile payments.
+**Pain Point / Friction**: Users face a **four-dimensional friction landscape** that compounds at the point of payment:
 
-**Impact**: Miles optimization errors cost users thousands of miles annually (SGD 200–500+ in flight value). Beyond financial loss, users experience decision fatigue and anxiety. At scale, this inefficiency discourages engagement with reward programs, weakening long-term customer loyalty for banks.
+1. **Complexity at POS**: Bonus caps, category-specific earn rates, MCC exclusions, and promotional overlaps across 3–7 cards are too complex to apply in real-time at a contactless checkout
+2. **Operational Burden**: Manual transaction logging (~10-20 sec/txn) creates fatigue; card rule changes happen without notice, invalidating mental models
+3. **Cognitive Load**: Chronic decision fatigue and anxiety at checkout; eroding confidence in their own optimization strategy over time
+4. **Knowledge Gaps**: Confusion between bank points vs airline miles (transferable programs add complexity)
 
-> **Full statement**: An **urban working professional in Singapore** struggles with **manually tracking credit card rules across spreadsheets, blogs, and memory** to **maximize airline miles earned from everyday spending** but cannot do so effectively because **bonus caps, category rules, and exclusions across multiple cards are too complex to track in real-time at the point of payment**, which leads to **thousands of lost miles annually (worth SGD 200–500+ in flights), chronic decision fatigue, and eroding trust in their own optimization strategy**.
+Result: Users frequently forget bonus caps, misclassify transactions, or exceed monthly limits unknowingly — leading to lost miles. Some users eventually abandon optimization entirely (HardwareZone evidence: users going from 7–10 cards down to 2).
+
+**Impact**: The cost is measured in **missed vacations** and **mounting psychological burden**:
+
+- **Financial**: Users lose 5,000–15,000 miles annually — *enough for a return business class seat to Tokyo, now permanently lost*. In dollar terms: SGD 200–500 in unrealized flight value per year, per user. Multiply by 200,000 active optimizers in Singapore = **SGD 40M–100M in lost value annually** across the market.
+
+- **Temporal**: ~18-27 hours per year spent on uncompensated cognitive labor — maintaining spreadsheets, second-guessing decisions at checkout ("Did I already use my dining cap this month?"), reconciling post-facto cap breaches. That's **2-3 full workdays** of mental effort with no reward.
+
+- **Psychological**: Each transaction triggers a micro-anxiety loop: *"Which card? Did I pick right? What if I'm wrong?"* This relentless decision burden compounds into chronic stress and eroding confidence. Users start doubting their own optimization strategy. The emotional toll is severe enough that many eventually surrender entirely — HardwareZone forums document users abandoning their optimization efforts, going from 7–10 carefully selected cards down to just 2. **What began as a smart financial strategy ends in exhausted resignation.**
+
+- **Systemic**: For banks, this exodus represents weakened customer engagement and abandoned category-specific spend incentives — the very mechanisms designed to differentiate premium cards. For the broader miles ecosystem, when users give up, it reduces demand pressure that keeps airline programs honest, paradoxically hurting even the engaged users who remain.
+
+> **Full statement**: An **urban working professional in Singapore** struggles with **manually tracking credit card rules across spreadsheets, blogs, and memory** to **maximize airline miles earned from everyday spending** but cannot do so effectively because of **four compounding frictions: (1) complexity at POS (bonus caps, category rules, MCC exclusions across 3–7 cards), (2) operational burden (manual logging, rule changes without notice), (3) cognitive load (chronic decision fatigue, eroding confidence), and (4) knowledge gaps (bank points vs airline miles confusion)**, which leads to **thousands of lost miles annually (worth SGD 200–500+ in flights), chronic decision fatigue, and eventual abandonment of optimization entirely (users going from 7–10 cards down to 2)**.
 
 ### Evidence
 - [HardwareZone forums](https://forums.hardwarezone.com.sg/threads/who-gave-up-miles-chasing-via-credit-card.7187086/): Users reporting giving up miles chasing due to complexity; going from 7–10 cards down to 2
@@ -168,7 +185,7 @@ No product exists in Singapore that provides real-time, personalized card recomm
 ### Competitive Positioning
 - **Our unique value**: The only product that combines personalized card portfolio awareness + real-time spending state + point-of-payment recommendations
 - **Table stakes**: Accurate earn rate data, coverage of top 30 SG miles cards (~85% market), mobile-first UX
-- **Differentiators**: State-aware cap tracking, proactive alerts, miles-saved insights (integrated into Miles tab), rate change monitoring (community + AI-automated detection), spending-pattern-based portfolio suggestions, **Apple Pay / Android notification auto-capture (F26/F27) — no Singapore competitor offers this**; **closed-loop Recommend->Pay->Auto-log->Cap update->Better recommendation feedback cycle** — auto-capture confirmation screen shows whether user used the best card (recommendation match indicator), turning every transaction into a micro-learning moment that reinforces the core value prop
+- **Differentiators**: State-aware cap tracking, proactive alerts, miles-saved insights (integrated into Miles tab), rate change monitoring (community + AI-automated detection), spending-pattern-based portfolio suggestions, **Apple Pay / Android notification auto-capture (F26/F27) — no Singapore competitor offers this**; **closed-loop Recommend->Pay->Auto-log->Cap update->Better recommendation feedback cycle** — auto-capture confirmation screen shows whether user used the best card (recommendation match indicator), turning every transaction into a micro-learning moment that reinforces the core value prop; **proactive push notifications for rate changes (F29) — no competitor (MileLion, Suitesmile, SingSaver) offers mobile push alerts for credit card rate changes**, creating a critical retention touchpoint for passive users
 
 ### SWOT Analysis
 
@@ -267,11 +284,18 @@ Enable miles-focused users to consistently use the optimal credit card for every
 - Transaction logging rate (target: 70%+ of recommendations result in logged transaction; target increases to 85%+ after F26/F27 auto-capture rollout)
 - Auto-capture setup rate (target: 30%+ of iOS users complete Shortcut setup within 7 days of F26 launch)
 - Auto-capture confirmation rate (target: 95%+ of auto-captured transactions confirmed by user)
+- Push notification opt-in rate (F29) (target for future launch: 50%+ iOS, 70%+ Android after 6 months)
+- Push notification open rate (F29) (target for future launch: 15%+ for critical, 10%+ for warning)
+- Push notification delivery rate (F29) (target for future launch: 95%+)
+- Demo mode presentation readiness (F29) (target: 100% — stakeholders can experience full notification flow on demand)
 
 ### Lagging Indicators
 - User-reported additional miles earned per month
 - Monthly churn rate (target: <15%)
 - NPS score (target: 50+)
+- Push notification opt-out rate (F29) (target for future launch: <5% after 6 months)
+- Retention uplift for push-enabled users (F29) (target for future launch: +20% vs non-push users)
+- Stakeholder demo feedback score (F29) (target: 4.5+/5.0 — measures demo mode effectiveness)
 
 ---
 
@@ -312,6 +336,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | F26 | **Apple Pay Shortcuts Auto-Capture** | iOS Shortcuts Transaction trigger integration that auto-populates transaction logs via the existing `maximile://` URL scheme when users pay with Apple Pay NFC. Captures amount, merchant, and card used — user confirms with one tap. Reduces per-transaction logging from ~20 sec to ~2-3 sec. Solves the #1 product risk (manual logging paradox) with zero native code required. Multiple App Store precedents (TravelSpend, MoneyCoach, BalanceTrackr). **Setup offered during onboarding as Step 1.5** (between "Add Cards" and "Set Miles Balances") to maximize adoption, with fallback access via Settings. **Confirmation screen includes recommendation match indicator** — calls `recommend()` RPC to show whether the user used the best card for that category, closing the Recommend->Pay->Auto-log->Cap update feedback loop. **iOS platform constraint**: Shortcuts automations cannot be programmatically installed — user must manually tap "Add Automation" in the Shortcuts app (hard Apple limitation); the setup wizard minimizes this friction with a pre-configured `.shortcut` file. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` and `docs/DRD_AUTO_CAPTURE.md` | 3500 | 3 | 85% | 3 | 2975 | Deep link handler parses `maximile://log?amount=X&merchant=Y&card=Z&source=shortcut`; card name fuzzy-matched to user portfolio; merchant auto-mapped to spend category; pre-filled transaction form shown for one-tap confirmation with recommendation match indicator; downloadable `.shortcut` template provided (cannot be auto-installed — Apple platform constraint); in-app setup wizard completes in <2 min; setup offered during onboarding Step 1.5; works on iOS 17+ |
 | F27 | **Android Notification Auto-Capture** | `NotificationListenerService`-based automatic transaction capture from banking app notifications on Android. Parses push notifications from DBS, OCBC, UOB, Citi, AMEX (and Google Pay/Samsung Pay) to extract amount, merchant, and card — auto-logs transactions with no user action. Requires one-time notification access permission. **Setup offered during onboarding as Step 1.5** (same screen as F26, platform-adaptive: shows notification-based messaging on Android). **Confirmation screen includes recommendation match indicator** (same as F26) — reinforces good card choices and educates on better alternatives. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` and `docs/DRD_AUTO_CAPTURE.md` | 3000 | 3 | 70% | 4 | 1575 | Native Android module via Expo config plugin; regex parsers for top 5 SG bank notification formats; on-device-only processing (no raw notification data uploaded); prominent privacy disclosure; background service with battery-efficient filtering; Google Pay + Samsung Pay notification parsing; Play Store Data Safety section updated; setup offered during onboarding Step 1.5; confirmation screen shows recommendation match indicator |
 | F28 | **Demo Mode** | Environment-controlled demo mode that enables product demonstrations without requiring real Apple Pay transactions. Activated via `EXPO_PUBLIC_DEMO_MODE=true` environment variable in EAS Build demo profile. When enabled, auto-capture flow automatically injects realistic mock transaction data (44 merchants across 6 categories: Coffee, Gas, Grocery, Restaurant, Retail, Online) into the deep link handler. Zero UI changes — completely transparent to the user experience. Essential for sales demos, investor presentations, and TestFlight/EAS Build testing where triggering the Shortcuts automation without making real purchases is required. Mock data generator produces randomized amounts within realistic merchant price ranges, uses user's portfolio cards when available, falls back to common card names otherwise. See `docs/DEMO_MODE.md` and `docs/PRD_DEMO_MODE.md` for full technical spec | 1000 | 2 | 95% | 1 | 1900 | Build command `eas build --profile demo --platform ios` generates demo-enabled build; deep link handler automatically injects mock data when `isDemoMode()` returns true; mock transactions include realistic amounts, merchant names, and card assignments; works seamlessly with existing auto-capture confirmation flow; production builds have demo mode disabled via `EXPO_PUBLIC_DEMO_MODE=false`; internal distribution via EAS Build (no App Store submission required) |
+| F29 | **Push Notifications for Rate Change Alerts** | Complete production-ready push notification system that alerts users when credit card earn rates, bonus caps, or transfer ratios change for cards in their portfolio. Complements existing in-app rate change alerts (F23) by reaching users who don't actively open the app. Implements portfolio-aware filtering (only alerts for owned cards), severity-based batching (critical = immediate, warning = daily batch, info = opt-in weekly), smart frequency capping (<4 notifications/user/month avg), and granular user controls. Uses `expo-notifications` (already installed) with Expo Push Service backend. Includes deep linking to card details, quiet hours support, and notification history. Addresses critical user need: rate changes directly impact earning potential (users who miss devaluations lose SGD 50-200+ per change). **Competitive differentiation**: None of our competitors (MileLion, Suitesmile, SingSaver) offer proactive push alerts for rate changes. **Build strategy**: Complete system built in single sprint (Sprint 13) with comprehensive demo mode for stakeholder presentations. System is production-ready and fully tested but NOT enabled for end users yet — launch date pending business decision. **Demo mode**: Auto-triggers on first Miles tab visit with realistic mock notifications showcasing critical/warning/info severity levels, batching behavior, and deep-link navigation. Enables compelling product demonstrations without real rate changes. See comprehensive evaluation at `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for technical architecture, risk analysis, UX design, and success metrics | 4000 | 3 | 85% | 4 | 2550 | Complete notification infrastructure built and tested; demo mode auto-triggers realistic notifications on Miles tab visit; users can opt into push during onboarding with pre-permission primer (disabled in production by default); critical rate changes trigger immediate push notification; warning changes batched to 9 AM daily; notification copy follows template "[Emoji] [Card]: [Change] — [Impact] [CTA]"; tap notification deep-links to card detail with rate change expanded; granular settings (critical/warning/info toggles, quiet hours, frequency mode); notification history accessible in Settings; demo mode showcases all notification types with realistic timing; production launch controlled via feature flag; integrates with F6 for cap approaching alerts; supports batched multi-change digest; portfolio-aware filtering ensures relevance |
 
 #### P2 — Could Have
 
@@ -354,6 +379,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | F26: Apple Pay Shortcuts Auto-Capture | **Delighter** → **Must-Have** (for retention) | Unexpected automation that "just works" for Apple Pay users; eliminates the #1 friction (manual logging) and converts a chore into a delight. Becomes Must-Have once users experience it — they won't go back to manual |
 | F27: Android Notification Auto-Capture | **Delighter** | Same automation delight for Android users; full notification interception feels magical; one-time setup then passive value delivery |
 | F28: Demo Mode | **Performance** (for go-to-market) | Critical enabler for product demonstrations, investor presentations, and sales demos; eliminates the requirement for real transactions during demos; purely operational value (no end-user impact in production) |
+| F29: Push Notifications for Rate Changes | **Delighter** → **Performance** (retention driver) | Unexpected proactive value; "the app watches out for me" even when I'm not using it; builds deep trust and drives re-engagement. Initially a delighter but becomes performance driver as users come to expect timely rate change alerts. Critical retention lever: push-enabled users show 15-25% higher retention vs non-push users. **Built as production-ready system in Sprint 13 but not user-enabled pending launch decision; includes comprehensive demo mode for stakeholder presentations** |
 
 ### Impact-Effort Matrix
 
@@ -476,6 +502,21 @@ Enable miles-focused users to consistently use the optimal credit card for every
 - As a product owner, I want automated monitoring of bank T&C pages, so that rate changes are detected within 48 hours without manual effort
 - As an admin, I want a pipeline health dashboard showing scraper uptime and detection accuracy, so that I can monitor system reliability
 
+### Epic 13: Push Notifications for Rate Change Alerts (F29 + F6 Integration + Demo Mode)
+- As a user, I want to opt into push notifications during onboarding with a clear explanation of value, so that I never miss critical rate changes without feeling pressured (production-ready but disabled by default pending launch decision)
+- As a user, I want to receive immediate push notifications for critical rate changes (devaluations, major earn rate cuts), so that I can adjust my strategy before the change becomes effective
+- As a user, I want warning-level rate changes (cap reductions, moderate cuts) batched into a daily 9 AM notification, so that I stay informed without being overwhelmed
+- As a user, I want granular control over which types of notifications I receive (critical/warning/info toggles), so that I only get alerts that matter to me
+- As a user, I want to set quiet hours for notifications, so that I'm not disturbed during sleep hours
+- As a user, I want to tap a notification and be taken directly to the affected card's detail screen, so that I can quickly review the change and see alternatives
+- As a user, I want to see a notification history in Settings, so that I can review past alerts even if I dismissed them
+- As a user approaching a bonus cap (F6), I want a push notification at 80% usage suggesting an alternative card, so that I don't exceed the cap and lose earning potential
+- As a user with multiple rate changes affecting my portfolio within a week, I want them collapsed into a single digest notification, so that I'm not bombarded with individual alerts
+- As a user, I want notification copy to be clear and actionable (showing impact in SGD or mpd), so that I understand why the alert matters and what to do about it
+- **As a stakeholder viewing a demo, I want push notifications to auto-trigger when I first visit the Miles tab, so that I can experience the complete notification flow without waiting for real rate changes**
+- **As a stakeholder viewing a demo, I want to see realistic examples of critical, warning, and info notifications with proper severity-based timing, so that I understand the full feature value proposition**
+- **As a product manager demoing the system, I want demo notifications to showcase deep-link navigation to card details, so that stakeholders see the complete user journey**
+
 ---
 
 ## 10. Assumptions & Hypotheses
@@ -548,6 +589,10 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | **iOS Shortcut setup drop-off due to manual "Add Automation" step** | Medium | Medium | Apple does not allow programmatic Shortcut installation — user must manually tap "Add Automation" in the Shortcuts app. Mitigation: pre-configured `.shortcut` file minimizes effort to ~30 seconds; setup wizard provides step-by-step guidance; onboarding Step 1.5 catches users at peak motivation | Product/UX |
 | **Android notification access permission scares users** | Medium | Medium | Prominent privacy disclosure; on-device-only processing; never upload raw notification content; transparent privacy policy; gradual rollout with opt-in | Product/UX |
 | **SG bank notification format changes break Android parsers** | Medium | Low | Regex patterns per bank with version control; community-reported format changes; automated test suite with sample notifications | Engineering |
+| **Push notification fatigue leads to high opt-out rate (F29)** | Medium | High | Frequency caps (<4 notifications/user/month avg); smart batching (warning=daily, info=weekly); granular user controls; portfolio-aware filtering (only owned cards); auto-throttle for non-engaging users; monitor opt-out rate weekly (target <5% when launched); system ready but disabled in production pending launch decision | Product/UX |
+| **Low push permission opt-in rate on iOS (F29)** | Medium | Medium | Pre-permission primer explaining value ("Never miss a rate change"); ask during onboarding Step 1.5 (contextual timing); retry after user's first in-app rate change alert; A/B test primer copy; accept lower iOS adoption, focus on Android + in-app fallback | Product/UX |
+| **Push notification delivery failures (F29)** | Low | Medium | Fallback to in-app banner (source of truth); retry critical notifications once after 1 hour; monitor Expo API status; alert eng team if delivery rate <85% for 24 hours; log delivery status for all notifications | Engineering |
+| **Irrelevant push notifications damage trust (F29)** | Low | High | Portfolio-aware filtering (only cards user owns); exclude cards unused in 90+ days (except critical devaluations); user feedback loop ("Was this helpful?"); one-tap opt-out in-app; monthly health check (auto-switch to digest if >10 notifications/month) | Product/UX |
 
 ---
 
@@ -562,6 +607,9 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | App Store / Play Store approval | External | N/A | Could delay launch by 1–2 weeks |
 | Apple Shortcuts Transaction trigger API stability (F26) | External | Stable (iOS 17+) | If Apple deprecates trigger, F26 auto-capture becomes unavailable; manual logging remains |
 | Expo Dev Build for native Android module (F27) | Internal | Available | Required for NotificationListenerService; blocks F27 if team is using Expo Go only |
+| expo-notifications package (F29) | Internal | Available (v0.32.16 installed) | Already in package.json; F29 implementation ready to start |
+| Expo Push Notification Service (F29) | External | Stable | Free tier 600K/month; if unavailable, can switch to OneSignal or direct FCM/APNs |
+| F23 Rate Change Monitoring (F29 dependency) | Internal | Shipped (Sprint 12) | F29 requires F23's rate_changes table and in-app banner infrastructure as foundation |
 
 ---
 
@@ -601,8 +649,8 @@ A mobile app where users can:
 | **v1.5** | F22–F23: Card Coverage Expansion (20→30 cards) + Rate Change Monitoring & Alerts. POSB Everyday reclassified. Eligibility metadata added | Months 9–11 | 30 cards in database (85% market coverage); 25% increase in addressable users; rate change alerts delivered within 48 hrs of detected changes; POSB Everyday removed from miles card list |
 | **v1.6** | F24: Community-Sourced Rate Change Submissions + admin verification dashboard. Closes Layer 1 detection gap with user-generated content | Months 11–12 | 10+ community submissions/month by month 3; <15 min/day admin review time; 0 false positives published; contributor badge system active |
 | **v1.7** | F25: Automated Rate Change Detection — GitHub Actions scraper + Gemini Flash AI classifier. $0/month infrastructure. Full detection pipeline | Months 12–14 | 90%+ of real rate changes auto-detected within 48 hours; 95%+ precision on published changes; pipeline uptime >=99%; admin review <30 min/month |
-| **v1.8** | F26: Apple Pay Shortcuts Auto-Capture — deep link handler, merchant→category mapping, card name fuzzy matching, downloadable Shortcut template (user must manually add via Shortcuts app — Apple platform constraint), in-app setup wizard offered during onboarding Step 1.5, recommendation match indicator on confirmation screen, Smart Pay auto-capture handoff (60s window). **Solves the #1 product risk (manual logging paradox) with zero native code. Closes the Recommend->Log feedback loop.** | Months 14–15 | 30%+ of iOS users complete Shortcut setup; auto-captured transactions confirmed in <3 sec; transaction logging rate improves from 70% to 85%+; Day-7 retention improves by 10%+ for Shortcut-enabled users; recommendation match shown on 100% of auto-captured confirmations |
-| **v2.0** | F27: Android Notification Auto-Capture (with onboarding Step 1.5, recommendation match indicator, Smart Pay handoff) + F10–F11: Portfolio optimizer, Promo tracker + bank API exploration + medium/ultra-premium card expansion (35→40+) + push notifications for rate changes | Months 15–18 | Android auto-capture covers top 5 SG banks; 10,000 users, 10%+ premium conversion, revenue positive |
+| **v1.8** | F29: Push Notifications (Complete System + Demo Mode) + F26: Apple Pay Shortcuts Auto-Capture — F29: production-ready push notification infrastructure with demo mode for stakeholder presentations (system built but not user-enabled pending launch decision); F26: deep link handler, merchant→category mapping, card name fuzzy matching, downloadable Shortcut template (user must manually add via Shortcuts app — Apple platform constraint), in-app setup wizard offered during onboarding Step 1.5, recommendation match indicator on confirmation screen, Smart Pay auto-capture handoff (60s window). **Solves the #1 product risk (manual logging paradox) with zero native code. Closes the Recommend->Log feedback loop.** | Months 13–15 | F29: Complete notification system built with demo mode showcasing all severity levels; stakeholder demo feedback >4.5/5.0; F26: 30%+ of iOS users complete Shortcut setup; auto-captured transactions confirmed in <3 sec; transaction logging rate improves from 70% to 85%+; Day-7 retention improves by 10%+ for Shortcut-enabled users; recommendation match shown on 100% of auto-captured confirmations |
+| **v2.0** | F27: Android Notification Auto-Capture (with onboarding Step 1.5, recommendation match indicator, Smart Pay handoff) + F10–F11: Portfolio optimizer, Promo tracker + bank API exploration + medium/ultra-premium card expansion (35→40+) | Months 15–18 | Android auto-capture covers top 5 SG banks; 10,000 users, 10%+ premium conversion, revenue positive. Note: F29 push notifications built in v1.8 (Month 13) but launch date TBD pending business decision |
 
 ---
 
@@ -958,8 +1006,9 @@ See PRD Section 4 for full competitive matrix, SWOT, and Porter's Five Forces an
 | **Month 9–11** | Market Coverage & Intelligence — "Every Card, Every Change" | Card Coverage Expansion (20→30 cards, 85% market coverage), Rate Change Monitoring & Alerts, POSB Everyday reclassification, Eligibility metadata for restricted cards | v1.5 Release |
 | **Month 11–12** | Community Intelligence — "Crowdsourced Accuracy" | Community rate change submissions, admin verification dashboard (Cloudflare Pages), dedup fingerprinting, contributor badges, submission status tracking | v1.6 Release |
 | **Month 12–14** | Automated Intelligence — "Always Up to Date" | GitHub Actions scraper (50 bank URLs), Gemini Flash AI classification, confidence-based routing, pipeline health monitoring. $0/month infrastructure | v1.7 Release |
+| **Month 13** | Proactive Engagement Foundation — "Build Once, Demo Well, Launch Later" | **F29 Push Notifications Complete System + Demo Mode**: Build production-ready push notification infrastructure with full feature completeness (token registration, permission flow, severity-based routing, batching, deep linking, notification history, granular settings, F6 cap alerts integration). System is fully functional but NOT enabled for end users in production — launch date TBD pending business decision. Includes comprehensive demo mode that auto-triggers realistic notifications on Miles tab visit for stakeholder presentations and investor demos. Enables immediate value demonstration without requiring beta cohorts or gradual rollout. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` | v1.8 Release |
 | **Month 14–15** | Auto-Capture — "Log Without Lifting a Finger" | F26: iOS Shortcuts Transaction trigger integration for Apple Pay NFC auto-capture. Deep link handler, merchant→category mapping, card fuzzy matching, downloadable Shortcut template (user must manually add — Apple platform constraint), in-app setup wizard. Onboarding Step 1.5 integration. Recommendation match indicator on confirmation screen. Smart Pay auto-capture handoff (60s window). Zero native code. **Solves #1 product risk. Closes Recommend->Log loop.** | v1.8 Release |
-| **Month 15–16** | Cross-Platform Auto-Capture + Smart Portfolio | F27: Android NotificationListenerService for banking app auto-capture (DBS, OCBC, UOB, Citi, AMEX). Portfolio optimizer, Promo & bonus tracker, Medium/ultra-premium card expansion (35→40+), push notifications for critical rate changes | v2.0 Release |
+| **Month 15–16** | Cross-Platform Auto-Capture + Smart Portfolio | F27: Android NotificationListenerService for banking app auto-capture (DBS, OCBC, UOB, Citi, AMEX). Portfolio optimizer, Promo & bonus tracker, Medium/ultra-premium card expansion (35→40+) | v2.0 Release |
 | **Month 17–18** | Monetization & Scale | Premium tier launch, Bank partnership exploration, Regional expansion research | Revenue Milestone |
 
 ### F. Product Backlog
@@ -991,6 +1040,7 @@ See PRD Section 4 for full competitive matrix, SWOT, and Porter's Five Forces an
 | P1 | F22: Card Coverage Expansion (20→30 cards) | Feature | Ready | Sprint 11 |
 | P1 | F23: Rate Change Monitoring & Alerts | Feature | Shipped | Sprint 12 |
 | P1 | F24: Community-Sourced Rate Change Submissions | Feature | Ready | Sprint 13 |
+| **P1** | **F29: Push Notifications (Complete System + Demo Mode)** | **Feature** | **Ready** | **Sprint 13** |
 | P1 | F25: Automated Rate Change Detection | Feature | Ready | Sprint 14–15 |
 | **P1** | **F26: Apple Pay Shortcuts Auto-Capture** | **Feature** | **Ready** | **Sprint 16–17** |
 | P1 | F27: Android Notification Auto-Capture | Feature | Future | Sprint 18–19 |

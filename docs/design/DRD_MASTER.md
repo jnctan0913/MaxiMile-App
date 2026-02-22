@@ -729,6 +729,27 @@ This master DRD defines the **global design system**. For detailed feature speci
 
 ---
 
+### 9.3 DRD: Push Notifications Demo Mode (F29)
+
+**File**: `docs/design/DRD_PUSH_NOTIFICATIONS_DEMO.md`
+**Version**: 1.0
+**Features Covered**: F29 (Push Notifications for Rate Change Alerts - Demo Mode)
+
+**Scope**:
+- Demo notification preview component (iOS-style native notification)
+- Auto-trigger mechanism (first Miles tab visit)
+- Demo controls UI for presenters
+- Notification library (6 pre-defined notifications)
+- Demo sequences (Feature Showcase, Rate Change, Auto-Capture)
+
+**Key Sections**:
+- Section 2: Demo Notification Component Specifications
+- Section 3: Visual Design (iOS-style glassmorphic UI)
+- Section 4: Animation Behavior (slide down/up, auto-dismiss)
+- Section 5: Demo Controls Interface
+
+---
+
 ## 10. Handover Notes for Developers
 
 ### 10.1 Design System Implementation

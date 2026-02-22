@@ -34,6 +34,9 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [showAboutModal, setShowAboutModal] = useState(false);
 
+  // Check if demo mode
+  const isDemoMode = process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
+
   const handleSignOut = async () => {
     if (Platform.OS === 'web') {
       const confirmed = window.confirm("Sign Out?\n\nYou'll need to sign in again to use MaxiMile.");
@@ -151,6 +154,21 @@ export default function ProfileScreen() {
             danger
           />
         </View>
+
+        {/* Demo Controls (only in demo builds) */}
+        {isDemoMode && (
+          <>
+            <Text style={styles.sectionLabel}>Demo</Text>
+            <View style={styles.menuSection}>
+              <MenuItem
+                icon="flask-outline"
+                label="Demo Controls"
+                onPress={() => router.push('/demo-controls')}
+                isLast
+              />
+            </View>
+          </>
+        )}
 
         {/* Sign out */}
         <TouchableOpacity

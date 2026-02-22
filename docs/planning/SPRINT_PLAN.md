@@ -1,11 +1,11 @@
 # Sprint Plan: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 9.0
+**Version**: 11.0
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
-**Source**: PRD v1.9, EPICS_AND_USER_STORIES v1.7, NOTIFICATION_CAPTURE_FEASIBILITY v1.0, DRD_AUTO_CAPTURE v1.1, PRD_DEMO_MODE v1.0
-**Status**: Draft — Awaiting Stakeholder Review
-**Change Log**: v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
+**Source**: PRD v1.9, EPICS_AND_USER_STORIES v1.7, NOTIFICATION_CAPTURE_FEASIBILITY v1.0, DRD_AUTO_CAPTURE v1.1, PRD_DEMO_MODE v1.0, PUSH_NOTIFICATIONS_EVALUATION v1.0
+**Status**: In Progress — Sprint 19 Complete, Sprint 20 Active
+**Change Log**: v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
 
@@ -104,6 +104,7 @@ All 5 agents work **simultaneously across 4 phases** with staggered starts:
 | **E11** | Rate Change Detection Pipeline | F24, F25 | P1 | Sprint 13–15 |
 | **E12** | Transaction Auto-Capture | F26, F27 | P1 | Sprint 16–17 |
 | **E13** | Demo Mode | F28 | P1 | Sprint 18 (Shipped) |
+| **E14** | Push Notifications for Rate Alerts | New Feature | P1 | Sprint 19–22 |
 
 **Critical Path**: F5 (Rules DB) → F1 (Card Setup) → F2 (Recommendation) → F4 (Transaction Log) → F3 (Cap Tracker)
 
@@ -3592,3 +3593,629 @@ For full implementation details, see:
 **Sprint 18 Status**: ✅ Complete (2026-02-21)
 **Implementation**: Fully shipped with 8 commits, 741 lines added, feature branch `feat/demo-mode` merged to `main`
 **Demo Build**: Available via `eas build --profile demo --platform ios`
+
+---
+
+## Sprint 19: "Foundation" (Push Notifications Phase 1 — Infrastructure) ✅ COMPLETE
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Build basic push notification infrastructure with token registration, permission flow, and backend sender capability. No user-facing notifications yet — this sprint establishes the foundation for push alerts.
+**Epic**: E14 — Push Notifications for Rate Alerts
+**PRD Reference**: `docs/PUSH_NOTIFICATIONS_EVALUATION.md` — Phase 1 (Foundation)
+**Prerequisite**: Sprint 12 complete (rate_changes table and in-app notification system operational)
+**Infrastructure Cost**: $0/month (Expo Push Service free tier: 600K notifications/month)
+**Status**: COMPLETE ✅ — All stories shipped, infrastructure operational
+
+### Sprint 19 — Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S19.1** | As a developer, I want to register device push tokens so users can receive notifications | P0 | M | 2 | Developer |
+| **S19.2** | As a user, I want to opt into push notifications during onboarding so I don't miss rate changes | P0 | S | 1 | Developer + Designer |
+| **S19.3** | As a backend, I want to send push notifications via Expo API when rate changes are inserted | P0 | L | 3 | Software Engineer |
+| **Total** | | | | **6** | |
+
+### Sprint 19 — User Story Details
+
+#### S19.1: Device Push Token Registration
+
+**As a developer, I want to register device push tokens so users can receive notifications**
+
+**Acceptance Criteria**:
+
+| AC# | Given | When | Then |
+|-----|-------|------|------|
+| AC1 | User grants notification permission | App requests Expo push token | Token is retrieved and stored in `auth.users.push_token` |
+| AC2 | Token registration succeeds | Token is saved to database | `auth.users.push_enabled` is set to `true` |
+| AC3 | Token registration fails (network error) | Token save fails | Error is logged; user can retry in Settings |
+| AC4 | User's token expires or changes | App detects token change on startup | New token overwrites old token in database |
+| AC5 | Developer tests on physical device | Test notification is sent via Expo Push API | Notification appears on device lock screen |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T19.01: Add `push_token`, `push_enabled`, `push_settings` columns to `auth.users` table (Migration 020) | Data Engineer | 1h | — |
+| T19.02: Create `lib/push-notifications.ts` module with `registerForPushNotifications()` function | Developer | 2h | T19.01 |
+| T19.03: Implement Expo `requestPermissionsAsync()` and `getExpoPushTokenAsync()` logic | Developer | 2h | T19.02 |
+| T19.04: Wire token registration to onboarding flow (call after user adds first card) | Developer | 1h | T19.02 |
+| T19.05: Add fallback: re-register token on app startup if expired/changed | Developer | 1.5h | T19.02 |
+| T19.06: Create Supabase RPC `upsert_push_token(user_id, token)` | Software Engineer | 1h | T19.01 |
+| T19.07: Test token registration on iOS (physical device required for push) | Tester | 2h | T19.02 |
+| T19.08: Test token registration on Android (emulator OK) | Tester | 1.5h | T19.02 |
+
+---
+
+#### S19.2: Onboarding Permission Prompt
+
+**As a user, I want to opt into push notifications during onboarding so I don't miss rate changes**
+
+**Acceptance Criteria**:
+
+| AC# | Given | When | Then |
+|-----|-------|------|------|
+| AC1 | User completes "Add Cards" step | Pre-permission primer screen appears | Screen explains value: "Never miss a rate change that costs you miles" |
+| AC2 | User taps "Enable Notifications" | iOS/Android permission prompt appears | User can grant or deny |
+| AC3 | User grants permission | Permission is saved | App proceeds to next onboarding step; push_enabled=true |
+| AC4 | User denies permission | Permission denial is saved | App proceeds to next step; in-app notifications remain active |
+| AC5 | User taps "I'll do this later" | No permission prompt shown | App proceeds; user can enable later in Settings |
+| AC6 | User denies then revisits Settings | Settings shows "Enable Push Notifications" toggle | User can grant permission retroactively |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T19.09: Design pre-permission primer screen wireframe (iOS + Android variants) | Designer | 2h | — |
+| T19.10: Build pre-permission primer UI (modal with "Enable" + "Later" buttons) | Developer | 3h | T19.09 |
+| T19.11: Implement iOS permission flow (primer → system prompt) | Developer | 2h | T19.10, T19.02 |
+| T19.12: Implement Android permission flow (primer → auto-grant on API 33+) | Developer | 1.5h | T19.10, T19.02 |
+| T19.13: Add "Enable Push Notifications" toggle to Settings screen | Developer | 2h | T19.02 |
+| T19.14: Wire Settings toggle to re-request permission if previously denied | Developer | 1.5h | T19.13 |
+| T19.15: Analytics: Track permission opt-in rate (iOS vs Android) | Developer | 1h | T19.11, T19.12 |
+
+---
+
+#### S19.3: Backend Push Notification Sender
+
+**As a backend, I want to send push notifications via Expo API when rate changes are inserted**
+
+**Acceptance Criteria**:
+
+| AC# | Given | When | Then |
+|-----|-------|------|------|
+| AC1 | New critical rate change is inserted | Trigger fires | Backend Edge Function is called with `rate_change_id` |
+| AC2 | Edge Function receives rate change | Function queries affected users (users with card in portfolio) | List of users with `push_enabled=true` is retrieved |
+| AC3 | Affected users are identified | Function builds notification payload for each user | Payload includes title, body, deep link data |
+| AC4 | Notification payload is built | Function sends batch request to Expo Push API | Expo returns delivery receipts |
+| AC5 | Expo Push API succeeds | Delivery status is logged to `push_notification_log` table | `delivered=true` is recorded |
+| AC6 | Expo Push API fails (invalid token, network error) | Error is logged | `delivered=false`, `error_message` is recorded |
+| AC7 | Developer tests with manual trigger | Edge Function is invoked via Supabase dashboard | Test notification is sent to developer's device |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T19.16: Design `push_notification_log` table schema | Data Engineer | 1h | — |
+| T19.17: Write Migration 021: `push_notification_log` table | Data Engineer | 1h | T19.16 |
+| T19.18: Create Supabase Edge Function scaffold: `send-push-notifications` | Software Engineer | 1.5h | — |
+| T19.19: Implement RPC `get_affected_users(card_id, program_id)` to find users with card in portfolio | Software Engineer | 2h | T19.01 |
+| T19.20: Implement notification payload builder (title, body, data, priority) | Software Engineer | 2.5h | T19.18 |
+| T19.21: Integrate Expo Push API client (POST to `https://exp.host/--/api/v2/push/send`) | Software Engineer | 2h | T19.20 |
+| T19.22: Implement delivery logging (insert to `push_notification_log`) | Software Engineer | 1.5h | T19.17, T19.21 |
+| T19.23: Create database trigger on `rate_changes` table to call Edge Function | Software Engineer | 2h | T19.18 |
+| T19.24: Implement error handling (retry once after 5 min for critical, log failures) | Software Engineer | 2h | T19.21 |
+| T19.25: Test Edge Function with manual rate change insert (dev environment) | Tester | 2h | T19.23 |
+| T19.26: Verify notification appears on physical iOS device | Tester | 1.5h | T19.25 |
+| T19.27: Verify notification appears on Android device/emulator | Tester | 1.5h | T19.25 |
+
+---
+
+### Sprint 19 — Dependency Map
+
+```
+T19.01 (Migration: push columns)
+    ├── T19.02 (lib/push-notifications.ts)
+    │       ├── T19.03 (Expo permission + token APIs)
+    │       ├── T19.04 (Wire to onboarding)
+    │       ├── T19.05 (Startup re-registration)
+    │       ├── T19.07 (Test iOS)
+    │       └── T19.08 (Test Android)
+    ├── T19.06 (RPC: upsert_push_token)
+    ├── T19.09 (Design primer screen)
+    │       └── T19.10 (Build primer UI)
+    │               ├── T19.11 (iOS permission flow)
+    │               ├── T19.12 (Android permission flow)
+    │               └── T19.15 (Analytics)
+    ├── T19.13 (Settings toggle)
+    │       └── T19.14 (Re-request permission)
+    └── T19.19 (RPC: get_affected_users)
+
+T19.16 (push_notification_log schema)
+    └── T19.17 (Migration 021)
+            └── T19.22 (Delivery logging)
+
+T19.18 (Edge Function scaffold)
+    ├── T19.20 (Payload builder)
+    │       └── T19.21 (Expo Push API client)
+    │               ├── T19.22 (Delivery logging)
+    │               └── T19.24 (Error handling)
+    └── T19.23 (Database trigger)
+            └── T19.25 (Manual test)
+                    ├── T19.26 (iOS verification)
+                    └── T19.27 (Android verification)
+```
+
+---
+
+### Sprint 19 — DoR (Definition of Ready)
+
+| # | Criterion | Status |
+|---|-----------|--------|
+| 1 | `expo-notifications@0.32.16` already in package.json | ✅ |
+| 2 | Push Notifications Evaluation v1.0 approved by stakeholders | ✅ |
+| 3 | Sprint 12 complete (rate_changes table, in-app notifications operational) | ✅ |
+| 4 | Physical iOS device available for push testing (emulator doesn't support push) | Required |
+| 5 | Supabase Edge Functions enabled on project | Ready |
+| 6 | Expo Push Notification Service account configured (free tier) | Ready |
+
+---
+
+### Sprint 19 — DoD (Definition of Done)
+
+| # | Criterion |
+|---|-----------|
+| 1 | Users can grant push notification permission during onboarding (iOS + Android) |
+| 2 | Device push tokens are registered and stored in `auth.users.push_token` |
+| 3 | Backend Edge Function can send push notifications via Expo Push API |
+| 4 | Notifications are logged to `push_notification_log` with delivery status |
+| 5 | Database trigger on `rate_changes` table fires Edge Function on insert |
+| 6 | Developer can receive test push notification on physical device |
+| 7 | Permission opt-in rate tracked in analytics (iOS vs Android) |
+| 8 | All new unit tests pass (token registration, Edge Function, delivery logging) |
+| 9 | No regressions in existing functionality (all 600+ tests pass) |
+
+---
+
+### Sprint 19 — Risks & Mitigations
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|----|------|------------|--------|------------|
+| R19.1 | Low iOS permission opt-in rate (~50% is typical) | **High** | **Medium** | Pre-permission primer explains clear value; ask after user adds cards (contextual timing); track opt-in rate daily |
+| R19.2 | Expo Push API rate limits or downtime | **Low** | **Medium** | Free tier: 600K/month (sufficient for beta); fallback to in-app notifications if API fails; monitor delivery rate |
+| R19.3 | Physical iOS device not available for testing | **Low** | **High** | Borrow device from team member; use TestFlight for beta testing with external devices |
+| R19.4 | Database trigger causes performance issues on high-volume inserts | **Low** | **Low** | Trigger only fires on new rate_changes (infrequent: ~10-20/month); Edge Function is async; monitor query time |
+| R19.5 | Token expiry not handled correctly | **Medium** | **Medium** | Implement startup re-registration; log token refresh events; test with expired tokens |
+
+---
+
+### Sprint 19 — Timeline
+
+```
+Week 1: Infrastructure Build
+═════════════════════════════
+Day 1-2:  T19.01–T19.06 (Database + token registration)
+Day 3-4:  T19.09–T19.14 (Permission UI + Settings)
+Day 5:    T19.16–T19.18 (Edge Function scaffold + logging)
+
+Week 2: Backend Integration
+════════════════════════════
+Day 6-7:  T19.19–T19.24 (Edge Function implementation)
+Day 8:    T19.23–T19.27 (Trigger + testing)
+Day 9:    Integration testing (E2E)
+Day 10:   Stabilization + bug fixes
+```
+
+---
+
+## Sprint 20: "Complete System + Demo Mode" (Push Notifications Phase 2 — Production Ready)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Build complete production-ready push notification system with all severities, smart batching, granular controls, F6 cap alerts, and beautiful demo mode for stakeholder presentations. No user rollout—focus on complete implementation + demo polish.
+**Epic**: E14 — Push Notifications for Rate Alerts
+**PRD Reference**: `docs/PUSH_NOTIFICATIONS_EVALUATION.md` (consolidated Phases 2-4) + `docs/PRD_DEMO_MODE.md`
+**Prerequisite**: Sprint 19 complete (push infrastructure operational)
+**Infrastructure Cost**: $0/month (Expo Push free tier)
+
+### Sprint 20 — Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S20.1** | As a backend, I want to send notifications for all severities (critical/warning/info) with smart batching | P0 | L | 8 | Software Engineer |
+| **S20.2** | As a user, I want to preview beautiful push notifications in demo mode | P1 | M | 3 | Developer + Designer |
+| **S20.3** | As a demo presenter, I want to trigger demo notifications from the Miles tab and control them in Settings | P1 | S | 2 | Developer |
+| **Total** | | | | **13** | |
+
+### Sprint 20 — User Story Details
+
+#### S20.1: Complete Notification System (All Severities + Batching + Controls)
+
+**As a backend, I want to send notifications for all severities (critical/warning/info) with smart batching, granular user controls, quiet hours, F6 cap alerts, deep linking, and notification history**
+
+**Acceptance Criteria**:
+
+| AC# | Given | When | Then |
+|-----|-------|------|------|
+| AC1 | Critical rate change is inserted | Edge Function triggers | Notification sent instantly to affected users (severity=critical) |
+| AC2 | Warning rate change is inserted | Edge Function triggers | Notification queued for 9 AM daily batch (severity=warning) |
+| AC3 | Info rate change is inserted | Edge Function triggers | Notification queued for Friday 9 AM weekly digest (severity=info) |
+| AC4 | User taps any notification | Tap detected | Deep links to relevant screen (card detail, cap status, or rate changes list) |
+| AC5 | User navigates to Settings | Screen loads | Granular toggles shown: Critical (ON), Warning (ON), Info (OFF), Cap Alerts (ON), Quiet Hours (10PM-8AM) |
+| AC6 | User reaches 80% of bonus cap | Daily cap check runs | Push notification: "You've used $800 of $1,000 DBS WWC cap. Switch cards?" |
+| AC7 | User navigates to Notification History | History screen loads | All sent notifications shown with timestamps, "Opened" badges, deep links |
+| AC8 | Critical notification triggers at 11 PM | Quiet hours active (10 PM - 8 AM) | Notification delayed until 8 AM |
+| AC9 | User disables "Warning changes" in Settings | Toggle OFF | No warning notifications sent; only critical + cap alerts |
+| AC10 | 2 warning changes occur same day | 9 AM batch job runs | Single batched notification: "2 rate changes affect your cards" |
+
+**Task Breakdown** (Consolidated from original Sprints 20-22):
+
+**Phase 1: Severity Handling + Deep Linking** (Days 1-3)
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T20.01: Update Edge Function to handle all severities (critical=instant, warning=batch 9AM, info=batch Friday) | Software Engineer | 2.5h | Sprint 19 T19.18 |
+| T20.02: Design `notification_queue` table schema (rate_change_id, user_id, severity, scheduled_send_time, delayed_until) | Data Engineer | 1h | — |
+| T20.03: Write Migration 022: notification_queue table | Data Engineer | 0.5h | T20.02 |
+| T20.04: Implement queuing logic for warning/info notifications | Software Engineer | 2h | T20.03 |
+| T20.05: Calculate next 9 AM / Friday 9 AM timestamps (UTC+8 Singapore) | Software Engineer | 1h | T20.04 |
+| T20.06: Update notification payload to include deep link data: {screen, cardId, rateChangeId} | Software Engineer | 1h | Sprint 19 T19.20 |
+| T20.07: Implement Notifications.addNotificationResponseReceivedListener() in App.tsx | Developer | 2h | — |
+| T20.08: Implement deep link router: parse notification data → navigate to CardDetail, CapStatus, or RateChangesList | Developer | 3h | T20.07 |
+| T20.09: Build "Rate Changes List" screen (new) showing all unread changes | Developer | 3h | — |
+| T20.10: Update deep link handler to support maximile://rate-changes and maximile://caps?highlight={cardId} | Developer | 1.5h | T20.08 |
+| T20.11: Test: Insert warning at 2 PM → verify queued for 9 AM, not sent instantly | Tester | 1h | T20.04 |
+| T20.12: Test: Tap notification (background/closed/logged out) → verify deep linking works | Tester | 2h | T20.08 |
+
+**Phase 2: Batching + Quiet Hours + Granular Settings** (Days 4-6)
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T20.13: Create Supabase Edge Function: process-notification-queue (cron job for batching) | Software Engineer | 2.5h | T20.03 |
+| T20.14: Implement batching logic: group by user+day, create single notification if ≥2 changes | Software Engineer | 2h | T20.13 |
+| T20.15: Set up GitHub Actions cron trigger (daily 9 AM SGT, Friday 9 AM for weekly digest) | Software Engineer | 1.5h | T20.13 |
+| T20.16: Add quiet_hours_start, quiet_hours_end to push_settings JSONB (defaults: 22, 8) | Data Engineer | 0.5h | Sprint 19 T19.01 |
+| T20.17: Implement quiet hours check in Edge Function: delay notifications if within window | Software Engineer | 2h | T20.16 |
+| T20.18: Update notification_queue to support delayed_until timestamp for quiet hours | Software Engineer | 1h | T20.03 |
+| T20.19: Design expanded Settings screen wireframe (5 toggles + time pickers + history link) | Designer | 2h | — |
+| T20.20: Build Settings UI: Critical/Warning/Info/Cap Alerts toggles + Quiet Hours time pickers + History link | Developer | 4h | T20.19 |
+| T20.21: Wire toggles to update push_settings JSONB (rate_changes_critical, rate_changes_warning, rate_changes_info, cap_alerts_enabled) | Developer | 2h | T20.20 |
+| T20.22: Update Edge Function to check user's severity preferences before sending | Software Engineer | 1.5h | T20.21 |
+| T20.23: Test: Manual trigger cron job → verify batch sent with 2+ changes | Tester | 1.5h | T20.15 |
+| T20.24: Test: Trigger critical at 11 PM → verify delayed to 8 AM (quiet hours) | Tester | 1.5h | T20.17 |
+| T20.25: Test: Disable warning toggle → insert warning → verify no push sent | Tester | 1h | T20.22 |
+
+**Phase 3: F6 Cap Alerts + Notification History** (Days 7-9)
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T20.26: Design cap_alert_sent tracking table (card_id, user_id, month, sent_at) to prevent duplicates | Data Engineer | 1h | — |
+| T20.27: Write Migration 023: cap_alert_sent table | Data Engineer | 0.5h | T20.26 |
+| T20.28: Create RPC get_users_approaching_cap(threshold=0.8) to find users at 80%+ cap usage | Software Engineer | 2.5h | T20.27 |
+| T20.29: Create Supabase Edge Function: send-cap-approaching-alerts (daily cron) | Software Engineer | 2h | T20.28 |
+| T20.30: Implement dedup logic: check cap_alert_sent, skip if already sent this month | Software Engineer | 1.5h | T20.27 |
+| T20.31: Build cap notification payload (distinct from rate changes): "📊 You've used $X of $Y cap. Switch cards?" | Software Engineer | 1.5h | T20.29 |
+| T20.32: Set up daily cron job (GitHub Actions) for cap alert check | Software Engineer | 1h | T20.29 |
+| T20.33: Design Notification History screen wireframe (list view, timestamps, "Opened" badges, deep links) | Designer | 2h | — |
+| T20.34: Create RPC get_user_notification_history(user_id, limit, offset) | Software Engineer | 1.5h | Sprint 19 T19.17 |
+| T20.35: Build Notification History screen (list view, pagination, infinite scroll) | Developer | 3.5h | T20.33 |
+| T20.36: Implement "Opened" vs "Not opened" badge logic based on push_notification_log.opened | Developer | 1h | T20.35 |
+| T20.37: Wire history list items to deep link to card detail or cap status | Developer | 1.5h | T20.35 |
+| T20.38: Update notification response listener to log opened=true on tap | Developer | 1.5h | T20.07 |
+| T20.39: Test: Manually set user to 80% cap → trigger job → verify notification + dedup works | Tester | 2h | T20.32 |
+| T20.40: Test: Receive 3 notifications → verify all appear in History with correct badges | Tester | 1.5h | T20.35 |
+
+**Phase 4: Testing + Stabilization** (Day 10)
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T20.41: E2E test: Full notification lifecycle (critical instant, warning batched, cap alert, history) | Tester | 3h | All above |
+| T20.42: E2E test: Settings controls (disable severity → verify no notifications sent) | Tester | 2h | T20.25 |
+| T20.43: E2E test: Deep linking from all notification types (rate change, cap, batched) | Tester | 2h | T20.12 |
+| T20.44: Bug fixes + stabilization | Developer + Software Engineer | 4h | All tests |
+
+---
+
+#### S20.2: Demo Notification Preview Component
+
+**As a user, I want to preview beautiful push notifications in demo mode with realistic, polished designs**
+
+**Acceptance Criteria**:
+
+| AC# | Given | When | Then |
+|-----|-------|------|------|
+| AC1 | Demo mode is enabled | User navigates to Miles tab | "Preview Push Notifications" button appears at bottom |
+| AC2 | User taps "Preview Push Notifications" | Button is pressed | Modal appears showing 4 notification previews (critical rate change, warning batch, cap alert, info digest) |
+| AC3 | Modal displays notification preview | User views preview | Realistic iOS/Android notification UI shown with icon, title, body, timestamp |
+| AC4 | User views critical rate change preview | Preview is displayed | Shows: "⚠️ Your Amex KrisFlyer card: Major Change" + "Earn rate dropped 33% (1.2 → 0.8 miles/$). Tap to switch cards." |
+| AC5 | User views warning batch preview | Preview is displayed | Shows: "📬 2 rate changes affect your cards" + "DBS Altitude & Citi PremierMiles updated. Review changes." |
+| AC6 | User views cap alert preview | Preview is displayed | Shows: "📊 Approaching DBS WWC bonus cap" + "You've used $800 of $1,000. Switch to Citi PremierMiles?" |
+| AC7 | User views info digest preview | Preview is displayed | Shows: "✨ 3 positive changes this week" + "Better rates on OCBC 90°N, UOB PRVI, HSBC Revolution" |
+| AC8 | User taps preview notification | Tap detected | Modal closes + deep link simulated (navigates to card detail / cap status) |
+| AC9 | User dismisses modal | X button tapped or swipe down | Modal closes, returns to Miles tab |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T20.45: Design notification preview modal wireframe (iOS + Android variants) | Designer | 2h | — |
+| T20.46: Build NotificationPreviewModal component with 4 sample notifications | Developer | 3h | T20.45 |
+| T20.47: Style notifications to match iOS/Android native appearance (colors, fonts, spacing) | Developer | 2h | T20.46 |
+| T20.48: Implement tap handlers for each preview → close modal + deep link to relevant screen | Developer | 1.5h | T20.46, T20.08 |
+| T20.49: Add "Preview Push Notifications" button to Miles tab (only visible in demo mode) | Developer | 1h | Sprint 18 (demo mode context) |
+| T20.50: Test: Open preview modal → verify all 4 notifications render correctly | Tester | 1h | T20.46 |
+| T20.51: Test: Tap each preview → verify deep linking works | Tester | 1h | T20.48 |
+
+---
+
+#### S20.3: Demo Mode Integration (Miles Tab Trigger + Settings Controls)
+
+**As a demo presenter, I want to trigger demo notifications from the Miles tab and control notification settings in Settings**
+
+**Acceptance Criteria**:
+
+| AC# | Given | When | Then |
+|-----|-------|------|------|
+| AC1 | Demo mode is enabled | User navigates to Settings > Push Notifications | Full Settings UI shown with all toggles (Critical/Warning/Info/Cap Alerts/Quiet Hours) |
+| AC2 | Demo mode is enabled | User toggles any setting in Settings | Setting is saved to demo user profile; preview modal respects settings |
+| AC3 | Demo mode is disabled (production) | User navigates to Settings | Push Notifications section still shown (if feature enabled for user) |
+| AC4 | Demo mode is enabled | User disables "Warning changes" toggle | Warning batch preview is grayed out in modal with "Disabled" badge |
+| AC5 | Demo mode is enabled | User navigates to Notification History | History screen shows 5-10 sample notifications (mix of types, timestamps) |
+| AC6 | Demo mode is disabled | User navigates to Notification History | Only real notifications shown (empty if none sent) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T20.52: Wire demo mode context to Settings screen (show/hide notification settings based on env) | Developer | 1.5h | T20.20, Sprint 18 |
+| T20.53: Update Settings toggles to save to demo user profile when in demo mode | Developer | 1.5h | T20.52 |
+| T20.54: Update NotificationPreviewModal to gray out disabled severity previews | Developer | 1h | T20.46, T20.53 |
+| T20.55: Create sample notification history data (5-10 notifications with realistic timestamps) | Developer | 1h | T20.35 |
+| T20.56: Update Notification History screen to show sample data in demo mode | Developer | 1.5h | T20.55 |
+| T20.57: Test: Demo mode → toggle settings → verify preview modal updates | Tester | 1h | T20.54 |
+| T20.58: Test: Demo mode → Notification History → verify sample data shown | Tester | 1h | T20.56 |
+| T20.59: Test: Production mode → verify only real notifications appear | Tester | 0.5h | T20.56 |
+
+---
+
+### Sprint 20 — Dependency Map
+
+```
+Phase 1: Severity + Deep Linking (Days 1-3)
+═════════════════════════════════════════════
+T20.02 (notification_queue schema)
+    └── T20.03 (Migration 022)
+            ├── T20.01 (Handle all severities in Edge Function)
+            ├── T20.04 (Queuing logic)
+            │       └── T20.05 (Calculate 9 AM / Friday timestamps)
+            └── T20.18 (Add delayed_until column)
+
+T20.06 (Add deep link data to payload) ← Sprint 19 T19.20
+    └── T20.07 (Notification response listener)
+            └── T20.08 (Deep link router)
+                    ├── T20.09 (Rate Changes List screen)
+                    └── T20.10 (Update deep link handler)
+
+T20.11 (Test: queuing)
+T20.12 (Test: deep linking)
+
+Phase 2: Batching + Settings + Quiet Hours (Days 4-6)
+════════════════════════════════════════════════════════
+T20.13 (process-notification-queue cron Edge Function) ← T20.03
+    ├── T20.14 (Batching logic)
+    └── T20.15 (GitHub Actions cron)
+
+T20.16 (quiet_hours columns) ← Sprint 19 T19.01
+    ├── T20.17 (Quiet hours check in Edge Function)
+    └── T20.18 (delayed_until support)
+
+T20.19 (Settings wireframe)
+    └── T20.20 (Build Settings UI: 5 toggles + time pickers + history link)
+            ├── T20.21 (Wire to JSONB)
+            │       └── T20.22 (Check severity preferences in Edge Function)
+            └── T20.23 (Test: batch sent)
+
+T20.24 (Test: quiet hours delay)
+T20.25 (Test: toggle warnings off)
+
+Phase 3: F6 Cap Alerts + History (Days 7-9)
+═══════════════════════════════════════════════
+T20.26 (cap_alert_sent schema)
+    └── T20.27 (Migration 023)
+            ├── T20.28 (RPC: get_users_approaching_cap)
+            │       └── T20.29 (Edge Function: send-cap-alerts)
+            │               ├── T20.30 (Dedup logic)
+            │               ├── T20.31 (Cap payload)
+            │               └── T20.32 (Daily cron)
+            └── T20.39 (Test: cap alert + dedup)
+
+T20.33 (History wireframe)
+    └── T20.34 (RPC: get_notification_history) ← Sprint 19 T19.17
+            └── T20.35 (Build History screen)
+                    ├── T20.36 (Opened/Not opened badges)
+                    ├── T20.37 (Deep link from history)
+                    └── T20.38 (Log opened=true)
+
+T20.40 (Test: history appears)
+
+Phase 4: Demo Mode (Days 7-9, parallel)
+═══════════════════════════════════════════
+T20.45 (Preview modal wireframe)
+    └── T20.46 (Build NotificationPreviewModal)
+            ├── T20.47 (Style iOS/Android appearance)
+            ├── T20.48 (Tap handlers + deep links)
+            └── T20.49 (Add button to Miles tab)
+
+T20.52 (Wire demo context to Settings) ← T20.20, Sprint 18
+    ├── T20.53 (Save to demo profile)
+    ├── T20.54 (Gray out disabled previews)
+    ├── T20.55 (Sample history data)
+    └── T20.56 (Show sample data in History)
+
+T20.50 (Test: preview modal)
+T20.51 (Test: preview deep links)
+T20.57 (Test: demo settings integration)
+T20.58 (Test: demo history)
+T20.59 (Test: production mode)
+
+Phase 5: E2E Testing + Stabilization (Day 10)
+══════════════════════════════════════════════════
+T20.41 (E2E: full lifecycle)
+T20.42 (E2E: settings controls)
+T20.43 (E2E: deep linking all types)
+T20.44 (Bug fixes + stabilization)
+```
+
+---
+
+### Sprint 20 — DoR (Definition of Ready)
+
+| # | Criterion | Status |
+|---|-----------|--------|
+| 1 | Sprint 19 complete (push infrastructure operational) | ✅ |
+| 2 | Sprint 18 complete (demo mode environment controls operational) | ✅ |
+| 3 | Notification preview designs approved by Product Owner | Ready |
+| 4 | Deep link schema extended: `maximile://card/{id}`, `maximile://caps?highlight={id}`, `maximile://rate-changes` | ✅ |
+| 5 | F6 Cap Approaching Alerts deferred from v1.1 — ready for implementation | ✅ |
+
+---
+
+### Sprint 20 — DoD (Definition of Done)
+
+| # | Criterion |
+|---|-----------|
+| 1 | Critical rate changes send instant push notifications |
+| 2 | Warning rate changes are batched and sent at 9 AM daily |
+| 3 | Info rate changes are batched and sent Friday 9 AM weekly |
+| 4 | Users receive push notification when reaching 80% of any bonus cap |
+| 5 | Cap alerts sent max once per card per month (no duplicates) |
+| 6 | Deep linking works from all notification types (rate change, cap, batched) when app is background/closed/logged out |
+| 7 | Settings shows 5 controls: Critical/Warning/Info/Cap Alerts toggles + Quiet Hours time pickers |
+| 8 | Quiet hours (default 10 PM - 8 AM) delay notifications until quiet hours end |
+| 9 | Notification History screen shows all sent notifications with timestamps and "Opened" badges |
+| 10 | Demo mode: "Preview Push Notifications" button appears on Miles tab |
+| 11 | Demo mode: Preview modal shows 4 beautiful notification designs (critical, warning batch, cap, info) |
+| 12 | Demo mode: Settings controls work and update preview modal (gray out disabled types) |
+| 13 | Demo mode: Notification History shows 5-10 sample notifications |
+| 14 | Production mode: Only real notifications appear (no demo data) |
+| 15 | All new tests pass; no regressions in existing functionality |
+| 16 | Complete system ready for future user rollout (infrastructure complete, no beta launch yet) |
+
+---
+
+### Sprint 20 — Risks & Mitigations
+
+| ID | Risk | Likelihood | Impact | Mitigation |
+|----|------|------------|--------|------------|
+| R20.1 | Consolidating 3 sprints into 1 causes scope creep or delays | **High** | **High** | Strict task prioritization; defer non-critical polish (e.g., analytics dashboard, A/B testing) to post-sprint; focus on core implementation + demo |
+| R20.2 | Deep linking breaks on iOS vs Android platform differences | **Medium** | **Medium** | Test on both platforms; use Expo Linking API (handles platform differences); allocate 2h buffer for cross-platform fixes |
+| R20.3 | Demo mode integration with real notification system causes conflicts | **Medium** | **Low** | Strict environment checks (`__DEV__` or demo flag); separate demo preview component from production notification system |
+| R20.4 | Batching logic has edge case bugs (timezone, quiet hours overlap) | **Medium** | **Medium** | Extensive testing with mock data; manual cron triggers; store user timezone in profile |
+| R20.5 | Cap alert logic has edge case bugs (cap resets not detected) | **Medium** | **Medium** | Test with mock cap data; monitor cap_alert_sent table for anomalies; dedup logic prevents worst-case duplicates |
+| R20.6 | Notification History screen loads slowly with 100+ notifications | **Low** | **Low** | Implement pagination (20 per page); add index on push_notification_log(user_id, sent_at) |
+
+---
+
+### Sprint 20 — Timeline
+
+```
+Week 1: Core Implementation (Days 1-5)
+═══════════════════════════════════════
+Day 1:    Phase 1 — Severity handling + queuing (T20.01–T20.06)
+Day 2:    Phase 1 — Deep linking + Rate Changes List screen (T20.07–T20.12)
+Day 3:    Phase 2 — Batching cron job + quiet hours (T20.13–T20.18)
+Day 4:    Phase 2 — Granular Settings UI (5 toggles + time pickers) (T20.19–T20.22)
+Day 5:    Phase 2 — Testing batching + quiet hours + settings (T20.23–T20.25)
+
+Week 2: F6 + History + Demo Mode (Days 6-10)
+═════════════════════════════════════════════
+Day 6:    Phase 3 — Cap alerts implementation (T20.26–T20.32)
+Day 7:    Phase 3 — Notification History screen (T20.33–T20.38)
+Day 8:    Phase 3 — Testing cap + history (T20.39–T20.40)
+          Phase 4 — Demo preview modal (T20.45–T20.49, parallel)
+Day 9:    Phase 4 — Demo Settings + History integration (T20.52–T20.56)
+          Phase 4 — Demo testing (T20.50–T20.59)
+Day 10:   Phase 5 — E2E testing all flows (T20.41–T20.43)
+          Phase 5 — Bug fixes + stabilization (T20.44)
+```
+
+---
+
+## Sprint 19-20 Summary: Push Notifications Roadmap (REVISED)
+
+**Change from Original Plan**: Consolidated Sprints 20-22 into single NEW Sprint 20. Removed gradual user rollout (beta → expand → full launch). Focus: Complete production-ready system + demo mode. No user launch.
+
+### Total Effort
+
+| Sprint | Phase | Stories | Points | Duration |
+|--------|-------|---------|--------|----------|
+| **Sprint 19** | Foundation ✅ COMPLETE | 3 | 6 | 2 weeks |
+| **Sprint 20** | Complete System + Demo Mode | 3 | 13 | 2 weeks |
+| **Total** | | **6** | **19** | **4 weeks** |
+
+**Original Plan (v10.0)**: 4 sprints (19-22), 22 story points, 8 weeks, gradual user rollout (beta → expand → full launch)
+
+**Revised Plan (v11.0)**: 2 sprints (19-20), 19 story points, 4 weeks, complete system build + demo mode (no user launch)
+
+---
+
+### Key Milestones
+
+| Milestone | Sprint | Status | Success Criteria |
+|-----------|--------|--------|------------------|
+| **Push Infrastructure Live** | Sprint 19 | ✅ COMPLETE | Device token registration, permission flow, backend sender operational |
+| **Complete Notification System** | Sprint 20 | 🔄 IN PROGRESS | All severities (critical/warning/info), batching, granular controls, quiet hours, F6 cap alerts, deep linking, notification history |
+| **Demo Mode Ready** | Sprint 20 | 🔄 IN PROGRESS | Preview modal with 4 notification designs, Settings integration, sample history data |
+| **Production-Ready (No Launch)** | Sprint 20 | 🎯 TARGET | Complete system built, tested, documented; ready for future user rollout decision |
+
+---
+
+### Scope Changes from Original Plan
+
+| Aspect | Original Plan (Sprints 20-22) | Revised Plan (Sprint 20 Only) |
+|--------|-------------------------------|-------------------------------|
+| **User Rollout** | Gradual: 100 users → 500 users → 5,000 users | No rollout — system build only |
+| **A/B Testing** | Test 3 notification copy variants with beta users | Deferred — not needed without user rollout |
+| **Beta Management** | Track opt-out rates, delivery rates, open rates per cohort | Deferred — no live users |
+| **Analytics Dashboard** | PM dashboard for delivery/open/opt-out metrics | Deferred — build analytics when launching to users |
+| **Timeline** | 6 weeks (3 sprints × 2 weeks) | 2 weeks (1 sprint) |
+| **Story Points** | 16 SP across Sprints 20-22 | 13 SP consolidated into Sprint 20 |
+| **Focus** | Gradual validation + user feedback loops | Complete implementation + demo polish |
+| **Milestone** | Full launch to 5,000+ users | Production-ready system (no launch) |
+
+---
+
+### Dependencies & Prerequisites
+
+| Sprint | Hard Dependencies | Soft Dependencies |
+|--------|-------------------|-------------------|
+| **Sprint 19** ✅ | `expo-notifications` installed (✅), Sprint 12 complete (✅) | Physical iOS device for testing (✅) |
+| **Sprint 20** 🔄 | Sprint 19 complete (✅), Sprint 18 demo mode complete (✅) | Notification preview designs approved |
+
+---
+
+### Reference Documentation
+
+For full implementation details, technical architecture, and risk analysis, see:
+- **Push Notifications Evaluation**: `docs/PUSH_NOTIFICATIONS_EVALUATION.md`
+- **Demo Mode PRD**: `docs/PRD_DEMO_MODE.md`
+- **Demo Mode Sprint Plan**: `docs/SPRINT_PLAN_DEMO_MODE.md`
+- **PRD**: `docs/PRD.md` — Sprint 12 (F23 Rate Change Monitoring & Alerts)
+- **User Stories**: `docs/EPICS_AND_USER_STORIES.md` — E14 (Push Notifications)
+
+---
+
+**Sprint 19-20 Status**: Sprint 19 ✅ COMPLETE | Sprint 20 🔄 IN PROGRESS
+
+**Next Steps**:
+1. Complete Sprint 20 implementation (all 3 stories: S20.1, S20.2, S20.3)
+2. Conduct stakeholder demo with preview modal + sample notifications
+3. Document complete system for future user rollout decision
+4. If approved for user launch: Create Sprint 21 for gradual rollout (beta → expand → full)
+
+---
+
+**DELETED FROM ORIGINAL PLAN** (Sprints 20-22 detailed content):
+- Sprint 20: Beta (Critical Only) — 4 stories, 5 SP
+- Sprint 21: Expand (Warning + Info + Batching) — 3 stories, 6 SP
+- Sprint 22: Full Launch (F6 + History + Analytics) — 2 stories, 5 SP
+
+**REASON**: No user rollout needed at this time. Focus on complete system build + beautiful demo mode for stakeholder presentations. User launch deferred pending business decision.
