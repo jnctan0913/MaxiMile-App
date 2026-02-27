@@ -105,34 +105,41 @@ async function scrapeWithPlaywright(
     const context = await browser.newContext({
       userAgent:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-        '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        '(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      locale: 'en-SG',
+      timezoneId: 'Asia/Singapore',
     });
 
     const page: Page = await context.newPage();
     page.setDefaultTimeout(PAGE_TIMEOUT_MS);
 
-    // Navigate and wait for network to settle
+    // Navigate — use domcontentloaded (faster, more reliable than networkidle
+    // which hangs on pages with long-polling or analytics scripts)
     await page.goto(url, {
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
       timeout: PAGE_TIMEOUT_MS,
     });
 
-    // Extract content
+    // Give JS frameworks a moment to render after DOM is ready
+    await page.waitForTimeout(3000);
+
+    // Extract content — try CSS selector first, fall back to full body
     let content: string;
 
     if (cssSelector) {
-      // Wait for the selector to appear, then extract its text
-      const element = await page.waitForSelector(cssSelector, {
-        timeout: PAGE_TIMEOUT_MS,
-      });
-
-      if (!element) {
-        throw new Error(`CSS selector "${cssSelector}" not found on page`);
+      try {
+        const element = await page.waitForSelector(cssSelector, {
+          timeout: 8000, // Short timeout — don't waste 30s on a bad selector
+        });
+        content = (element ? await element.textContent() : null) ?? '';
+      } catch {
+        // Selector not found — fall back to full page body
+        console.log(
+          `[Scraper] Selector "${cssSelector}" not found on ${url}, falling back to body text`
+        );
+        content = await page.evaluate(() => document.body.innerText);
       }
-
-      content = (await element.textContent()) ?? '';
     } else {
-      // No selector — get the full page body text
       content = await page.evaluate(() => document.body.innerText);
     }
 
@@ -179,14 +186,18 @@ async function scrapeWithHttp(
     }
 
     const contentType = response.headers.get('content-type') ?? '';
-    const body = await response.text();
 
-    // If it's a PDF, return the raw body (hash will still detect changes)
+    // If it's a PDF, store as base64 to avoid Unicode encoding issues.
+    // Binary PDF bytes corrupt when stored as UTF-8 text in Supabase.
     if (contentType.includes('application/pdf') || url.endsWith('.pdf')) {
-      // For PDFs, we return the raw bytes as text for hashing purposes.
-      // Full PDF text extraction would require a PDF parser (future enhancement).
-      return body;
+      const buffer = await response.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString('base64');
+      // Return a compact representation — hash will detect changes,
+      // and base64 is safe for Supabase TEXT columns.
+      return `[PDF:base64:${base64.length}chars]${base64.slice(0, 50000)}`;
     }
+
+    const body = await response.text();
 
     // Extract text from HTML
     let content = stripHtmlTags(body);
