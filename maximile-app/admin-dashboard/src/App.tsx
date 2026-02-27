@@ -108,13 +108,13 @@ export default function App() {
       <header className="bg-brand-charcoal px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img
-            src="/Logo.png"
+            src={`${import.meta.env.BASE_URL}Logo.png`}
             alt="MaxiMile"
             className="h-9 w-auto object-contain"
           />
           <div className="flex items-center gap-2">
             <img
-              src="/Name.png"
+              src={`${import.meta.env.BASE_URL}Name.png`}
               alt="MaxiMile"
               className="h-5 brightness-0 invert"
             />
