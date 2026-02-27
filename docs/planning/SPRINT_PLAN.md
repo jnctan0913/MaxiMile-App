@@ -5502,6 +5502,89 @@ S24.2 (Category UX) ────────┘              │
 
 **Sprint 23-24 Status**: Sprint 23 📋 PLANNED | Sprint 24 📋 PLANNED
 
+---
+
+## Sprint 16: T&C Focus Refactor (Detection Pipeline v2.0.1)
+
+> **Context**: Sprint 14-15 deployed the automated detection pipeline, but the first production run failed on **45 of 54 sources** — Playwright selector timeouts, navigation timeouts, and PDF Unicode encoding errors. Root cause: broad website scraping (card listing pages, promo pages, rewards pages) is unreliable because bank SPAs block headless browsers and CSS selectors don't match actual page structure.
+>
+> **Solution**: Replace 54 broad URLs with ~35 focused T&C document sources (30 card-specific PDFs + 5 bank index pages). T&C documents are the authoritative source of truth for rate changes, and PDFs are simple HTTP downloads — no Playwright needed for 85% of sources.
+
+### Sprint 16 Goal
+
+Refocus the detection pipeline from broad web scraping to targeted T&C PDF monitoring with version-based change detection gating.
+
+### Stories
+
+| ID | Story | Points | Priority | Status |
+|----|-------|--------|----------|--------|
+| S16.1 | PDF text extraction via `pdf-parse` (replace base64 encoding) | 3 | P0 | Done |
+| S16.2 | T&C version + date extraction with regex patterns | 3 | P0 | Done |
+| S16.3 | Version-based short-circuit in pipeline (3-tier gate) | 5 | P0 | Done |
+| S16.4 | Database migration: retire 54 sources, insert 30 PDFs + 5 index pages | 5 | P0 | Done |
+| S16.5 | URL discovery for versioned PDF filenames | 3 | P1 | Done |
+| S16.6 | AI prompt updates for T&C PDF input + cardName parameter | 2 | P0 | Done |
+| S16.7 | Documentation updates (architecture, PRD, sprint plan) | 2 | P1 | Done |
+| **Total** | | **23** | | |
+
+### Task Breakdown
+
+#### S16.1 — PDF Text Extraction
+- Add `pdf-parse` dependency to scraper package.json
+- Create `src/types/pdf-parse.d.ts` type declaration
+- Replace base64 PDF storage with `pdfParse(buffer).text` in `scraper.ts`
+- Add content length warning for scanned image PDFs (< 100 chars)
+
+#### S16.2 — Version + Date Extraction
+- `extractTcVersion(text)`: regex patterns for "Version X.X", "V1.2", "Rev 2024/01", "Edition 2025"
+- `extractTcLastUpdated(text)`: regex patterns for "Last updated: DD MMM YYYY", "Effective date:", "WEF", etc.
+- Return version + date metadata in `ScrapeResult`
+
+#### S16.3 — Version-Based Short-Circuit
+- After scraping, compare `result.tcVersion` + `result.tcLastUpdated` against stored `source.tc_version` + `source.tc_last_updated`
+- Both match → skip hash check, skip AI → log "T&C version unchanged"
+- Either differs or null → proceed with existing hash comparison flow
+- On change detection: update `source_configs.tc_version` and `tc_last_updated`
+- New `updateSourceVersion()` function in `supabase-client.ts`
+
+#### S16.4 — Database Migration
+- Add `bank_tc_pdf` and `bank_index_page` to `source_type` enum
+- Add `card_name`, `tc_version`, `tc_last_updated` columns to `source_configs`
+- Add `tc_version`, `tc_last_updated` columns to `source_snapshots`
+- Retire all existing 54 sources (`SET status = 'retired'`)
+- Insert 30 card-specific T&C PDF sources + 5 bank index pages
+- Update `v_pipeline_health` view to include version info and exclude retired sources
+
+#### S16.5 — URL Discovery
+- `runUrlDiscovery()` runs before main scrape loop
+- Fetches bank index pages, extracts PDF links via regex
+- Matches to card-specific sources, updates `source_configs.url` if changed
+- Handles 6 versioned-URL cards (OCBC Titanium, BOC Elite Miles, Maybank FC Barcelona, Citi Rewards, Citi PremierMiles, SC Smart)
+
+#### S16.6 — AI Prompt Updates
+- Update `SYSTEM_PROMPT`: input is now extracted PDF text from official T&C documents
+- Add guidance about PDF text extraction artifacts
+- Add `cardName` parameter to `classifyPageChange()`, `classifyWithGemini()`, `classifyWithGroq()`
+- Increase `MAX_CONTENT_LENGTH` from 15,000 to 30,000 chars
+- Add `bank_tc_pdf` to `TIER_1_SOURCE_TYPES` for auto-approval
+
+### Sprint 14-15 Retrospective
+
+**What went wrong:**
+- 45/54 sources failed on first production run
+- Playwright selector timeouts: bank SPAs use dynamic class names that don't match static CSS selectors
+- Navigation timeouts: some bank sites block headless browsers entirely
+- PDF Unicode errors: base64 encoding didn't enable content analysis
+
+**Key learnings:**
+- T&C PDFs are more reliable than web pages (simple HTTP download, no JS rendering)
+- T&C documents are the authoritative source of truth for rate changes
+- Version metadata provides a cheap change detection gate before expensive hash/AI processing
+
+**Sprint 16 Status**: ✅ COMPLETED
+
+---
+
 **Next Steps**:
 1. Complete Sprints 21-22 (Recommendation Accuracy)
 2. Begin Sprint 23 — 6 straightforward cards (Day 1: flat-rate cards first)

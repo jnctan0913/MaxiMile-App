@@ -13,6 +13,7 @@
 // =============================================================================
 
 import { chromium, type Browser, type Page } from 'playwright';
+import pdfParse from 'pdf-parse';
 import { computeContentHash } from './hasher.js';
 import type { ScrapeResult, ScrapeMethod } from './types.js';
 
@@ -51,16 +52,39 @@ export async function scrapePage(
         contentHash: '',
         success: false,
         error: 'Extracted content is empty',
+        tcVersion: null,
+        tcLastUpdated: null,
       };
     }
 
+    // Warn if PDF text is suspiciously short (might be scanned image)
+    if ((url.endsWith('.pdf') || content.length < 100) && content.length < 100) {
+      console.warn(
+        `[Scraper] Warning: Extracted text from ${url} is only ${content.length} chars — ` +
+          `might be a scanned image PDF with no extractable text.`
+      );
+    }
+
     const contentHash = computeContentHash(content);
+
+    // Extract T&C version and last-updated date from content
+    const tcVersion = extractTcVersion(content);
+    const tcLastUpdated = extractTcLastUpdated(content);
+
+    if (tcVersion) {
+      console.log(`[Scraper] Extracted T&C version: ${tcVersion}`);
+    }
+    if (tcLastUpdated) {
+      console.log(`[Scraper] Extracted T&C last updated: ${tcLastUpdated}`);
+    }
 
     return {
       url,
       content,
       contentHash,
       success: true,
+      tcVersion,
+      tcLastUpdated,
     };
   } catch (error) {
     const errorMessage =
@@ -72,6 +96,8 @@ export async function scrapePage(
       contentHash: '',
       success: false,
       error: errorMessage,
+      tcVersion: null,
+      tcLastUpdated: null,
     };
   }
 }
@@ -187,14 +213,22 @@ async function scrapeWithHttp(
 
     const contentType = response.headers.get('content-type') ?? '';
 
-    // If it's a PDF, store as base64 to avoid Unicode encoding issues.
-    // Binary PDF bytes corrupt when stored as UTF-8 text in Supabase.
+    // If it's a PDF, extract text using pdf-parse instead of base64.
+    // This gives us searchable text content for AI classification.
     if (contentType.includes('application/pdf') || url.endsWith('.pdf')) {
       const buffer = await response.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
-      // Return a compact representation — hash will detect changes,
-      // and base64 is safe for Supabase TEXT columns.
-      return `[PDF:base64:${base64.length}chars]${base64.slice(0, 50000)}`;
+      try {
+        const pdfData = await pdfParse(Buffer.from(buffer));
+        return pdfData.text;
+      } catch (pdfError) {
+        // Fallback: if pdf-parse fails, use base64 hash-only mode
+        console.warn(
+          `[Scraper] pdf-parse failed for ${url}: ${pdfError instanceof Error ? pdfError.message : String(pdfError)}. ` +
+            `Falling back to base64 hash-only mode.`
+        );
+        const base64 = Buffer.from(buffer).toString('base64');
+        return `[PDF:base64:${base64.length}chars]${base64.slice(0, 50000)}`;
+      }
     }
 
     const body = await response.text();
@@ -331,4 +365,73 @@ function escapeRegex(str: string): string {
  */
 function normalizeContent(content: string): string {
   return content.replace(/\s+/g, ' ').trim();
+}
+
+// ---------------------------------------------------------------------------
+// T&C version and date extraction
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract a T&C version number from document text.
+ *
+ * Matches patterns like:
+ *   - "Version 1.0", "Version 2.3"
+ *   - "V1.2", "v3.0"
+ *   - "Rev 2024/01", "Revision 3"
+ *   - "Edition 2025"
+ *
+ * @returns The extracted version string, or null if not found.
+ */
+export function extractTcVersion(text: string): string | null {
+  const patterns = [
+    /Version\s+(\d+(?:\.\d+)*)/i,
+    /\bV(\d+(?:\.\d+)+)\b/i,
+    /Rev(?:ision)?\s+(\d{4}\/\d{2}|\d+(?:\.\d+)*)/i,
+    /Edition\s+(\d{4})/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = pattern.exec(text);
+    if (match) {
+      return match[0].trim();
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Extract a "last updated" date from T&C document text.
+ *
+ * Matches patterns like:
+ *   - "Last updated: 15 Jan 2025"
+ *   - "Last updated 15 January 2025"
+ *   - "Effective date: 1 March 2025"
+ *   - "Effective from 01/03/2025"
+ *   - "Date of issue: 15 Feb 2025"
+ *   - "With effect from 1 Jan 2025"
+ *   - "Updated on 15 January 2025"
+ *
+ * @returns The extracted date string, or null if not found.
+ */
+export function extractTcLastUpdated(text: string): string | null {
+  const patterns = [
+    /Last\s+updated[:\s]+(\d{1,2}\s+\w+\s+\d{4})/i,
+    /Effective\s+(?:date|from)[:\s]+(\d{1,2}\s+\w+\s+\d{4})/i,
+    /Effective\s+(?:date|from)[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i,
+    /Date\s+of\s+issue[:\s]+(\d{1,2}\s+\w+\s+\d{4})/i,
+    /With\s+effect\s+from[:\s]+(\d{1,2}\s+\w+\s+\d{4})/i,
+    /Updated\s+on[:\s]+(\d{1,2}\s+\w+\s+\d{4})/i,
+    /(?:W\.?E\.?F\.?|wef)[:\s]+(\d{1,2}\s+\w+\s+\d{4})/i,
+    /(?:W\.?E\.?F\.?|wef)[:\s]+(\d{1,2}\s+\w{3}\s+\d{2,4})/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = pattern.exec(text);
+    if (match) {
+      return match[1].trim();
+    }
+  }
+
+  return null;
 }

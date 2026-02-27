@@ -964,18 +964,24 @@ Key design decisions:
 
 **F25 — Automated Detection Pipeline**:
 ```
-GitHub Actions (daily cron) → Playwright scrapes ~50 bank URLs
-    → SHA-256 content hash comparison (zero-cost gate)
-    → If changed: Gemini Flash classifies via tool_use structured output
+GitHub Actions (daily cron) → HTTP fetches 30 T&C PDFs + Playwright scrapes 5 index pages
+    → pdf-parse extracts text from PDFs
+    → Gate 1: Version + date check (cheapest — skip if tc_version + tc_last_updated match)
+    → Gate 2: SHA-256 content hash comparison (skip AI if hash unchanged)
+    → Gate 3: Gemini Flash classifies via tool_use structured output (Groq Llama fallback)
     → Confidence routing: >=0.85 auto-approve | 0.50-0.84 admin review | <0.50 discard
     → Approved changes → INSERT into rate_changes
     → Existing Layer 2+3 delivers to users automatically
 ```
 
 Key design decisions:
-- Content-hash gating means LLM is only called when a page actually changes (~5-10% of daily checks)
+- **T&C PDF focus**: 30 card-specific T&C PDFs + 5 bank index pages (replaced ~54 broad URLs after 45/54 failures)
+- **3-tier gating**: Version check → hash check → AI classification minimizes unnecessary processing
+- PDF text extraction via `pdf-parse` replaces base64 encoding — enables AI analysis of actual content
+- Content-hash gating means LLM is only called when content actually changes (~5-10% of daily checks)
 - Gemini Flash chosen over Claude Haiku: comparable quality for structured extraction, $0 vs $1-5/mo
 - Groq Llama 3.3 70B as fallback if Gemini limits tighten
+- URL discovery: 5 bank index pages scraped to find updated PDF URLs for versioned-filename cards
 - Scraper auto-commits `last_run.json` to prevent GitHub's 60-day inactivity disable
 - Admin review expected: ~15-30 min/month (most changes auto-approved)
 

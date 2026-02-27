@@ -204,57 +204,76 @@ User discovers change → Opens "Report a Change" form → Fills structured fiel
 
 ### v2.0 — Automated Detection
 
-**Goal**: Monitor bank T&C pages and use AI to detect and classify rate changes.
+**Goal**: Monitor bank T&C documents and use AI to detect and classify rate changes.
+
+> **Sprint 16 Update (2026-02-28)**: Refocused from ~54 broad bank URLs to 30 T&C PDFs + 5 bank index pages. First production run failed on 45/54 sources due to Playwright selector timeouts and PDF encoding issues. T&C PDFs are the authoritative source of truth and can be fetched via simple HTTP (no Playwright needed for 85% of sources).
 
 #### Detection Pipeline
 
 ```
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│  SCHEDULER   │───▶│  SCRAPER     │───▶│  DIFF ENGINE │───▶│  CLASSIFIER  │
-│  (pg_cron)   │    │  (Playwright)│    │  (SHA-256)   │    │  (Claude AI) │
-│  Daily 2am   │    │  Fetch HTML  │    │  Hash compare│    │  Haiku/Sonnet│
-└──────────────┘    └──────────────┘    └──────────────┘    └──────┬───────┘
-                                                                   │
-                    ┌──────────────┐    ┌──────────────┐           │
-                    │  PUBLISHED   │◀───│  REVIEW      │◀──────────┘
-                    │  rate_changes│    │  QUEUE       │
-                    │  table       │    │  (confidence) │
-                    └──────────────┘    └──────────────┘
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  SCHEDULER   │───▶│  URL         │───▶│  SCRAPER     │───▶│  VERSION     │───▶│  HASH        │
+│  (GH Actions)│    │  DISCOVERY   │    │  (HTTP/PW)   │    │  CHECK       │    │  COMPARE     │
+│  Daily 2am   │    │  (index pgs) │    │  PDF text    │    │  (cheapest)  │    │  (SHA-256)   │
+└──────────────┘    └──────────────┘    └──────────────┘    └──────┬───────┘    └──────┬───────┘
+                                                                   │                   │
+                                                         match→SKIP│         match→SKIP│
+                                                                   │                   │
+                    ┌──────────────┐    ┌──────────────┐    ┌──────▼───────────────────▼┐
+                    │  PUBLISHED   │◀───│  REVIEW      │◀───│  AI CLASSIFIER            │
+                    │  rate_changes│    │  QUEUE       │    │  (Gemini Flash → Groq)    │
+                    │  table       │    │  (confidence) │    │  Only when content changed│
+                    └──────────────┘    └──────────────┘    └───────────────────────────┘
 ```
+
+#### Version-Based Change Detection (3-Tier Gate)
+
+T&C documents contain version numbers and "last updated" dates. The pipeline uses a 3-tier gate to minimize unnecessary processing:
+
+| Gate | Check | Cost | Action if match |
+|------|-------|------|-----------------|
+| **1. Version + Date** | Compare extracted `tc_version` and `tc_last_updated` against stored values | Instant, $0 | Skip entirely |
+| **2. SHA-256 Hash** | Compare content hash against latest snapshot | Fast, $0 | Skip AI classification |
+| **3. AI Classification** | Gemini Flash structured output (Groq Llama fallback) | ~1-3s, $0 (free tier) | Route by confidence |
 
 #### AI/ML Pipeline (AI Engineer)
 
-**Recommended approach**: Hybrid content-hash gating + Claude Haiku classification.
+**Implemented approach**: Hybrid version-gating + content-hash gating + Gemini Flash classification.
 
 | Stage | Method | Cost |
 |-------|--------|------|
-| **1. Fetch** | Playwright (JS-rendered) or HTTP (static) | $0 (self-hosted) |
-| **2. Diff** | SHA-256 hash comparison of page content | $0 |
-| **3. Classify** | Claude Haiku via tool_use structured output | ~$0.008/call |
-| **4. Route** | Confidence-based: auto-approve / escalate / discard | $0 |
+| **1. Fetch** | HTTP for PDFs (85%), Playwright for index pages (15%) | $0 (GitHub Actions) |
+| **2. Extract** | `pdf-parse` for PDF text extraction | $0 |
+| **3. Version Check** | Compare tc_version + tc_last_updated | $0 |
+| **4. Hash Diff** | SHA-256 hash comparison of extracted text | $0 |
+| **5. Classify** | Gemini 2.0 Flash via tool_use structured output | $0 (free tier, 250 req/day) |
+| **6. Route** | Confidence-based: auto-approve / escalate / discard | $0 |
 
-**Why Haiku over fine-tuned models**:
-- No training data collection needed (cold-start friendly)
-- Few-shot prompting with existing 5 seed records as examples
+**Why Gemini Flash over Claude Haiku**:
+- Comparable quality for structured extraction tasks
+- $0/month vs $1-5/month (Gemini free tier: 250 requests/day)
+- Groq Llama 3.3 70B as free-tier fallback (1,000 requests/day)
+- No training data needed — few-shot prompting with 5 seed examples
 - Structured output via `tool_use` ensures schema compliance
-- $0.25/1M input tokens, $1.25/1M output tokens — negligible for ~30-75 calls/month
 
 **Confidence routing thresholds**:
 
 | Confidence | Action | Estimated % |
 |------------|--------|-------------|
-| ≥ 0.85 | Auto-approve (Tier 1-2 sources only) | ~60% |
-| 0.70 – 0.84 | Auto-approve with admin notification | ~20% |
-| 0.50 – 0.69 | Escalate to Claude Sonnet for re-analysis | ~15% |
-| < 0.50 | Discard (log for review) | ~5% |
+| ≥ 0.85 | Auto-approve (Tier 1 sources: bank_tc_pdf, bank_tc_page, bank_announcement) | ~60% |
+| 0.50 – 0.84 | Queue for admin review | ~35% |
+| < 0.50 | Auto-discard (log for audit) | ~5% |
 
 **Prompt design** (AI Engineer):
 
 ```
 System: You are a Singapore credit card rate change detector.
-Given a before/after snapshot of a bank's T&C page, identify
-any changes to: earn rates, spending caps, transfer ratios,
-partner programs, or annual fees.
+Input is extracted PDF text from official T&C documents.
+Given a before/after version, identify changes to: earn rates,
+spending caps, transfer ratios, partner programs, or annual fees.
+
+Handle PDF extraction artifacts (table misalignment, repeated
+headers/footers, inline page numbers).
 
 Output using the provided tool schema. If no relevant change
 is detected, return {"changes": []}.
@@ -262,37 +281,15 @@ is detected, return {"changes": []}.
 Few-shot examples: [5 seed records from Migration 015]
 ```
 
-**Tool schema** (enforces `rate_changes` table structure):
+#### Monitored Sources (Sprint 16 Overhaul)
 
-```json
-{
-  "name": "record_rate_change",
-  "parameters": {
-    "card_name": "string",
-    "change_type": "earn_rate|cap_change|devaluation|partner_change|fee_change",
-    "category": "string|null",
-    "old_value": "string",
-    "new_value": "string",
-    "effective_date": "YYYY-MM-DD",
-    "alert_title": "string (max 60 chars)",
-    "alert_body": "string (max 300 chars)",
-    "severity": "info|warning|critical",
-    "confidence": "number 0-1"
-  }
-}
-```
+| Source Type | Count | Scrape Method | Frequency | Notes |
+|-------------|-------|---------------|-----------|-------|
+| Card-specific T&C PDFs | 30 | HTTP + pdf-parse | Daily | One PDF per tracked card |
+| Bank index pages | 5 | Playwright | Daily | URL discovery for versioned PDFs |
+| **Total** | **35** | | | |
 
-#### Monitored Sources (SWE Agent)
-
-| Source Type | Examples | Scrape Method | Frequency |
-|-------------|----------|---------------|-----------|
-| Bank T&C pages | DBS, OCBC, UOB, Citi, HSBC, SCB, Maybank, BOC, POSB | Playwright (JS-rendered) | Daily |
-| Bank announcement pages | News/updates sections | HTTP + cheerio | Daily |
-| MAS regulatory filings | mas.gov.sg | HTTP | Weekly |
-| Community forums | HardwareZone, Reddit r/singaporefi | HTTP | 6-hourly |
-| Bank email newsletters | Forwarded by admin | Email parser | On-receive |
-
-**Total estimated sources**: 30-50 URLs across 9 banks.
+**Source strategy**: Each of the 30 tracked cards has a dedicated T&C PDF source. 5 bank index pages are scraped to discover updated PDF URLs (some banks use versioned filenames).
 
 ---
 
@@ -636,11 +633,26 @@ CREATE TABLE public.rate_changes (
 | Story | Points | Priority |
 |-------|--------|----------|
 | Migration 018: source_configs + source_snapshots tables | 5 | P0 |
-| Scraper service (Railway + Playwright) | 8 | P0 |
+| Scraper service (GitHub Actions + Playwright) | 8 | P0 |
 | Content diff engine (SHA-256 gating) | 3 | P0 |
-| Claude Haiku classification pipeline | 8 | P0 |
+| Gemini Flash classification pipeline | 8 | P0 |
 | Confidence routing + auto-approve | 5 | P1 |
 | Pipeline health monitoring | 3 | P1 |
 | Source config management (admin) | 3 | P1 |
 | E2E tests | 5 | P0 |
 | **Total** | **40** | |
+
+### Sprint 16 — T&C Focus Refactor (v2.0.1)
+
+> First production run failed on 45/54 sources. Refocused to T&C PDF monitoring.
+
+| Story | Points | Priority |
+|-------|--------|----------|
+| PDF text extraction (pdf-parse) | 3 | P0 |
+| Version/date extraction + gating | 5 | P0 |
+| Migration: retire 54 sources, insert 30 PDFs + 5 index pages | 5 | P0 |
+| URL discovery for versioned PDFs | 3 | P1 |
+| AI prompt update for T&C PDF input | 2 | P0 |
+| Pipeline integration (3-tier gate) | 3 | P0 |
+| Documentation updates | 2 | P1 |
+| **Total** | **23** | |

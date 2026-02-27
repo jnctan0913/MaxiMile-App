@@ -40,6 +40,7 @@ export interface RoutingResult {
 const TIER_1_SOURCE_TYPES: ReadonlySet<string> = new Set([
   'bank_tc_page',
   'bank_announcement',
+  'bank_tc_pdf',
 ]);
 
 /** Minimum confidence for auto-approval (when source is Tier-1). */

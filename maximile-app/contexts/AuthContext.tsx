@@ -158,6 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         session,
         loading: false,
         needsOnboarding,
+        isRecovery: false,
       });
     }).catch(async () => {
       await supabase.auth.signOut();
@@ -222,7 +223,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const inOnboarding = segments[0] === 'onboarding';
     const inOnboardingAutoCapture = segments[0] === 'onboarding-auto-capture';
     const inOnboardingMiles = segments[0] === 'onboarding-miles';
+    const inOnboardingNotificationPrimer = segments[0] === 'onboarding-notification-primer';
     const inAutoCaptureSetup = segments[0] === 'auto-capture-setup';
+    const inAndroidAutoCaptureSetup = segments[0] === 'android-auto-capture-setup';
     const inWelcome = segments[0] === 'welcome';
     const inPrivacyPolicy = segments[0] === 'privacy-policy';
     const inResetPassword = segments[0] === 'reset-password';
@@ -243,7 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else if (state.needsOnboarding) {
       // Authenticated but no cards -> redirect to welcome (then onboarding)
       // Allow onboarding-auto-capture (Step 1.5), auto-capture-setup wizard, and onboarding-miles (Step 2)
-      if (!inOnboarding && !inOnboardingAutoCapture && !inAutoCaptureSetup && !inOnboardingMiles && !inWelcome) {
+      if (!inOnboarding && !inOnboardingAutoCapture && !inAutoCaptureSetup && !inAndroidAutoCaptureSetup && !inOnboardingMiles && !inOnboardingNotificationPrimer && !inWelcome) {
         router.replace('/welcome');
       }
     } else {

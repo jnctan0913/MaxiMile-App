@@ -40,6 +40,8 @@ import {
   resetFailureCount,
   createPipelineRun,
   updatePipelineRun,
+  updateSourceVersion,
+  updateSourceUrl,
   getClient,
 } from './supabase-client.js';
 import { withRetry } from './error-handler.js';
@@ -105,6 +107,9 @@ export async function runPipeline(): Promise<void> {
   }
 
   try {
+    // Step 1b: URL discovery for versioned PDFs (before main scrape loop)
+    await runUrlDiscovery();
+
     // Step 2: Get sources due for check
     console.log('[Pipeline] Fetching sources due for check...');
     const sources = await withRetry(() => getSourcesDueForCheck());
@@ -269,13 +274,36 @@ async function processSource(source: SourceConfig): Promise<ProcessSourceResult>
     throw new Error(result.error ?? 'Scrape failed');
   }
 
-  // Step 3b: Compute SHA-256 hash (already computed in scraper)
+  // -------------------------------------------------------------------------
+  // Gate 1: Version + date check (cheapest — skip everything if unchanged)
+  // -------------------------------------------------------------------------
+  if (result.tcVersion && result.tcLastUpdated &&
+      source.tc_version && source.tc_last_updated) {
+    if (result.tcVersion === source.tc_version &&
+        result.tcLastUpdated === source.tc_last_updated) {
+      console.log(
+        `[Pipeline]   T&C version unchanged (${result.tcVersion}, updated ${result.tcLastUpdated}). Skipping.`
+      );
+      await withRetry(() =>
+        updateSourceStatus(source.id, 'active', new Date())
+      );
+      await withRetry(() => resetFailureCount(source.id));
+      return noChangeResult;
+    }
+    console.log(
+      `[Pipeline]   T&C version changed: ${source.tc_version} → ${result.tcVersion}, ` +
+        `date: ${source.tc_last_updated} → ${result.tcLastUpdated}`
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Gate 2: SHA-256 hash comparison
+  // -------------------------------------------------------------------------
   const contentHash = result.contentHash;
   console.log(
     `[Pipeline]   Content hash: ${contentHash.substring(0, 16)}...`
   );
 
-  // Step 3c: Compare with latest snapshot
   const latestSnapshot = await withRetry(() =>
     getLatestSnapshot(source.id)
   );
@@ -285,16 +313,21 @@ async function processSource(source: SourceConfig): Promise<ProcessSourceResult>
   const changed = hasContentChanged(contentHash, previousHash);
 
   if (!changed) {
-    // Step 3d: Unchanged — update last_checked_at, skip
-    console.log('[Pipeline]   Content unchanged. Skipping.');
+    console.log('[Pipeline]   Content unchanged (hash match). Skipping.');
     await withRetry(() =>
       updateSourceStatus(source.id, 'active', new Date())
     );
     await withRetry(() => resetFailureCount(source.id));
+    // Update version metadata even if hash unchanged (first time extracting)
+    if (result.tcVersion || result.tcLastUpdated) {
+      await withRetry(() =>
+        updateSourceVersion(source.id, result.tcVersion, result.tcLastUpdated)
+      );
+    }
     return noChangeResult;
   }
 
-  // Step 3e: Changed — save new snapshot
+  // Step 3e: Changed — save new snapshot (with version/date metadata)
   console.log(
     '[Pipeline]   CHANGE DETECTED! Saving new snapshot.'
   );
@@ -310,8 +343,15 @@ async function processSource(source: SourceConfig): Promise<ProcessSourceResult>
   }
 
   const snapshotId = await withRetry(() =>
-    saveSnapshot(source.id, contentHash, result.content)
+    saveSnapshot(source.id, contentHash, result.content, result.tcVersion, result.tcLastUpdated)
   );
+
+  // Update version metadata on the source config
+  if (result.tcVersion || result.tcLastUpdated) {
+    await withRetry(() =>
+      updateSourceVersion(source.id, result.tcVersion, result.tcLastUpdated)
+    );
+  }
 
   // Step 3g: On success — reset failure count, update status
   await withRetry(() =>
@@ -320,7 +360,7 @@ async function processSource(source: SourceConfig): Promise<ProcessSourceResult>
   await withRetry(() => resetFailureCount(source.id));
 
   // -------------------------------------------------------------------------
-  // Sprint 15: AI Classification + Confidence Routing
+  // Gate 3: AI Classification + Confidence Routing
   // -------------------------------------------------------------------------
 
   // Only classify if we have previous content to compare against.
@@ -337,7 +377,8 @@ async function processSource(source: SourceConfig): Promise<ProcessSourceResult>
     oldContent,
     result.content,
     source.bank_name,
-    source.url
+    source.url,
+    source.card_name
   );
 
   console.log(
@@ -384,6 +425,134 @@ async function processSource(source: SourceConfig): Promise<ProcessSourceResult>
 
   console.log('[Pipeline]   No rate changes detected by AI.');
   return { changed: true, routing: { autoApproved: 0, queued: 0, discarded: 0 }, classificationDetails: null };
+}
+
+// ---------------------------------------------------------------------------
+// URL discovery for versioned PDFs
+// ---------------------------------------------------------------------------
+
+/**
+ * Cards whose T&C PDF URLs contain version numbers or dates that change
+ * when a new version is published. URL discovery fetches the bank index
+ * page and extracts the current PDF link.
+ */
+const VERSIONED_PDF_CARDS: ReadonlyMap<string, { bankName: string; indexUrlPattern: string }> = new Map([
+  ['OCBC Titanium Rewards', { bankName: 'OCBC', indexUrlPattern: 'tnc-titaniumrewards' }],
+  ['BOC Elite Miles Card', { bankName: 'BOC', indexUrlPattern: 'elite-miles' }],
+  ['Maybank FC Barcelona Card', { bankName: 'Maybank', indexUrlPattern: 'fc-barcelona' }],
+  ['Citi Rewards Card', { bankName: 'Citibank', indexUrlPattern: 'citi-thankyou-rewards' }],
+  ['Citi PremierMiles Card', { bankName: 'Citibank', indexUrlPattern: 'premiermiles' }],
+  ['SC Smart Card', { bankName: 'Standard Chartered', indexUrlPattern: 'smart-card' }],
+]);
+
+/**
+ * Run URL discovery before the main scrape loop.
+ *
+ * Fetches bank index pages (which list T&C PDFs) and extracts current
+ * PDF links. If a PDF URL has changed (versioned filename), updates the
+ * source_configs record with the new URL.
+ *
+ * This is best-effort — if discovery fails for any index page, we fall
+ * back to the last known URL.
+ */
+async function runUrlDiscovery(): Promise<void> {
+  console.log('[Pipeline] Running URL discovery for versioned PDFs...');
+
+  const supabase = getClient();
+
+  // Get all bank_index_page sources
+  const { data: indexSources, error } = await supabase
+    .from('source_configs')
+    .select('*')
+    .eq('source_type', 'bank_index_page')
+    .eq('status', 'active');
+
+  if (error || !indexSources || indexSources.length === 0) {
+    console.log('[Pipeline] No index page sources found. Skipping URL discovery.');
+    return;
+  }
+
+  for (const indexSource of indexSources) {
+    try {
+      console.log(`[Pipeline] Discovering PDFs from: ${indexSource.url}`);
+      const result = await scrapePage(indexSource.url, indexSource.css_selector, indexSource.scrape_method);
+
+      if (!result.success || !result.content) {
+        console.warn(`[Pipeline] Index page scrape failed: ${result.error}`);
+        continue;
+      }
+
+      // Extract PDF links from the page content
+      const pdfLinks = extractPdfLinks(result.content, indexSource.url);
+
+      if (pdfLinks.length === 0) {
+        console.log(`[Pipeline] No PDF links found on ${indexSource.url}`);
+        continue;
+      }
+
+      console.log(`[Pipeline] Found ${pdfLinks.length} PDF links on ${indexSource.url}`);
+
+      // Match PDF links to card-specific sources and update URLs if changed
+      const { data: pdfSources } = await supabase
+        .from('source_configs')
+        .select('*')
+        .eq('bank_name', indexSource.bank_name)
+        .eq('source_type', 'bank_tc_pdf')
+        .eq('status', 'active');
+
+      if (!pdfSources) continue;
+
+      for (const pdfSource of pdfSources) {
+        // Find a PDF link that matches this source's card
+        const matchingLink = pdfLinks.find((link) => {
+          const cardInfo = VERSIONED_PDF_CARDS.get(pdfSource.card_name ?? '');
+          if (cardInfo) {
+            return link.toLowerCase().includes(cardInfo.indexUrlPattern.toLowerCase());
+          }
+          // Generic match: check if the link looks similar to the current URL
+          const currentFilename = pdfSource.url.split('/').pop()?.replace(/\.pdf.*/, '') ?? '';
+          return link.includes(currentFilename.split('-')[0]);
+        });
+
+        if (matchingLink && matchingLink !== pdfSource.url) {
+          console.log(
+            `[Pipeline] URL changed for ${pdfSource.card_name}: ${pdfSource.url} → ${matchingLink}`
+          );
+          await withRetry(() => updateSourceUrl(pdfSource.id, matchingLink));
+        }
+      }
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.warn(`[Pipeline] URL discovery failed for ${indexSource.url}: ${errMsg}`);
+      // Non-fatal — continue with other index pages
+    }
+  }
+
+  console.log('[Pipeline] URL discovery complete.');
+}
+
+/**
+ * Extract PDF links from page content or raw HTML.
+ * Returns absolute URLs to PDF files found on the page.
+ */
+function extractPdfLinks(content: string, baseUrl: string): string[] {
+  const pdfPattern = /https?:\/\/[^\s"'<>]+\.pdf(?:\?[^\s"'<>]*)?/gi;
+  const results: string[] = [...(content.match(pdfPattern) ?? [])];
+
+  // Also try relative paths
+  const relativePattern = /(?:href=["'])([^"']+\.pdf(?:\?[^"']*)?)/gi;
+  let relMatch;
+  while ((relMatch = relativePattern.exec(content)) !== null) {
+    try {
+      const absoluteUrl = new URL(relMatch[1], baseUrl).href;
+      results.push(absoluteUrl);
+    } catch {
+      // Invalid URL — skip
+    }
+  }
+
+  // Deduplicate
+  return [...new Set(results)];
 }
 
 // ---------------------------------------------------------------------------

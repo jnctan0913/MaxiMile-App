@@ -165,7 +165,7 @@ export default function OnboardingScreen() {
       } else {
         // Fresh onboarding — proceed to Step 1.5 (auto-capture setup)
         track('onboarding_completed', { cards_count: selectedIds.size }, user.id);
-        router.push({
+        router.replace({
           pathname: '/onboarding-auto-capture',
           params: { cardIds: JSON.stringify(Array.from(selectedIds)) },
         });

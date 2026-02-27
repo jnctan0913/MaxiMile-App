@@ -159,6 +159,52 @@ export async function resetFailureCount(
   }
 }
 
+/**
+ * Update a source's T&C version and last-updated date.
+ * Called when the pipeline detects a new version in extracted PDF text.
+ */
+export async function updateSourceVersion(
+  sourceConfigId: string,
+  tcVersion: string | null,
+  tcLastUpdated: string | null
+): Promise<void> {
+  const updates: Record<string, unknown> = {};
+  if (tcVersion !== null) updates.tc_version = tcVersion;
+  if (tcLastUpdated !== null) updates.tc_last_updated = tcLastUpdated;
+
+  if (Object.keys(updates).length === 0) return;
+
+  const { error } = await getClient()
+    .from('source_configs')
+    .update(updates)
+    .eq('id', sourceConfigId);
+
+  if (error) {
+    throw new Error(
+      `Failed to update source version for ${sourceConfigId}: ${error.message}`
+    );
+  }
+}
+
+/**
+ * Update a source's URL (used by URL discovery when PDFs have versioned paths).
+ */
+export async function updateSourceUrl(
+  sourceConfigId: string,
+  newUrl: string
+): Promise<void> {
+  const { error } = await getClient()
+    .from('source_configs')
+    .update({ url: newUrl })
+    .eq('id', sourceConfigId);
+
+  if (error) {
+    throw new Error(
+      `Failed to update source URL for ${sourceConfigId}: ${error.message}`
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Source snapshots
 // ---------------------------------------------------------------------------
@@ -194,7 +240,9 @@ export async function getLatestSnapshot(
 export async function saveSnapshot(
   sourceConfigId: string,
   contentHash: string,
-  rawContent: string
+  rawContent: string,
+  tcVersion?: string | null,
+  tcLastUpdated?: string | null
 ): Promise<string> {
   const { data, error } = await getClient()
     .from('source_snapshots')
@@ -203,6 +251,8 @@ export async function saveSnapshot(
       content_hash: contentHash,
       raw_content: rawContent,
       snapshot_at: new Date().toISOString(),
+      tc_version: tcVersion ?? null,
+      tc_last_updated: tcLastUpdated ?? null,
     })
     .select('id')
     .single();

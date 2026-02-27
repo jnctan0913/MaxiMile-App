@@ -75,7 +75,18 @@ export const SYSTEM_PROMPT = `You are a Singapore credit card rate change detect
 
 ## Your Role
 
-You analyze changes in Singapore bank credit card terms and conditions pages. Given a BEFORE (old) and AFTER (new) snapshot of a bank page, you identify any meaningful changes to credit card earn rates, spending caps, transfer ratios, partner programs, annual fees, or card lifecycle events.
+You analyze changes in official Terms & Conditions (T&C) documents for Singapore bank credit cards. Given a BEFORE (old) and AFTER (new) version of extracted PDF text from a bank's T&C document, you identify any meaningful changes to credit card earn rates, spending caps, transfer ratios, partner programs, annual fees, or card lifecycle events.
+
+## Input Format
+
+Your input is extracted text from official bank T&C PDF documents. Be aware of common PDF text extraction artifacts:
+- Table columns may not align perfectly (numbers may appear separated from their labels)
+- Headers and footers may be repeated on each page
+- Bullet points may be extracted as special characters or missing
+- Page numbers may appear inline with content
+- Multi-column layouts may interleave text from different columns
+
+Focus on the semantic meaning of the text rather than exact formatting.
 
 ## What Constitutes a Rate Change
 
@@ -510,19 +521,20 @@ export function formatFewShotExamples(): string {
  * @param newContent - The current page content (from the new snapshot)
  * @param bankName   - The bank that owns this page (e.g., "DBS", "OCBC")
  * @param url        - The source URL being analyzed
+ * @param cardName   - The specific card this T&C belongs to, or null for bank-wide
  * @returns The formatted user message string
  */
 export function buildClassificationPrompt(
   oldContent: string,
   newContent: string,
   bankName: string,
-  url: string
+  url: string,
+  cardName?: string | null
 ): string {
   // Truncate very long content to stay within token limits.
-  // Gemini 2.5 Flash has a 1M token context window but we want to keep
-  // costs predictable and latency low. 15,000 chars per side is roughly
-  // ~4,000 tokens — more than enough for T&C pages.
-  const MAX_CONTENT_LENGTH = 15_000;
+  // T&C PDFs can be longer than web pages — allow 30,000 chars per side
+  // (~8,000 tokens). Gemini 2.0 Flash has a 1M token context window.
+  const MAX_CONTENT_LENGTH = 30_000;
 
   const trimmedOld = oldContent.length > MAX_CONTENT_LENGTH
     ? oldContent.substring(0, MAX_CONTENT_LENGTH) + '\n\n[... content truncated ...]'
@@ -532,24 +544,27 @@ export function buildClassificationPrompt(
     ? newContent.substring(0, MAX_CONTENT_LENGTH) + '\n\n[... content truncated ...]'
     : newContent;
 
-  return `Analyze the following page content change and report any credit card rate changes.
+  const cardInfo = cardName ? `\n- **Card**: ${cardName}` : '';
+
+  return `Analyze the following T&C document change and report any credit card rate changes.
 
 ## Source Information
-- **Bank**: ${bankName}
+- **Bank**: ${bankName}${cardInfo}
 - **URL**: ${url}
+- **Document type**: Official Terms & Conditions PDF
 
-## Previous Page Content (BEFORE)
+## Previous T&C Content (BEFORE)
 \`\`\`
 ${trimmedOld}
 \`\`\`
 
-## Current Page Content (AFTER)
+## Current T&C Content (AFTER)
 \`\`\`
 ${trimmedNew}
 \`\`\`
 
 ## Instructions
-Compare the BEFORE and AFTER content above. Identify any changes to credit card earn rates, spending caps, transfer ratios, fees, or card availability. Use the \`report_rate_changes\` tool to report your findings. If no rate-relevant changes are found, return an empty changes array with \`no_changes_detected: true\`.`;
+Compare the BEFORE and AFTER T&C content above. Identify any changes to credit card earn rates, spending caps, transfer ratios, fees, or card availability. Use the \`report_rate_changes\` tool to report your findings. If no rate-relevant changes are found, return an empty changes array with \`no_changes_detected: true\`.${cardName ? `\n\nNote: This T&C document is specifically for the **${cardName}**. Focus your analysis on changes affecting this card.` : ''}`;
 }
 
 // ---------------------------------------------------------------------------

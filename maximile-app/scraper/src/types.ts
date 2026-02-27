@@ -13,7 +13,9 @@ export type SourceType =
   | 'bank_tc_page'
   | 'bank_announcement'
   | 'regulatory'
-  | 'community_forum';
+  | 'community_forum'
+  | 'bank_tc_pdf'
+  | 'bank_index_page';
 
 /**
  * Source health status enum.
@@ -66,6 +68,9 @@ export interface SourceConfig {
   consecutive_failures: number;
   notes: string | null;
   created_at: string;
+  card_name: string | null;
+  tc_version: string | null;
+  tc_last_updated: string | null;
 }
 
 /**
@@ -81,6 +86,8 @@ export interface SourceSnapshot {
   content_hash: string; // SHA-256 hex digest
   raw_content: string | null;
   snapshot_at: string; // ISO 8601 timestamp
+  tc_version: string | null;
+  tc_last_updated: string | null;
 }
 
 /**
@@ -118,4 +125,6 @@ export interface ScrapeResult {
   contentHash: string;
   success: boolean;
   error?: string;
+  tcVersion: string | null;
+  tcLastUpdated: string | null;
 }

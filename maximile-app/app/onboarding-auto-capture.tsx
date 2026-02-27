@@ -83,10 +83,10 @@ export default function OnboardingAutoCaptureScreen() {
 
     if (Platform.OS === 'ios') {
       // iOS: Route to Shortcuts-based auto-capture setup
-      router.push({ pathname: '/auto-capture-setup', params: { skipIntro: '1' } });
+      router.replace({ pathname: '/auto-capture-setup', params: { skipIntro: '1' } });
     } else if (Platform.OS === 'android') {
       // Android: Route to notification-based auto-capture setup (Sprint 17)
-      router.push('/android-auto-capture-setup');
+      router.replace('/android-auto-capture-setup');
     } else {
       // Fallback for other platforms (web, etc.)
       handleSkip();
@@ -105,7 +105,7 @@ export default function OnboardingAutoCaptureScreen() {
     // if (showPrimer) { router.push('/onboarding-notification-primer'); return; }
 
     // Proceed to onboarding-miles with cardIds
-    router.push({
+    router.replace({
       pathname: '/onboarding-miles',
       params: { cardIds: cardIds || JSON.stringify([]) },
     });

@@ -39,6 +39,7 @@ const TIMEOUT_MS = 30_000;
  * @param newContent - Current page content (from new snapshot)
  * @param bankName   - Bank that owns this page
  * @param url        - Source URL being analyzed
+ * @param cardName   - The specific card this T&C belongs to, or null for bank-wide
  * @returns Validated ClassificationResponse
  * @throws Error if both attempts fail
  */
@@ -46,7 +47,8 @@ export async function classifyWithGroq(
   oldContent: string,
   newContent: string,
   bankName: string,
-  url: string
+  url: string,
+  cardName?: string | null
 ): Promise<ClassificationResponse> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -62,7 +64,7 @@ export async function classifyWithGroq(
     JSON.stringify(GROQ_RESPONSE_SCHEMA, null, 2);
 
   // Build the user message
-  const userMessage = buildClassificationPrompt(oldContent, newContent, bankName, url);
+  const userMessage = buildClassificationPrompt(oldContent, newContent, bankName, url, cardName);
 
   // First attempt
   try {

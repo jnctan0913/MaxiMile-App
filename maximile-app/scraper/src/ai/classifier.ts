@@ -46,20 +46,22 @@ export interface ClassificationResult {
  * @param newContent - Current page content (from new snapshot)
  * @param bankName   - Bank that owns this page
  * @param url        - Source URL being analyzed
+ * @param cardName   - The specific card this T&C belongs to, or null for bank-wide
  * @returns ClassificationResult with response, provider, and latency
  */
 export async function classifyPageChange(
   oldContent: string,
   newContent: string,
   bankName: string,
-  url: string
+  url: string,
+  cardName?: string | null
 ): Promise<ClassificationResult> {
   const startTime = Date.now();
 
   // Attempt 1: Gemini Flash (primary)
   try {
     console.log('[Classifier] Trying Gemini Flash...');
-    const response = await classifyWithGemini(oldContent, newContent, bankName, url);
+    const response = await classifyWithGemini(oldContent, newContent, bankName, url, cardName);
     const latencyMs = Date.now() - startTime;
 
     console.log(
@@ -80,7 +82,7 @@ export async function classifyPageChange(
     // Attempt 2: Groq Llama (fallback)
     try {
       console.log('[Classifier] Falling back to Groq Llama...');
-      const response = await classifyWithGroq(oldContent, newContent, bankName, url);
+      const response = await classifyWithGroq(oldContent, newContent, bankName, url, cardName);
       const latencyMs = Date.now() - startTime;
 
       console.log(
