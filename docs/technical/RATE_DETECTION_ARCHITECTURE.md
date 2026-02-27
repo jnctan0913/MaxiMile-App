@@ -1,9 +1,9 @@
 # Rate Change Detection Architecture
 
 > **Feature**: F23 — Rate Change Monitoring & Alerts
-> **Version**: 1.0 (Planning)
-> **Date**: 2026-02-21
-> **Status**: Proposed — awaiting implementation approval
+> **Version**: 1.1 (MileLion Pivot)
+> **Date**: 2026-02-28
+> **Status**: Implemented — MileLion review monitoring live
 > **Authors**: PM Agent, Software Engineer, AI Engineer, Data Engineer (coordinated by Orchestrator)
 
 ---
@@ -121,7 +121,7 @@ MaxiMile's rate change monitoring system has three layers:
 |-------|------|------------|--------|----------|-----------------|
 | **v1.0** | Manual Admin Entry | — | — | ✅ Shipped | SQL migrations for rate changes |
 | **v1.5** | Community Submissions | **2560** | Low (2 sprints) | Next | User submission form + admin verification queue |
-| **v2.0** | Automated Monitoring | **1750** | Medium (3 sprints) | +6 weeks | Bank page scraping + Claude Haiku classification |
+| **v2.0** | Automated Monitoring | **1750** | Medium (3 sprints) | +6 weeks | T&C PDF monitoring (30 PDFs + 5 index pages) + Gemini 2.0 Flash classification |
 | **v2.5** | Push Notifications | **2267** | Low (1 sprint) | +2 weeks | Expo push via Supabase webhooks |
 | **v3.0** | Predictive Intelligence | **133** | High (4 sprints) | Future | Trend analysis, proactive recommendations |
 
@@ -141,8 +141,8 @@ MaxiMile's rate change monitoring system has three layers:
 | Decision Area | PM | SWE | AI Eng | Data Eng | Consensus |
 |---------------|-----|------|---------|----------|-----------|
 | Next phase | v1.5 Community | v1.5 Community | v1.5 Community | v1.5 Community | **Unanimous: v1.5** |
-| AI approach | Hybrid hash+LLM | Content-hash + LLM | Hash gating + Haiku | Hash + structured extraction | **Hybrid: hash gate + Claude Haiku** |
-| Infra (v2.0) | Keep costs <$15/mo | Railway + Edge Functions | API-first (no self-hosted models) | Supabase-native where possible | **Railway ($7) + Supabase Edge + Vercel** |
+| AI approach | Hybrid hash+LLM | Content-hash + LLM | Hash gating + Gemini | Hash + structured extraction | **3-tier: version/date → hash → Gemini 2.0 Flash** |
+| Infra (v2.0) | Keep costs <$15/mo | GitHub Actions + Edge Functions | API-first (no self-hosted models) | Supabase-native where possible | **GitHub Actions ($0) + Supabase + Cloudflare Pages** |
 | Confidence routing | Admin review for low-confidence | Review queue + auto-approve | ≥0.85 auto, 0.5-0.69 escalate | Auto-approve Tier 1 sources | **Tiered: auto/escalate/discard** |
 | Dedup strategy | Prevent user confusion | Fingerprint-based | Semantic similarity check | SHA-256 fingerprint | **SHA-256 of (card+type+value+month)** |
 | Schema additions | detection_source column | 6 new tables | prompt_log table | 7 tables + 3 views | **Migration 017: 7 tables + views** |
@@ -204,92 +204,93 @@ User discovers change → Opens "Report a Change" form → Fills structured fiel
 
 ### v2.0 — Automated Detection
 
-**Goal**: Monitor bank T&C documents and use AI to detect and classify rate changes.
+**Goal**: Monitor authoritative sources and use AI to detect and classify rate changes.
 
-> **Sprint 16 Update (2026-02-28)**: Refocused from ~54 broad bank URLs to 30 T&C PDFs + 5 bank index pages. First production run failed on 45/54 sources due to Playwright selector timeouts and PDF encoding issues. T&C PDFs are the authoritative source of truth and can be fetched via simple HTTP (no Playwright needed for 85% of sources).
+> **Sprint 16 Update (2026-02-28)**: Refocused from ~54 broad bank URLs to 30 T&C PDFs + 5 bank index pages. First production run failed on 45/54 sources due to Playwright selector timeouts and PDF encoding issues.
 
-#### Detection Pipeline
+> **Sprint 17 Update (2026-02-28)**: Pivoted from bank T&C PDFs to **MileLion review pages** as the primary detection source. Bank T&C sources were fragile (404s, Maybank blocks GitHub IPs, broken PDF URLs). MileLion maintains authoritative, human-verified credit card reviews with `dateModified` metadata in JSON-LD structured data. New approach: date-gated scraping of 24 MileLion review pages + 1 guide page, with AI comparison against our database rather than old-vs-new content diffing. Bank T&C sources set to `paused` (kept as backup).
+
+#### Detection Pipeline (MileLion Date-Gated)
 
 ```
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│  SCHEDULER   │───▶│  URL         │───▶│  SCRAPER     │───▶│  VERSION     │───▶│  HASH        │
-│  (GH Actions)│    │  DISCOVERY   │    │  (HTTP/PW)   │    │  CHECK       │    │  COMPARE     │
-│  Daily 2am   │    │  (index pgs) │    │  PDF text    │    │  (cheapest)  │    │  (SHA-256)   │
-└──────────────┘    └──────────────┘    └──────────────┘    └──────┬───────┘    └──────┬───────┘
-                                                                   │                   │
-                                                         match→SKIP│         match→SKIP│
-                                                                   │                   │
-                    ┌──────────────┐    ┌──────────────┐    ┌──────▼───────────────────▼┐
-                    │  PUBLISHED   │◀───│  REVIEW      │◀───│  AI CLASSIFIER            │
-                    │  rate_changes│    │  QUEUE       │    │  (Gemini Flash → Groq)    │
-                    │  table       │    │  (confidence) │    │  Only when content changed│
-                    └──────────────┘    └──────────────┘    └───────────────────────────┘
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  SCHEDULER   │───▶│  HTTP FETCH  │───▶│  DATE GATE   │───▶│ DB COMPARATOR│
+│  (GH Actions)│    │  MileLion    │    │  dateModified│    │  Fetch our   │
+│  Weekly      │    │  review page │    │  vs stored   │    │  card data   │
+└──────────────┘    └──────────────┘    └──────┬───────┘    └──────┬───────┘
+                                               │                   │
+                                     match→SKIP│                   │
+                                               │                   │
+                    ┌──────────────┐    ┌───────▼──────┐    ┌──────▼───────┐
+                    │  ADMIN       │◀───│  REVIEW      │◀───│ AI COMPARE   │
+                    │  DASHBOARD   │    │  QUEUE       │    │ MileLion vs  │
+                    │  (review)    │    │              │    │ our DB data  │
+                    └──────────────┘    └──────────────┘    └──────────────┘
 ```
 
-#### Version-Based Change Detection (3-Tier Gate)
+#### MileLion Date-Gated Change Detection
 
-T&C documents contain version numbers and "last updated" dates. The pipeline uses a 3-tier gate to minimize unnecessary processing:
+MileLion pages include JSON-LD structured data with `dateModified`. The pipeline uses this as a lightweight gate:
 
 | Gate | Check | Cost | Action if match |
 |------|-------|------|-----------------|
-| **1. Version + Date** | Compare extracted `tc_version` and `tc_last_updated` against stored values | Instant, $0 | Skip entirely |
-| **2. SHA-256 Hash** | Compare content hash against latest snapshot | Fast, $0 | Skip AI classification |
-| **3. AI Classification** | Gemini Flash structured output (Groq Llama fallback) | ~1-3s, $0 (free tier) | Route by confidence |
+| **1. dateModified** | Compare JSON-LD `dateModified` against stored `tc_last_updated` | Instant, $0 | Skip entirely |
+| **2. AI Comparison** | Compare MileLion article content against our DB data | ~1-3s, $0 (free tier) | Route by confidence |
+
+This is simpler than the previous 3-tier gate (version + hash + AI) because MileLion's `dateModified` is a reliable signal — if the date hasn't changed, the content hasn't changed.
 
 #### AI/ML Pipeline (AI Engineer)
 
-**Implemented approach**: Hybrid version-gating + content-hash gating + Gemini Flash classification.
+**Implemented approach**: Date-gated MileLion monitoring + DB comparison + Gemini Flash classification.
 
 | Stage | Method | Cost |
 |-------|--------|------|
-| **1. Fetch** | HTTP for PDFs (85%), Playwright for index pages (15%) | $0 (GitHub Actions) |
-| **2. Extract** | `pdf-parse` for PDF text extraction | $0 |
-| **3. Version Check** | Compare tc_version + tc_last_updated | $0 |
-| **4. Hash Diff** | SHA-256 hash comparison of extracted text | $0 |
-| **5. Classify** | Gemini 2.0 Flash via tool_use structured output | $0 (free tier, 250 req/day) |
+| **1. Fetch** | HTTP fetch of MileLion review pages (WordPress, server-rendered) | $0 (GitHub Actions) |
+| **2. Date Gate** | Extract `dateModified` from JSON-LD, compare against stored date | $0 |
+| **3. Extract** | Strip HTML for article body text | $0 |
+| **4. DB Lookup** | Fetch our card's earn rules, caps, exclusions from Supabase | $0 |
+| **5. AI Compare** | Gemini 2.0 Flash compares MileLion content vs our DB summary | $0 (free tier, 250 req/day) |
 | **6. Route** | Confidence-based: auto-approve / escalate / discard | $0 |
 
-**Why Gemini Flash over Claude Haiku**:
-- Comparable quality for structured extraction tasks
-- $0/month vs $1-5/month (Gemini free tier: 250 requests/day)
-- Groq Llama 3.3 70B as free-tier fallback (1,000 requests/day)
-- No training data needed — few-shot prompting with 5 seed examples
-- Structured output via `tool_use` ensures schema compliance
+**Why MileLion over bank T&C PDFs**:
+- MileLion reviews are human-verified and regularly updated
+- JSON-LD `dateModified` provides reliable change signal (vs fragile PDF version extraction)
+- Server-rendered HTML — no Playwright needed, simple HTTP fetch
+- 24 review pages cover 29 cards (vs 35 fragile bank PDF sources)
+- Bank T&C PDFs suffered from: 404s, Maybank IP blocking, versioned URLs, encoding issues
 
 **Confidence routing thresholds**:
 
 | Confidence | Action | Estimated % |
 |------------|--------|-------------|
-| ≥ 0.85 | Auto-approve (Tier 1 sources: bank_tc_pdf, bank_tc_page, bank_announcement) | ~60% |
+| ≥ 0.85 | Auto-approve (Tier 1 sources including milelion_review) | ~60% |
 | 0.50 – 0.84 | Queue for admin review | ~35% |
 | < 0.50 | Auto-discard (log for audit) | ~5% |
 
-**Prompt design** (AI Engineer):
+**MileLion comparison prompt design**:
 
 ```
 System: You are a Singapore credit card rate change detector.
-Input is extracted PDF text from official T&C documents.
-Given a before/after version, identify changes to: earn rates,
-spending caps, transfer ratios, partner programs, or annual fees.
+Compare MileLion review article content against our database records.
+Identify discrepancies in earn rates, spending caps, transfer ratios,
+category definitions, or card availability.
 
-Handle PDF extraction artifacts (table misalignment, repeated
-headers/footers, inline page numbers).
-
-Output using the provided tool schema. If no relevant change
-is detected, return {"changes": []}.
-
-Few-shot examples: [5 seed records from Migration 015]
+Input: MileLion article text + our DB summary (earn rules, caps)
+Output: Discrepancies using report_rate_changes tool schema.
+If data matches, return {"changes": []}.
 ```
 
-#### Monitored Sources (Sprint 16 Overhaul)
+#### Monitored Sources (Sprint 17 — MileLion Pivot)
 
 | Source Type | Count | Scrape Method | Frequency | Notes |
 |-------------|-------|---------------|-----------|-------|
-| Card-specific T&C PDFs | 30 | HTTP + pdf-parse | Daily | One PDF per tracked card |
-| Bank index pages | 5 | Playwright | Daily | URL discovery for versioned PDFs |
-| **Total** | **35** | | | |
+| MileLion review pages | 24 | HTTP | Weekly | One per card review URL |
+| MileLion guide page | 1 | HTTP | Weekly | Fallback for 5 cards without dedicated reviews |
+| Bank T&C PDFs | 30 | — | **Paused** | Kept as backup, not actively checked |
+| Bank index pages | 5 | — | **Paused** | Kept as backup |
+| **Active Total** | **25** | | | |
 
-**Source strategy**: Each of the 30 tracked cards has a dedicated T&C PDF source. 5 bank index pages are scraped to discover updated PDF URLs (some banks use versioned filenames).
+**MileLion URL mapping**: 29 tracked cards map to 24 dedicated review pages (UOB Lady's Card and Lady's Solitaire share one review). 5 cards without dedicated reviews (BOC Elite Miles, Maybank FC Barcelona, POSB Everyday, UOB Visa Signature, SC Journey Card) use the MileLion credit cards guide page as a fallback monitor.
 
 ---
 
@@ -330,9 +331,9 @@ Few-shot examples: [5 seed records from Migration 015]
 ┌─────────────────────────────────────────────────────────┐
 │              GITHUB ACTIONS (Free — Public Repo)        │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │ Cron Trigger │  │  Playwright  │  │  Gemini API  │  │
+│  │ Cron Trigger │  │  HTTP + PW   │  │  Gemini API  │  │
 │  │ (daily 6am)  │──▶  Scraper     │──▶  Classifier  │  │
-│  └──────────────┘  │  (50 URLs)   │  │  (free tier)  │  │
+│  └──────────────┘  │ (25 sources) │  │  (free tier)  │  │
 │                    └──────────────┘  └──────┬───────┘  │
 └─────────────────────────────────────────────┼──────────┘
                                               │ writes via
@@ -360,7 +361,7 @@ Few-shot examples: [5 seed records from Migration 015]
 | Edge Functions (processing) | Supabase | Free (500K invocations) | $0 |
 | Object Storage (snapshots) | Supabase | Free (1 GB) | $0 |
 | Scheduler + Scraper | GitHub Actions | Free (public repo: unlimited) | $0 |
-| AI Classification (primary) | Google Gemini 2.5 Flash | Free (250 req/day) | $0 |
+| AI Classification (primary) | Google Gemini 2.0 Flash | Free (250 req/day) | $0 |
 | AI Classification (fallback) | Groq Llama 3.3 70B | Free (1,000 req/day) | $0 |
 | Admin Dashboard | Cloudflare Pages | Free (unlimited bandwidth) | $0 |
 | **Total** | | | **$0/mo** |
@@ -372,7 +373,7 @@ Few-shot examples: [5 seed records from Migration 015]
 **New enums:**
 
 ```sql
-CREATE TYPE source_type AS ENUM ('bank_tc_page', 'bank_announcement', 'regulatory', 'community_forum', 'email', 'community_submission');
+CREATE TYPE source_type AS ENUM ('bank_tc_page', 'bank_announcement', 'regulatory', 'community_forum', 'email', 'community_submission', 'bank_tc_pdf', 'bank_index_page', 'milelion_review');
 CREATE TYPE source_status AS ENUM ('active', 'paused', 'broken', 'retired');
 CREATE TYPE detected_change_status AS ENUM ('detected', 'confirmed', 'rejected', 'published', 'duplicate');
 CREATE TYPE submission_status AS ENUM ('pending', 'under_review', 'approved', 'rejected', 'merged');
@@ -384,8 +385,8 @@ CREATE TYPE pipeline_run_status AS ENUM ('running', 'completed', 'failed', 'part
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
-| `source_configs` | Registry of monitored URLs | url, source_type, bank_name, scrape_method, check_interval, css_selector |
-| `source_snapshots` | Point-in-time page captures | source_config_id, content_hash (SHA-256), raw_content, snapshot_at |
+| `source_configs` | Registry of monitored URLs | url, source_type, bank_name, scrape_method, check_interval, css_selector, card_name, tc_version, tc_last_updated |
+| `source_snapshots` | Point-in-time page captures | source_config_id, content_hash (SHA-256), raw_content, snapshot_at, tc_version, tc_last_updated |
 | `detected_changes` | AI-detected changes awaiting review | source_snapshot_id, card_id, change_type, confidence, status, reviewer_notes |
 | `community_submissions` | User-reported changes | user_id, card_id, change_type, old_value, new_value, evidence_url, screenshot_path, status |
 | `pipeline_runs` | Execution log for monitoring | stage, status, sources_checked, changes_detected, errors, duration_ms |
@@ -430,7 +431,7 @@ Every component of the automated detection pipeline can run on free tiers. The o
 | Component | Original Plan | $0 Alternative | Free Tier Limits |
 |-----------|--------------|-----------------|------------------|
 | **Web Scraper** | Railway ($7/mo) | **GitHub Actions** (cron workflow) | Public repos: unlimited. Private: 2,000 min/mo. Native Playwright support, 6-hour timeout. |
-| **AI Classification** | Claude Haiku ($1-5/mo) | **Google Gemini 2.5 Flash** (primary) + **Groq Llama 3.3 70B** (fallback) | Gemini: 250 req/day free, native JSON schema. Groq: 1,000 req/day free, JSON mode. |
+| **AI Classification** | Claude Haiku ($1-5/mo) | **Google Gemini 2.0 Flash** (primary) + **Groq Llama 3.3 70B** (fallback) | Gemini: 250 req/day free, native JSON schema. Groq: 1,000 req/day free, JSON mode. |
 | **Database** | Supabase Free ($0) | **Supabase Free** (no change) | 500 MB storage, 500K Edge Function invocations, pg_cron included. |
 | **Storage** | Supabase Free ($0) | **Supabase Free** (no change) | 1 GB file storage. ~180 MB/year for snapshots. |
 | **Scheduler** | pg_cron ($0) | **GitHub Actions cron** (built-in) | `schedule` trigger in workflow YAML. Runs daily at configurable time. |
@@ -443,9 +444,9 @@ Every component of the automated detection pipeline can run on free tiers. The o
 ┌─────────────────────────────────────────────────────────┐
 │              GITHUB ACTIONS (Free — Public Repo)        │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │ Cron Trigger │  │  Playwright  │  │  Gemini API  │  │
+│  │ Cron Trigger │  │  HTTP + PW   │  │  Gemini API  │  │
 │  │ (daily 6am)  │──▶  Scraper     │──▶  Classifier  │  │
-│  └──────────────┘  │  (50 URLs)   │  │  (free tier)  │  │
+│  └──────────────┘  │ (25 sources) │  │  (free tier)  │  │
 │                    └──────────────┘  └──────┬───────┘  │
 └─────────────────────────────────────────────┼──────────┘
                                               │ writes via
@@ -483,7 +484,7 @@ Every component of the automated detection pipeline can run on free tiers. The o
 
 ### Why Gemini Flash Over Claude Haiku
 
-| Factor | Gemini 2.5 Flash (Free) | Claude Haiku ($0.25-1.25/MTok) |
+| Factor | Gemini 2.0 Flash (Free) | Claude Haiku ($0.25-1.25/MTok) |
 |--------|------------------------|-------------------------------|
 | Cost for 75 calls/mo | $0 | ~$1-5 |
 | Free tier | 250 requests/day | None (pay-per-use) |
@@ -491,7 +492,7 @@ Every component of the automated detection pipeline can run on free tiers. The o
 | Quality | Comparable for structured extraction | Slightly better reasoning |
 | Fallback | Groq Llama 3.3 70B (also free) | N/A |
 
-**Trade-off**: Claude Haiku produces marginally better structured output for financial text, but Gemini 2.5 Flash with JSON schema enforcement is more than adequate for detecting "old rate → new rate" changes. At $0 vs $1-5/mo, the quality difference doesn't justify the cost for a <100-calls/month workload.
+**Trade-off**: Claude Haiku produces marginally better structured output for financial text, but Gemini 2.0 Flash with JSON schema enforcement is more than adequate for detecting "old rate → new rate" changes. At $0 vs $1-5/mo, the quality difference doesn't justify the cost for a <100-calls/month workload.
 
 ### Cost Comparison Summary
 
@@ -656,3 +657,20 @@ CREATE TABLE public.rate_changes (
 | Pipeline integration (3-tier gate) | 3 | P0 |
 | Documentation updates | 2 | P1 |
 | **Total** | **23** | |
+
+### Sprint 17 — MileLion Detection Pivot (v2.0.2)
+
+> Bank T&C PDF sources proved fragile (404s, IP blocking, broken URLs). Pivoted to MileLion review pages as primary detection source.
+
+| Story | Points | Priority |
+|-------|--------|----------|
+| Migration: add `milelion_review` source type | 1 | P0 |
+| Migration: pause bank T&C sources, insert 25 MileLion sources | 3 | P0 |
+| MileLion scraper module (HTTP + JSON-LD date extraction) | 3 | P0 |
+| DB comparator module (fetch card data for AI comparison) | 3 | P0 |
+| Pipeline integration (date gate + MileLion comparison branch) | 5 | P0 |
+| MileLion comparison AI prompt | 2 | P0 |
+| Router update (milelion_review as Tier-1) | 1 | P0 |
+| Type updates | 1 | P0 |
+| Documentation updates (architecture, sprint plan, PRD) | 2 | P1 |
+| **Total** | **21** | |

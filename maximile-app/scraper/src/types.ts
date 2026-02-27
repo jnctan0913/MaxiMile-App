@@ -15,7 +15,8 @@ export type SourceType =
   | 'regulatory'
   | 'community_forum'
   | 'bank_tc_pdf'
-  | 'bank_index_page';
+  | 'bank_index_page'
+  | 'milelion_review';
 
 /**
  * Source health status enum.

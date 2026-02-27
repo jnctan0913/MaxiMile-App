@@ -4,7 +4,7 @@
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
 **Source**: PRD v2.3, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0
-**Status**: In Progress — Sprint 20 Active, Sprints 21-22 Planned (Recommendation Accuracy), Sprints 23-24 Planned (Card Expansion 22→29)
+**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprints 21-22 Planned (Recommendation Accuracy), Sprints 23-24 Planned (Card Expansion 22→29)
 **Change Log**: v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
@@ -2298,7 +2298,7 @@ T13.12 + T13.16 ── T13.18 (Analytics) ── T13.19 (E2E Tests) ── T13.2
 
 ---
 
-## Sprint 14: "Detection Foundation" (F25 Part 1 — Scraper + Hashing)
+## Sprint 14: "Detection Foundation" (F25 Part 1 — Scraper + Hashing) ✅ COMPLETED
 
 **Duration**: 2 weeks (10 working days)
 **Goal**: Build the automated page monitoring foundation: source configuration, GitHub Actions Playwright scraper, content-hash change detection, and snapshot storage. No AI classification yet — this sprint delivers the data collection layer.
@@ -2389,11 +2389,11 @@ T14.16 (Unit Tests) ← T14.10 + T14.13 ── T14.17 (Regression)
 | R14.2 | CSS selectors break due to bank page redesigns | **High** | **Medium** | Version selectors in source_configs; fallback to full-page content hash if selector extraction fails; alerting on extraction errors |
 | R14.3 | GitHub Actions runner environment changes break Playwright | **Low** | **Medium** | Pin Playwright version in workflow; use ubuntu-22.04 runner (LTS); test locally before deploying |
 | R14.4 | Supabase connection from GitHub Actions fails (CORS/auth) | **Low** | **High** | Use Supabase service_role key in GitHub Secrets; test connection in T14.07 before building full pipeline |
-| R14.5 | Compiling 50 bank T&C URLs takes longer than estimated | **Medium** | **Low** | Start with top 20 most important sources (covering the 29 cards in our DB); expand to 50 in Sprint 15 |
+| R14.5 | Compiling bank T&C URLs takes longer than estimated | **Medium** | **Low** | Start with top 20 most important sources (covering the 29 cards in our DB); expand in subsequent sprints. **Post-mortem**: Refocused to 30 T&C PDFs + 5 index pages in Sprint 16b |
 
 ---
 
-## Sprint 15: "Always Up to Date" (F25 Part 2 — AI Classification + Pipeline Health)
+## Sprint 15: "Always Up to Date" (F25 Part 2 — AI Classification + Pipeline Health) ✅ COMPLETED
 
 **Duration**: 2 weeks (10 working days)
 **Goal**: Wire the AI classification pipeline (Gemini Flash + Groq fallback), implement confidence-based routing, build the pipeline health monitoring dashboard, and run comprehensive E2E testing. After this sprint, the full detection pipeline runs autonomously at $0/month.
@@ -2499,7 +2499,7 @@ SPRINT 13 (Weeks 1–2)                SPRINT 14 (Weeks 3–4)                SP
 Day 1:    Migration 017              Day 1:    Migration 018              Day 1:    AI prompt design
           (community_submissions)              (source_configs +                    + tool schema
 Day 1–2:  RLS + dedup function                 snapshots + pipeline)     Day 2–4:  Gemini + Groq
-Day 2–4:  Submission form UI         Day 2–4:  Seed 50 URLs +                      API clients
+Day 2–4:  Submission form UI         Day 2–4:  Seed source URLs +                      API clients
 Day 3–6:  Admin dashboard                      CSS selectors            Day 4–6:  Wire to pipeline
           (Cloudflare Pages)         Day 3–6:  Playwright scraper                  + confidence routing
 Day 5–6:  Status tracking +         Day 5–6:  Hash comparison +          Day 5–7:  Extend admin dashboard
@@ -5504,7 +5504,7 @@ S24.2 (Category UX) ────────┘              │
 
 ---
 
-## Sprint 16: T&C Focus Refactor (Detection Pipeline v2.0.1)
+## Sprint 16b: T&C Focus Refactor (Detection Pipeline v2.0.1)
 
 > **Context**: Sprint 14-15 deployed the automated detection pipeline, but the first production run failed on **45 of 54 sources** — Playwright selector timeouts, navigation timeouts, and PDF Unicode encoding errors. Root cause: broad website scraping (card listing pages, promo pages, rewards pages) is unreliable because bank SPAs block headless browsers and CSS selectors don't match actual page structure.
 >
@@ -5581,11 +5581,110 @@ Refocus the detection pipeline from broad web scraping to targeted T&C PDF monit
 - T&C documents are the authoritative source of truth for rate changes
 - Version metadata provides a cheap change detection gate before expensive hash/AI processing
 
-**Sprint 16 Status**: ✅ COMPLETED
+**Sprint 16b Status**: ✅ COMPLETED
+
+---
+
+## Sprint 16c: MileLion Detection Pivot (Detection Pipeline v2.0.2)
+
+> **Sprint Goal**: Pivot from fragile bank T&C PDF monitoring to MileLion review pages as the primary detection source. MileLion maintains authoritative, human-verified credit card reviews with `dateModified` metadata, enabling reliable date-gated change detection.
+
+| Field | Value |
+|-------|-------|
+| **Sprint Goal** | Replace 35 fragile bank T&C sources with 25 reliable MileLion review sources |
+| **Duration** | 1 day (focused implementation) |
+| **Story Points** | 21 |
+| **Status** | ✅ COMPLETED |
+
+### Why the Pivot
+
+**Sprint 16b post-mortem revealed systemic issues with bank T&C PDF sources:**
+- Maybank blocks GitHub Actions IPs → scrape failures
+- Bank PDF URLs are fragile (404s, versioned paths that break)
+- PDF text extraction produces noisy output (table misalignment, encoding issues)
+- 35 sources × daily = many potential failure points
+
+**MileLion advantages:**
+- Human-verified, authoritative credit card reviews
+- JSON-LD `dateModified` metadata = reliable change signal (no content hashing needed)
+- Server-rendered WordPress = simple HTTP fetch (no Playwright)
+- 24 review pages cover 29 tracked cards
+- Trusted source in the Singapore miles community
+
+### Sprint 16c — Stories
+
+| ID | Story | Points | Priority | Status |
+|----|-------|--------|----------|--------|
+| S16c.1 | Migration: add `milelion_review` source type enum | 1 | P0 | ✅ |
+| S16c.2 | Migration: pause bank T&C sources, insert 25 MileLion sources | 3 | P0 | ✅ |
+| S16c.3 | MileLion scraper module (HTTP + JSON-LD extraction) | 3 | P0 | ✅ |
+| S16c.4 | DB comparator module (fetch card data for AI comparison) | 3 | P0 | ✅ |
+| S16c.5 | Pipeline integration (date gate + MileLion comparison branch) | 5 | P0 | ✅ |
+| S16c.6 | MileLion comparison AI prompt | 2 | P0 | ✅ |
+| S16c.7 | Router update (milelion_review as Tier-1) | 1 | P0 | ✅ |
+| S16c.8 | Type updates + documentation | 3 | P0 | ✅ |
+| **Total** | | **21** | | |
+
+### Sprint 16c — Files Changed
+
+| # | File | Action |
+|---|------|--------|
+| 1 | `supabase/migrations/20260228300000_add_milelion_source_type.sql` | NEW |
+| 2 | `supabase/migrations/20260228400000_milelion_sources.sql` | NEW |
+| 3 | `scraper/src/milelion.ts` | NEW — date extraction + content scraping |
+| 4 | `scraper/src/db-comparator.ts` | NEW — fetch card data for AI comparison |
+| 5 | `scraper/src/pipeline.ts` | MODIFY — add MileLion date gate branch |
+| 6 | `scraper/src/ai/prompts.ts` | MODIFY — add MileLion comparison prompt |
+| 7 | `scraper/src/ai/classifier.ts` | MODIFY — add MileLion comparison classifier |
+| 8 | `scraper/src/ai/gemini-client.ts` | MODIFY — add custom prompt classifier |
+| 9 | `scraper/src/ai/groq-client.ts` | MODIFY — add custom prompt classifier |
+| 10 | `scraper/src/ai/router.ts` | MODIFY — add milelion_review to Tier-1 |
+| 11 | `scraper/src/types.ts` | MODIFY — add milelion_review type |
+
+### Sprint 16c — Pipeline Flow
+
+```
+GitHub Actions (weekly or manual trigger)
+  │
+  ├─ For each milelion_review source:
+  │    ├─ HTTP fetch MileLion page
+  │    ├─ Extract dateModified from JSON-LD
+  │    ├─ GATE: dateModified == stored date? → SKIP (no change)
+  │    ├─ Date newer → extract article content
+  │    ├─ Fetch our DB data for this card (db-comparator)
+  │    ├─ AI: Compare MileLion content vs our DB
+  │    ├─ Differences found?
+  │    │    ├─ YES → Insert into detected_changes → Admin dashboard
+  │    │    └─ NO → Log "MileLion updated but no rate changes"
+  │    └─ Update source_configs.tc_last_updated = new dateModified
+  │
+  └─ Update pipeline_run stats + last_run.json
+```
+
+### Sprint 16b/16c Retrospective
+
+**What went wrong with bank T&C PDFs (Sprint 16b):**
+- Maybank blocks GitHub Actions IPs → all Maybank sources fail
+- Bank PDF URLs are fragile (version numbers in filenames change)
+- PDF text extraction noisy — tables don't align, headers repeat
+- 35 sources × daily = too many failure points for reliable monitoring
+
+**What the MileLion pivot solves (Sprint 16c):**
+- Single, reliable third-party source that's always accessible
+- `dateModified` in JSON-LD = cheap, reliable change detection
+- AI comparison against our DB (not old-vs-new content diff) = better precision
+- Server-rendered HTML = no Playwright, no PDF parsing
+- 25 sources × weekly = simpler, more maintainable
+
+**Sprint 16c Status**: ✅ COMPLETED
 
 ---
 
 **Next Steps**:
-1. Complete Sprints 21-22 (Recommendation Accuracy)
-2. Begin Sprint 23 — 6 straightforward cards (Day 1: flat-rate cards first)
-3. Sprint 24 begins after Sprint 23 ships — UOB Lady's Solitaire with category selection UX
+1. Apply database migrations (`20260228300000` + `20260228400000`) to production
+2. Trigger manual GitHub Actions workflow run to verify MileLion sources scrape successfully
+3. First run saves baseline `dateModified` dates — no AI comparison yet
+4. Subsequent runs detect MileLion page updates and trigger AI comparison
+5. Complete Sprints 21-22 (Recommendation Accuracy)
+6. Begin Sprint 23 — 6 straightforward cards (Day 1: flat-rate cards first)
+7. Sprint 24 begins after Sprint 23 ships — UOB Lady's Solitaire with category selection UX

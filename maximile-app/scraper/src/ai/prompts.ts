@@ -479,6 +479,116 @@ Annual fee: S$160.50 (waived for first 2 years)`,
 ];
 
 // ---------------------------------------------------------------------------
+// MileLion comparison prompt
+// ---------------------------------------------------------------------------
+
+export const MILELION_COMPARISON_PROMPT = buildMileLionSystemPrompt();
+
+function buildMileLionSystemPrompt(): string {
+  const cardList = TRACKED_CARDS.map((card, i) => `${i + 1}. ${card}`).join('\n');
+
+  return `You are a Singapore credit card rate change detector for the MaxiMile app.
+
+## Your Role
+
+You compare credit card earn rate information from a MileLion review article against our internal database records. Your job is to identify any discrepancies — places where MileLion's data differs from what we have stored.
+
+MileLion (milelion.com) is an authoritative Singapore miles & points blog that publishes detailed, human-verified credit card reviews. When their data differs from ours, it likely means either:
+1. The bank has updated their card's terms (and MileLion has captured the change)
+2. Our database has an error or is outdated
+
+## What to Look For
+
+Compare the MileLion article against our database and flag differences in:
+1. **Earn rates** (mpd / points per dollar) for any spending category
+2. **Spending caps** (monthly/annual bonus caps, minimum spend thresholds)
+3. **Transfer ratios** (points-to-miles conversion rates)
+4. **Category definitions** (which merchant types qualify for bonus rates)
+5. **Card availability** (discontinued, new launches, name changes)
+
+## Cards We Track
+
+${cardList}
+
+## Output Format
+
+Use the provided tool/function report_rate_changes to return your analysis as structured JSON. Your output MUST include:
+
+- **changes**: An array of detected discrepancies (empty array if none found).
+- **no_changes_detected**: Set to true if MileLion data matches our DB, false otherwise.
+- **analysis_notes**: A brief (1-3 sentence) explanation of your comparison.
+
+For each discrepancy in the changes array, provide ALL required fields:
+- card_name: Exact card name from the tracked list above
+- change_type: One of earn_rate_change, cap_adjustment, program_devaluation, new_card_launch, card_discontinued
+- category: Spend category affected or null for card-wide changes
+- old_value: What our database currently shows
+- new_value: What MileLion's review states
+- effective_date: Date mentioned in MileLion article, or null
+- severity: info (rate increase), warning (rate decrease <=20%), critical (rate decrease >20%)
+- confidence: 0.00-1.00 based on how clear the discrepancy is
+- alert_title: Short (max 60 chars) human-readable title
+- alert_body: Detailed (max 300 chars) description
+
+## Important Rules
+
+1. **Return an empty changes array** if MileLion's data matches our database. Do NOT fabricate discrepancies.
+2. **Ignore editorial content**: Opinions, recommendations, comparisons to other cards, and promotional language are NOT rate changes.
+3. **Be precise**: Quote exact values from both MileLion and our DB.
+4. **One discrepancy per item**: Report each difference as a separate item.
+5. **Singapore market only**: Only report data for Singapore-issued cards.`;
+}
+
+/**
+ * Builds the user-message prompt for MileLion comparison.
+ *
+ * Instead of comparing old vs new page content (T&C diff), this compares
+ * MileLion's article content against our internal database summary.
+ *
+ * @param mileLionContent - Extracted text from the MileLion review article
+ * @param dbSummary       - Formatted summary of our database's card data
+ * @param bankName        - The bank that issues this card
+ * @param cardName        - The specific card name
+ * @param url             - The MileLion review URL
+ * @returns The formatted user message string
+ */
+export function buildMileLionComparisonPrompt(
+  mileLionContent: string,
+  dbSummary: string,
+  bankName: string,
+  cardName: string,
+  url: string
+): string {
+  // Truncate MileLion content if very long
+  const MAX_CONTENT_LENGTH = 30_000;
+  const trimmedContent = mileLionContent.length > MAX_CONTENT_LENGTH
+    ? mileLionContent.substring(0, MAX_CONTENT_LENGTH) + '\n\n[... content truncated ...]'
+    : mileLionContent;
+
+  return `Compare the following MileLion review article against our database records and identify any discrepancies in earn rates, caps, or conditions.
+
+## Source Information
+- **Bank**: ${bankName}
+- **Card**: ${cardName}
+- **MileLion Review URL**: ${url}
+
+## Our Database Records
+\`\`\`
+${dbSummary}
+\`\`\`
+
+## MileLion Review Content
+\`\`\`
+${trimmedContent}
+\`\`\`
+
+## Instructions
+Compare the MileLion review content above against our database records. Identify any discrepancies in earn rates, spending caps, transfer ratios, category definitions, or card availability. Use the \`report_rate_changes\` tool to report your findings. If MileLion's data matches our database, return an empty changes array with \`no_changes_detected: true\`.
+
+Focus on **factual earn rate data** in the MileLion article (tables, bullet points with rates) rather than editorial commentary.`;
+}
+
+// ---------------------------------------------------------------------------
 // Format few-shot examples into prompt text
 // ---------------------------------------------------------------------------
 

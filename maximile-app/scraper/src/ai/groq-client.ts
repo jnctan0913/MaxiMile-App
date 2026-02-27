@@ -82,6 +82,37 @@ export async function classifyWithGroq(
 }
 
 /**
+ * Classify using a custom system prompt and user message (for MileLion comparison).
+ *
+ * Same as classifyWithGroq but accepts pre-built prompts.
+ */
+export async function classifyWithGroqCustomPrompt(
+  systemPrompt: string,
+  userMessage: string
+): Promise<ClassificationResponse> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error('Missing GROQ_API_KEY environment variable');
+  }
+
+  const groq = new Groq({ apiKey });
+
+  const fullSystemPrompt =
+    systemPrompt +
+    '\n\nYou MUST respond with JSON matching this schema:\n' +
+    JSON.stringify(GROQ_RESPONSE_SCHEMA, null, 2);
+
+  try {
+    return await callGroq(groq, fullSystemPrompt, userMessage);
+  } catch (firstError) {
+    console.warn(
+      `[Groq] First attempt failed: ${firstError instanceof Error ? firstError.message : String(firstError)}. Retrying...`
+    );
+    return await callGroq(groq, fullSystemPrompt, userMessage);
+  }
+}
+
+/**
  * Make a single Groq API call with JSON mode and validate the response.
  */
 async function callGroq(

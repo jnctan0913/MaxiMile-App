@@ -46,7 +46,10 @@ import {
 } from './supabase-client.js';
 import { withRetry } from './error-handler.js';
 import { classifyPageChange } from './ai/classifier.js';
+import { classifyMileLionComparison } from './ai/classifier.js';
 import { routeDetectedChanges } from './ai/router.js';
+import { scrapeMileLionPage } from './milelion.js';
+import { getCardDataSummary, getMultiCardDataSummary } from './db-comparator.js';
 import type { SourceConfig, PipelineRun } from './types.js';
 
 // Resolve __dirname equivalent for ESM
@@ -247,6 +250,9 @@ interface ProcessSourceResult {
 
 /**
  * Process a single source: scrape, hash, compare, classify, route.
+ *
+ * For milelion_review sources, uses a date-gated pipeline that compares
+ * MileLion's article content against our database (instead of old vs new content).
  */
 async function processSource(source: SourceConfig): Promise<ProcessSourceResult> {
   const noChangeResult: ProcessSourceResult = {
@@ -254,6 +260,11 @@ async function processSource(source: SourceConfig): Promise<ProcessSourceResult>
     routing: { autoApproved: 0, queued: 0, discarded: 0 },
     classificationDetails: null,
   };
+
+  // Route MileLion sources to the date-gated pipeline
+  if (source.source_type === 'milelion_review') {
+    return processMileLionSource(source);
+  }
 
   // Step 3a: Scrape the page (with retry)
   const result = await withRetry(
@@ -424,6 +435,177 @@ async function processSource(source: SourceConfig): Promise<ProcessSourceResult>
   }
 
   console.log('[Pipeline]   No rate changes detected by AI.');
+  return { changed: true, routing: { autoApproved: 0, queued: 0, discarded: 0 }, classificationDetails: null };
+}
+
+// ---------------------------------------------------------------------------
+// MileLion date-gated processing
+// ---------------------------------------------------------------------------
+
+/**
+ * Cards covered by the MileLion guide page fallback (no dedicated review).
+ */
+const GUIDE_PAGE_CARDS = [
+  'BOC Elite Miles Card',
+  'Maybank FC Barcelona Card',
+  'POSB Everyday Card',
+  'UOB Visa Signature',
+  'SC Journey Card',
+];
+
+/**
+ * Process a MileLion review source using date-gated comparison.
+ *
+ * Flow:
+ *   1. HTTP fetch MileLion page → extract dateModified from JSON-LD
+ *   2. GATE: if dateModified === stored tc_last_updated → SKIP (no update)
+ *   3. Date is newer → extract article content
+ *   4. Fetch our DB summary for this card via db-comparator
+ *   5. Call AI classifier with MileLion content + our DB data
+ *   6. Route detected differences → detected_changes table
+ *   7. Update source.tc_last_updated = dateModified
+ */
+async function processMileLionSource(source: SourceConfig): Promise<ProcessSourceResult> {
+  const noChangeResult: ProcessSourceResult = {
+    changed: false,
+    routing: { autoApproved: 0, queued: 0, discarded: 0 },
+    classificationDetails: null,
+  };
+
+  // Step 1: Scrape MileLion page
+  const result = await withRetry(
+    () => scrapeMileLionPage(source.url),
+    3,
+    2000
+  );
+
+  if (!result.success) {
+    console.warn(`[Pipeline]   MileLion scrape failed: ${result.error}`);
+    await withRetry(() => incrementFailureCount(source.id));
+    await withRetry(() =>
+      updateSourceStatus(source.id, source.status, new Date())
+    );
+    throw new Error(result.error ?? 'MileLion scrape failed');
+  }
+
+  // Step 2: Date gate — compare dateModified against stored date
+  if (result.dateModified && source.tc_last_updated) {
+    if (result.dateModified === source.tc_last_updated) {
+      console.log(
+        `[Pipeline]   MileLion dateModified unchanged (${result.dateModified}). Skipping.`
+      );
+      await withRetry(() =>
+        updateSourceStatus(source.id, 'active', new Date())
+      );
+      await withRetry(() => resetFailureCount(source.id));
+      return noChangeResult;
+    }
+    console.log(
+      `[Pipeline]   MileLion dateModified changed: ${source.tc_last_updated} → ${result.dateModified}`
+    );
+  } else if (!result.dateModified) {
+    console.warn(
+      '[Pipeline]   No dateModified found in JSON-LD. Proceeding with content comparison.'
+    );
+  } else {
+    console.log(
+      `[Pipeline]   First check for this MileLion source. Saving baseline dateModified: ${result.dateModified}`
+    );
+  }
+
+  // Step 3: Save snapshot
+  const snapshotId = await withRetry(() =>
+    saveSnapshot(source.id, result.contentHash, result.content, null, result.dateModified)
+  );
+
+  // Update dateModified on the source config
+  await withRetry(() =>
+    updateSourceVersion(source.id, null, result.dateModified)
+  );
+
+  // Reset failure count and update status
+  await withRetry(() =>
+    updateSourceStatus(source.id, 'active', new Date())
+  );
+  await withRetry(() => resetFailureCount(source.id));
+
+  // First-time baseline: no AI comparison needed
+  if (!source.tc_last_updated) {
+    console.log(
+      '[Pipeline]   First MileLion snapshot — baseline saved, no AI comparison.'
+    );
+    return { changed: true, routing: { autoApproved: 0, queued: 0, discarded: 0 }, classificationDetails: null };
+  }
+
+  // Step 4: Fetch our DB data for this card
+  let dbSummary: string | null = null;
+
+  if (source.card_name) {
+    dbSummary = await getCardDataSummary(source.card_name);
+  } else {
+    // Guide page fallback — fetch multiple cards
+    dbSummary = await getMultiCardDataSummary(GUIDE_PAGE_CARDS);
+  }
+
+  if (!dbSummary) {
+    console.warn(
+      `[Pipeline]   Could not fetch DB data for "${source.card_name ?? 'guide page'}". Skipping AI comparison.`
+    );
+    return { changed: true, routing: { autoApproved: 0, queued: 0, discarded: 0 }, classificationDetails: null };
+  }
+
+  // Step 5: AI comparison — MileLion content vs our DB
+  console.log('[Pipeline]   Running MileLion vs DB AI comparison...');
+  const classification = await classifyMileLionComparison(
+    result.content,
+    dbSummary,
+    source.bank_name,
+    source.card_name ?? 'Multiple cards',
+    source.url
+  );
+
+  console.log(
+    `[Pipeline]   AI result: ${classification.response.changes.length} discrepancies detected ` +
+      `(provider: ${classification.provider}, latency: ${classification.latencyMs}ms)`
+  );
+
+  if (classification.response.analysis_notes) {
+    console.log(
+      `[Pipeline]   AI notes: ${classification.response.analysis_notes}`
+    );
+  }
+
+  // Step 6: Route detected discrepancies
+  if (classification.response.changes.length > 0) {
+    const supabaseClient = getClient();
+    const routing = await routeDetectedChanges(
+      classification.response.changes,
+      source,
+      snapshotId,
+      supabaseClient
+    );
+
+    const classificationDetails = classification.response.changes
+      .filter((c) => c.confidence >= 0.85)
+      .map((c) => ({
+        card_name: c.card_name,
+        change_type: c.change_type,
+        alert_title: c.alert_title,
+        provider: classification.provider,
+      }));
+
+    return {
+      changed: true,
+      routing: {
+        autoApproved: routing.autoApproved,
+        queued: routing.queued,
+        discarded: routing.discarded,
+      },
+      classificationDetails,
+    };
+  }
+
+  console.log('[Pipeline]   MileLion updated but no rate discrepancies found.');
   return { changed: true, routing: { autoApproved: 0, queued: 0, discarded: 0 }, classificationDetails: null };
 }
 

@@ -195,6 +195,33 @@ export async function classifyWithGemini(
 }
 
 /**
+ * Classify using a custom system prompt and user message (for MileLion comparison).
+ *
+ * Same as classifyWithGemini but accepts pre-built prompts instead of
+ * building them from old/new content.
+ */
+export async function classifyWithGeminiCustomPrompt(
+  systemPrompt: string,
+  userMessage: string
+): Promise<ClassificationResponse> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('Missing GEMINI_API_KEY environment variable');
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+
+  try {
+    return await callGemini(genAI, systemPrompt, userMessage, undefined);
+  } catch (firstError) {
+    console.warn(
+      `[Gemini] First attempt failed: ${firstError instanceof Error ? firstError.message : String(firstError)}. Retrying with temperature=0...`
+    );
+    return await callGemini(genAI, systemPrompt, userMessage, 0);
+  }
+}
+
+/**
  * Make a single Gemini API call with function calling and validate the response.
  */
 async function callGemini(

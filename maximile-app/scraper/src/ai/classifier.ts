@@ -12,8 +12,9 @@
 // =============================================================================
 
 import type { ClassificationResponse } from './schema.js';
-import { classifyWithGemini } from './gemini-client.js';
-import { classifyWithGroq } from './groq-client.js';
+import { classifyWithGemini, classifyWithGeminiCustomPrompt } from './gemini-client.js';
+import { classifyWithGroq, classifyWithGroqCustomPrompt } from './groq-client.js';
+import { MILELION_COMPARISON_PROMPT, buildMileLionComparisonPrompt } from './prompts.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -118,6 +119,93 @@ export async function classifyPageChange(
             `This page change requires manual review.`,
         },
         provider: 'gemini', // Default provider (neither actually produced the result)
+        latencyMs,
+      };
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// MileLion comparison classifier
+// ---------------------------------------------------------------------------
+
+/**
+ * Compare MileLion article content against our database using AI.
+ *
+ * Uses the MILELION_COMPARISON_PROMPT (different from the T&C diff prompt)
+ * to identify discrepancies between MileLion's earn rate data and our DB.
+ *
+ * Same Gemini → Groq fallback pattern as classifyPageChange.
+ *
+ * @param mileLionContent - Extracted text from the MileLion review article
+ * @param dbSummary       - Formatted summary of our database's card data
+ * @param bankName        - The bank that issues this card
+ * @param cardName        - The specific card name
+ * @param url             - The MileLion review URL
+ * @returns ClassificationResult with response, provider, and latency
+ */
+export async function classifyMileLionComparison(
+  mileLionContent: string,
+  dbSummary: string,
+  bankName: string,
+  cardName: string,
+  url: string
+): Promise<ClassificationResult> {
+  const startTime = Date.now();
+
+  const systemPrompt = MILELION_COMPARISON_PROMPT;
+  const userMessage = buildMileLionComparisonPrompt(
+    mileLionContent,
+    dbSummary,
+    bankName,
+    cardName,
+    url
+  );
+
+  // Attempt 1: Gemini Flash (primary)
+  try {
+    console.log('[Classifier] MileLion comparison — trying Gemini Flash...');
+    const response = await classifyWithGeminiCustomPrompt(systemPrompt, userMessage);
+    const latencyMs = Date.now() - startTime;
+
+    console.log(
+      `[Classifier] Gemini succeeded in ${latencyMs}ms. ` +
+        `Discrepancies: ${response.changes.length}`
+    );
+
+    return { response, provider: 'gemini', latencyMs };
+  } catch (geminiError) {
+    const geminiErrorMsg =
+      geminiError instanceof Error ? geminiError.message : String(geminiError);
+    console.warn(`[Classifier] Gemini failed: ${geminiErrorMsg}`);
+
+    // Attempt 2: Groq Llama (fallback)
+    try {
+      console.log('[Classifier] MileLion comparison — falling back to Groq...');
+      const response = await classifyWithGroqCustomPrompt(systemPrompt, userMessage);
+      const latencyMs = Date.now() - startTime;
+
+      console.log(
+        `[Classifier] Groq succeeded in ${latencyMs}ms. ` +
+          `Discrepancies: ${response.changes.length}`
+      );
+
+      return { response, provider: 'groq', latencyMs };
+    } catch (groqError) {
+      const groqErrorMsg =
+        groqError instanceof Error ? groqError.message : String(groqError);
+      console.error(`[Classifier] Both providers failed: ${groqErrorMsg}`);
+
+      const latencyMs = Date.now() - startTime;
+      return {
+        response: {
+          changes: [],
+          no_changes_detected: true,
+          analysis_notes:
+            `MileLion comparison failed. Gemini: ${geminiErrorMsg}. Groq: ${groqErrorMsg}. ` +
+            `This comparison requires manual review.`,
+        },
+        provider: 'gemini',
         latencyMs,
       };
     }
