@@ -19,6 +19,8 @@ const storage = Platform.OS === 'web'
   ? (typeof window !== 'undefined' ? window.localStorage : undefined)
   : AsyncStorage;
 
+export const SITE_URL = 'https://jnctan0913.github.io/MaxiMile-App';
+
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: storage as any,

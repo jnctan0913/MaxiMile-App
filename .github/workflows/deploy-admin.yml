@@ -37,10 +37,21 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
 
+      - name: Prepare Pages Artifact
+        run: |
+          mkdir -p deployment
+          # Copy admin dashboard build
+          cp -r maximile-app/admin-dashboard/dist/* deployment/
+          # Copy auth pages to /auth subdirectory
+          mkdir -p deployment/auth
+          cp -r auth-pages/* deployment/auth/
+          # Ensure assets like Logo.png are accessible to auth pages
+          # (Assuming Logo.png is already in admin-dashboard/dist from the build)
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: maximile-app/admin-dashboard/dist
+          path: deployment
 
   deploy:
     needs: build

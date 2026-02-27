@@ -266,14 +266,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { SITE_URL } = await import('../lib/supabase');
+    const { error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: `${SITE_URL}/auth/confirm.html`,
+      },
+    });
     return { error };
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
-    const redirectUrl = Platform.OS === 'web'
-      ? `${window.location.origin}/reset-password`
-      : 'maximile://reset-password';
+    const { SITE_URL } = await import('../lib/supabase');
+    const redirectUrl = `${SITE_URL}/auth/reset-password.html`;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
@@ -314,7 +320,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const changeEmail = useCallback(async (newEmail: string) => {
-    const { error } = await supabase.auth.updateUser({ email: newEmail });
+    const { SITE_URL } = await import('../lib/supabase');
+    const { error } = await supabase.auth.updateUser({ 
+      email: newEmail,
+      options: {
+        emailRedirectTo: `${SITE_URL}/auth/confirm.html`,
+      },
+    });
     return { error: error as AuthError | null };
   }, []);
 
