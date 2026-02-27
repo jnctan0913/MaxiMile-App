@@ -331,20 +331,74 @@ function cardNameToSlug(cardName: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Card name → card_id resolution
+// ---------------------------------------------------------------------------
+
+/** Cache of card name → card_id lookups to avoid repeated queries. */
+const cardIdCache = new Map<string, string | null>();
+
+/**
+ * Resolve a card name (from AI output) to a card_id UUID in the database.
+ * Uses slug-based matching with a fallback to partial name matching.
+ * Results are cached for the duration of the pipeline run.
+ */
+async function resolveCardId(
+  cardName: string,
+  supabaseClient: SupabaseClient
+): Promise<string | null> {
+  if (cardIdCache.has(cardName)) {
+    return cardIdCache.get(cardName) ?? null;
+  }
+
+  const slug = cardNameToSlug(cardName);
+
+  // Try exact slug match first
+  const { data: slugMatch } = await supabaseClient
+    .from('cards')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (slugMatch) {
+    cardIdCache.set(cardName, slugMatch.id);
+    return slugMatch.id;
+  }
+
+  // Fallback: partial name match (case-insensitive)
+  const { data: nameMatch } = await supabaseClient
+    .from('cards')
+    .select('id')
+    .ilike('name', `%${cardName}%`)
+    .limit(1)
+    .maybeSingle();
+
+  const resolved = nameMatch?.id ?? null;
+  cardIdCache.set(cardName, resolved);
+
+  if (!resolved) {
+    console.warn(`[Router] Could not resolve card_id for "${cardName}" (slug: ${slug})`);
+  }
+
+  return resolved;
+}
+
+// ---------------------------------------------------------------------------
 // Database operations
 // ---------------------------------------------------------------------------
 
 /**
- * Check if a dedup fingerprint already exists in rate_changes.
+ * Check if a dedup fingerprint already exists in detected_changes.
+ * (rate_changes does not have a dedup_fingerprint column)
  */
 async function checkDuplicateFingerprint(
   fingerprint: string,
   supabaseClient: SupabaseClient
 ): Promise<boolean> {
   const { data, error } = await supabaseClient
-    .from('rate_changes')
+    .from('detected_changes')
     .select('id')
     .eq('dedup_fingerprint', fingerprint)
+    .in('status', ['detected', 'confirmed', 'published'])
     .limit(1)
     .maybeSingle();
 
@@ -360,6 +414,11 @@ async function checkDuplicateFingerprint(
 
 /**
  * Insert an auto-approved change into the rate_changes table.
+ *
+ * DB columns: id, card_id (UUID FK), program_id, change_type (enum),
+ *   category, old_value, new_value, effective_date (DATE NOT NULL),
+ *   alert_title, alert_body, severity (enum), source_url, created_at,
+ *   detection_source (TEXT).
  */
 async function insertRateChange(
   change: DetectedRateChange,
@@ -368,23 +427,20 @@ async function insertRateChange(
   supabaseClient: SupabaseClient
 ): Promise<void> {
   const dbChangeType = CHANGE_TYPE_TO_DB_ENUM[change.change_type] ?? change.change_type;
+  const cardId = await resolveCardId(change.card_name, supabaseClient);
 
   const { error } = await supabaseClient.from('rate_changes').insert({
-    // Card lookup will be done via card_name for now.
-    // In production, we'd resolve card_name -> card_id first.
-    card_name: change.card_name,
+    card_id: cardId,
     change_type: dbChangeType,
     category: change.category,
     old_value: change.old_value,
     new_value: change.new_value,
-    effective_date: change.effective_date,
+    effective_date: change.effective_date ?? new Date().toISOString().split('T')[0],
     severity: change.severity,
     alert_title: change.alert_title,
     alert_body: change.alert_body,
+    source_url: sourceConfig.url,
     detection_source: 'automated',
-    dedup_fingerprint: fingerprint,
-    source_config_id: sourceConfig.id,
-    detected_at: new Date().toISOString(),
   });
 
   if (error) {
@@ -394,6 +450,12 @@ async function insertRateChange(
 
 /**
  * Insert a detected change record for audit/review.
+ *
+ * DB columns: id, source_snapshot_id (UUID FK), card_id (UUID FK),
+ *   card_name (TEXT), bank_name (TEXT), change_type (enum), category,
+ *   old_value, new_value, effective_date, alert_title, alert_body,
+ *   severity (enum), confidence (NUMERIC), status (enum), reviewer_notes,
+ *   ai_notes (TEXT), dedup_fingerprint, created_at.
  */
 async function insertDetectedChange(
   change: DetectedRateChange,
@@ -405,11 +467,13 @@ async function insertDetectedChange(
   reviewerNotes: string | null
 ): Promise<void> {
   const dbChangeType = CHANGE_TYPE_TO_DB_ENUM[change.change_type] ?? change.change_type;
+  const cardId = await resolveCardId(change.card_name, supabaseClient);
 
   const { error } = await supabaseClient.from('detected_changes').insert({
-    source_config_id: sourceConfig.id,
-    snapshot_id: snapshotId,
+    source_snapshot_id: snapshotId,
+    card_id: cardId,
     card_name: change.card_name,
+    bank_name: sourceConfig.bank_name,
     change_type: dbChangeType,
     category: change.category,
     old_value: change.old_value,
@@ -422,7 +486,6 @@ async function insertDetectedChange(
     status,
     dedup_fingerprint: fingerprint,
     reviewer_notes: reviewerNotes,
-    detected_at: new Date().toISOString(),
   });
 
   if (error) {
