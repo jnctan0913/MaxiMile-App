@@ -32,6 +32,8 @@ interface PipelineSummary {
 interface SourceHealth {
   source_id: string;
   bank_name: string;
+  card_name: string | null;
+  source_type: string;
   url: string;
   source_status: SourceStatus;
   uptime_pct_30d: number | null;
@@ -116,6 +118,7 @@ export default function PipelineHealth() {
   const [runs, setRuns] = useState<PipelineRun[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPaused, setShowPaused] = useState(false);
 
   // -------------------------------------------------------------------------
   // Fetch all pipeline health data
@@ -152,6 +155,7 @@ export default function PipelineHealth() {
       if (sourcesRes.data) {
         setSources(sourcesRes.data as unknown as SourceHealth[]);
       }
+
 
       // Runs
       if (runsRes.error) {
@@ -226,21 +230,26 @@ export default function PipelineHealth() {
             color="text-green-700"
             bgColor="bg-green-50 border-green-200"
           />
-          {/* Broken Sources */}
-          <SummaryCard
-            label="Broken Sources"
-            value={summary?.broken_sources ?? 0}
-            color={
-              (summary?.broken_sources ?? 0) > 0
-                ? 'text-red-700'
-                : 'text-text-secondary'
-            }
-            bgColor={
-              (summary?.broken_sources ?? 0) > 0
-                ? 'bg-red-50 border-red-200'
-                : 'bg-surface-bg border-gold-tint'
-            }
-          />
+          {/* Broken / Paused Sources */}
+          <div className="border border-gold-tint rounded-xl p-4 shadow-sm bg-white">
+            <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-1">
+              Broken / Paused
+            </p>
+            <div className="flex items-baseline gap-2">
+              <span
+                className={`text-3xl font-bold ${
+                  (summary?.broken_sources ?? 0) > 0
+                    ? 'text-red-700'
+                    : 'text-text-secondary'
+                }`}
+              >
+                {summary?.broken_sources ?? 0}
+              </span>
+              <span className="text-sm text-text-tertiary">
+                / {summary?.paused_sources ?? 0} paused
+              </span>
+            </div>
+          </div>
           {/* Last Run Time */}
           <div className="border border-gold-tint rounded-xl p-4 shadow-sm bg-white border-gold-tint">
             <p className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-1">
@@ -275,9 +284,21 @@ export default function PipelineHealth() {
 
       {/* ---- SOURCE HEALTH TABLE ---- */}
       <div className="px-6 mb-6">
-        <h3 className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-3">
-          Source Health
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider">
+            Source Health
+          </h3>
+          {summary && summary.paused_sources > 0 && (
+            <button
+              onClick={() => setShowPaused(!showPaused)}
+              className="text-[12px] text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              {showPaused
+                ? `Hide ${summary.paused_sources} paused`
+                : `Show ${summary.paused_sources} paused`}
+            </button>
+          )}
+        </div>
 
         {sources.length === 0 ? (
           <div className="bg-white border border-gold-tint rounded-xl shadow-sm p-8 text-center text-text-tertiary text-sm">
@@ -289,10 +310,10 @@ export default function PipelineHealth() {
               <thead>
                 <tr className="border-b-2 border-gold-tint">
                   <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
-                    Bank
+                    Card / Bank
                   </th>
                   <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
-                    URL
+                    Source
                   </th>
                   <th className="text-left text-[12px] font-semibold text-text-secondary uppercase tracking-wider px-4 py-3">
                     Status
@@ -312,13 +333,30 @@ export default function PipelineHealth() {
                 </tr>
               </thead>
               <tbody>
-                {sources.map((source) => (
+                {sources
+                  .filter((s) => showPaused || s.source_status !== 'paused')
+                  .map((source) => (
                   <tr
                     key={source.source_id}
-                    className="border-b border-surface-border-light hover:bg-surface-bg transition-colors"
+                    className={`border-b border-surface-border-light hover:bg-surface-bg transition-colors ${
+                      source.source_status === 'paused' ? 'opacity-50' : ''
+                    }`}
                   >
-                    <td className="px-4 py-3 text-sm font-medium text-text-primary">
-                      {source.bank_name}
+                    <td className="px-4 py-3">
+                      {source.card_name ? (
+                        <>
+                          <p className="text-sm font-medium text-text-primary">
+                            {source.card_name}
+                          </p>
+                          <p className="text-[11px] text-text-tertiary">
+                            {source.bank_name}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-sm font-medium text-text-primary">
+                          {source.bank_name}
+                        </p>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <a
@@ -328,8 +366,11 @@ export default function PipelineHealth() {
                         className="text-sm text-primary hover:underline"
                         title={source.url}
                       >
-                        {truncateUrl(source.url)}
+                        {truncateUrl(source.url, 35)}
                       </a>
+                      <p className="text-[11px] text-text-tertiary mt-0.5">
+                        {source.source_type}
+                      </p>
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={source.source_status} />
