@@ -162,13 +162,34 @@ With no product to intervene at Stage 5, the optimization strategy collapses und
 
 ---
 
-## Slide 4 — Hypothesis & Product Design
+## Slide 4 — Our Solution: Vision, Design & Metrics
 **Satisfies**: (c) Hypothesis and product design
 **Rubric targets**: #3 IS622 concepts, #4 Creativity in product design
 
-### The Hypothesis
+### 1. Product Vision
 
-> **We believe that** intervening at **Stage 4 (Engagement)** with real-time, state-aware card recommendations **will** help miles-focused consumers in Singapore earn **20–40% more miles per dollar** and reduce churn by **70%+** — by addressing all four friction dimensions: (1) **Complexity at POS** (instant recommendation), (2) **Operational Burden** (auto-capture logging), (3) **Cognitive Load** (sub-2-second decisions prevent anxiety spiral), and (4) **Knowledge Gaps** (transparent miles vs points logic) — thereby preventing the **Stage 5 (Friction) → Stage 6 (Churn)** collapse that manual methods cannot avoid.
+**Vision Statement:**
+> **For** miles-focused consumers in Singapore managing 3–7 credit cards  
+> **Who** struggle with complex earn rates, caps, and rule changes  
+> **MaxiMile is** a context-aware mobile miles optimization app  
+> **That** automates card selection and cap tracking at the point of payment  
+> **Unlike** static blogs and manual spreadsheets  
+> **We** deliver real-time, state-aware recommendations that eliminate guesswork
+
+**North Star Metric:** Monthly Active Recommendations Used (MARU) — measuring trust and reliance at the point of payment
+
+---
+
+### 2. Job to be Done → Hypothesis
+
+**Goal:** Maximize airline miles earned from everyday spending
+- **Functionally:** Right card, every transaction
+- **Emotionally:** Confidence at checkout (no second-guessing)
+- **Situationally:** Instant answer at point of payment (<2 seconds)
+
+**The Hypothesis
+
+> **We believe that** real-time, state-aware card recommendations—always reflecting latest rules, best miles, and remaining caps—**will** help miles-focused consumers in Singapore earn **20–40% more miles per dollar** and reduce churn by **70%+** (users abandoning optimization and reverting to a single card) compared to manual tracking — by preventing the cognitive overload, post-facto errors, and trust erosion that drives abandonment.
 
 **Testable because**: Effective mpd can be measured per transaction, pre/post; cap breach rate can be tracked in-app.
 
@@ -200,8 +221,8 @@ By providing real-time, state-aware recommendations at the moment of payment anx
 
 ### Core Product Design Decisions (Derived from Research)
 
-**1. State-aware recommendations (not static lookups)**
-The research root cause analysis revealed that blogs and comparison sites already provide static information. The gap is real-time, personalized, *current-state* recommendations. Design response: recommendation engine queries *remaining cap this month*, not just earn rate in isolation.
+**1. State-aware recommendations across three dimensions (not static lookups)**
+The research root cause analysis revealed that blogs and comparison sites already provide static information. The gap is real-time, personalized, *current-state* recommendations. Design response: recommendation engine considers (a) **latest rules** (auto-updated via F25 AI detection), (b) **best miles** (highest earn rate for category), and (c) **remaining caps** (headroom left this month) — all three update automatically.
 
 **2. One-tap at checkout (not a dashboard you need to navigate)**
 Survey finding: users will tolerate 5–10 seconds maximum. Design response: category tap → recommendation in <1 second. Primary screen is a category grid, not a home feed.
@@ -214,6 +235,25 @@ Research showed users are skeptical of black-box recommendations. Design respons
 
 **5. Two-layer miles architecture (eliminates knowledge gaps)**
 Research revealed confusion between bank points and airline miles (transferable programs). Design response: separate "Points" layer (bank-issued) from "Miles" layer (airline programs), with visual distinction (bank icon vs airline icon), transfer rate transparency, and "last verified" timestamps. Prevents the knowledge gap friction that erodes user confidence.
+
+**6. Real-time rule change detection (prevents post-facto errors)**
+Research showed "rules changed and I didn't know" is a critical trust-breaking moment (Stage 5 Friction). Design response: AI-powered rate detection (F25) monitors bank T&C pages + community-sourced alerts (F24), surfacing changes within 48 hours via push notifications. Users never discover cap breaches or rule changes post-facto — the system alerts them proactively.
+
+---
+
+### 4. Success Metrics
+
+**How we measure impact:**
+
+| Metric | Definition | Target | Why It Matters |
+|--------|------------|--------|----------------|
+| **MARU** (North Star) | Monthly Active Recommendations Used | 10,000 within 6 months | Measures trust: do users rely on product at POS? |
+| **Effective mpd** | Average miles per dollar earned | 2.5–4.0 mpd (vs 1.2 baseline) | Financial value delivered (100–230% improvement) |
+| **Churn rate** | % users abandoning optimization | <10% (vs 70% manual baseline) | Retention: are we preventing Stage 6 abandonment? |
+| **Cap breach rate** | % users exceeding bonus caps | <5% (vs 60%+ manual baseline) | Accuracy: is state-awareness working? |
+| **Time to decision** | Seconds from category tap to recommendation | <2 seconds | UX: is it fast enough for POS? |
+
+**Testable hypothesis:** Effective mpd and churn rate can be measured pre/post; cap breach rate tracked in-app vs self-reported baseline.
 
 ---
 
@@ -257,29 +297,44 @@ Research revealed confusion between bank points and airline miles (transferable 
 
 *(Reach = users/quarter, out of 5,000 initial; Impact = 1–3; Confidence = %; Effort = engineering weeks)*
 
-| Feature | Reach | Impact | Conf. | Effort | **RICE** | MVP? |
-|---------|-------|--------|-------|--------|---------|------|
-| F1: Card Portfolio Setup | 5,000 | 3 | 90% | 3 wks | **4,500** | ✅ P0 |
-| F2: Category Recommendation Engine | 5,000 | 3 | 90% | 4 wks | **3,375** | ✅ P0 |
-| **F26: iOS Auto-Capture (Shortcuts)** | **5,000** | **3** | **85%** | **4 wks** | **3,188** | **✅ Shipped** |
-| **F27: Android Auto-Capture (Notification)** | **4,500** | **3** | **80%** | **5 wks** | **2,160** | **✅ Shipped** |
-| F5: Card Rules Database (Top 20) | 5,000 | 3 | 80% | 6 wks | **2,000** | ✅ P0 |
-| F6: Cap Approach Alerts | 3,000 | 2 | 80% | 2 wks | **2,400** | P1 |
-| F3: Bonus Cap Tracker | 4,000 | 3 | 80% | 5 wks | **1,920** | ✅ P0 |
-| F4: Transaction Logging | 4,000 | 2 | 85% | 3 wks | **2,267** | ✅ P0 |
-| F8: Quick-Access Widget | 2,500 | 2 | 70% | 3 wks | **1,167** | P1 |
-| F10: Portfolio Optimizer | 1,500 | 2 | 50% | 5 wks | **300** | P2 |
+| Feature | Reach | Impact | Conf. | Effort | **RICE** | **Friction Addressed** | **MVP** |
+|---------|-------|--------|-------|--------|---------|------------------------|---------|
+| **F2: Recommendation Engine** | 5,000 | 3 | 90% | 4 wks | **3,375** | 🧩 **Complexity at POS**<br/>🧠 Cognitive Load | ✅ **P0 MVP** |
+| **F1: Card Portfolio Setup** | 5,000 | 3 | 90% | 3 wks | **4,500** | Foundation (enables F2) | ✅ **P0 MVP** |
+| **F5: Rules Database (Top 20 cards)** | 5,000 | 3 | 80% | 6 wks | **2,000** | **Latest rules** (hypothesis)<br/>🧩 Complexity | ✅ **P0 MVP** |
+| **F3: Bonus Cap Tracker** | 4,000 | 3 | 80% | 5 wks | **1,920** | **Remaining caps** (hypothesis)<br/>⏱️ Operational | ✅ **P0 MVP** |
+| **F4: Transaction Logging** | 4,000 | 2 | 85% | 3 wks | **2,267** | ⏱️ **Operational Burden**<br/>Feeds F3 cap tracker | ✅ **P0 MVP** |
+| **F6: Cap Approach Alerts** | 3,000 | 2 | 80% | 2 wks | **2,400** | 🧠 **Cognitive Load**<br/>Prevents Stage 5 errors | 🟡 **P1** |
+| **F26: iOS Auto-Capture** | 3,500 | 3 | 85% | 3 wks | **2,975** | ⏱️ **Operational Burden**<br/>Solves #1 product risk (logging) | 🟡 **P1** |
+| **F18-F21: Two-Layer Miles** | 4,500 | 3 | 80% | 4 wks | **2,700** | ❓ **Knowledge Gaps**<br/>Mental model alignment | 🟡 **P1** |
+| **F24: Community Rate Submissions** | 3,200 | 2 | 80% | 2 wks | **2,560** | **Latest rules** (community-sourced)<br/>⏱️ Operational | 🟡 **P1** |
+| **F27: Android Auto-Capture** | 3,000 | 3 | 70% | 4 wks | **1,575** | ⏱️ Operational Burden<br/>Platform parity | 🟡 **P1** |
+| **F8: Quick-Access Widget** | 2,500 | 2 | 70% | 3 wks | **1,167** | 🧠 Cognitive Load (convenience) | 🔵 **P2** |
+| **F25: AI Rate Detection** | 3,500 | 3 | 50% | 6 wks | **875** | **Latest rules** (AI-powered)<br/>Critical for database freshness | 🔵 **P2 (v1.5)** |
+| **F10: Portfolio Optimizer** | 1,500 | 2 | 50% | 5 wks | **300** | 🧩 Complexity (portfolio fit) | ⬜ **P3 (v2+)** |
 
-### Kano Classification of MVP Features *(IS622: Kano Model)*
+**MVP Definition (P0):** F1 + F2 + F5 + F3 + F4 = Core loop (portfolio → recommend → log → track caps)
+**Post-MVP P1:** F26 (iOS auto-capture), F18-F21 (two-layer miles), F24 (community), F27 (Android auto-capture), F6 (cap alerts)
+**Post-MVP P2:** F8 (widget), F25 (AI detection — lower confidence but critical for scale)
+
+### Kano Classification of Features *(IS622: Kano Model)*
 
 | Feature | Kano Category | Reasoning |
 |---------|--------------|-----------|
+| **P0 MVP Features** |||
 | F1 Card Setup + F5 Rules DB | **Must-Have** | Without these, product literally does not function |
 | F2 Recommendation Engine | **Must-Have** | This IS the product — not a feature, the value proposition |
 | F3 Cap Tracker | **Must-Have** | Primary differentiator from static alternatives; absence = parity with a blog |
 | F4 Transaction Logging | **Must-Have** | Cap tracker is only accurate if transactions are logged; structural dependency |
-| F6 Cap Alerts | **Performance** | More alerting = more satisfaction, linearly correlated; correctly P1 |
+| **P1 Post-MVP Features** |||
+| F26 iOS Auto-Capture | **Delighter** → **Must-Have** | Automated logging exceeds expectations initially; becomes essential after users experience it (solves #1 product risk) |
+| F18-F21 Two-Layer Miles | **Performance** | Eliminates knowledge gap confusion; more clarity = higher trust; mental model alignment |
+| F24 Community Submissions | **Performance** | More crowdsourced data = faster rule updates; linear satisfaction gain |
+| F6 Cap Alerts | **Performance** | More alerting = more satisfaction, linearly correlated; prevents Stage 5 friction |
+| F27 Android Auto-Capture | **Delighter** | Platform parity for Android; automated logging surprise & delight; complements F26 |
+| **P2 Features** |||
 | F8 Widget | **Delighter** | Unexpected convenience; not expected at MVP |
+| F25 AI Rate Detection | **Performance** (critical for scale) | Faster rule updates; lower confidence (50%) but essential to prevent database degradation |
 
 ### What Was Deliberately Excluded from MVP
 

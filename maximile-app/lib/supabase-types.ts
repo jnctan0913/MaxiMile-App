@@ -162,6 +162,33 @@ export interface UserAlertRead {
 }
 
 // ---------------------------------------------------------------------------
+// User Settings (F31 — Min Spend Enforcement)
+// ---------------------------------------------------------------------------
+
+/** User-level settings for recommendation personalization */
+export interface UserSettings {
+  user_id: string;                    // FK to auth.users.id (PK)
+  estimated_monthly_spend: number;    // SGD estimated monthly card spend
+  created_at: string;                 // ISO timestamp
+  updated_at: string;                 // ISO timestamp
+}
+
+// ---------------------------------------------------------------------------
+// User Card Preferences (Sprint 24 — UOB Lady's Solitaire Category Selection)
+// ---------------------------------------------------------------------------
+
+/** Per-user, per-card category preference (e.g. UOB Lady's Solitaire choose 2 of 7) */
+export interface UserCardPreference {
+  id: string;                   // UUID
+  user_id: string;              // FK to auth.users.id
+  card_id: string;              // FK to cards.id
+  selected_categories: string[]; // Array of chosen category IDs
+  max_selections: number;       // Max allowed selections (e.g. 2)
+  updated_at: string;           // ISO timestamp
+  created_at: string;           // ISO timestamp
+}
+
+// ---------------------------------------------------------------------------
 // RPC Function Return Types
 // ---------------------------------------------------------------------------
 
@@ -198,6 +225,10 @@ export interface RecommendResult {
   network: string;
   base_rate_mpd: number;
   conditions_note: string | null;
+  min_spend_threshold: number | null;   // Min monthly spend required for bonus rate (NULL = none)
+  min_spend_met: boolean | null;        // Whether user meets the min spend threshold
+  total_monthly_spend: number;          // User's actual + estimated monthly spend used
+  requires_contactless: boolean;        // TRUE if bonus rate requires contactless payment
 }
 
 // ---------------------------------------------------------------------------
@@ -378,6 +409,16 @@ export interface Database {
         Row: CommunitySubmission;
         Insert: Omit<CommunitySubmission, 'id' | 'status' | 'reviewer_notes' | 'reviewed_at' | 'dedup_fingerprint' | 'created_at'>;
         Update: Partial<Omit<CommunitySubmission, 'id' | 'user_id' | 'dedup_fingerprint' | 'created_at'>>;
+      };
+      user_settings: {
+        Row: UserSettings;
+        Insert: Omit<UserSettings, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<UserSettings, 'user_id' | 'created_at' | 'updated_at'>>;
+      };
+      user_card_preferences: {
+        Row: UserCardPreference;
+        Insert: Omit<UserCardPreference, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<UserCardPreference, 'id' | 'user_id' | 'card_id' | 'created_at' | 'updated_at'>>;
       };
     };
     Views: {

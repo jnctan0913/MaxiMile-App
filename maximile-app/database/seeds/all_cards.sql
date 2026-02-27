@@ -4,13 +4,13 @@
 --
 -- SINGLE SOURCE OF TRUTH for all card data.
 --
--- Card count:    20 cards (batch 1: cards 1-10, batch 2: cards 11-20)
--- Last updated:  2026-02-19
--- Version:       1.0.0
+-- Card count:    29 cards (batch 1: cards 1-10, batch 2: cards 11-20, batch 3: cards 21-22, batch 4: cards 23-29)
+-- Last updated:  2026-02-27
+-- Version:       1.3.0
 -- Author:        Data Engineer Agent
 --
 -- Description:
---   Combined seed file for all 20 Singapore miles credit cards.
+--   Combined seed file for all 29 Singapore miles credit cards.
 --   Includes categories, card metadata, earn rules, caps, and exclusions.
 --   All statements use ON CONFLICT for idempotent re-runs.
 --
@@ -229,7 +229,7 @@ ON CONFLICT (id) DO UPDATE SET
 
 
 -- ============================================================
--- SECTION 2: CARD METADATA (all 20 cards)
+-- SECTION 2: CARD METADATA (all 28 cards)
 -- ============================================================
 
 INSERT INTO public.cards (id, bank, name, slug, network, annual_fee, base_rate_mpd, image_url, is_active, notes)
@@ -521,6 +521,140 @@ VALUES
     NULL,
     TRUE,
     'No annual fee. 10X UNI$ on dining (= 4 mpd). 0.4 mpd on other spend. Capped at $1,000/month on bonus categories. Minimum spend $600/month to qualify for 10X. Popular mid-range dining card. [VERIFIED from UOB website]'
+  ),
+
+  -- =============================================
+  -- BATCH 3: Cards 21-22
+  -- =============================================
+
+  -- 21. Maybank World Mastercard
+  (
+    '00000000-0000-0000-0003-000000000021',
+    'Maybank',
+    'Maybank World Mastercard',
+    'maybank-world-mc',
+    'mastercard',
+    261.60,  -- S$261.60 annual fee (1st year waived)
+    0.4,     -- 0.4 mpd base
+    NULL,
+    TRUE,
+    'First Mastercard in database. Uncapped 4 mpd on petrol (MCC 5541), no min spend. 0.4 mpd base on other categories. 4 mpd at selected dining merchants (Paradise Group, Imperial Treasure, Les Amis, RWS) — merchant-specific, not modeled as category bonus. 3.2 mpd on overseas (FCY, out of scope). Min income $80K. Annual fee $261.60 (1st year waived). [VERIFIED from Maybank website + SingSaver]'
+  ),
+
+  -- 22. UOB Visa Signature
+  (
+    '00000000-0000-0000-0003-000000000022',
+    'UOB',
+    'UOB Visa Signature',
+    'uob-visa-signature',
+    'visa',
+    218.00,  -- S$218.00 annual fee (1st year waived)
+    0.4,     -- 0.4 mpd base
+    NULL,
+    TRUE,
+    '4 mpd on contactless spend (dining, transport, groceries, general) + petrol. Requires $1,000/month min spend across petrol & contactless. Cap $1,200/month shared across all bonus categories. Petrol does NOT require contactless. Online/bills at base 0.4 mpd. Overseas 4 mpd (FCY, out of scope). Annual fee $218 (1st year waived). [VERIFIED from UOB website]'
+  ),
+
+  -- =============================================
+  -- BATCH 4: Cards 23-28
+  -- =============================================
+
+  -- 23. DBS Vantage Visa Infinite
+  (
+    '00000000-0000-0000-0004-000000000023',
+    'DBS',
+    'DBS Vantage Visa Infinite',
+    'dbs-vantage-visa-infinite',
+    'visa',
+    599.50,
+    1.0,     -- 1.0 mpd base (without min spend)
+    NULL,
+    TRUE,
+    'Flat 1.5 mpd all local spend with $2,000/month min spend. 1.0 mpd without min spend. No bonus categories. Annual fee $599.50 (non-waivable year 1). [VERIFIED]'
+  ),
+
+  -- 24. OCBC Voyage Card
+  (
+    '00000000-0000-0000-0004-000000000024',
+    'OCBC',
+    'OCBC Voyage Card',
+    'ocbc-voyage-card',
+    'visa',
+    497.06,
+    1.3,     -- 1.3 mpd flat
+    NULL,
+    TRUE,
+    'Flat 1.3 mpd all local spend. No caps, no min spend. VOYAGE Miles do not expire. Annual fee $497.06. [VERIFIED from OCBC website]'
+  ),
+
+  -- 25. SC Journey Card
+  (
+    '00000000-0000-0000-0004-000000000025',
+    'SC',
+    'SC Journey Card',
+    'sc-journey-card',
+    'visa',
+    196.20,
+    1.2,     -- 1.2 mpd base
+    NULL,
+    TRUE,
+    '3 mpd on online transport/food delivery and online grocery delivery. 1.2 mpd base on all other spend. Cap $1,000/month shared. Annual fee $196.20. [VERIFIED]'
+  ),
+
+  -- 26. SC Beyond Card
+  (
+    '00000000-0000-0000-0004-000000000026',
+    'SC',
+    'SC Beyond Card',
+    'sc-beyond-card',
+    'mastercard',
+    1635.00,
+    1.5,     -- 1.5 mpd flat
+    NULL,
+    TRUE,
+    'Flat 1.5 mpd all local spend. No caps, no min spend. Premium card with $1,635 non-waivable annual fee. Priority Banking: 2.0 mpd (not modeled). [VERIFIED from SC website]'
+  ),
+
+  -- 27. HSBC Premier Mastercard
+  (
+    '00000000-0000-0000-0004-000000000027',
+    'HSBC',
+    'HSBC Premier Mastercard',
+    'hsbc-premier-mc',
+    'mastercard',
+    708.50,
+    1.4,     -- 1.4 mpd flat (KrisFlyer rate)
+    NULL,
+    TRUE,
+    'Flat 1.4 mpd all local spend (KrisFlyer rate). Uncapped, no min spend. Annual fee $708.50 (waived for Premier customers with $200K TRB). Transfer fee waived. [VERIFIED from HSBC website]'
+  ),
+
+  -- 28. Maybank XL Rewards
+  (
+    '00000000-0000-0000-0004-000000000028',
+    'Maybank',
+    'Maybank XL Rewards',
+    'maybank-xl-rewards',
+    'mastercard',
+    87.20,
+    0.4,     -- 0.4 mpd base
+    NULL,
+    TRUE,
+    '4 mpd on dining, online shopping, travel. Base 0.4 mpd. Min spend $500/month. Cap $1,000/month shared. Age 21-39 only. 1-year points expiry. $27.25 transfer fee. Annual fee $87.20. [VERIFIED]'
+  ),
+
+  -- 29. UOB Lady's Solitaire
+  (
+    '00000000-0000-0000-0004-000000000029',
+    'UOB',
+    'UOB Lady''s Solitaire',
+    'uob-ladys-solitaire',
+    'mastercard',
+    414.20,
+    0.4,
+    NULL,
+    TRUE,
+    'Choose 2 of 7 bonus categories for 4 mpd (10X UNI$). Base 0.4 mpd. Cap $1,500/month shared ($750 per category). No min spend. Categories: Fashion, Dining, Travel, Beauty & Wellness, Family (groceries), Transport, Entertainment. Re-selectable quarterly. Annual fee $414.20. [VERIFIED from UOB website]'
   )
 
 ON CONFLICT (id) DO UPDATE SET
@@ -537,7 +671,7 @@ ON CONFLICT (id) DO UPDATE SET
 
 
 -- ============================================================
--- SECTION 3: EARN RULES (8 categories x 20 cards = 160 rows)
+-- SECTION 3: EARN RULES (8 categories x 29 cards = 232 rows)
 -- ============================================================
 -- Convention:
 --   is_bonus = TRUE  -> this is the accelerated/bonus rate for this category
@@ -817,7 +951,132 @@ VALUES
 ('00000000-0000-0000-0002-000000000020', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000020', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
 ('00000000-0000-0000-0002-000000000020', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
-('00000000-0000-0000-0002-000000000020', 'general',    0.4,  FALSE, '{}', NULL, NULL)
+('00000000-0000-0000-0002-000000000020', 'general',    0.4,  FALSE, '{}', NULL, NULL),
+
+-- =============================================
+-- BATCH 3: Cards 21-22
+-- =============================================
+
+-- ============================================================
+-- CARD 21: Maybank World Mastercard (4 mpd petrol uncapped, 0.4 mpd else)
+-- ============================================================
+-- [VERIFIED from Maybank website + SingSaver]
+('00000000-0000-0000-0003-000000000021', 'dining',    0.4,  FALSE, '{}', '4 mpd at selected dining merchants (Paradise Group, Imperial Treasure, Les Amis, RWS). 0.4 mpd at other dining merchants.', 'https://www.maybank2u.com.sg/en/personal/cards/credit/maybank-world-mastercard.page'),
+('00000000-0000-0000-0003-000000000021', 'transport',  0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0003-000000000021', 'online',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0003-000000000021', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0003-000000000021', 'petrol',     4.0,  TRUE,  '{}', 'Earn 4 mpd on petrol (MCC 5541). Uncapped, no min spend. [VERIFIED from Maybank website]', NULL),
+('00000000-0000-0000-0003-000000000021', 'bills',      0.4,  FALSE, '{}', 'Base rate on bills/utilities.', NULL),
+('00000000-0000-0000-0003-000000000021', 'travel',     0.4,  FALSE, '{}', '3.2 mpd on overseas travel (FCY). 0.4 mpd on local travel. [VERIFIED]', NULL),
+('00000000-0000-0000-0003-000000000021', 'general',    0.4,  FALSE, '{}', NULL, NULL),
+
+-- ============================================================
+-- CARD 22: UOB Visa Signature (4 mpd contactless + petrol, 0.4 mpd else)
+-- ============================================================
+-- [VERIFIED from UOB website]
+('00000000-0000-0000-0003-000000000022', 'dining',    4.0,  TRUE,  '{"contactless": true, "min_spend_monthly": 1000}', 'Earn 4 mpd on contactless dining. Min spend $1,000/month across petrol & contactless. Cap $1,200/month shared. 0.4 mpd otherwise. [VERIFIED from UOB website]', 'https://www.uob.com.sg/personal/cards/rewards/visa-signature-card.page'),
+('00000000-0000-0000-0003-000000000022', 'transport',  4.0,  TRUE,  '{"contactless": true, "min_spend_monthly": 1000}', 'Earn 4 mpd on contactless transport incl. SimplyGo. Min spend $1,000/month. Cap $1,200/month shared. [VERIFIED]', NULL),
+('00000000-0000-0000-0003-000000000022', 'online',     0.4,  FALSE, '{}', 'Mobile contactless in-app payments classified as online, not contactless. 0.4 mpd. [VERIFIED from UOB T&Cs]', NULL),
+('00000000-0000-0000-0003-000000000022', 'groceries',  4.0,  TRUE,  '{"contactless": true, "min_spend_monthly": 1000}', 'Earn 4 mpd on contactless groceries. Min spend $1,000/month. Cap $1,200/month shared. [VERIFIED]', NULL),
+('00000000-0000-0000-0003-000000000022', 'petrol',     4.0,  TRUE,  '{"min_spend_monthly": 1000}', 'Earn 4 mpd on petrol. Min spend $1,000/month. Cap $1,200/month shared. No contactless required for petrol. [VERIFIED]', NULL),
+('00000000-0000-0000-0003-000000000022', 'bills',      0.4,  FALSE, '{}', 'Utilities excluded from bonus earning. Base rate only. [VERIFIED from UOB T&Cs]', NULL),
+('00000000-0000-0000-0003-000000000022', 'travel',     0.4,  FALSE, '{}', '4 mpd on overseas travel (FCY, out of scope). 0.4 mpd on local travel. [VERIFIED]', NULL),
+('00000000-0000-0000-0003-000000000022', 'general',    4.0,  TRUE,  '{"contactless": true, "min_spend_monthly": 1000}', 'Earn 4 mpd on contactless spend. Min spend $1,000/month. Cap $1,200/month shared. [VERIFIED]', NULL),
+
+-- =============================================
+-- BATCH 4: Cards 23-28
+-- =============================================
+
+-- ============================================================
+-- CARD 23: DBS Vantage Visa Infinite (1.5 mpd all categories with min spend)
+-- ============================================================
+-- [VERIFIED from DBS website]
+('00000000-0000-0000-0004-000000000023', 'dining',    1.5,  TRUE,  '{"min_spend_monthly": 2000}', 'Earn 1.5 mpd on all local spend. Requires $2,000/month min spend (1.0 mpd otherwise). [VERIFIED from DBS website]', NULL),
+('00000000-0000-0000-0004-000000000023', 'transport',  1.5,  TRUE,  '{"min_spend_monthly": 2000}', 'Earn 1.5 mpd on all local spend. Requires $2,000/month min spend (1.0 mpd otherwise). [VERIFIED from DBS website]', NULL),
+('00000000-0000-0000-0004-000000000023', 'online',     1.5,  TRUE,  '{"min_spend_monthly": 2000}', 'Earn 1.5 mpd on all local spend. Requires $2,000/month min spend (1.0 mpd otherwise). [VERIFIED from DBS website]', NULL),
+('00000000-0000-0000-0004-000000000023', 'groceries',  1.5,  TRUE,  '{"min_spend_monthly": 2000}', 'Earn 1.5 mpd on all local spend. Requires $2,000/month min spend (1.0 mpd otherwise). [VERIFIED from DBS website]', NULL),
+('00000000-0000-0000-0004-000000000023', 'petrol',     1.5,  TRUE,  '{"min_spend_monthly": 2000}', 'Earn 1.5 mpd on all local spend. Requires $2,000/month min spend (1.0 mpd otherwise). [VERIFIED from DBS website]', NULL),
+('00000000-0000-0000-0004-000000000023', 'bills',      1.5,  TRUE,  '{"min_spend_monthly": 2000}', 'Earn 1.5 mpd on all local spend. Requires $2,000/month min spend (1.0 mpd otherwise). [VERIFIED from DBS website]', NULL),
+('00000000-0000-0000-0004-000000000023', 'travel',     1.5,  TRUE,  '{"min_spend_monthly": 2000}', 'Earn 1.5 mpd on all local spend. Requires $2,000/month min spend (1.0 mpd otherwise). [VERIFIED from DBS website]', NULL),
+('00000000-0000-0000-0004-000000000023', 'general',    1.5,  TRUE,  '{"min_spend_monthly": 2000}', 'Earn 1.5 mpd on all local spend. Requires $2,000/month min spend (1.0 mpd otherwise). [VERIFIED from DBS website]', NULL),
+
+-- ============================================================
+-- CARD 24: OCBC Voyage Card (flat 1.3 mpd all categories)
+-- ============================================================
+-- [VERIFIED from OCBC website]
+('00000000-0000-0000-0004-000000000024', 'dining',    1.3,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000024', 'transport',  1.3,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000024', 'online',     1.3,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000024', 'groceries',  1.3,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000024', 'petrol',     1.3,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000024', 'bills',      1.3,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000024', 'travel',     1.3,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000024', 'general',    1.3,  FALSE, '{}', NULL, NULL),
+
+-- ============================================================
+-- CARD 25: SC Journey Card (3 mpd transport/groceries online, 1.2 mpd else)
+-- ============================================================
+-- [VERIFIED from SC website]
+('00000000-0000-0000-0004-000000000025', 'dining',    1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000025', 'transport',  3.0,  TRUE,  '{}', 'Earn 3 mpd on online transport and food delivery (Grab, foodpanda, Deliveroo). In-store transport earns 1.2 mpd base rate. Cap $1,000/month shared. [VERIFIED from SC website]', NULL),
+('00000000-0000-0000-0004-000000000025', 'online',     1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000025', 'groceries',  3.0,  TRUE,  '{}', 'Earn 3 mpd on online grocery delivery. In-store groceries earn 1.2 mpd base rate. Cap $1,000/month shared. [VERIFIED from SC website]', NULL),
+('00000000-0000-0000-0004-000000000025', 'petrol',     1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000025', 'bills',      1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000025', 'travel',     1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000025', 'general',    1.2,  FALSE, '{}', NULL, NULL),
+
+-- ============================================================
+-- CARD 26: SC Beyond Card (flat 1.5 mpd all categories)
+-- ============================================================
+-- [VERIFIED from SC website]
+('00000000-0000-0000-0004-000000000026', 'dining',    1.5,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000026', 'transport',  1.5,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000026', 'online',     1.5,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000026', 'groceries',  1.5,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000026', 'petrol',     1.5,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000026', 'bills',      1.5,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000026', 'travel',     1.5,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000026', 'general',    1.5,  FALSE, '{}', NULL, NULL),
+
+-- ============================================================
+-- CARD 27: HSBC Premier Mastercard (flat 1.4 mpd all categories)
+-- ============================================================
+-- [VERIFIED from HSBC website]
+('00000000-0000-0000-0004-000000000027', 'dining',    1.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000027', 'transport',  1.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000027', 'online',     1.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000027', 'groceries',  1.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000027', 'petrol',     1.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000027', 'bills',      1.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000027', 'travel',     1.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000027', 'general',    1.4,  FALSE, '{}', NULL, NULL),
+
+-- ============================================================
+-- CARD 28: Maybank XL Rewards (4 mpd dining/online/travel, 0.4 mpd else)
+-- ============================================================
+-- [VERIFIED from Maybank website]
+('00000000-0000-0000-0004-000000000028', 'dining',    4.0,  TRUE,  '{"min_spend_monthly": 500}', 'Earn 4 mpd on dining (restaurants + food delivery). Min spend $500/month. Cap $1,000/month shared. Age 21-39 only. [VERIFIED from Maybank website]', NULL),
+('00000000-0000-0000-0004-000000000028', 'transport',  0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000028', 'online',     4.0,  TRUE,  '{"min_spend_monthly": 500}', 'Earn 4 mpd on online shopping. Min spend $500/month. Cap $1,000/month shared. [VERIFIED from Maybank website]', NULL),
+('00000000-0000-0000-0004-000000000028', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000028', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000028', 'bills',      0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000028', 'travel',     4.0,  TRUE,  '{"min_spend_monthly": 500}', 'Earn 4 mpd on travel (flights, hotels). Min spend $500/month. Cap $1,000/month shared. [VERIFIED from Maybank website]', NULL),
+('00000000-0000-0000-0004-000000000028', 'general',    0.4,  FALSE, '{}', NULL, NULL),
+
+-- ============================================================
+-- CARD 29: UOB Lady's Solitaire (user-selectable bonus categories)
+-- ============================================================
+-- [VERIFIED from UOB website]
+('00000000-0000-0000-0004-000000000029', 'dining',    4.0,  TRUE,  '{"user_selectable": true}', 'Earn 4 mpd if Dining selected as bonus category. Choose 2 of 7 categories. Cap $750/month per category ($1,500 total). [VERIFIED from UOB website]', NULL),
+('00000000-0000-0000-0004-000000000029', 'transport',  4.0,  TRUE,  '{"user_selectable": true}', 'Earn 4 mpd if Transport selected as bonus category. Choose 2 of 7 categories. Cap $750/month per category ($1,500 total). [VERIFIED]', NULL),
+('00000000-0000-0000-0004-000000000029', 'online',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000029', 'groceries',  4.0,  TRUE,  '{"user_selectable": true}', 'Earn 4 mpd if Family (groceries) selected as bonus category. Choose 2 of 7 categories. Cap $750/month per category ($1,500 total). [VERIFIED]', NULL),
+('00000000-0000-0000-0004-000000000029', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000029', 'bills',      0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0004-000000000029', 'travel',     4.0,  TRUE,  '{"user_selectable": true}', 'Earn 4 mpd if Travel selected as bonus category. Choose 2 of 7 categories. Cap $750/month per category ($1,500 total). [VERIFIED]', NULL),
+('00000000-0000-0000-0004-000000000029', 'general',    4.0,  TRUE,  '{"user_selectable": true}', 'Earn 4 mpd if Fashion, Beauty & Wellness, or Entertainment selected as bonus category (mapped to general). Choose 2 of 7 categories. Cap $750/month per category ($1,500 total). [VERIFIED]', NULL)
 
 ON CONFLICT (card_id, category_id, is_bonus, effective_from) DO UPDATE SET
   earn_rate_mpd   = EXCLUDED.earn_rate_mpd,
@@ -912,7 +1171,39 @@ VALUES
 
   -- CARD 20: UOB Preferred Platinum
   ('00000000-0000-0000-0002-000000000020', 'dining', 1000.00, 'spend',
-   'Cap on 10X dining bonus. Min spend $600/month to qualify for 10X. [VERIFIED from UOB website]')
+   'Cap on 10X dining bonus. Min spend $600/month to qualify for 10X. [VERIFIED from UOB website]'),
+
+  -- =============================================
+  -- BATCH 3 CAPS
+  -- =============================================
+
+  -- CARD 21: Maybank World Mastercard — No cap (uncapped petrol is the key differentiator)
+
+  -- CARD 22: UOB Visa Signature
+  ('00000000-0000-0000-0003-000000000022', NULL, 1200.00, 'spend',
+   'Combined cap across all bonus categories (petrol + contactless spend). $1,200/month shared. [VERIFIED from UOB website]'),
+
+  -- =============================================
+  -- BATCH 4 CAPS
+  -- =============================================
+
+  -- CARD 23: DBS Vantage Visa Infinite — No cap (flat rate with min spend condition)
+  -- CARD 24: OCBC Voyage Card — No cap (flat rate, uncapped)
+
+  -- CARD 25: SC Journey Card
+  ('00000000-0000-0000-0004-000000000025', NULL, 1000.00, 'spend',
+   'Combined cap across online transport and grocery delivery bonus categories. $1,000/month shared. [VERIFIED from SC website]'),
+
+  -- CARD 26: SC Beyond Card — No cap (flat rate, uncapped)
+  -- CARD 27: HSBC Premier Mastercard — No cap (flat rate, uncapped)
+
+  -- CARD 28: Maybank XL Rewards
+  ('00000000-0000-0000-0004-000000000028', NULL, 1000.00, 'spend',
+   'Combined cap across dining, online shopping, and travel bonus categories. $1,000/month shared. Age 21-39 only. 1-year points expiry. [VERIFIED from Maybank website]'),
+
+  -- CARD 29: UOB Lady's Solitaire
+  ('00000000-0000-0000-0004-000000000029', NULL, 1500.00, 'spend',
+   'Combined cap across 2 chosen bonus categories. $1,500/month shared ($750 per category). [VERIFIED from UOB website]')
 
 ON CONFLICT (card_id, category_id) DO UPDATE SET
   monthly_cap_amount = EXCLUDED.monthly_cap_amount,
@@ -994,6 +1285,10 @@ VALUES
    ARRAY['6300', '6381', '6399'],
    '{"payment_type": "insurance"}',
    'Insurance premium payments excluded.'),
+  ('00000000-0000-0000-0001-000000000006', 'dining',
+   ARRAY['5814'],
+   '{}',
+   'Fast food restaurants (MCC 5814) excluded from 10X bonus on HSBC Revolution. Per MileLion analysis, fast food coded under MCC 5814 does not earn 4 mpd. [F32 — Condition Transparency]'),
   ('00000000-0000-0000-0001-000000000006', 'groceries',
    ARRAY['5411'],
    '{}',
@@ -1173,7 +1468,105 @@ VALUES
   ('00000000-0000-0000-0002-000000000020', 'dining',
    ARRAY[]::TEXT[],
    '{"payment_type": "fast_food_delivery"}',
-   'Fast food delivery apps may not always code as dining MCC. Bonus may not apply. [ESTIMATED]');
+   'Fast food delivery apps may not always code as dining MCC. Bonus may not apply. [ESTIMATED]'),
+
+  -- =============================================
+  -- BATCH 3 EXCLUSIONS
+  -- =============================================
+
+  -- CARD 21: Maybank World Mastercard
+  ('00000000-0000-0000-0003-000000000021', NULL,
+   ARRAY['9311', '9222', '9211', '9399'],
+   '{"payment_type": "government"}',
+   'Government payments excluded from TreatsPoints earning.'),
+  ('00000000-0000-0000-0003-000000000021', NULL,
+   ARRAY['6300', '6381', '6399'],
+   '{"payment_type": "insurance"}',
+   'Insurance premium payments excluded.'),
+
+  -- CARD 22: UOB Visa Signature
+  ('00000000-0000-0000-0003-000000000022', NULL,
+   ARRAY['9311', '9222', '9211', '9399'],
+   '{"payment_type": "government"}',
+   'Government payments excluded from UNI$ earning.'),
+  ('00000000-0000-0000-0003-000000000022', NULL,
+   ARRAY['6300', '6381', '6399'],
+   '{"payment_type": "insurance"}',
+   'Insurance premium payments excluded.'),
+
+  -- =============================================
+  -- BATCH 4 EXCLUSIONS
+  -- =============================================
+
+  -- CARD 23: DBS Vantage Visa Infinite
+  ('00000000-0000-0000-0004-000000000023', NULL,
+   ARRAY['9311', '9222', '9211', '9399'],
+   '{"payment_type": "government"}',
+   'Government payments excluded from DBS Points earning.'),
+  ('00000000-0000-0000-0004-000000000023', NULL,
+   ARRAY['6300', '6381', '6399'],
+   '{"payment_type": "insurance"}',
+   'Insurance premium payments excluded.'),
+
+  -- CARD 24: OCBC Voyage Card
+  ('00000000-0000-0000-0004-000000000024', NULL,
+   ARRAY['9311', '9222', '9211', '9399'],
+   '{"payment_type": "government"}',
+   'Government payments excluded from VOYAGE Miles earning.'),
+  ('00000000-0000-0000-0004-000000000024', NULL,
+   ARRAY['6300', '6381', '6399'],
+   '{"payment_type": "insurance"}',
+   'Insurance premium payments excluded.'),
+
+  -- CARD 25: SC Journey Card
+  ('00000000-0000-0000-0004-000000000025', NULL,
+   ARRAY['9311', '9222', '9211', '9399'],
+   '{"payment_type": "government"}',
+   'Government payments excluded from 360 reward points earning.'),
+  ('00000000-0000-0000-0004-000000000025', NULL,
+   ARRAY['6300', '6381', '6399'],
+   '{"payment_type": "insurance"}',
+   'Insurance premium payments excluded.'),
+
+  -- CARD 26: SC Beyond Card
+  ('00000000-0000-0000-0004-000000000026', NULL,
+   ARRAY['9311', '9222', '9211', '9399'],
+   '{"payment_type": "government"}',
+   'Government payments excluded from 360 reward points earning.'),
+  ('00000000-0000-0000-0004-000000000026', NULL,
+   ARRAY['6300', '6381', '6399'],
+   '{"payment_type": "insurance"}',
+   'Insurance premium payments excluded.'),
+
+  -- CARD 27: HSBC Premier Mastercard
+  ('00000000-0000-0000-0004-000000000027', NULL,
+   ARRAY['9311', '9222', '9211', '9399'],
+   '{"payment_type": "government"}',
+   'Government payments excluded from HSBC rewards earning.'),
+  ('00000000-0000-0000-0004-000000000027', NULL,
+   ARRAY['6300', '6381', '6399'],
+   '{"payment_type": "insurance"}',
+   'Insurance premium payments excluded.'),
+
+  -- CARD 28: Maybank XL Rewards
+  ('00000000-0000-0000-0004-000000000028', NULL,
+   ARRAY['9311', '9222', '9211', '9399'],
+   '{"payment_type": "government"}',
+   'Government payments excluded from TreatsPoints earning.'),
+  ('00000000-0000-0000-0004-000000000028', NULL,
+   ARRAY['6300', '6381', '6399'],
+   '{"payment_type": "insurance"}',
+   'Insurance premium payments excluded.'),
+
+  -- CARD 29: UOB Lady's Solitaire
+  ('00000000-0000-0000-0004-000000000029', NULL,
+   ARRAY['9311', '9222', '9211', '9399'],
+   '{"payment_type": "government"}',
+   'Government payments excluded from UNI$ earning.'),
+  ('00000000-0000-0000-0004-000000000029', NULL,
+   ARRAY['6300', '6381', '6399'],
+   '{"payment_type": "insurance"}',
+   'Insurance premium payments excluded.');
 
 
 -- ============================================================

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import EligibilityTooltip from '../../components/EligibilityTooltip';
 import RateUpdatedBadge from '../../components/RateUpdatedBadge';
 import type { RateChangeDetail } from '../../components/RateUpdatedBadge';
 import SubmissionFormSheet from '../../components/SubmissionFormSheet';
+import CategorySelectionSheet from '../../components/CategorySelectionSheet';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -66,6 +67,8 @@ export default function CardDetailScreen() {
   const [rateChanges, setRateChanges] = useState<RateChangeDetail[]>([]);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
+  const [showCategorySheet, setShowCategorySheet] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -104,6 +107,15 @@ export default function CardDetailScreen() {
               .eq('month', currentMonth);
 
             if (stateData) setSpendingStates(stateData as SpendingState[]);
+
+            // Fetch user category preferences for selectable cards
+            const { data: prefs } = await supabase
+              .from('user_card_preferences')
+              .select('selected_categories')
+              .eq('user_id', user.id)
+              .eq('card_id', id)
+              .single();
+            if (prefs) setSelectedCategories(prefs.selected_categories);
           }
 
           const { data: changesData } = await supabase.rpc('get_card_rate_changes', {
@@ -157,6 +169,24 @@ export default function CardDetailScreen() {
 
   const earnTable = buildEarnTable();
   const maxEarnRate = earnTable.length > 0 ? Math.max(...earnTable.map((e) => e.earnRate)) : 0;
+
+  // -----------------------------------------------------------------------
+  // Save category selections for user-selectable cards
+  // -----------------------------------------------------------------------
+  const handleSaveCategories = async (categories: string[]) => {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return;
+
+    await supabase.from('user_card_preferences').upsert({
+      user_id: authUser.id,
+      card_id: id,
+      selected_categories: categories,
+      max_selections: 2,
+    }, { onConflict: 'user_id,card_id' });
+
+    setSelectedCategories(categories);
+    setShowCategorySheet(false);
+  };
 
   // -----------------------------------------------------------------------
   // Remove card
@@ -301,6 +331,23 @@ export default function CardDetailScreen() {
               })}
             </View>
 
+            {/* Category selection button for user-selectable cards */}
+            {earnRules.some((r) => r.conditions?.user_selectable) && (
+              <TouchableOpacity
+                style={styles.setCategoriesButton}
+                onPress={() => setShowCategorySheet(true)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="options-outline" size={20} color={Colors.brandGold} />
+                <Text style={styles.setCategoriesButtonText}>
+                  {selectedCategories.length === 0
+                    ? 'Set Bonus Categories'
+                    : `Bonus: ${selectedCategories.map((c) => CATEGORIES.find((cat) => cat.id === c)?.name).join(' + ')}`}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={Colors.textSecondary} />
+              </TouchableOpacity>
+            )}
+
             {/* Monthly Caps section */}
             {caps.length > 0 && (
               <>
@@ -380,6 +427,17 @@ export default function CardDetailScreen() {
         onDismiss={() => setShowSubmissionForm(false)}
         cardId={id ?? ''}
         cardName={card.name}
+      />
+
+      {/* Category selection sheet for user-selectable cards */}
+      <CategorySelectionSheet
+        visible={showCategorySheet}
+        onDismiss={() => setShowCategorySheet(false)}
+        cardId={id as string}
+        cardName={card?.name ?? ''}
+        currentSelections={selectedCategories}
+        maxSelections={2}
+        onSave={handleSaveCategories}
       />
     </>
   );
@@ -519,6 +577,27 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     color: Colors.brandCharcoal,
     textTransform: 'uppercase',
+  },
+
+  // Set Bonus Categories button
+  setCategoriesButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(197, 165, 90, 0.08)',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(197, 165, 90, 0.2)',
+    gap: Spacing.sm,
+  },
+  setCategoriesButtonText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.brandCharcoal,
   },
 
   // Caps

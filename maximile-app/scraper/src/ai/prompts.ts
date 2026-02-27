@@ -20,39 +20,49 @@
 // =============================================================================
 
 // ---------------------------------------------------------------------------
-// The 29 tracked credit cards
+// All 30 tracked credit cards (must match database cards table exactly)
 // ---------------------------------------------------------------------------
 
 export const TRACKED_CARDS = [
+  // DBS (3) + POSB (1)
   'DBS Altitude Visa',
   'DBS Woman\'s World Card',
-  'DBS Vantage Card',
-  'OCBC 90\u00b0N Mastercard',
+  'DBS Vantage Visa Infinite',
+  'POSB Everyday Card',
+  // OCBC (3)
   'OCBC 90\u00b0N Visa',
   'OCBC Titanium Rewards',
   'OCBC VOYAGE Card',
+  // UOB (6)
   'UOB PRVI Miles Visa',
   'UOB Preferred Platinum Visa',
   'UOB Lady\'s Card',
+  'UOB Lady\'s Solitaire Metal Card',
   'UOB Visa Signature',
   'KrisFlyer UOB Card',
+  // HSBC (3)
   'HSBC Revolution Card',
   'HSBC TravelOne Card',
   'HSBC Premier Mastercard',
+  // Amex (2)
   'Amex KrisFlyer Ascend',
   'Amex KrisFlyer Credit Card',
+  // BOC (1)
   'BOC Elite Miles Card',
+  // Standard Chartered (5)
   'SC Visa Infinite Card',
   'SC X Card',
   'SC Journey Card',
   'SC Smart Card',
   'SC Beyond Card',
+  // Maybank (4)
   'Maybank Horizon Visa Signature',
   'Maybank FC Barcelona Card',
   'Maybank World Mastercard',
   'Maybank XL Rewards Card',
-  'Citi PremierMiles Card',
+  // Citi (2)
   'Citi Rewards Card',
+  'Citi PremierMiles Card',
 ] as const;
 
 export type TrackedCardName = (typeof TRACKED_CARDS)[number];
@@ -79,7 +89,7 @@ You MUST detect these types of changes:
 
 ## Cards We Track
 
-You should identify changes affecting any of these 29 Singapore credit cards:
+You should identify changes affecting any of these 30 Singapore credit cards:
 
 ${TRACKED_CARDS.map((card, i) => `${i + 1}. ${card}`).join('\n')}
 

@@ -133,6 +133,17 @@ export default function ProfileScreen() {
           />
         </View>
 
+        {/* Settings */}
+        <Text style={styles.sectionLabel}>Settings</Text>
+        <View style={styles.menuSection}>
+          <MenuItem
+            icon="wallet-outline"
+            label="Monthly Spend Estimate"
+            onPress={() => router.push('/spending-settings')}
+            isLast
+          />
+        </View>
+
         {/* Account */}
         <Text style={styles.sectionLabel}>Account</Text>
         <View style={styles.menuSection}>

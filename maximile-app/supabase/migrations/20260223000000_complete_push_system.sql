@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS cap_alert_tracking (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
-  category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+  category_id TEXT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
   alert_threshold INTEGER NOT NULL, -- 80 (for 80%), 90, 100, etc.
   period_start DATE NOT NULL, -- Start of the cap period (usually month start)
   alerted_at TIMESTAMPTZ DEFAULT NOW(),
@@ -324,7 +324,7 @@ COMMENT ON FUNCTION queue_notification IS 'Add notification to send queue';
 CREATE OR REPLACE FUNCTION record_cap_alert(
   p_user_id UUID,
   p_card_id UUID,
-  p_category_id UUID,
+  p_category_id TEXT,
   p_alert_threshold INTEGER,
   p_period_start DATE,
   p_usage_at_alert NUMERIC,

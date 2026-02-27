@@ -1,11 +1,11 @@
 # Sprint Plan: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 11.0
+**Version**: 13.0
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
-**Source**: PRD v1.9, EPICS_AND_USER_STORIES v1.7, NOTIFICATION_CAPTURE_FEASIBILITY v1.0, DRD_AUTO_CAPTURE v1.1, PRD_DEMO_MODE v1.0, PUSH_NOTIFICATIONS_EVALUATION v1.0
-**Status**: In Progress — Sprint 19 Complete, Sprint 20 Active
-**Change Log**: v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
+**Source**: PRD v2.3, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0
+**Status**: In Progress — Sprint 20 Active, Sprints 21-22 Planned (Recommendation Accuracy), Sprints 23-24 Planned (Card Expansion 22→29)
+**Change Log**: v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
 
@@ -68,7 +68,7 @@
 | **Auth** | Supabase Auth | Email/password + Google; built-in; no custom auth code needed |
 | **Hosting** | Supabase (DB/API) + Expo EAS (mobile builds) | Zero DevOps overhead for MVP |
 | **API Style** | Supabase auto-generated REST + custom RPC for recommendation engine | Minimal API code needed |
-| **Card Coverage** | Top 20 miles cards (batched) | Batch 1 (D1–3): DBS Altitude, Citi PremierMiles, UOB PRVI Miles, OCBC 90°N, KrisFlyer UOB, HSBC Revolution, Amex KrisFlyer Ascend, BOC Elite Miles, SC Visa Infinite, DBS Woman's World. Batch 2 (D4–7): UOB Lady's Card, OCBC Titanium Rewards, HSBC TravelOne, Amex KrisFlyer CC, SC X Card, Maybank Horizon Visa, Maybank FC Barcelona, Citi Rewards, POSB Everyday, UOB Preferred Platinum |
+| **Card Coverage** | 29 miles cards (batched) | Batch 1 (D1–3): DBS Altitude, Citi PremierMiles, UOB PRVI Miles, OCBC 90°N, KrisFlyer UOB, HSBC Revolution, Amex KrisFlyer Ascend, BOC Elite Miles, SC Visa Infinite, DBS Woman's World. Batch 2 (D4–7): UOB Lady's Card, OCBC Titanium Rewards, HSBC TravelOne, Amex KrisFlyer CC, SC X Card, Maybank Horizon Visa, Maybank FC Barcelona, Citi Rewards, POSB Everyday, UOB Preferred Platinum. Batch 3 (Sprint 22+): Maybank World MC, UOB Visa Signature. Batch 4 (Sprint 23-24): DBS Vantage, UOB Lady's Solitaire, OCBC Voyage, SC Journey, SC Beyond, HSBC Premier MC, Maybank XL Rewards |
 | **Categories** | 7 categories | Dining, Transport, Online Shopping, Groceries, Petrol, Travel/Hotels, General |
 
 ---
@@ -4219,3 +4219,1290 @@ For full implementation details, technical architecture, and risk analysis, see:
 - Sprint 22: Full Launch (F6 + History + Analytics) — 2 stories, 5 SP
 
 **REASON**: No user rollout needed at this time. Focus on complete system build + beautiful demo mode for stakeholder presentations. User launch deferred pending business decision.
+
+---
+
+## Sprint 21: "Data Fix" (F30 — Petrol/Bills Category Resolution + F32 — Condition Transparency)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Resolve the petrol/bills data conflict that leaves 140 earn rules inaccessible and 1 category returning undifferentiated results, then surface card conditions and exclusions in the recommendation UI so users understand the fine print behind every recommendation.
+**Epic**: E14 — Recommendation Accuracy Improvements (Post-MileLion Analysis)
+**PRD Features**: F30 (P0, RICE 9500), F32 (P2, RICE 4800)
+**Phase**: v2.2 — Recommendation Accuracy
+**Predecessor**: Sprint 20 (Push Notifications complete)
+**Reference**: `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`, `docs/technical/CARD_DATA_VERIFICATION.md` Section 3.1
+
+---
+
+### Sprint 21 — Definition of Ready (DoR) Checklist
+
+Before any story enters the sprint, it must satisfy:
+
+- [ ] User story has clear "As a... I want... So that..." statement
+- [ ] Acceptance criteria defined and reviewed by PM + Tech Lead
+- [ ] T-shirt size estimated by the team
+- [ ] Dependencies identified — Sprint 20 complete
+- [ ] `constants/categories.ts` confirmed to have both `petrol` and `bills` categories
+- [ ] `all_cards.sql` earn rules for `petrol` verified as correct for all 20 cards
+- [ ] HSBC Revolution MCC 5814 exclusion confirmed via MileLion analysis
+- [ ] Insurance MCC exclusion data (6300/6381/6399) confirmed in existing `exclusions` table
+
+### Sprint 21 — Definition of Done (DoD) Checklist
+
+A story is "Done" when:
+
+- [ ] Feature works as described in all acceptance criteria
+- [ ] Unit tests written and passing (happy path + key edge cases)
+- [ ] `recommend('bills')` returns differentiated results (not all identical base rates)
+- [ ] `recommend('petrol')` continues to return correct petrol-specific earn rates
+- [ ] Google Places `gas_station` maps to `petrol` (not `transport`)
+- [ ] Condition notes visible on recommendation cards where applicable
+- [ ] Insurance warning banner appears on Bills recommendation screen
+- [ ] No P0 or P1 bugs remaining
+- [ ] Code committed to main branch and peer-reviewed
+- [ ] All existing tests pass (no regressions)
+- [ ] HSBC Revolution excluded from dining for fast food merchants
+
+---
+
+### Sprint 21 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S21.1** | Add base-rate earn rules for `bills` category across all 20 cards | P0 | M | 3 | Data Engineer |
+| **S21.2** | Fix Google Places `gas_station` mapping to `petrol` | P0 | S | 1 | Developer |
+| **S21.3** | Add `bills` to AI scraper schema and prompts | P0 | S | 2 | Software Engineer |
+| **S21.4** | Add HSBC Revolution MCC 5814 exclusion | P1 | XS | 1 | Data Engineer |
+| **S21.5** | Surface `conditions_note` on recommendation cards | P1 | M | 3 | Developer |
+| **S21.6** | Add insurance warning banner on Bills recommendation screen | P1 | S | 2 | Developer |
+| **S21.7** | Update tests for 8-category coverage and new exclusion | P1 | S | 2 | Tester |
+| **Total** | | | | **14** | |
+
+---
+
+### Sprint 21 — User Story Details
+
+#### S21.1: Add Base-Rate Earn Rules for `bills` Category
+
+> **As a** user selecting "Bills" in the app,
+> **I want** `recommend('bills')` to return differentiated results for all 20 cards,
+> **So that** I know which card earns the most on telco and utility payments.
+
+**Priority**: P0 (Must Have — core data fix)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F30
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | The earn rules migration runs | I call `recommend('bills')` | All 20 cards appear with earn rates (base rates: 0.4–1.5 mpd) |
+| AC2 | Bills earn rules are seeded | I compare `recommend('bills')` results | Cards are ranked by `base_rate_mpd`: BOC Elite Miles (1.5) > UOB PRVI/SC Visa Infinite (1.4) > ... > HSBC Revolution/DBS WWC (0.4) |
+| AC3 | Bills earn rules are seeded | I query `earn_rules WHERE category_id = 'bills'` | 20 rows exist (one per card), all with `is_bonus = FALSE` |
+| AC4 | Petrol earn rules already exist | I call `recommend('petrol')` | Results unchanged — existing petrol-specific bonus rates still apply (e.g., Maybank Horizon 1.6 mpd, SC X Card 3.3 mpd) |
+| AC5 | Both categories exist | I view the category tile grid | 8 categories visible: Dining, Transport, Online, Groceries, Petrol, Bills, Travel, General |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T21.01: Write SQL INSERT for 20 base-rate earn rules for `bills` category (matching each card's `base_rate_mpd`) | Data Engineer | 2h | None |
+| T21.02: Add `ON CONFLICT` clause for idempotent re-runs | Data Engineer | 0.5h | T21.01 |
+| T21.03: Update `all_cards.sql` seed file with bills earn rules section | Data Engineer | 1h | T21.01 |
+| T21.04: Run migration on Supabase and verify `recommend('bills')` output | Data Engineer | 1h | T21.03 |
+| T21.05: Verify `recommend('petrol')` output is unchanged (regression check) | Tester | 1h | T21.04 |
+| T21.06: Test that all 8 category tiles are visible and tappable in the app | Tester | 0.5h | T21.04 |
+
+---
+
+#### S21.2: Fix Google Places `gas_station` Mapping
+
+> **As a** user at a petrol station with GPS enabled,
+> **I want** the app to detect my location as "Petrol" (not "Transport"),
+> **So that** the auto-detected category matches the correct earn rules.
+
+**Priority**: P0 (Must Have — wrong category mapping)
+**T-Shirt Size**: **S** (Small) — ~0.5 day
+**Feature**: F30
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | User is near a petrol station | Google Places API returns `gas_station` type | App maps to `petrol` category (not `transport`) |
+| AC2 | User is near a taxi stand | Google Places API returns `taxi_stand` type | App still maps to `transport` (unchanged) |
+| AC3 | Mapping is updated | I look up `mapTypesToCategory('gas_station')` | Returns `petrol` |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T21.07: Update `mapTypesToCategory()` in `lib/merchant.ts` — change `gas_station` from `transport` to `petrol` | Developer | 0.5h | None |
+| T21.08: Update unit tests for `mapTypesToCategory()` to expect `petrol` for `gas_station` | Tester | 0.5h | T21.07 |
+| T21.09: Verify other Google Places type mappings are unaffected (regression) | Tester | 0.5h | T21.07 |
+
+---
+
+#### S21.3: Add `bills` to AI Scraper Schema
+
+> **As the** AI rate change detection system,
+> **I need** `bills` to be a valid category in the scraper schema and prompts,
+> **So that** rate change submissions for bills-related cards pass schema validation.
+
+**Priority**: P0 (Must Have — schema consistency)
+**T-Shirt Size**: **S** (Small) — ~1 day
+**Feature**: F30
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | AI scraper processes a bills-related rate change | Schema validation runs | `bills` is accepted as a valid `category` value |
+| AC2 | The category enum is updated | I inspect `scraper/src/ai/schema.ts` | `bills` is in the `CategoryId` enum/type |
+| AC3 | The system prompt is updated | I inspect `scraper/src/ai/prompts.ts` | `bills` appears in the tracked categories list with description |
+| AC4 | Both `petrol` and `bills` are in schema | I check the category enum | Both values are present |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T21.10: Add `bills` to `CategoryId` enum in `scraper/src/ai/schema.ts` | Software Engineer | 0.5h | None |
+| T21.11: Add `bills` description to tracked categories in `scraper/src/ai/prompts.ts` system prompt | Software Engineer | 0.5h | T21.10 |
+| T21.12: Update Zod validation schema (if `GROQ_RESPONSE_SCHEMA` has category validation) | Software Engineer | 0.5h | T21.10 |
+| T21.13: Test: Submit a mock rate change with `category: 'bills'` → verify schema accepts it | Tester | 0.5h | T21.12 |
+
+---
+
+#### S21.4: Add HSBC Revolution MCC 5814 Exclusion
+
+> **As the** system,
+> **I need** HSBC Revolution to be excluded from dining bonus for MCC 5814 (fast food),
+> **So that** users are not recommended HSBC Revolution at 4 mpd at McDonald's, KFC, or Burger King when it actually earns 0.4 mpd there.
+
+**Priority**: P1 (Should Have — accuracy fix)
+**T-Shirt Size**: **XS** (Extra Small) — ~2 hours
+**Feature**: F32
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Exclusion row is inserted | I query `exclusions WHERE card_id = hsbc-revolution AND category_id = 'dining'` | MCC 5814 is in the `excluded_mccs` array |
+| AC2 | HSBC Revolution has dining exclusion | User selects "Dining" category | HSBC Revolution recommendation shows asterisk/note: "Excludes fast food (MCC 5814)" |
+| AC3 | Exclusion exists | HSBC Revolution is recommended for dining | `conditions_note` or exclusion note visible to user |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T21.14: Write SQL INSERT for HSBC Revolution MCC 5814 exclusion in `exclusions` table | Data Engineer | 0.5h | None |
+| T21.15: Update `all_cards.sql` seed file with HSBC Revolution dining exclusion | Data Engineer | 0.5h | T21.14 |
+| T21.16: Verify HSBC Revolution exclusion appears in recommendation UI (after S21.5 ships) | Tester | 0.5h | T21.14, S21.5 |
+
+---
+
+#### S21.5: Surface `conditions_note` on Recommendation Cards
+
+> **As a** user viewing a card recommendation,
+> **I want** to see any conditions attached to the earn rate (e.g., "Requires contactless", "SIA bookings only"),
+> **So that** I understand the fine print before choosing a card and can make an informed decision.
+
+**Priority**: P1 (Should Have — trust building)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F32
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | A card has `conditions_note` in its earn rule | Recommendation screen loads for that category | Condition text shown below earn rate in muted/secondary style |
+| AC2 | A card has no conditions (null `conditions_note`) | Recommendation screen loads | No condition text shown — clean display |
+| AC3 | KrisFlyer UOB is recommended for Travel | User views recommendation | Shows: "Earn 3 mpd on SIA purchases (flights, SIA website). 1.2 mpd on other travel." |
+| AC4 | SC X Card is recommended for Dining | User views recommendation | Shows: "Earn 3.3 mpd with min spend $500/month. Otherwise 0.4 mpd." |
+| AC5 | UOB Preferred Platinum for Dining | User views recommendation | Shows: "Earn 4 mpd (10X UNI$) on dining with min spend $600/month." |
+| AC6 | Condition text is long | Screen renders | Text wraps cleanly; no layout breakage; max 2 lines with ellipsis |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T21.17: Update `recommend()` RPC to return `conditions_note` field from `earn_rules` join | Software Engineer | 1.5h | None |
+| T21.18: Update TypeScript types for recommendation response to include `conditions_note: string | null` | Developer | 0.5h | T21.17 |
+| T21.19: Add conditions text UI to `app/recommend/[category].tsx` — below earn rate, muted style, max 2 lines | Developer | 3h | T21.18 |
+| T21.20: Add conditions text to `RecommendationMatchBanner.tsx` (transaction log flow) | Developer | 1.5h | T21.18 |
+| T21.21: Style condition text — secondary color, smaller font, italic, ellipsis for overflow | Developer | 1h | T21.19 |
+| T21.22: Test: Verify conditions shown for cards with conditions (KrisFlyer UOB, SC X, UOB PP) | Tester | 1h | T21.19 |
+| T21.23: Test: Verify no condition text for cards without conditions (DBS Altitude base rate) | Tester | 0.5h | T21.19 |
+| T21.24: Test: Long condition text wraps cleanly on small screen (iPhone SE) | Tester | 0.5h | T21.21 |
+
+---
+
+#### S21.6: Insurance Warning Banner on Bills Recommendation Screen
+
+> **As a** user viewing Bills recommendations,
+> **I want** to see a clear warning that insurance payments are excluded from earning on most cards,
+> **So that** I have realistic expectations and don't assume I'll earn 0.4+ mpd on Prudential or AIA payments.
+
+**Priority**: P1 (Should Have — prevents user confusion)
+**T-Shirt Size**: **S** (Small) — ~1 day
+**Feature**: F32
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | User navigates to Bills recommendation screen | Screen loads | Warning banner visible at top (before card list): "Insurance payments (MCC 6300/6381/6399) are excluded from earning on most cards. Rates shown below apply to telco and utility bills." |
+| AC2 | Warning banner is shown | User reads it | Styled as amber/yellow info banner with ⚠️ icon; dismissible but reappears on next visit |
+| AC3 | User navigates to Dining recommendation screen | Screen loads | No warning banner shown (only appears on Bills) |
+| AC4 | Banner is displayed | Layout | Does not push card list below the fold on small screens; compact design |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T21.25: Create `CategoryWarningBanner` component (reusable for future category-specific warnings) | Developer | 2h | None |
+| T21.26: Add Bills-specific warning content and amber/yellow styling with ⚠️ icon | Developer | 1h | T21.25 |
+| T21.27: Integrate banner into `app/recommend/[category].tsx` — show only when `category_id === 'bills'` | Developer | 1h | T21.25 |
+| T21.28: Test: Banner visible on Bills, not on other categories | Tester | 0.5h | T21.27 |
+| T21.29: Test: Banner layout doesn't push card list below fold on iPhone SE | Tester | 0.5h | T21.27 |
+
+---
+
+#### S21.7: Update Tests for 8-Category Coverage and New Exclusion
+
+> **As the** development team,
+> **I need** existing tests updated to reflect 8 categories (including `petrol` and `bills`) and the new HSBC Revolution exclusion,
+> **So that** CI/CD catches regressions in category or exclusion logic.
+
+**Priority**: P1 (Should Have — test coverage)
+**T-Shirt Size**: **S** (Small) — ~1 day
+**Feature**: F30 + F32
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Tests run | Category list tests execute | Tests expect 8 categories (dining, transport, online, groceries, petrol, bills, travel, general) |
+| AC2 | Tests run | Merchant mapping tests execute | `gas_station` Google Places type maps to `petrol` in tests |
+| AC3 | Tests run | Exclusion tests execute | HSBC Revolution MCC 5814 exclusion is validated |
+| AC4 | All tests run | CI pipeline completes | All existing tests pass + new tests pass; zero regressions |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T21.30: Update `tests/card-rules.test.ts` to expect 8 categories (add `bills` alongside existing `petrol`) | Tester | 1h | S21.1 |
+| T21.31: Update `tests/merchant.test.ts` to expect `petrol` for `gas_station` mapping | Tester | 0.5h | S21.2 |
+| T21.32: Add test case for HSBC Revolution MCC 5814 exclusion | Tester | 1h | S21.4 |
+| T21.33: Add test case for `recommend('bills')` returning differentiated results | Tester | 1.5h | S21.1 |
+| T21.34: Run full test suite — verify zero regressions | Tester | 1h | All above |
+
+---
+
+### Sprint 21 — Dependencies Map
+
+```
+S21.1 (Bills earn rules) ──→ S21.7 (Tests update)
+         │
+         └──→ S21.5 (Conditions UI) ──→ S21.4 (HSBC exclusion verification)
+                                              │
+S21.2 (gas_station fix) ──→ S21.7             │
+                                              ↓
+S21.3 (Scraper schema) ──→ (independent)    S21.7 (Tests)
+
+S21.6 (Insurance banner) ──→ (independent, parallel with S21.5)
+```
+
+**Critical Path**: S21.1 → S21.5 → S21.7 (data fix → UI → tests)
+**Parallel Track**: S21.2, S21.3, S21.6 can all start Day 1
+
+---
+
+### Sprint 21 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Bills earn rules INSERT conflicts with existing data | Low | Medium | Use `ON CONFLICT DO UPDATE` for idempotent runs; verify no existing bills rules |
+| `conditions_note` is NULL for most cards | Medium | Low | UI hides section when NULL; no visual noise |
+| Insurance warning banner pushes content below fold | Low | Low | Compact design; test on iPhone SE; make dismissible |
+| Gas_station mapping change affects existing user overrides | Low | Low | User overrides have higher priority than Places API; no impact |
+| AI scraper schema change breaks existing detections | Low | Medium | `bills` is additive (new enum value); existing values unchanged |
+
+---
+
+### Sprint 21 — Schedule
+
+| Days | Focus | Stories | Owners |
+|------|-------|---------|--------|
+| **Days 1-3** | Data fixes | S21.1 (bills earn rules), S21.2 (gas_station), S21.3 (scraper), S21.4 (HSBC exclusion) | Data Engineer, Developer, Software Engineer |
+| **Days 4-7** | UI implementation | S21.5 (conditions_note display), S21.6 (insurance banner) | Developer, Software Engineer |
+| **Days 8-9** | Testing | S21.7 (test updates + full regression) | Tester |
+| **Day 10** | Stabilization + review | Bug fixes, code review, PR merge | All |
+
+---
+
+## Sprint 22: "Smart Scoring" (F31 — Min Spend Condition Enforcement)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Enforce minimum monthly spend conditions in the recommendation scoring algorithm so that cards requiring $300-$600/month min spend are downranked to base rate for users who haven't met the threshold, preventing wrong recommendations for ~5 of 20 cards.
+**Epic**: E14 — Recommendation Accuracy Improvements (Post-MileLion Analysis)
+**PRD Feature**: F31 (P1, RICE 3400)
+**Phase**: v2.2 — Recommendation Accuracy
+**Predecessor**: Sprint 21 (F30 data fix must be complete — bills earn rules must exist before condition checks)
+**Reference**: `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`, `docs/technical/RECOMMENDATION_AND_CATEGORY_LOGIC.md`
+
+---
+
+### Sprint 22 — Definition of Ready (DoR) Checklist
+
+Before any story enters the sprint, it must satisfy:
+
+- [ ] User story has clear "As a... I want... So that..." statement
+- [ ] Acceptance criteria defined and reviewed by PM + Tech Lead
+- [ ] T-shirt size estimated by the team
+- [ ] Dependencies identified — Sprint 21 complete (F30 shipped, bills earn rules exist)
+- [ ] Cards with `min_spend_monthly` conditions identified: SC X Card ($500), UOB Preferred Platinum ($600), Maybank Horizon ($300), Maybank FC Barcelona ($300), KrisFlyer UOB (conditional on contactless — separate consideration)
+- [ ] `recommend()` RPC current behaviour understood and documented
+- [ ] UX for "spend more to unlock" nudge designed (can be wireframe)
+
+### Sprint 22 — Definition of Done (DoD) Checklist
+
+A story is "Done" when:
+
+- [ ] Feature works as described in all acceptance criteria
+- [ ] Unit tests written and passing (happy path + edge cases)
+- [ ] `recommend()` returns downranked results for cards whose min spend isn't met
+- [ ] SC X Card shows 0.4 mpd (not 3.3 mpd) for users spending <$500/month
+- [ ] UOB Preferred Platinum shows 0.4 mpd (not 4 mpd) for users spending <$600/month
+- [ ] "Spend $X more to unlock bonus rate" message visible on downranked cards
+- [ ] No P0 or P1 bugs remaining
+- [ ] Code committed to main branch and peer-reviewed
+- [ ] All existing tests pass (no regressions)
+- [ ] Recommendation engine performance still < 10ms for typical users
+
+---
+
+### Sprint 22 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S22.1** | Modify `recommend()` RPC to check min spend conditions | P0 | L | 5 | Software Engineer |
+| **S22.2** | Add "Spend more to unlock" nudge on recommendation cards | P1 | M | 3 | Developer |
+| **S22.3** | Add user monthly spending estimate in Settings | P1 | M | 3 | Developer |
+| **S22.4** | Comprehensive testing of condition-aware recommendations | P1 | M | 3 | Tester |
+| **Total** | | | | **14** | |
+
+---
+
+### Sprint 22 — User Story Details
+
+#### S22.1: Modify `recommend()` RPC to Check Min Spend Conditions
+
+> **As a** user who spends less than $500/month,
+> **I want** SC X Card to show me 0.4 mpd (not 3.3 mpd),
+> **So that** I don't follow a recommendation that won't actually earn me bonus miles.
+
+**Priority**: P0 (Must Have — fixes wrong recommendations)
+**T-Shirt Size**: **L** (Large) — ~4 days
+**Feature**: F31
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | SC X Card has `conditions: {"min_spend_monthly": 500}` | User has spent $200 this month | `recommend('dining')` returns SC X Card at 0.4 mpd (base rate, not 3.3 mpd bonus) |
+| AC2 | SC X Card has min spend condition | User has spent $550 this month | `recommend('dining')` returns SC X Card at 3.3 mpd (bonus rate unlocked) |
+| AC3 | UOB Preferred Platinum has `conditions: {"min_spend_monthly": 600}` | User has spent $400 this month | `recommend('dining')` returns UOB PP at 0.4 mpd (not 4 mpd) |
+| AC4 | Maybank Horizon has `conditions: {"min_spend_monthly": 300}` | User has spent $350 this month | `recommend('dining')` returns Maybank Horizon at 1.6 mpd (bonus unlocked) |
+| AC5 | Card has no min_spend condition (NULL conditions) | User has any spend level | Card scored at normal bonus rate (no change from current behaviour) |
+| AC6 | New month starts (March 1) | User's monthly spend resets to $0 | All cards with min spend conditions revert to base rate until threshold met again |
+| AC7 | Performance check | `recommend()` called with condition checks | Response time still < 10ms for 5-card user |
+| AC8 | The RPC returns a downranked card | Result set includes the card | A new field `min_spend_remaining` shows how much more the user needs to spend (e.g., $300 remaining) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T22.01: Analyze current `recommend()` RPC — identify where to inject condition check (after `user_card_rates` CTE) | Software Engineer | 1h | None |
+| T22.02: Add new CTE `total_monthly_spend` — aggregate total user spend across ALL categories for current month | Software Engineer | 1.5h | T22.01 |
+| T22.03: Add condition check logic — if `earn_rules.conditions->>'min_spend_monthly'` exists AND user spend < threshold, use `base_rate_mpd` instead of bonus `earn_rate_mpd` | Software Engineer | 3h | T22.02 |
+| T22.04: Add `min_spend_remaining` to return type — calculated as `MAX(0, threshold - total_spend)` (NULL if no condition) | Software Engineer | 1.5h | T22.03 |
+| T22.05: Handle edge case: card with both min spend AND cap — min spend checked first, then cap ratio applied | Software Engineer | 2h | T22.03 |
+| T22.06: Add `conditions_note` to return columns (if not already added in Sprint 21) | Software Engineer | 0.5h | Sprint 21 S21.5 |
+| T22.07: Performance test — `EXPLAIN ANALYZE` on modified query with 7-card user | Software Engineer | 1h | T22.03 |
+| T22.08: Create migration script for updated `recommend()` function | Software Engineer | 0.5h | T22.05 |
+| T22.09: Deploy to Supabase and verify with manual RPC calls | Software Engineer | 1h | T22.08 |
+
+---
+
+#### S22.2: "Spend More to Unlock" Nudge on Recommendation Cards
+
+> **As a** user who hasn't met a card's min spend threshold this month,
+> **I want** to see "Spend $X more to unlock bonus rate" on the recommendation card,
+> **So that** I understand why the earn rate is lower than expected and what I can do about it.
+
+**Priority**: P1 (Should Have — UX clarity)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F31
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | SC X Card is downranked (user spent $200, threshold $500) | User views recommendation | Orange badge: "Spend $300 more this month to unlock 3.3 mpd" |
+| AC2 | SC X Card has met min spend (user spent $550) | User views recommendation | No orange badge; normal 3.3 mpd display |
+| AC3 | Card has no min spend condition | User views recommendation | No badge or nudge shown |
+| AC4 | Multiple cards are downranked | User views recommendation list | Each downranked card shows its own nudge with correct remaining amount |
+| AC5 | User taps the nudge badge | Badge is tapped | Tooltip/expandable shows: "This card requires $500/month total spend to unlock bonus rates. You've spent $200 so far this month." |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T22.10: Update TypeScript types for recommendation response to include `min_spend_remaining: number | null` | Developer | 0.5h | S22.1 T22.04 |
+| T22.11: Create `MinSpendNudge` component — orange badge with "Spend $X more to unlock Y mpd" | Developer | 2h | T22.10 |
+| T22.12: Integrate `MinSpendNudge` into recommendation card in `app/recommend/[category].tsx` | Developer | 1.5h | T22.11 |
+| T22.13: Add tap-to-expand tooltip with full explanation text | Developer | 1.5h | T22.12 |
+| T22.14: Integrate into `RecommendationMatchBanner.tsx` (transaction log flow) | Developer | 1h | T22.11 |
+| T22.15: Test: SC X shows nudge at $200 spend, no nudge at $550 spend | Tester | 1h | T22.12 |
+| T22.16: Test: Card without min spend shows no nudge | Tester | 0.5h | T22.12 |
+
+---
+
+#### S22.3: User Monthly Spending Estimate in Settings
+
+> **As a** user,
+> **I want** to set my estimated monthly spending level in Settings,
+> **So that** the app knows whether I'm likely to meet card-specific minimum spend thresholds even before I've logged enough transactions this month.
+
+**Priority**: P1 (Should Have — improves first-month accuracy)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F31
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | User navigates to Settings | Settings screen loads | "Monthly Spending Estimate" section visible with input field |
+| AC2 | User enters $2,000 as estimate | Value is saved | Stored in `user_preferences` table (or user profile) |
+| AC3 | It's the 1st of the month (no transactions logged yet) | User selects a category for recommendation | `recommend()` uses the estimate as a proxy for min spend check until actual transactions exist |
+| AC4 | User has logged $800 in transactions this month | User selects a category | `recommend()` uses actual transaction total ($800), NOT the estimate |
+| AC5 | User doesn't set an estimate (NULL) | User selects a category early in month | `recommend()` uses actual transaction total only (may be $0, so all min-spend cards default to base rate) |
+| AC6 | User updates estimate from $2,000 to $500 | Value is saved | Future recommendations reflect the new estimate |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T22.17: Add `monthly_spend_estimate` column to user profile or `user_preferences` table | Data Engineer | 0.5h | None |
+| T22.18: Write migration for new column | Data Engineer | 0.5h | T22.17 |
+| T22.19: Build Settings UI — "Monthly Spending Estimate" input with SGD prefix, numeric keyboard | Developer | 2h | None |
+| T22.20: Wire Settings input to upsert `monthly_spend_estimate` via Supabase | Developer | 1h | T22.17 |
+| T22.21: Update `recommend()` RPC — use `GREATEST(actual_total_spend, monthly_spend_estimate)` for condition check when actual spend is below estimate | Software Engineer | 2h | S22.1, T22.18 |
+| T22.22: Test: Set estimate $2,000, no transactions → SC X shows 3.3 mpd (estimate > $500 threshold) | Tester | 1h | T22.21 |
+| T22.23: Test: No estimate, no transactions → SC X shows 0.4 mpd (defaults to actual $0) | Tester | 0.5h | T22.21 |
+| T22.24: Test: Actual spend $800 overrides estimate $500 → uses $800 for condition check | Tester | 0.5h | T22.21 |
+
+---
+
+#### S22.4: Comprehensive Testing of Condition-Aware Recommendations
+
+> **As the** development team,
+> **I need** thorough testing of the min spend condition enforcement across all affected cards,
+> **So that** we're confident the algorithm produces correct results in all scenarios.
+
+**Priority**: P1 (Should Have — quality gate)
+**T-Shirt Size**: **M** (Medium) — ~2 days
+**Feature**: F31
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | All affected cards tested | Test suite runs | SC X ($500), UOB PP ($600), Maybank Horizon ($300), Maybank FC Barcelona ($300) all correctly downranked/upgraded based on spend |
+| AC2 | Cards without conditions tested | Test suite runs | DBS Altitude, Citi PremierMiles, HSBC Revolution, etc. behave identically to pre-Sprint 22 |
+| AC3 | Edge cases tested | Test suite runs | Zero spend, exact threshold, one dollar below, one dollar above, mid-month, month rollover |
+| AC4 | Performance tested | Benchmark runs | `recommend()` still < 10ms for 7-card portfolio |
+| AC5 | Ranking tested | Test suite runs | Cards re-ranked correctly when condition state changes (e.g., SC X drops from #1 to #5 when user hasn't met min spend) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T22.25: Write unit tests for `recommend()` with min spend conditions — 5 affected cards × 3 spend scenarios | Tester | 3h | S22.1 |
+| T22.26: Write edge case tests — zero spend, exact threshold ($500.00), $499.99, $500.01 | Tester | 2h | S22.1 |
+| T22.27: Write regression tests — verify unaffected cards (15 of 20) produce same results as before | Tester | 2h | S22.1 |
+| T22.28: Write month rollover test — simulate February→March transition, verify reset | Tester | 1.5h | S22.1 |
+| T22.29: Performance benchmark — `EXPLAIN ANALYZE` with modified RPC, compare to baseline | Software Engineer | 1h | S22.1 |
+| T22.30: E2E test — full user flow: set estimate → log transaction → check recommendation changes | Tester | 2h | S22.2, S22.3 |
+| T22.31: Bug fixes + stabilization | Developer + Software Engineer | 3h | All tests |
+
+---
+
+### Sprint 22 — Dependencies Map
+
+```
+S22.1 (recommend() RPC) ──→ S22.2 (Nudge UI)
+         │                        │
+         │                        ↓
+         └──→ S22.3 (Settings) ──→ S22.4 (Testing)
+                                        │
+                                        ↓
+                               Sprint 22 Complete
+```
+
+**Critical Path**: S22.1 (algorithm) → S22.4 (testing)
+**Parallel**: S22.2 (nudge UI) and S22.3 (settings) can start after S22.1 ships, run in parallel
+
+---
+
+### Sprint 22 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| `recommend()` RPC performance degrades with condition check | Low | High | Pre-compute total monthly spend in CTE; add index on transactions(user_id, transaction_date); benchmark with `EXPLAIN ANALYZE` |
+| Edge case: card with BOTH min spend AND cap creates confusing UX | Medium | Medium | Check min spend first → if met, apply cap ratio; if not met, show base rate + nudge. Document logic clearly |
+| User confusion about "estimate" vs actual spend | Medium | Low | Settings label: "Estimated Monthly Card Spending (all cards combined)"; help text explains it's used for early-month recommendations |
+| Min spend is per-card or total? Ambiguity in bank T&Cs | Medium | High | Verify with bank T&Cs: SC X = total across all transactions; UOB PP = total. Store in `conditions` JSONB as `min_spend_monthly` (total). If per-category, add `min_spend_scope: 'total' | 'category'` |
+| Month rollover edge case at midnight SGT | Low | Low | Use `date_trunc('month', CURRENT_DATE AT TIME ZONE 'Asia/Singapore')` for month boundary |
+
+---
+
+### Sprint 22 — Schedule
+
+| Days | Focus | Stories | Owners |
+|------|-------|---------|--------|
+| **Days 1-4** | Algorithm implementation | S22.1 (`recommend()` RPC modification) | Software Engineer |
+| **Days 3-6** | UI implementation | S22.2 (nudge component), S22.3 (settings) | Developer, Data Engineer |
+| **Days 5-8** | Testing | S22.4 (comprehensive tests — unit, edge case, regression, performance) | Tester |
+| **Days 9-10** | Stabilization + review | Bug fixes, code review, PR merge, performance validation | All |
+
+---
+
+## Sprint 21-22 Summary: Recommendation Accuracy Roadmap
+
+### Total Effort
+
+| Sprint | Phase | Features | Stories | Points | Duration |
+|--------|-------|----------|---------|--------|----------|
+| **Sprint 21** | Data Fix + UI | F30 + F32 | 7 | 14 | 2 weeks |
+| **Sprint 22** | Smart Scoring | F31 | 4 | 14 | 2 weeks |
+| **Total** | | **F30 + F31 + F32** | **11** | **28** | **4 weeks** |
+
+### Key Milestones
+
+| Milestone | Sprint | Success Criteria |
+|-----------|--------|------------------|
+| **Bills Earn Rules Live** | Sprint 21 | `recommend('bills')` returns differentiated results for all 20 cards |
+| **Gas Station Fix** | Sprint 21 | Google Places `gas_station` → `petrol` (not `transport`) |
+| **Conditions Visible** | Sprint 21 | `conditions_note` shown on recommendation cards; insurance warning on Bills |
+| **Min Spend Enforced** | Sprint 22 | SC X shows 0.4 mpd (not 3.3 mpd) for users spending <$500/month |
+| **Recommendation Accuracy Complete** | Sprint 22 | All 20 cards produce correct recommendations under all spending scenarios |
+| **Card Expansion to 22** | Post-Sprint 22 | Maybank World MC + UOB Visa Signature added, 4 new tests passing |
+
+### Dependencies & Prerequisites
+
+| Sprint | Hard Dependencies | Soft Dependencies |
+|--------|-------------------|-------------------|
+| **Sprint 21** | Sprint 20 complete | None |
+| **Sprint 22** | Sprint 21 complete (F30 shipped) | UX wireframe for "spend more" nudge |
+| **Card Expansion** | Sprint 22 complete (min spend + contactless) | None |
+
+### Reference Documentation
+
+- **MileLion Analysis**: `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`
+- **Card Data Verification**: `docs/technical/CARD_DATA_VERIFICATION.md`
+- **Recommendation Logic**: `docs/technical/RECOMMENDATION_AND_CATEGORY_LOGIC.md`
+- **PRD v2.2**: `docs/planning/PRD.md` (Section 8, P0.5)
+- **PM Handover**: `.claude/handover/pm-to-scrum.md`
+
+---
+
+## Card Expansion: Maybank World Mastercard + UOB Visa Signature
+
+**Date**: 2026-02-27
+**Prerequisite**: Sprint 21-22 complete (petrol/bills resolution, min spend enforcement, contactless badge)
+
+### Story: Expand Card Database from 20 to 22 Cards
+
+> **As a** user who holds a Maybank World Mastercard or UOB Visa Signature,
+> **I want** the app to include my card in recommendations,
+> **So that** I get accurate "use this card" advice for my spending categories.
+
+**Cards Added:**
+
+| # | Card | Key Feature | Why Now |
+|---|------|-------------|---------|
+| 21 | Maybank World Mastercard | 4 mpd petrol, uncapped, no min spend | Petrol/bills resolution (Sprint 21) makes this viable |
+| 22 | UOB Visa Signature | 4 mpd contactless + petrol, $1,000 min spend, $1,200 cap | Min spend enforcement + contactless badge (Sprint 22) handle dual conditions |
+
+**Changes:**
+
+| File | Change |
+|------|--------|
+| `database/seeds/all_cards.sql` | +2 card metadata, +16 earn rules, +1 cap (UOB VS shared), +4 exclusions |
+| `tests/mocks/test-data.ts` | +2 mock cards, +16 earn rules, +1 cap constant |
+| `tests/recommendation.test.ts` | +4 test cases (40 total, all passing) |
+| `docs/technical/CARD_DATA_VERIFICATION.md` | +2 card data sheets, updated counts |
+| `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md` | Updated gap status, P3 completed |
+| `docs/technical/RECOMMENDATION_AND_CATEGORY_LOGIC.md` | Updated card count, test count |
+
+**Verification:**
+- All 40 tests pass (`npm test`)
+- SQL is syntactically correct with ON CONFLICT for idempotent re-runs
+- Card count consistent across all docs: 22
+
+---
+
+**Sprint 21-22 Status**: Sprint 21 📋 PLANNED | Sprint 22 📋 PLANNED | Card Expansion (20→22) ✅ COMPLETED
+
+**Next Steps**:
+1. Complete Sprint 20 (Push Notifications)
+2. Begin Sprint 21 — start with S21.1 (bills earn rules) and S21.2 (gas_station fix) on Day 1
+3. Sprint 22 begins after Sprint 21 ships
+4. Sprint 23-24 (F33 Card Expansion 22→29) begins after Sprint 22 ships
+
+---
+
+## Sprint 23: "More Cards" (F33 Part 1 — 6 Straightforward Cards: 22→28)
+
+**Duration**: 1 week (5 working days)
+**Sprint Goal**: Add 6 straightforward miles cards to the database (DBS Vantage, OCBC Voyage, SC Journey, SC Beyond, HSBC Premier MC, Maybank XL Rewards) — all follow existing data patterns with no new UX required.
+**Epic**: E15 — Card Database Expansion (F33)
+**PRD Feature**: F33 (P1, RICE 4050)
+**Phase**: v2.3 — Card Expansion
+**Predecessor**: Sprint 22 (F31 min spend enforcement must be complete — DBS Vantage and Maybank XL have min spend conditions)
+**Reference**: `docs/technical/CARD_DATA_VERIFICATION.md`, `docs/technical/RECOMMENDATION_AND_CATEGORY_LOGIC.md`
+
+---
+
+### Sprint 23 — Definition of Ready (DoR) Checklist
+
+Before any story enters the sprint, it must satisfy:
+
+- [ ] User story has clear "As a... I want... So that..." statement
+- [ ] Acceptance criteria defined and reviewed
+- [ ] T-shirt size estimated
+- [ ] Sprint 22 complete (min spend enforcement working — needed for DBS Vantage $2K/month and Maybank XL $500/month)
+- [ ] All 6 card earn rates verified against bank T&Cs and MileLion/SingSaver
+- [ ] Card image assets exist in `assets/cards/` (all 6 confirmed present)
+- [ ] UUIDs assigned (batch 4: `00000000-0000-0000-0004-000000000023` through `...0028`)
+
+### Sprint 23 — Definition of Done (DoD) Checklist
+
+A story is "Done" when:
+
+- [ ] Card data inserted into `all_cards.sql` with ON CONFLICT for idempotent re-runs
+- [ ] Earn rules cover all 8 categories per card (48 total new rows)
+- [ ] Caps and exclusions added where applicable
+- [ ] Mock test data added to `tests/mocks/test-data.ts`
+- [ ] New recommendation test cases pass
+- [ ] All existing tests pass (no regressions)
+- [ ] `recommend()` returns correct results for new cards (verified manually)
+- [ ] Documentation updated (CARD_DATA_VERIFICATION.md, RECOMMENDATION_AND_CATEGORY_LOGIC.md)
+- [ ] Card count consistent across all docs: 28
+
+---
+
+### Sprint 23 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S23.1** | Add 3 flat-rate cards to database (OCBC Voyage, SC Beyond, HSBC Premier MC) | P0 | M | 3 | Data Engineer |
+| **S23.2** | Add DBS Vantage Visa Infinite with $2,000/month min spend condition | P0 | M | 3 | Data Engineer |
+| **S23.3** | Add SC Journey Card with online transport/grocery bonus | P0 | M | 3 | Data Engineer |
+| **S23.4** | Add Maybank XL Rewards with $500/month min spend + age restriction | P0 | M | 3 | Data Engineer |
+| **S23.5** | Add test cases for all 6 new cards | P1 | M | 3 | Tester |
+| **S23.6** | Update documentation for card expansion 22→28 | P1 | S | 1 | Scrum Master |
+| **Total** | | | | **16** | |
+
+---
+
+### Sprint 23 — User Story Details
+
+#### S23.1: Add 3 Flat-Rate Cards (OCBC Voyage, SC Beyond, HSBC Premier MC)
+
+> **As a** user with an OCBC Voyage, SC Beyond, or HSBC Premier Mastercard,
+> **I want** my card to appear in MaxiMile recommendations,
+> **So that** I see accurate earn rates when comparing cards for any spend category.
+
+**Priority**: P0
+**T-Shirt Size**: **M** (Moderate) — ~1 day
+**Feature**: F33
+
+**Card Data Summary**:
+
+| Card | Slug | Network | Base Rate | Conditions | Cap |
+|------|------|---------|-----------|------------|-----|
+| OCBC Voyage Card | `ocbc-voyage-card` | visa | 1.3 mpd (all categories) | None | None |
+| SC Beyond Card | `sc-beyond-card` | mastercard | 1.5 mpd (all categories) | None | None |
+| HSBC Premier MC | `hsbc-premier-mc` | mastercard | 1.4 mpd (all categories) | None | None |
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | OCBC Voyage added to database | `recommend('dining')` called for user with OCBC Voyage | Returns 1.3 mpd |
+| AC2 | SC Beyond added to database | `recommend('general')` called | Returns 1.5 mpd, no conditions badge |
+| AC3 | HSBC Premier MC added | `recommend('petrol')` called | Returns 1.4 mpd, no cap indicator |
+| AC4 | All 3 cards have 8 earn rule rows each | SQL seed re-run | ON CONFLICT handles idempotent insert |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T23.01: Add 3 card metadata rows to `all_cards.sql` Section 2 | Data Engineer | 0.5h | None |
+| T23.02: Add 24 earn rule rows (8 per card, all same rate) | Data Engineer | 1h | T23.01 |
+| T23.03: Add standard exclusion rows (government + insurance) | Data Engineer | 0.5h | T23.01 |
+| T23.04: Verify SQL syntax and test with `psql` | Data Engineer | 0.5h | T23.02 |
+
+---
+
+#### S23.2: Add DBS Vantage Visa Infinite with Min Spend Condition
+
+> **As a** user with a DBS Vantage card who spends $2,000+/month,
+> **I want** the app to show me 1.5 mpd (not 1.0 mpd),
+> **So that** my recommendation reflects my actual earning rate.
+
+**Priority**: P0
+**T-Shirt Size**: **M** (Moderate) — ~1 day
+**Feature**: F33
+
+**Card Data**:
+
+| Field | Value |
+|-------|-------|
+| Slug | `dbs-vantage-visa-infinite` |
+| Network | visa |
+| Annual Fee | $599.50 |
+| Base Rate | 1.0 mpd (min spend NOT met) |
+| Bonus Rate | 1.5 mpd all categories (min spend met) |
+| Min Spend | $2,000/month |
+| Cap | None |
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | DBS Vantage has `conditions: {"min_spend_monthly": 2000}` | User has spent $1,500 this month | Card shows 1.0 mpd (base rate, downranked by F31 logic) |
+| AC2 | Same card | User has spent $2,200 this month | Card shows 1.5 mpd (bonus unlocked) |
+| AC3 | All 8 categories have same rate | `recommend('dining')` and `recommend('petrol')` | Both return 1.5 mpd (or 1.0 mpd if min spend not met) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T23.05: Add card metadata with `base_rate_mpd: 1.0` | Data Engineer | 0.5h | None |
+| T23.06: Add 8 earn rules at 1.5 mpd with `{"min_spend_monthly": 2000}` condition | Data Engineer | 1h | T23.05 |
+| T23.07: Add exclusion rows | Data Engineer | 0.5h | T23.05 |
+| T23.08: Verify min spend downranking works via `recommend()` | Tester | 0.5h | T23.06, Sprint 22 |
+
+---
+
+#### S23.3: Add SC Journey Card with Online Bonus Categories
+
+> **As a** user with an SC Journey Card,
+> **I want** to see 3 mpd for online food delivery and grocery delivery,
+> **So that** I know to use this card when ordering from Grab or online groceries.
+
+**Priority**: P0
+**T-Shirt Size**: **M** (Moderate) — ~1 day
+**Feature**: F33
+
+**Card Data**:
+
+| Field | Value |
+|-------|-------|
+| Slug | `sc-journey-card` |
+| Network | visa |
+| Annual Fee | $196.20 |
+| Base Rate | 1.2 mpd |
+| Bonus Categories | Online transport (3.0 mpd), Online groceries (3.0 mpd) |
+| Cap | $1,000/month shared across bonus categories |
+
+**Note**: The 3 mpd bonus applies to ONLINE transactions (food delivery, ride-hailing apps, online grocery). In-store dining/groceries earn base 1.2 mpd. In our category model, this maps to `transport` and `groceries` with a `conditions_note` explaining the online-only distinction.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | SC Journey transport earn rule = 3.0 mpd | `recommend('transport')` | Returns 3.0 mpd with note "Online transport/food delivery only" |
+| AC2 | SC Journey groceries earn rule = 3.0 mpd | `recommend('groceries')` | Returns 3.0 mpd with note "Online grocery delivery only" |
+| AC3 | Combined cap $1,000/month | User spends $900 on transport | Groceries cap remaining = $100 |
+| AC4 | User at in-store restaurant | `recommend('dining')` | SC Journey shows 1.2 mpd (base rate) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T23.09: Add card metadata | Data Engineer | 0.5h | None |
+| T23.10: Add 8 earn rules (transport + groceries at 3.0 mpd bonus, others at 1.2 base) | Data Engineer | 1h | T23.09 |
+| T23.11: Add shared cap row (NULL category, $1,000, 'spend') | Data Engineer | 0.5h | T23.09 |
+| T23.12: Add exclusion rows | Data Engineer | 0.5h | T23.09 |
+
+---
+
+#### S23.4: Add Maybank XL Rewards with Min Spend + Age Restriction
+
+> **As a** young professional (age 21-39) with a Maybank XL Rewards card,
+> **I want** to see my 4 mpd bonus on dining, online shopping, and travel,
+> **So that** I maximize the card's earning potential on my everyday spending.
+
+**Priority**: P0
+**T-Shirt Size**: **M** (Moderate) — ~1 day
+**Feature**: F33
+
+**Card Data**:
+
+| Field | Value |
+|-------|-------|
+| Slug | `maybank-xl-rewards` |
+| Network | mastercard |
+| Annual Fee | $87.20 |
+| Base Rate | 0.4 mpd |
+| Bonus Categories | Dining (4.0 mpd), Online/Shopping (4.0 mpd), Travel (4.0 mpd) |
+| Cap | $1,000/month shared across bonus categories |
+| Min Spend | $500/month |
+| Age Restriction | 21-39 only |
+| Points Expiry | 1 year |
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Maybank XL has `{"min_spend_monthly": 500}` on dining | User spends $600/month | `recommend('dining')` returns 4.0 mpd |
+| AC2 | Same card | User spends $300/month | `recommend('dining')` returns 0.4 mpd (downranked) |
+| AC3 | Online earn rule = 4.0 mpd | `recommend('online')` with min spend met | Returns 4.0 mpd |
+| AC4 | Transport is NOT a bonus category | `recommend('transport')` | Returns 0.4 mpd base rate |
+| AC5 | Combined cap $1,000/month | User spends $800 on dining + $300 online | Cap exceeded — remaining bonus categories downranked |
+| AC6 | Card notes include "Age 21-39 only" | Card displayed in portfolio browse | Age restriction visible in card notes |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T23.13: Add card metadata with age restriction in notes | Data Engineer | 0.5h | None |
+| T23.14: Add 8 earn rules (dining/online/travel at 4.0 bonus + $500 min spend, others at 0.4 base) | Data Engineer | 1h | T23.13 |
+| T23.15: Add shared cap row ($1,000/month) | Data Engineer | 0.5h | T23.13 |
+| T23.16: Add exclusion rows (government + insurance) | Data Engineer | 0.5h | T23.13 |
+
+---
+
+#### S23.5: Test Cases for 6 New Cards
+
+> **As a** developer,
+> **I want** comprehensive test coverage for all 6 new cards,
+> **So that** future code changes don't break recommendation accuracy for these cards.
+
+**Priority**: P1
+**T-Shirt Size**: **M** (Moderate) — ~1 day
+**Feature**: F33
+
+**Test Cases to Add**:
+
+| # | Test | Expected Result |
+|---|------|-----------------|
+| TC1 | OCBC Voyage general recommendation | 1.3 mpd, no conditions |
+| TC2 | SC Beyond dining recommendation | 1.5 mpd, no conditions |
+| TC3 | HSBC Premier MC petrol recommendation | 1.4 mpd, no conditions |
+| TC4 | DBS Vantage with min spend met ($2,000+) | 1.5 mpd all categories |
+| TC5 | DBS Vantage without min spend (<$2,000) | 1.0 mpd (downranked) |
+| TC6 | SC Journey transport (online) | 3.0 mpd, cap $1,000 |
+| TC7 | SC Journey dining (in-store) | 1.2 mpd base rate |
+| TC8 | Maybank XL dining with min spend met | 4.0 mpd, cap $1,000 |
+| TC9 | Maybank XL transport (not bonus) | 0.4 mpd base rate |
+| TC10 | Maybank XL dining without min spend | 0.4 mpd (downranked) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T23.17: Add 6 mock cards to `test-data.ts` | Tester | 1.5h | S23.1-S23.4 complete |
+| T23.18: Add 10 test cases to `recommendation.test.ts` | Tester | 2h | T23.17 |
+| T23.19: Run full test suite, verify all pass | Tester | 0.5h | T23.18 |
+
+---
+
+#### S23.6: Documentation Update for Card Expansion 22→28
+
+> **As a** team member,
+> **I want** all documentation to reflect the new card count of 28,
+> **So that** card data verification docs, analysis docs, and technical docs are consistent.
+
+**Priority**: P1
+**T-Shirt Size**: **S** (Simple) — ~2 hours
+**Feature**: F33
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T23.20: Update `CARD_DATA_VERIFICATION.md` — add 6 card data sheets | Scrum Master | 1h | S23.1-S23.4 |
+| T23.21: Update `RECOMMENDATION_AND_CATEGORY_LOGIC.md` — card count + test count | Scrum Master | 0.5h | S23.5 |
+| T23.22: Update `MAXIMILE_VS_MILELION_ANALYSIS.md` — gap status | Scrum Master | 0.5h | S23.1-S23.4 |
+
+---
+
+### Sprint 23 — Dependencies Map
+
+```
+Sprint 22 (F31 Min Spend) ─────────────────────────────────────────┐
+                                                                    ▼
+S23.1 (3 flat-rate cards) ──────────────┐                   S23.2 (DBS Vantage)
+S23.3 (SC Journey) ────────────────────┤                   S23.4 (Maybank XL)
+                                        │                          │
+                                        ▼                          ▼
+                                   S23.5 (Tests) ◄─────────────────┘
+                                        │
+                                        ▼
+                                   S23.6 (Docs)
+```
+
+- **S23.1** has no internal dependencies (flat-rate cards, no conditions)
+- **S23.2** and **S23.4** depend on Sprint 22 (min spend enforcement must work)
+- **S23.3** follows existing cap patterns (no new logic needed)
+- **S23.5** depends on all card data stories
+- **S23.6** depends on tests passing
+
+---
+
+### Sprint 23 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| SC Journey "online-only" bonus doesn't fit category model cleanly | Medium | Medium | Use `conditions_note` to explain distinction; model as transport/groceries bonus with note |
+| DBS Vantage $2K min spend rarely met by users | Low | Low | F31 handles this — card correctly downranked for low spenders |
+| Maybank XL age restriction not enforceable in app | Low | Low | Display in card notes; don't filter in card browse (user responsibility) |
+| Points expiry (Maybank XL: 1 year) not tracked | Low | Low | Out of scope for v1; note in card description |
+
+---
+
+### Sprint 23 — Schedule
+
+| Day | Focus | Deliverables |
+|-----|-------|-------------|
+| **Day 1** | S23.1: 3 flat-rate cards (OCBC Voyage, SC Beyond, HSBC Premier MC) | 3 cards + 24 earn rules + exclusions in SQL |
+| **Day 2** | S23.2 + S23.3: DBS Vantage + SC Journey | 2 cards + conditions + caps in SQL |
+| **Day 3** | S23.4: Maybank XL Rewards | 1 card + conditions + cap + age note in SQL |
+| **Day 4** | S23.5: All test cases | 10 new tests, mock data, full suite passing |
+| **Day 5** | S23.6: Documentation + verification | All docs updated, card count = 28 everywhere |
+
+---
+
+## Sprint 24: "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire: 28→29)
+
+**Duration**: 1 week (5 working days)
+**Sprint Goal**: Add UOB Lady's Solitaire with user-selectable bonus categories — the only card in the database where the user chooses which categories earn the bonus rate, requiring new UX and recommend() logic.
+**Epic**: E15 — Card Database Expansion (F33)
+**PRD Feature**: F33 (P1, RICE 4050)
+**Phase**: v2.3 — Card Expansion
+**Predecessor**: Sprint 23 (28-card database must be stable before adding UX complexity)
+**Reference**: `docs/planning/PRD.md` (F33), UOB official site
+
+---
+
+### Sprint 24 — Definition of Ready (DoR) Checklist
+
+- [ ] User story has clear "As a... I want... So that..." statement
+- [ ] Acceptance criteria defined
+- [ ] T-shirt size estimated
+- [ ] Sprint 23 complete (6 straightforward cards stable)
+- [ ] UOB Lady's Solitaire earn rates verified: 4.0 mpd on 2 chosen categories, 0.4 mpd base
+- [ ] Category mapping defined: Fashion→general, Beauty & Wellness→general, Family→groceries, Entertainment→general (best fit)
+- [ ] UX wireframe for category selection ready (or in-sprint design)
+- [ ] Card image `uob-ladys-solitaire.png` exists in `assets/cards/`
+
+### Sprint 24 — Definition of Done (DoD) Checklist
+
+- [ ] UOB Lady's Solitaire card data in `all_cards.sql`
+- [ ] User can select 2 preferred categories for the card
+- [ ] `recommend()` uses user's selected categories for bonus rate
+- [ ] Default behaviour when no categories selected: base rate (0.4 mpd)
+- [ ] UI for category selection accessible from card detail screen
+- [ ] Tests cover category selection logic
+- [ ] All existing tests pass
+- [ ] Documentation updated (card count = 29)
+
+---
+
+### Sprint 24 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S24.1** | Add UOB Lady's Solitaire base card data to database | P0 | S | 2 | Data Engineer |
+| **S24.2** | Design and implement category selection UX | P0 | L | 5 | Developer + Designer |
+| **S24.3** | Modify `recommend()` to use user-selected bonus categories | P0 | L | 5 | Software Engineer |
+| **S24.4** | Add test cases for UOB Lady's Solitaire | P1 | M | 3 | Tester |
+| **S24.5** | Update documentation for 29-card database | P1 | S | 1 | Scrum Master |
+| **Total** | | | | **16** | |
+
+---
+
+### Sprint 24 — User Story Details
+
+#### S24.1: Add UOB Lady's Solitaire Base Card Data
+
+> **As a** user with a UOB Lady's Solitaire card,
+> **I want** my card to appear in MaxiMile,
+> **So that** I can get recommendations tailored to my card's earn rates.
+
+**Priority**: P0
+**T-Shirt Size**: **S** (Simple) — ~2 hours
+**Feature**: F33
+
+**Card Data**:
+
+| Field | Value |
+|-------|-------|
+| Slug | `uob-ladys-solitaire` |
+| Network | mastercard |
+| Annual Fee | $414.20 |
+| Base Rate | 0.4 mpd |
+| Bonus Rate | 4.0 mpd on 2 user-chosen categories |
+| Cap | $1,500/month shared ($750 per category) |
+| Min Income | $120,000 |
+
+**Category Mapping** (UOB's 7 categories → MaxiMile's 8 categories):
+
+| UOB Category | MaxiMile Category | Notes |
+|-------------|-------------------|-------|
+| Dining | `dining` | Direct map |
+| Transport | `transport` | Direct map |
+| Travel | `travel` | Direct map |
+| Family | `groceries` | UOB "Family" includes supermarkets/groceries |
+| Fashion | `general` | No direct category; closest fit |
+| Beauty & Wellness | `general` | No direct category; closest fit |
+| Entertainment | `general` | No direct category; closest fit |
+
+**Implementation approach**: Store all 8 MaxiMile categories as earn rules with `is_bonus: TRUE` and `earn_rate_mpd: 4.0`. Add a new `user_card_preferences` table (or use existing user settings) to store which 2 categories the user has selected. The `recommend()` RPC checks this preference when scoring UOB Lady's Solitaire.
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T24.01: Add card metadata to `all_cards.sql` | Data Engineer | 0.5h | None |
+| T24.02: Add 8 earn rules — all at 4.0 mpd bonus with `{"user_selectable": true}` condition | Data Engineer | 1h | T24.01 |
+| T24.03: Add cap row ($1,500/month shared) | Data Engineer | 0.5h | T24.01 |
+| T24.04: Add exclusion rows | Data Engineer | 0.5h | T24.01 |
+
+---
+
+#### S24.2: Category Selection UX for UOB Lady's Solitaire
+
+> **As a** UOB Lady's Solitaire cardholder,
+> **I want** to choose my 2 preferred reward categories in the app,
+> **So that** my recommendations reflect my actual 4 mpd bonus categories.
+
+**Priority**: P0
+**T-Shirt Size**: **L** (Large) — ~3-4 days
+**Feature**: F33
+
+**UX Requirements**:
+- Accessible from card detail screen (tap UOB Lady's Solitaire → "Set Bonus Categories")
+- Shows 7 category options matching UOB's official list
+- User selects exactly 2 categories (validated)
+- Selection stored in `user_card_preferences` table
+- Can be updated quarterly (UOB allows quarterly re-selection)
+- Default state: no categories selected → card shows base 0.4 mpd everywhere
+- After selection: selected categories show 4.0 mpd, others show 0.4 mpd
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | User has UOB Lady's Solitaire in portfolio | Taps card in My Cards | "Set Bonus Categories" button visible |
+| AC2 | User opens category selector | Selects Dining + Transport | Selection saved; returns to card detail |
+| AC3 | User tries to select 3 categories | Taps a 3rd option | Validation error: "Select exactly 2 categories" |
+| AC4 | Categories saved (Dining + Transport) | `recommend('dining')` | UOB Lady's Solitaire shows 4.0 mpd |
+| AC5 | Categories saved (Dining + Transport) | `recommend('online')` | UOB Lady's Solitaire shows 0.4 mpd (not selected) |
+| AC6 | No categories selected yet | `recommend('dining')` | UOB Lady's Solitaire shows 0.4 mpd (base) |
+| AC7 | User wants to change selection | Taps "Set Bonus Categories" again | Can re-select 2 different categories |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T24.05: Design category selector bottom sheet (wireframe) | Designer | 2h | None |
+| T24.06: Create `user_card_preferences` table migration | Software Engineer | 1h | None |
+| T24.07: Build category selector component (bottom sheet with 7 options, 2-select validation) | Developer | 4h | T24.05 |
+| T24.08: Add "Set Bonus Categories" button to card detail screen | Developer | 1h | T24.07 |
+| T24.09: Connect selector to Supabase (upsert user_card_preferences) | Developer | 2h | T24.06, T24.07 |
+| T24.10: Handle default state (no selection = base rate) | Developer | 1h | T24.09 |
+
+---
+
+#### S24.3: Modify `recommend()` for User-Selected Bonus Categories
+
+> **As a** UOB Lady's Solitaire user who selected Dining + Transport,
+> **I want** `recommend('dining')` to show 4.0 mpd for my card,
+> **So that** the recommendation engine respects my chosen bonus categories.
+
+**Priority**: P0
+**T-Shirt Size**: **L** (Large) — ~3-4 days
+**Feature**: F33
+
+**Implementation**:
+- Add `user_card_preferences` join to `recommend()` RPC
+- For cards with `conditions->>'user_selectable' = 'true'`:
+  - If user has selected this category → use bonus rate (4.0 mpd)
+  - If user has NOT selected this category → use base rate (0.4 mpd)
+  - If user has not set any preferences → use base rate for all categories
+- Cap logic unchanged: $1,500/month shared across both selected categories
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | User selected Dining + Transport | `recommend('dining')` | UOB Lady's Solitaire scored at 4.0 mpd |
+| AC2 | User selected Dining + Transport | `recommend('groceries')` | UOB Lady's Solitaire scored at 0.4 mpd |
+| AC3 | User has not set preferences | `recommend('dining')` | UOB Lady's Solitaire scored at 0.4 mpd |
+| AC4 | User changes selection to Transport + Travel | `recommend('dining')` | UOB Lady's Solitaire now scored at 0.4 mpd |
+| AC5 | Cap applies to selected categories | User spent $1,400 on dining | Transport cap remaining = $100 (shared cap) |
+| AC6 | Performance | `recommend()` with user_selectable check | Still < 10ms response time |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T24.11: Add `user_card_preferences` CTE to `recommend()` | Software Engineer | 2h | T24.06 |
+| T24.12: Add conditional scoring logic for `user_selectable` cards | Software Engineer | 4h | T24.11 |
+| T24.13: Handle edge case: user deletes UOB Lady's Solitaire then re-adds | Software Engineer | 1h | T24.12 |
+| T24.14: Performance test with `EXPLAIN ANALYZE` | Software Engineer | 1h | T24.12 |
+| T24.15: Create migration script for updated `recommend()` | Software Engineer | 0.5h | T24.12 |
+
+---
+
+#### S24.4: Test Cases for UOB Lady's Solitaire
+
+> **As a** developer,
+> **I want** comprehensive tests for user-selectable category logic,
+> **So that** this unique card behaviour is protected from regressions.
+
+**Priority**: P1
+**T-Shirt Size**: **M** (Moderate) — ~1 day
+**Feature**: F33
+
+**Test Cases**:
+
+| # | Test | Expected Result |
+|---|------|-----------------|
+| TC1 | Dining selected as bonus + recommend dining | 4.0 mpd |
+| TC2 | Dining NOT selected + recommend dining | 0.4 mpd base |
+| TC3 | No preferences set + recommend any category | 0.4 mpd base |
+| TC4 | 2 categories selected + recommend non-selected | 0.4 mpd base |
+| TC5 | Cap applied to selected categories | Score reduced when cap exceeded |
+| TC6 | Category selection changed mid-month | New selection reflected in next recommend() |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. | Dependencies |
+|------|-------|------|--------------|
+| T24.16: Add UOB Lady's Solitaire mock data to `test-data.ts` | Tester | 1h | S24.1 |
+| T24.17: Add 6 test cases for category selection logic | Tester | 2h | T24.16, S24.3 |
+| T24.18: Run full test suite | Tester | 0.5h | T24.17 |
+
+---
+
+#### S24.5: Documentation Update for 29-Card Database
+
+**Priority**: P1
+**T-Shirt Size**: **S** (Simple) — ~2 hours
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T24.19: Update CARD_DATA_VERIFICATION.md — add UOB Lady's Solitaire data sheet | Scrum Master | 0.5h |
+| T24.20: Update RECOMMENDATION_AND_CATEGORY_LOGIC.md — document user_selectable pattern | Scrum Master | 0.5h |
+| T24.21: Update MAXIMILE_VS_MILELION_ANALYSIS.md — mark UOB Lady's Solitaire as ADDED | Scrum Master | 0.5h |
+| T24.22: Verify card count = 29 across all docs | Scrum Master | 0.5h |
+
+---
+
+### Sprint 24 — Dependencies Map
+
+```
+Sprint 23 (28 cards stable) ───────────────────────────────────────┐
+                                                                    ▼
+S24.1 (Card data) ──────────┐
+                             ├──► S24.3 (recommend() modification)
+S24.2 (Category UX) ────────┘              │
+                                            ▼
+                                      S24.4 (Tests)
+                                            │
+                                            ▼
+                                      S24.5 (Docs)
+```
+
+- **S24.1** and **S24.2** can start in parallel on Day 1
+- **S24.3** depends on both (needs card data + user_card_preferences table)
+- **S24.4** depends on S24.3 (tests exercise the full flow)
+- **S24.5** depends on everything
+
+---
+
+### Sprint 24 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| UOB's 7 categories don't map cleanly to MaxiMile's 8 | Medium | Medium | Fashion/Beauty/Entertainment → `general`. Document mapping clearly |
+| `user_card_preferences` table adds complexity to `recommend()` | Medium | Medium | Use LEFT JOIN — NULL preferences default to base rate |
+| User confusion about "choose 2 categories" concept | Medium | Low | Clear UX copy explaining the UOB benefit structure |
+| Quarterly re-selection timing not enforced | Low | Low | Allow re-selection anytime (more flexible than UOB's quarterly constraint) |
+
+---
+
+### Sprint 24 — Schedule
+
+| Day | Focus | Deliverables |
+|-----|-------|-------------|
+| **Day 1** | S24.1 (card data) + S24.2 start (UX design) | Card in SQL; wireframe ready |
+| **Day 2** | S24.2 continue (build component) + S24.3 start (DB migration) | Category selector built; `user_card_preferences` table created |
+| **Day 3** | S24.3 continue (recommend() modification) | Conditional scoring logic working |
+| **Day 4** | S24.3 finish + S24.4 (tests) | All tests pass; recommend() handles user_selectable |
+| **Day 5** | S24.5 (docs) + verification | Card count = 29 everywhere; full suite green |
+
+---
+
+## Sprint 23-24 Summary: Card Expansion Roadmap (22→29)
+
+### Total Effort
+
+| Sprint | Phase | Cards Added | Stories | Points | Duration |
+|--------|-------|-------------|---------|--------|----------|
+| **Sprint 23** | Straightforward Cards | 6 (22→28) | 6 | 16 | 1 week |
+| **Sprint 24** | UOB Lady's Solitaire | 1 (28→29) | 5 | 16 | 1 week |
+| **Total** | | **7 new cards** | **11** | **32** | **2 weeks** |
+
+### Key Milestones
+
+| Milestone | Sprint | Success Criteria |
+|-----------|--------|------------------|
+| **6 Straightforward Cards Live** | Sprint 23 | 28 cards in DB; 10 new tests pass; flat-rate + conditional cards working |
+| **UOB Lady's Solitaire Category Selection** | Sprint 24 | User can choose 2 bonus categories; recommend() respects selection |
+| **29-Card Database Complete** | Sprint 24 | All docs at 29; SC Smart Card documented as deferred (P3) |
+
+### Dependencies & Prerequisites
+
+| Sprint | Hard Dependencies | Soft Dependencies |
+|--------|-------------------|-------------------|
+| **Sprint 23** | Sprint 22 complete (F31 min spend enforcement) | None |
+| **Sprint 24** | Sprint 23 complete (28-card baseline stable) | Designer wireframe for category selector |
+
+### Deferred: SC Smart Card (P3)
+
+**Reason**: SC Smart Card is primarily a cashback card (0.5%-10% cashback) with a poor miles conversion path ($27.25 transfer fee, ~0.4 mpd effective base). The 9.28 mpd equivalent is only achievable on specific merchants (McDonald's, KFC, Netflix, SimplyGo) at the highest spend tier ($1,500+/month). Including it in a miles optimizer app would be misleading for most users. **Revisit in v2.0** if product expands to include cashback cards.
+
+### Reference Documentation
+
+- **PRD v2.3**: `docs/planning/PRD.md` (F33)
+- **Card Data Verification**: `docs/technical/CARD_DATA_VERIFICATION.md`
+- **MileLion Analysis**: `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`
+- **Recommendation Logic**: `docs/technical/RECOMMENDATION_AND_CATEGORY_LOGIC.md`
+
+---
+
+**Sprint 23-24 Status**: Sprint 23 📋 PLANNED | Sprint 24 📋 PLANNED
+
+**Next Steps**:
+1. Complete Sprints 21-22 (Recommendation Accuracy)
+2. Begin Sprint 23 — 6 straightforward cards (Day 1: flat-rate cards first)
+3. Sprint 24 begins after Sprint 23 ships — UOB Lady's Solitaire with category selection UX

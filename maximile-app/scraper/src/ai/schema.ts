@@ -141,7 +141,7 @@ export const RATE_CHANGE_TOOL = {
               type: 'string' as const,
               description:
                 'Exact card name from the tracked list (e.g., "DBS Woman\'s World Card", "HSBC Revolution Card"). ' +
-                'Must match one of the 29 tracked cards.',
+                'Must match one of the 30 tracked cards.',
             },
             change_type: {
               type: 'string' as const,
@@ -301,7 +301,7 @@ export const GROQ_RESPONSE_SCHEMA = {
         properties: {
           card_name: {
             type: 'string' as const,
-            description: 'Exact card name from the 29 tracked cards.',
+            description: 'Exact card name from the 30 tracked cards.',
           },
           change_type: {
             type: 'string' as const,

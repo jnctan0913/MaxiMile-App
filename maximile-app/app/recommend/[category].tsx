@@ -43,6 +43,11 @@ interface RecommendRow {
   remaining_cap: number | null;
   monthly_cap_amount: number | null;
   is_recommended: boolean;
+  conditions_note: string | null;
+  min_spend_threshold: number | null;
+  min_spend_met: boolean | null;
+  total_monthly_spend: number;
+  requires_contactless: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -367,7 +372,9 @@ export default function RecommendResultScreen() {
   // Parse results
   // -----------------------------------------------------------------------
   const topPick = results.find((r) => r.is_recommended) ?? results[0];
-  const alternatives = results.filter((r) => r.card_id !== topPick.card_id);
+  const alternatives = results
+    .filter((r) => r.card_id !== topPick.card_id)
+    .filter((r, i, arr) => arr.findIndex((x) => x.card_id === r.card_id) === i);
 
   // Check if all caps are exhausted
   const allCapsExhausted =
@@ -399,10 +406,20 @@ export default function RecommendResultScreen() {
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <FlatList
           data={alternatives}
-          keyExtractor={(item) => item.card_id}
+          keyExtractor={(item, index) => `${item.card_id}-${index}`}
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
             <View>
+              {/* Insurance warning banner for Bills category */}
+              {category === 'bills' && (
+                <View style={styles.insuranceWarning}>
+                  <Ionicons name="warning-outline" size={18} color="#F59E0B" />
+                  <Text style={styles.insuranceWarningText}>
+                    Insurance payments are excluded from bonus earning on most cards. Base rate only.
+                  </Text>
+                </View>
+              )}
+
               {/* "USE THIS CARD" overline label */}
               <Text style={styles.overlineLabel}>USE THIS CARD</Text>
 
@@ -438,6 +455,32 @@ export default function RecommendResultScreen() {
                     <Text style={styles.topCardRate}>
                       {topPick.earn_rate_mpd.toFixed(1)} mpd
                     </Text>
+                    {topPick.conditions_note && (
+                      <View style={styles.conditionsRow}>
+                        <Ionicons name="information-circle-outline" size={14} color={Colors.textSecondary} />
+                        <Text style={styles.conditionsText}>{topPick.conditions_note}</Text>
+                      </View>
+                    )}
+                    {topPick.min_spend_met === false && topPick.min_spend_threshold != null && (
+                      <View style={styles.minSpendNudge}>
+                        <Ionicons name="alert-circle" size={14} color="#F59E0B" />
+                        <Text style={styles.minSpendNudgeText}>
+                          Spend ${Math.ceil(topPick.min_spend_threshold - topPick.total_monthly_spend).toLocaleString()} more this month to unlock bonus rate
+                        </Text>
+                      </View>
+                    )}
+                    {topPick.min_spend_met === true && topPick.min_spend_threshold != null && (
+                      <View style={styles.minSpendMet}>
+                        <Ionicons name="checkmark-circle" size={14} color={Colors.success} />
+                        <Text style={styles.minSpendMetText}>Min spend met — earning bonus rate</Text>
+                      </View>
+                    )}
+                    {topPick.requires_contactless && (
+                      <View style={styles.contactlessBadge}>
+                        <Ionicons name="wifi" size={14} color="#3B82F6" />
+                        <Text style={styles.contactlessBadgeText}>Requires contactless payment</Text>
+                      </View>
+                    )}
                     {hasTopCap ? (
                       <View style={styles.topCapSection}>
                         <Text style={styles.topCapLabel}>Remaining Cap</Text>
@@ -508,6 +551,19 @@ export default function RecommendResultScreen() {
                 <View style={styles.altInfo}>
                   <Text style={styles.altCardName}>{item.card_name}</Text>
                   <Text style={styles.altBank}>{item.bank}</Text>
+                  {item.conditions_note && (
+                    <Text style={styles.altConditions} numberOfLines={1}>{item.conditions_note}</Text>
+                  )}
+                  {item.min_spend_met === false && item.min_spend_threshold != null && (
+                    <Text style={styles.altMinSpendWarning} numberOfLines={1}>
+                      Min spend ${item.min_spend_threshold.toLocaleString()}/mo not met
+                    </Text>
+                  )}
+                  {item.requires_contactless && (
+                    <Text style={styles.altContactless} numberOfLines={1}>
+                      Contactless only
+                    </Text>
+                  )}
                 </View>
                 <Text style={styles.altRate}>
                   {item.earn_rate_mpd.toFixed(1)} mpd
@@ -747,5 +803,111 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     marginTop: Spacing.lg,
+  },
+
+  // Insurance warning banner (Bills category)
+  insuranceWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.md,
+    gap: Spacing.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: '#F59E0B',
+  },
+  insuranceWarningText: {
+    ...Typography.caption,
+    color: Colors.textPrimary,
+    flex: 1,
+  },
+
+  // Conditions note (top card)
+  conditionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+    marginBottom: Spacing.xs,
+  },
+  conditionsText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    flex: 1,
+  },
+
+  // Conditions note (alt cards)
+  altConditions: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    fontSize: 11,
+    marginTop: 2,
+  },
+
+  // Min spend nudge (top card — not met)
+  minSpendNudge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: Spacing.xs,
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+  },
+  minSpendNudgeText: {
+    ...Typography.caption,
+    color: '#92400E',
+    flex: 1,
+    fontSize: 12,
+  },
+
+  // Min spend met (top card — met)
+  minSpendMet: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: Spacing.xs,
+  },
+  minSpendMetText: {
+    ...Typography.caption,
+    color: Colors.success,
+    fontSize: 12,
+  },
+
+  // Contactless badge (top card)
+  contactlessBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: Spacing.xs,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+  },
+  contactlessBadgeText: {
+    ...Typography.caption,
+    color: '#1E40AF',
+    flex: 1,
+    fontSize: 12,
+  },
+
+  // Contactless caption (alt cards)
+  altContactless: {
+    ...Typography.caption,
+    color: '#3B82F6',
+    fontSize: 11,
+    marginTop: 2,
+  },
+
+  // Min spend warning (alt cards)
+  altMinSpendWarning: {
+    ...Typography.caption,
+    color: '#D97706',
+    fontSize: 11,
+    marginTop: 2,
   },
 });

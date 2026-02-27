@@ -2,9 +2,10 @@
 
 > **Purpose**: This document presents ALL card data, categorization logic, and earn rate information used in the MaxiMile app for **subject matter expert (SME) verification**. Each data point should be checked against the referenced bank T&Cs.
 >
-> **Last Updated**: 2026-02-21
+> **Last Updated**: 2026-02-27 (Card Expansion — 29 cards across 7 banks)
 > **Data As Of**: February 2026
-> **Total Cards**: 20 Singapore miles credit cards
+> **Total Cards**: 29 Singapore miles credit cards
+> **Total Categories**: 8 (dining, transport, online, groceries, petrol, travel, general, bills)
 > **Source Files**: `maximile-app/database/seeds/all_cards.sql` (single source of truth)
 
 ---
@@ -30,7 +31,7 @@
 
 **Key assumptions in v1**:
 - All earn_rate_mpd values represent **TOTAL** miles per dollar (not incremental over base)
-- All conditions (min spend, contactless, etc.) are **assumed to be met** per PRD
+- ~~All conditions (min spend, contactless, etc.) are **assumed to be met** per PRD~~ **Updated Sprint 22**: Min spend conditions are now **enforced** in the recommendation engine. Cards with `min_spend_monthly` in their `conditions` JSONB are downranked to `base_rate_mpd` when the user's effective monthly spend (higher of actual or estimated) does not meet the threshold. Contactless conditions are now surfaced via a dedicated `requires_contactless` badge in the recommendation UI (see Section 3.4).
 - Only **local (SGD) spend** rates are modeled; overseas rates noted but not used in recommendations
 - Banks may change rates at any time — periodic re-validation required
 
@@ -38,7 +39,7 @@
 
 ## 2. Category Taxonomy & MCC Mappings
 
-MaxiMile uses **7 fixed spend categories** to classify transactions. Each category maps to specific Merchant Category Codes (MCCs) defined by Visa/Mastercard.
+MaxiMile uses **8 fixed spend categories** to classify transactions. Each category maps to specific Merchant Category Codes (MCCs) defined by Visa/Mastercard.
 
 ### 2.1 Category: Dining (ID: `dining`)
 
@@ -180,7 +181,29 @@ MaxiMile uses **7 fixed spend categories** to classify transactions. Each catego
 
 ---
 
-### 2.8 How Categories Drive Earn Rates
+### 2.8 Category: Bills (ID: `bills`)
+
+| Field | Value |
+|-------|-------|
+| Display Order | 8 |
+| Icon | file-text |
+| Description | Utility bills, telco, insurance premiums, recurring payments |
+
+**MCC Codes**:
+| MCC | Merchant Type |
+|-----|--------------|
+| 4812 | Telecommunication Equipment and Telephone Sales |
+| 4814 | Telecommunication Services (telco, broadband) |
+| 4900 | Utilities — Electric, Gas, Water, Sanitary |
+| 6300 | Insurance Sales, Underwriting, and Premiums |
+| 6381 | Insurance Premiums (no longer classified) |
+| 6399 | Insurance — Not Elsewhere Classified |
+
+> **Note (Sprint 21)**: Insurance MCCs (6300, 6381, 6399) are commonly excluded from bonus earning across most cards. An insurance warning banner is displayed on the Bills recommendation screen to inform users that base rate only applies for insurance payments. All 29 cards have base-rate (0.4 mpd) earn rules for bills; no cards have bonus rates for this category.
+
+---
+
+### 2.9 How Categories Drive Earn Rates
 
 ```
 User logs a transaction with amount + card + category
@@ -199,73 +222,127 @@ miles_earned = amount × earn_rate_mpd
 
 > **SME: Please review these inconsistencies.**
 
-### 3.1 Critical Issue: `petrol` vs `bills` Category Conflict
+### 3.1 ~~Critical Issue~~ **[RESOLVED — Sprint 21]**: `petrol` vs `bills` Category Conflict
 
-The system currently has **two competing categories** occupying the same display_order=5 slot. This is the result of an evolution during development:
+> **Status**: RESOLVED (2026-02-26). **Option A was implemented** — both `petrol` and `bills` coexist as 8 total categories.
+
+**Resolution summary**:
+- **8 categories** now exist in both the database and frontend: dining, transport, online, groceries, petrol, travel, general, bills.
+- All 29 cards have **base-rate earn rules for `bills`** (0.4 mpd or equivalent base rate).
+- `petrol` retains all existing bonus earn rules (e.g., Maybank Horizon 1.6 mpd, SC X Card 3.3 mpd).
+- `gas_station` Google Places type correctly maps to `petrol` in `merchant.ts`.
+- **No bills sub-categories** were created. Bills is a single flat category with an **insurance warning banner** displayed on the Bills recommendation screen (see Section 3.2 item #1).
+- `bills` was added to the AI scraper schema.
+- Tests updated to expect 8 categories.
+
+<details>
+<summary>Original issue description (pre-resolution)</summary>
+
+The system previously had two competing categories occupying the same display_order=5 slot. This was the result of an evolution during development:
 
 **Timeline of the conflict**:
-1. **Initial setup** (`001_initial_schema.sql`, `all_cards.sql`): Category 5 was defined as **`petrol`** (MCC: 5541, 5542, 5983 — petrol stations). All 20 cards have earn rules for `petrol`.
-2. **Frontend development** (`constants/categories.ts`): The frontend was built with **`bills`** (utilities, insurance, telco) instead of `petrol`. No `petrol` category exists in the frontend.
-3. **Migration 007** (`007_add_bills_category.sql`): A migration was created to add `bills` to the database because the recommend() RPC was rejecting `bills` as an invalid category. The migration comment explicitly states: *"The app defines 'bills' as a spend category but the database only had 'petrol'."*
-4. **Current state**: The database has **BOTH** `petrol` and `bills` as valid categories. All 20 cards have earn rules for `petrol` but **no cards have earn rules for `bills`**.
+1. **Initial setup** (`001_initial_schema.sql`, `all_cards.sql`): Category 5 was defined as **`petrol`** (MCC: 5541, 5542, 5983 — petrol stations). All 20 cards had earn rules for `petrol`.
+2. **Frontend development** (`constants/categories.ts`): The frontend was built with **`bills`** (utilities, insurance, telco) instead of `petrol`. No `petrol` category existed in the frontend.
+3. **Migration 007** (`007_add_bills_category.sql`): A migration was created to add `bills` to the database because the recommend() RPC was rejecting `bills` as an invalid category.
+4. **Resolution (Sprint 21)**: Option A implemented — both categories kept, expanded to 8 categories, base-rate earn rules added for `bills` across all 20 cards.
 
-**Where each is used**:
-
-| Location | Uses `petrol` | Uses `bills` |
-|----------|:---:|:---:|
-| `all_cards.sql` (source of truth for seed data) | Yes | No |
-| `batch1_cards.sql` (10 cards, 70 earn rules) | Yes | No |
-| `batch2_cards.sql` (10 cards, 70 earn rules) | Yes | No |
-| `seed.mjs` (JS seed script) | Yes | No |
-| `categories.sql` (standalone seed) | Yes | Yes (both defined) |
-| `constants/categories.ts` (frontend) | **No** | Yes |
-| `lib/merchant.ts` (merchant detection) | **No** | Yes |
-| `007_add_bills_category.sql` (migration) | No | Yes |
-| `tests/mocks/test-data.ts` | Yes | No |
-
-**Impact**:
-- When a user selects "Bills" in the app UI, the recommend() RPC can now accept it (post-migration 007), but it will return **no earn rules** because no card has bonus or base rules for `bills`.
-- All earn rate data exists only for `petrol`, which the user **cannot select** in the frontend.
-- This means petrol-related earn rates are invisible to users, and bills-related spend gets no optimized recommendations.
-
-**Resolution needed (for SME and Product Owner)**:
-
-#### Recommended Resolution: Support BOTH categories (expand to 8 categories)
-
-Based on analysis, **petrol** and **bills** serve genuinely different user needs:
-- **Petrol** — Singapore drivers optimizing fuel spend (Shell, Esso, Caltex, SPC). The PRD specifically highlights Maybank World MC's "4 mpd petrol UNCAPPED" as a key recommendation scenario. Multiple cards have differentiated petrol earn rates.
-- **Bills** — Recurring utility/telco/insurance payments. A common spending category for all users, but most cards earn only base rate (and insurance MCCs are commonly excluded).
-
-| Option | Description | Effort | Recommendation |
-|--------|-------------|--------|----------------|
-| **A. Keep both (8 categories)** | Add `petrol` to frontend alongside existing `bills`. Add base-rate earn rules for `bills` across all 20 cards. | Medium | **Recommended** — preserves all existing data, matches PRD intent, adds user value |
-| B. Replace `bills` with `petrol` | Remove `bills` from frontend, replace with `petrol`. Drop migration 007 data. | Low | Loses bills utility for non-drivers |
-| C. Replace `petrol` with `bills` | Migrate all `petrol` earn rules to `bills`. Update all seed files. | High | Destroys petrol-specific rate data that the PRD emphasizes |
-| D. Keep only 7 with `petrol` | Revert frontend to `petrol`, remove `bills` entirely | Low | Loses bills utility |
-
-**If Option A is chosen, the following changes are needed**:
-1. Add `petrol` category to `constants/categories.ts` (frontend)
-2. Add `petrol` color/icon to `CategoryTile.tsx`, `MerchantCard.tsx`, `transactions.tsx`, `card-transactions/[cardId].tsx`
-3. Map `gas_station` Google Places type to `petrol` instead of `transport` in `merchant.ts`
-4. Add base-rate earn rules (0.4 mpd) for `bills` category across all 20 cards
-5. Add `bills` to AI scraper schema (`scraper/src/ai/schema.ts` and `prompts.ts`)
-6. Update tests to expect 8 categories
-
-**Decision required**:
-- [ ] **Option A**: Keep both `petrol` and `bills` (8 categories) — **Recommended**
-- [ ] **Option B**: Replace `bills` with `petrol` (7 categories)
-- [ ] **Option C**: Replace `petrol` with `bills` (7 categories)
-- [ ] **Option D**: Keep only `petrol`, remove `bills` (7 categories)
+</details>
 
 ### 3.2 Secondary Discrepancies
 
-| # | Issue | Severity | Details | Files Affected |
-|---|-------|----------|---------|---------------|
-| 1 | **Insurance MCCs overlap** | Medium | MCC codes 6300, 6381, 6399 appear in both the `bills` category definition AND as common exclusions across all cards. If `bills` is kept, insurance payments would match the category but be excluded from earning — effectively earning 0 mpd on insurance spend even though the user selected `bills`. | `007_add_bills_category.sql`, all card exclusions |
-| 2 | **gas_station mapped to transport** | Medium | In `merchant.ts`, Google Places type `gas_station` is mapped to `transport`, not `petrol`. Petrol station detection routes to the wrong category. | `lib/merchant.ts` line 57 |
-| 3 | **AI scraper missing `bills`** | Low | The Gemini AI schema (`scraper/src/ai/schema.ts`) and prompts (`prompts.ts`) only list `petrol` in the category enum. Rate change submissions for `bills` would fail schema validation. | `scraper/src/ai/schema.ts`, `scraper/src/ai/prompts.ts` |
-| 4 | **Earn rules assume conditions met** | Low (v1 known limitation) | v1 assumes all conditions (min spend, contactless, etc.) are met. This inflates effective rates for cards like SC X Card (requires $500/month min spend) and UOB Preferred Platinum (requires $600/month min spend). | All earn rules with conditions |
-| 5 | **Test suite inconsistency** | Low | `tests/card-rules.test.ts` expects `petrol` in category list. `tests/merchant.test.ts` tests `bills` mappings. If both categories exist, both tests should pass; if either is removed, corresponding tests will fail. | `tests/card-rules.test.ts:317`, `tests/merchant.test.ts:7` |
+| # | Issue | Severity | Status (Sprint 21) | Details | Files Affected |
+|---|-------|----------|---------------------|---------|---------------|
+| 1 | **Insurance MCCs overlap** | Medium | **MITIGATED** | MCC codes 6300, 6381, 6399 appear in both the `bills` category definition AND as common exclusions across all cards. Insurance payments match the category but are excluded from bonus earning on most cards. **Mitigation**: An insurance warning banner now displays on the Bills recommendation screen (`app/recommend/[category].tsx`) informing users that insurance payments earn base rate only. | `007_add_bills_category.sql`, all card exclusions, `app/recommend/[category].tsx` |
+| 2 | **gas_station mapped to transport** | Medium | **RESOLVED** | `gas_station` Google Places type already correctly maps to `petrol` in `merchant.ts`. No further action needed. | `lib/merchant.ts` |
+| 3 | **AI scraper missing `bills`** | Low | **RESOLVED** | `bills` has been added to the AI scraper schema and prompts. Both `petrol` and `bills` are now in the category enum. | `scraper/src/ai/schema.ts`, `scraper/src/ai/prompts.ts` |
+| 4 | **Earn rules assume conditions met** | Low (v1 known limitation) | **RESOLVED (Sprint 22)** | ~~v1 assumes all conditions (min spend, contactless, etc.) are met.~~ **Sprint 22 (F31)**: Min spend conditions are now **enforced** in the `recommend()` RPC. Cards with `min_spend_monthly` in `conditions` JSONB are downranked to `base_rate_mpd` when the user's effective monthly spend does not meet the threshold. A `user_settings` table stores estimated monthly spend. The UI shows amber nudges ("Spend $X more to unlock bonus rate") and green checkmarks ("Min spend met"). Contactless conditions are now surfaced via a dedicated `requires_contactless` BOOLEAN column and blue UI badge (see Section 3.4). | `database/functions/recommend.sql`, `database/migrations/020_min_spend_enforcement.sql`, `app/spending-settings.tsx`, `app/recommend/[category].tsx`, `lib/supabase-types.ts` |
+| 5 | **Test suite inconsistency** | Low | **RESOLVED** | Both `petrol` and `bills` exist as categories. Both test suites pass with 8 categories. | `tests/card-rules.test.ts:317`, `tests/merchant.test.ts:7` |
+
+### 3.3 HSBC Revolution MCC 5814 Fast Food Exclusion (Sprint 21)
+
+> **Added**: 2026-02-26 | **Card**: HSBC Revolution Credit Card | **Source**: MileLion analysis
+
+During Sprint 21 data refinement, an exclusion was added to the `exclusions` table for HSBC Revolution:
+
+| Field | Value |
+|-------|-------|
+| Card | HSBC Revolution (`00000000-0000-0000-0001-000000000006`) |
+| Category | `dining` |
+| Excluded MCC | `5814` (Fast Food Restaurants) |
+| Description | Fast food restaurants (MCC 5814) excluded from 10X bonus on HSBC Revolution. Per MileLion analysis, fast food coded under MCC 5814 does not earn 4 mpd. |
+| Reference | F32 — Condition Transparency |
+
+**Impact**: Users selecting HSBC Revolution for dining will earn the base rate (0.4 mpd) at fast food restaurants, not the bonus 4 mpd. This exclusion is reflected in the `conditions_note` displayed on the card in the recommendation UI. MCC 5814 remains part of the `dining` category definition (it applies to other cards that do not exclude it).
+
+**Source file**: `maximile-app/database/seeds/all_cards.sql` (Section 5: Exclusions, Card 6)
+
+### 3.4 `conditions_note` Surfaced in Recommendation UI (Sprint 21)
+
+> **Added**: 2026-02-26 | **Scope**: All cards with conditions | **Files**: `recommend.sql`, `app/recommend/[category].tsx`
+
+The `conditions_note` field from the `earn_rules` table is now returned by the `recommend()` RPC function and displayed in the recommendation UI:
+
+**Data flow**:
+```
+earn_rules.conditions_note (TEXT, per card per category)
+       |
+recommend() RPC function (database/functions/recommend.sql)
+       |  -- conditions_note included in return type and SELECT
+       |
+RecommendationResult type (app/recommend/[category].tsx)
+       |  -- conditions_note: string | null
+       |
+UI display:
+  - Top pick card: conditions_note shown with info icon below the rate
+  - Alternative cards: conditions_note shown as a single-line caption
+```
+
+**Examples of conditions surfaced**:
+- "Earn 4 mpd on dining (10X HSBC rewards). Capped at $1,000/month across bonus categories."
+- "Earn 3.3 mpd with min spend $500/month. Otherwise 0.4 mpd."
+- "Earn 2 mpd on contactless dining transactions. Standard 1.2 mpd for non-contactless."
+
+This partially mitigates Secondary Discrepancy #4 (earn rules assume conditions met) by making conditions visible to users. As of Sprint 22, min spend conditions are also **enforced in scoring** (see Section 3.5).
+
+Additionally, the `recommend()` RPC now returns a `requires_contactless` BOOLEAN column, extracted from `earn_rules.conditions->>'contactless'`. When `TRUE`, the recommendation UI displays:
+- **Top card**: A blue info badge "Requires contactless payment" (with wifi icon)
+- **Alternative cards**: A blue caption "Contactless only"
+
+This is informational only — scoring is not affected. The only card with `contactless: true` conditions is the **KrisFlyer UOB Credit Card** (Card 5), which requires contactless for its 2 mpd dining and transport bonuses.
+
+### 3.5 Min Spend Condition Enforcement (Sprint 22 — F31)
+
+> **Added**: 2026-02-26 | **Scope**: All cards with `min_spend_monthly` in `conditions` JSONB | **Files**: `recommend.sql`, `020_min_spend_enforcement.sql`, `spending-settings.tsx`, `[category].tsx`, `supabase-types.ts`
+
+Sprint 22 resolved Secondary Discrepancy #4 by enforcing min spend conditions in the recommendation engine's scoring formula.
+
+**Affected cards (8 of 29)**:
+
+| Card | Min Spend Required | Bonus Rate | Base Rate (fallback) |
+|------|-------------------|------------|---------------------|
+| SC X Credit Card | $500/month | 3.3 mpd | 0.4 mpd |
+| UOB Preferred Platinum Visa | $600/month | 4.0 mpd | 0.4 mpd |
+| Maybank Horizon Visa Signature | $300/month | 1.6 mpd | 0.4 mpd |
+| Maybank FC Barcelona Visa Sig. | $300/month | 1.6 mpd | 0.4 mpd |
+| UOB Visa Signature | $1,000/month | 4.0 mpd | 0.4 mpd |
+| DBS Vantage Visa Infinite | $2,000/month | 1.5 mpd | 1.0 mpd | **NEW — Card 23** |
+| Maybank XL Rewards | $500/month | 4.0 mpd | 0.4 mpd | **NEW — Card 28** |
+
+**Implementation**:
+
+1. **`user_settings` table** (`020_min_spend_enforcement.sql`): Stores user's `estimated_monthly_spend`. RLS enforced — users can only read/write their own row.
+2. **`recommend()` RPC** (`recommend.sql`): Extracts `min_spend_monthly` from `earn_rules.conditions` JSONB. Computes `effective_monthly_spend = GREATEST(actual_spend, estimated_spend)`. If effective spend < threshold, falls back to `base_rate_mpd` instead of bonus rate. Three new output columns: `min_spend_threshold`, `min_spend_met`, `total_monthly_spend`.
+3. **Spending Settings screen** (`spending-settings.tsx`): User inputs estimated monthly card spend. Preset chips for common amounts ($300–$2,000). Impact preview shows which card bonuses are unlocked.
+4. **Recommendation UI** (`[category].tsx`): Amber nudge when min spend not met ("Spend $X more to unlock bonus rate"). Green checkmark when met ("Min spend met — earning bonus rate").
+
+**Scoring impact**:
+```
+Before (Sprint 21): score = earn_rate_mpd × cap_ratio  (always uses bonus rate)
+After  (Sprint 22): score = effective_earn_rate × cap_ratio
+  where effective_earn_rate = bonus rate IF min_spend_met, ELSE base_rate_mpd
+```
+
+This naturally downranks cards whose conditions are not met, preventing wrong recommendations (e.g., SC X Card at 3.3 mpd for a user spending $200/month).
 
 ---
 
@@ -494,6 +571,7 @@ Based on analysis, **petrol** and **bills** serve genuinely different user needs
 |-------|--------------|------|-------------|
 | Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from bonus. |
 | Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+| Dining | 5814 | Fast Food | Fast food restaurants (MCC 5814) excluded from 10X bonus. Per MileLion analysis, fast food coded under MCC 5814 does not earn 4 mpd. **(Sprint 21 — [F32])** |
 | Groceries | 5411 | Supermarket | Supermarkets typically excluded from the 10X bonus categories. **[ESTIMATED]** |
 
 **Source URL**: https://www.hsbc.com.sg/credit-cards/products/revolution/
@@ -1062,9 +1140,366 @@ Based on analysis, **petrol** and **bills** serve genuinely different user needs
 
 ---
 
+### Card 21: Maybank World Mastercard
+
+| Field | Value | Status |
+|-------|-------|--------|
+| **Bank** | Maybank | |
+| **Card Name** | Maybank World Mastercard | |
+| **Slug** | `maybank-world-mastercard` | |
+| **Network** | Mastercard | First Mastercard in our database |
+| **Annual Fee** | S$261.60 (1st year waived) | |
+| **Base Rate** | 0.4 mpd | |
+| **Min Income** | S$80,000 | |
+| **Data Status** | **[VERIFIED]** from Maybank website + SingSaver | |
+| **Notes** | #1 petrol card — uncapped 4 mpd on petrol, no min spend. 4 mpd at selected dining merchants (Paradise Group, Imperial Treasure, Les Amis, RWS) — merchant-specific, NOT modeled as category bonus. 3.2 mpd overseas (FCY, out of scope). | |
+
+**Earn Rates by Category**:
+
+| Category | Rate (mpd) | Bonus? | Conditions | Notes |
+|----------|-----------|--------|------------|-------|
+| Dining | 0.4 | No (base) | — | 4 mpd at selected merchants only (Paradise Group, etc.). Not category-wide bonus. |
+| Transport | 0.4 | No (base) | — | — |
+| Online | 0.4 | No (base) | — | — |
+| Groceries | 0.4 | No (base) | — | — |
+| Petrol | **4.0** | **Yes (bonus)** | **None (uncapped, no min spend)** | Earn 4 mpd on petrol (MCC 5541). Uncapped, no min spend. Key differentiator. **[VERIFIED]** |
+| Bills | 0.4 | No (base) | — | Base rate on bills/utilities. |
+| Travel | 0.4 | No (base) | — | 3.2 mpd on overseas travel (FCY). 0.4 mpd on local travel. **[VERIFIED]** |
+| General | 0.4 | No (base) | — | — |
+
+**Monthly Caps**: None — uncapped petrol is the key differentiator vs Horizon/Barcelona ($300 min spend, $1,500 cap).
+
+**Exclusions**:
+| Scope | Excluded MCCs | Type | Description |
+|-------|--------------|------|-------------|
+| Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from TreatsPoints earning. |
+| Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+
+**Source URL**: https://www.maybank2u.com.sg/en/personal/cards/credit/maybank-world-mastercard.page
+
+---
+
+### Card 22: UOB Visa Signature
+
+| Field | Value | Status |
+|-------|-------|--------|
+| **Bank** | UOB | |
+| **Card Name** | UOB Visa Signature | |
+| **Slug** | `uob-visa-signature` | |
+| **Network** | Visa | |
+| **Annual Fee** | S$218.00 (1st year waived) | |
+| **Base Rate** | 0.4 mpd | |
+| **Data Status** | **[VERIFIED]** from UOB website | |
+| **Notes** | Strong general/contactless card. 4 mpd on contactless + petrol. Requires $1,000/month min spend. Cap $1,200/month shared. First card with dual conditions (contactless + min spend). | |
+
+**Earn Rates by Category**:
+
+| Category | Rate (mpd) | Bonus? | Conditions | Notes |
+|----------|-----------|--------|------------|-------|
+| Dining | **4.0** | **Yes (bonus)** | Contactless + Min spend $1,000/month | Earn 4 mpd on contactless dining. Cap $1,200/month shared. **[VERIFIED]** |
+| Transport | **4.0** | **Yes (bonus)** | Contactless + Min spend $1,000/month | Earn 4 mpd on contactless transport incl. SimplyGo. **[VERIFIED]** |
+| Online | 0.4 | No (base) | — | Mobile contactless in-app payments classified as online, not contactless. **[VERIFIED from UOB T&Cs]** |
+| Groceries | **4.0** | **Yes (bonus)** | Contactless + Min spend $1,000/month | Earn 4 mpd on contactless groceries. **[VERIFIED]** |
+| Petrol | **4.0** | **Yes (bonus)** | Min spend $1,000/month (no contactless) | Earn 4 mpd on petrol. No contactless required for petrol. **[VERIFIED]** |
+| Bills | 0.4 | No (base) | — | Utilities excluded from bonus earning. **[VERIFIED from UOB T&Cs]** |
+| Travel | 0.4 | No (base) | — | 4 mpd on overseas travel (FCY, out of scope). 0.4 mpd local. **[VERIFIED]** |
+| General | **4.0** | **Yes (bonus)** | Contactless + Min spend $1,000/month | Earn 4 mpd on contactless spend. **[VERIFIED]** |
+
+**Monthly Caps**:
+| Scope | Cap Amount | Cap Type | Notes | Status |
+|-------|-----------|----------|-------|--------|
+| All bonus categories (combined) | S$1,200/month | Spend | Shared across all bonus categories (petrol + contactless). Same pattern as HSBC Revolution combined cap. | **[VERIFIED]** |
+
+**Exclusions**:
+| Scope | Excluded MCCs | Type | Description |
+|-------|--------------|------|-------------|
+| Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from UNI$ earning. |
+| Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+
+**Source URL**: https://www.uob.com.sg/personal/cards/rewards/visa-signature-card.page
+
+---
+
+### Card 23: DBS Vantage Visa Infinite
+
+| Field | Value | Status |
+|-------|-------|--------|
+| **Bank** | DBS | |
+| **Card Name** | DBS Vantage Visa Infinite | |
+| **Slug** | `dbs-vantage-visa-infinite` | |
+| **Network** | Visa | |
+| **Annual Fee** | S$599.50 (non-waivable year 1) | |
+| **Base Rate** | 1.0 mpd (without min spend) | |
+| **Data Status** | **[VERIFIED]** from DBS website | |
+| **Notes** | Flat 1.5 mpd all local spend with $2,000/month min spend. 1.0 mpd without min spend. No bonus categories. Annual fee $599.50. | |
+
+**Earn Rates by Category**:
+
+| Category | Rate (mpd) | Bonus? | Conditions | Notes |
+|----------|-----------|--------|------------|-------|
+| Dining | **1.5** | **Yes (bonus)** | Min spend $2,000/month | Earn 1.5 mpd on all local spend. 1.0 mpd without min spend. **[VERIFIED]** |
+| Transport | **1.5** | **Yes (bonus)** | Min spend $2,000/month | Same as above. **[VERIFIED]** |
+| Online | **1.5** | **Yes (bonus)** | Min spend $2,000/month | Same as above. **[VERIFIED]** |
+| Groceries | **1.5** | **Yes (bonus)** | Min spend $2,000/month | Same as above. **[VERIFIED]** |
+| Petrol | **1.5** | **Yes (bonus)** | Min spend $2,000/month | Same as above. **[VERIFIED]** |
+| Bills | **1.5** | **Yes (bonus)** | Min spend $2,000/month | Same as above. **[VERIFIED]** |
+| Travel | **1.5** | **Yes (bonus)** | Min spend $2,000/month | Same as above. **[VERIFIED]** |
+| General | **1.5** | **Yes (bonus)** | Min spend $2,000/month | Same as above. **[VERIFIED]** |
+
+**Monthly Caps**: None (flat rate with min spend condition).
+
+**Exclusions**:
+| Scope | Excluded MCCs | Type | Description |
+|-------|--------------|------|-------------|
+| Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from DBS Points earning. |
+| Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+
+**Source URL**: https://www.dbs.com.sg/personal/cards/credit-cards/vantage-card
+
+---
+
+### Card 24: OCBC Voyage Card
+
+| Field | Value | Status |
+|-------|-------|--------|
+| **Bank** | OCBC | |
+| **Card Name** | OCBC Voyage Card | |
+| **Slug** | `ocbc-voyage-card` | |
+| **Network** | Visa | |
+| **Annual Fee** | S$497.06 | |
+| **Base Rate** | 1.3 mpd | |
+| **Data Status** | **[VERIFIED]** from OCBC website | |
+| **Notes** | Flat 1.3 mpd all local spend. No caps, no min spend. VOYAGE Miles do not expire. | |
+
+**Earn Rates by Category**:
+
+| Category | Rate (mpd) | Bonus? | Conditions | Notes |
+|----------|-----------|--------|------------|-------|
+| Dining | 1.3 | No (base) | — | — |
+| Transport | 1.3 | No (base) | — | — |
+| Online | 1.3 | No (base) | — | — |
+| Groceries | 1.3 | No (base) | — | — |
+| Petrol | 1.3 | No (base) | — | — |
+| Bills | 1.3 | No (base) | — | — |
+| Travel | 1.3 | No (base) | — | — |
+| General | 1.3 | No (base) | — | — |
+
+**Monthly Caps**: None (flat rate).
+
+**Exclusions**:
+| Scope | Excluded MCCs | Type | Description |
+|-------|--------------|------|-------------|
+| Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from VOYAGE Miles earning. |
+| Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+
+**Source URL**: https://www.ocbc.com/personal-banking/cards/voyage-card
+
+---
+
+### Card 25: SC Journey Card
+
+| Field | Value | Status |
+|-------|-------|--------|
+| **Bank** | SC | |
+| **Card Name** | SC Journey Card | |
+| **Slug** | `sc-journey-card` | |
+| **Network** | Visa | |
+| **Annual Fee** | S$196.20 | |
+| **Base Rate** | 1.2 mpd | |
+| **Data Status** | **[VERIFIED]** from SC website | |
+| **Notes** | 3 mpd on online transport/food delivery and online grocery delivery. 1.2 mpd base on all other spend. Cap $1,000/month shared. | |
+
+**Earn Rates by Category**:
+
+| Category | Rate (mpd) | Bonus? | Conditions | Notes |
+|----------|-----------|--------|------------|-------|
+| Dining | 1.2 | No (base) | — | — |
+| Transport | **3.0** | **Yes (bonus)** | — | Earn 3 mpd on online transport and food delivery (Grab, foodpanda, Deliveroo). In-store transport earns 1.2 mpd base rate. Cap $1,000/month shared. **[VERIFIED]** |
+| Online | 1.2 | No (base) | — | — |
+| Groceries | **3.0** | **Yes (bonus)** | — | Earn 3 mpd on online grocery delivery. In-store groceries earn 1.2 mpd base rate. Cap $1,000/month shared. **[VERIFIED]** |
+| Petrol | 1.2 | No (base) | — | — |
+| Bills | 1.2 | No (base) | — | — |
+| Travel | 1.2 | No (base) | — | — |
+| General | 1.2 | No (base) | — | — |
+
+**Monthly Caps**:
+| Scope | Cap Amount | Cap Type | Notes | Status |
+|-------|-----------|----------|-------|--------|
+| All bonus categories (combined) | S$1,000/month | Spend | Combined cap across online transport and grocery delivery. | **[VERIFIED]** |
+
+**Exclusions**:
+| Scope | Excluded MCCs | Type | Description |
+|-------|--------------|------|-------------|
+| Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from 360 reward points earning. |
+| Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+
+**Source URL**: https://www.sc.com/sg/credit-cards/journey-card/
+
+---
+
+### Card 26: SC Beyond Card
+
+| Field | Value | Status |
+|-------|-------|--------|
+| **Bank** | SC | |
+| **Card Name** | SC Beyond Card | |
+| **Slug** | `sc-beyond-card` | |
+| **Network** | Mastercard | |
+| **Annual Fee** | S$1,635.00 (non-waivable) | |
+| **Base Rate** | 1.5 mpd | |
+| **Data Status** | **[VERIFIED]** from SC website | |
+| **Notes** | Flat 1.5 mpd all local spend. No caps, no min spend. Premium card. Priority Banking: 2.0 mpd (not modeled). | |
+
+**Earn Rates by Category**:
+
+| Category | Rate (mpd) | Bonus? | Conditions | Notes |
+|----------|-----------|--------|------------|-------|
+| Dining | 1.5 | No (base) | — | — |
+| Transport | 1.5 | No (base) | — | — |
+| Online | 1.5 | No (base) | — | — |
+| Groceries | 1.5 | No (base) | — | — |
+| Petrol | 1.5 | No (base) | — | — |
+| Bills | 1.5 | No (base) | — | — |
+| Travel | 1.5 | No (base) | — | — |
+| General | 1.5 | No (base) | — | — |
+
+**Monthly Caps**: None (flat rate).
+
+**Exclusions**:
+| Scope | Excluded MCCs | Type | Description |
+|-------|--------------|------|-------------|
+| Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from 360 reward points earning. |
+| Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+
+**Source URL**: https://www.sc.com/sg/credit-cards/beyond-card/
+
+---
+
+### Card 27: HSBC Premier Mastercard
+
+| Field | Value | Status |
+|-------|-------|--------|
+| **Bank** | HSBC | |
+| **Card Name** | HSBC Premier Mastercard | |
+| **Slug** | `hsbc-premier-mc` | |
+| **Network** | Mastercard | |
+| **Annual Fee** | S$708.50 (waived for Premier customers with $200K TRB) | |
+| **Base Rate** | 1.4 mpd (KrisFlyer rate) | |
+| **Data Status** | **[VERIFIED]** from HSBC website | |
+| **Notes** | Flat 1.4 mpd all local spend (KrisFlyer rate). Uncapped, no min spend. Transfer fee waived. | |
+
+**Earn Rates by Category**:
+
+| Category | Rate (mpd) | Bonus? | Conditions | Notes |
+|----------|-----------|--------|------------|-------|
+| Dining | 1.4 | No (base) | — | — |
+| Transport | 1.4 | No (base) | — | — |
+| Online | 1.4 | No (base) | — | — |
+| Groceries | 1.4 | No (base) | — | — |
+| Petrol | 1.4 | No (base) | — | — |
+| Bills | 1.4 | No (base) | — | — |
+| Travel | 1.4 | No (base) | — | — |
+| General | 1.4 | No (base) | — | — |
+
+**Monthly Caps**: None (flat rate).
+
+**Exclusions**:
+| Scope | Excluded MCCs | Type | Description |
+|-------|--------------|------|-------------|
+| Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from HSBC rewards earning. |
+| Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+
+**Source URL**: https://www.hsbc.com.sg/credit-cards/products/premier-mastercard/
+
+---
+
+### Card 28: Maybank XL Rewards
+
+| Field | Value | Status |
+|-------|-------|--------|
+| **Bank** | Maybank | |
+| **Card Name** | Maybank XL Rewards | |
+| **Slug** | `maybank-xl-rewards` | |
+| **Network** | Mastercard | |
+| **Annual Fee** | S$87.20 | |
+| **Base Rate** | 0.4 mpd | |
+| **Data Status** | **[VERIFIED]** from Maybank website | |
+| **Notes** | 4 mpd on dining, online shopping, travel. Base 0.4 mpd. Min spend $500/month. Cap $1,000/month shared. Age 21-39 only. 1-year points expiry. $27.25 transfer fee. | |
+
+**Earn Rates by Category**:
+
+| Category | Rate (mpd) | Bonus? | Conditions | Notes |
+|----------|-----------|--------|------------|-------|
+| Dining | **4.0** | **Yes (bonus)** | Min spend $500/month | Earn 4 mpd on dining (restaurants + food delivery). Cap $1,000/month shared. Age 21-39 only. **[VERIFIED]** |
+| Transport | 0.4 | No (base) | — | — |
+| Online | **4.0** | **Yes (bonus)** | Min spend $500/month | Earn 4 mpd on online shopping. Cap $1,000/month shared. **[VERIFIED]** |
+| Groceries | 0.4 | No (base) | — | — |
+| Petrol | 0.4 | No (base) | — | — |
+| Bills | 0.4 | No (base) | — | — |
+| Travel | **4.0** | **Yes (bonus)** | Min spend $500/month | Earn 4 mpd on travel (flights, hotels). Cap $1,000/month shared. **[VERIFIED]** |
+| General | 0.4 | No (base) | — | — |
+
+**Monthly Caps**:
+| Scope | Cap Amount | Cap Type | Notes | Status |
+|-------|-----------|----------|-------|--------|
+| All bonus categories (combined) | S$1,000/month | Spend | Combined cap across dining, online shopping, and travel. Age 21-39 only. | **[VERIFIED]** |
+
+**Exclusions**:
+| Scope | Excluded MCCs | Type | Description |
+|-------|--------------|------|-------------|
+| Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from TreatsPoints earning. |
+| Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+
+**Source URL**: https://www.maybank.com.sg/cards/credit-cards/xl-rewards/
+
+---
+
+### Card 29: UOB Lady's Solitaire
+
+| Field | Value | Status |
+|-------|-------|--------|
+| **Bank** | UOB | |
+| **Card Name** | UOB Lady's Solitaire | |
+| **Slug** | `uob-ladys-solitaire` | |
+| **Network** | Mastercard | |
+| **Annual Fee** | S$414.20 | |
+| **Base Rate** | 0.4 mpd | |
+| **Data Status** | **[VERIFIED]** from UOB website | |
+| **Notes** | Choose 2 of 7 bonus categories for 4 mpd (10X UNI$). Base 0.4 mpd. Cap $1,500/month shared ($750 per category). No min spend. Categories: Fashion, Dining, Travel, Beauty & Wellness, Family (groceries), Transport, Entertainment. Re-selectable quarterly. **Special: `user_selectable` condition type.** | |
+
+**Earn Rates by Category**:
+
+| Category | Rate (mpd) | Bonus? | Conditions | Notes |
+|----------|-----------|--------|------------|-------|
+| Dining | **4.0** | **Yes (bonus)** | `user_selectable` | Earn 4 mpd if Dining selected as bonus category. Choose 2 of 7. Cap $750/month per category. **[VERIFIED]** |
+| Transport | **4.0** | **Yes (bonus)** | `user_selectable` | Earn 4 mpd if Transport selected as bonus category. Choose 2 of 7. Cap $750/month per category. **[VERIFIED]** |
+| Online | 0.4 | No (base) | — | Online is not one of the 7 selectable UOB categories. |
+| Groceries | **4.0** | **Yes (bonus)** | `user_selectable` | Earn 4 mpd if Family (groceries) selected as bonus category. Choose 2 of 7. Cap $750/month per category. **[VERIFIED]** |
+| Petrol | 0.4 | No (base) | — | Petrol is not one of the 7 selectable UOB categories. |
+| Bills | 0.4 | No (base) | — | — |
+| Travel | **4.0** | **Yes (bonus)** | `user_selectable` | Earn 4 mpd if Travel selected as bonus category. Choose 2 of 7. Cap $750/month per category. **[VERIFIED]** |
+| General | **4.0** | **Yes (bonus)** | `user_selectable` | Earn 4 mpd if Fashion, Beauty & Wellness, or Entertainment selected (mapped to general). Choose 2 of 7. Cap $750/month per category. **[VERIFIED]** |
+
+**Monthly Caps**:
+| Scope | Cap Amount | Cap Type | Notes | Status |
+|-------|-----------|----------|-------|--------|
+| All bonus categories (combined) | S$1,500/month | Spend | Combined cap across 2 chosen bonus categories ($750 per category). | **[VERIFIED]** |
+
+**Exclusions**:
+| Scope | Excluded MCCs | Type | Description |
+|-------|--------------|------|-------------|
+| Global | 9311, 9222, 9211, 9399 | Government | Government payments excluded from UNI$ earning. |
+| Global | 6300, 6381, 6399 | Insurance | Insurance premium payments excluded. |
+
+> **Special case: `user_selectable` condition type.** UOB Lady's Solitaire uses a `{"user_selectable": true}` condition in the `conditions` JSONB. This indicates that the bonus rate is only active if the user has selected this category as one of their 2 chosen bonus categories. The recommendation engine currently treats all `user_selectable` categories as active (assumes user has selected them). A future enhancement could allow users to specify their selected categories in `user_settings`.
+
+**Source URL**: https://www.uob.com.sg/personal/cards/credit/ladys-solitaire-card.page
+
+---
+
 ## 5. Database Schema Overview
 
-The card data is stored across 5 PostgreSQL tables in Supabase:
+The card data is stored across 6 PostgreSQL tables in Supabase:
 
 ### 5.1 `categories` — Spend Category Taxonomy
 | Column | Type | Description |
@@ -1113,7 +1548,17 @@ The card data is stored across 5 PostgreSQL tables in Supabase:
 | cap_type | TEXT | `spend` (cap on SGD amount) or `miles` (cap on miles earned) |
 | notes | TEXT | Details and verification status |
 
-### 5.5 `exclusions` — MCC / Condition-Based Exclusions
+### 5.5 `user_settings` — User Preferences (Sprint 22)
+| Column | Type | Description |
+|--------|------|-------------|
+| user_id | UUID (PK, FK → auth.users) | One row per user |
+| estimated_monthly_spend | DECIMAL | User's estimated total monthly card spend in SGD |
+| created_at | TIMESTAMPTZ | Row creation time |
+| updated_at | TIMESTAMPTZ | Auto-updated via trigger |
+
+> Used by the `recommend()` RPC to determine if min spend conditions are met. RLS enforced — users can only access their own row.
+
+### 5.6 `exclusions` — MCC / Condition-Based Exclusions
 | Column | Type | Description |
 |--------|------|-------------|
 | id | UUID (PK) | Auto-generated |
@@ -1151,6 +1596,13 @@ The card data is stored across 5 PostgreSQL tables in Supabase:
 | SC | X Card | https://www.sc.com/sg/credit-cards/x-card/ |
 | Maybank | Horizon Visa | https://www.maybank.com.sg/cards/credit-cards/horizon-visa-signature/ |
 | Maybank | FC Barcelona Visa | https://www.maybank.com.sg/cards/credit-cards/fc-barcelona-visa-signature/ |
+| DBS | Vantage Visa Infinite | https://www.dbs.com.sg/personal/cards/credit-cards/vantage-card |
+| OCBC | Voyage Card | https://www.ocbc.com/personal-banking/cards/voyage-card |
+| SC | Journey Card | https://www.sc.com/sg/credit-cards/journey-card/ |
+| SC | Beyond Card | https://www.sc.com/sg/credit-cards/beyond-card/ |
+| HSBC | Premier Mastercard | https://www.hsbc.com.sg/credit-cards/products/premier-mastercard/ |
+| Maybank | XL Rewards | https://www.maybank.com.sg/cards/credit-cards/xl-rewards/ |
+| UOB | Lady's Solitaire | https://www.uob.com.sg/personal/cards/credit/ladys-solitaire-card.page |
 
 ### 6.2 Cross-Reference Sources
 
@@ -1195,6 +1647,15 @@ Instructions: For each card, verify the data against the bank's current T&Cs usi
 | 18 | Citi Rewards Card | Citi | VERIFIED | $0 | 0.4 | Yes (online, general) | Yes ($1,000 combined) | [ ] |
 | 19 | POSB Everyday Card | DBS/POSB | **ESTIMATED** | $0 | 0.4 | No | No | [ ] |
 | 20 | UOB Preferred Platinum Visa | UOB | VERIFIED | $0 | 0.4 | Yes (dining) | Yes ($1,000 dining) | [ ] |
+| 21 | Maybank World Mastercard | Maybank | VERIFIED | $261.60* | 0.4 | Yes (petrol) | No (uncapped) | [ ] |
+| 22 | UOB Visa Signature | UOB | VERIFIED | $218.00* | 0.4 | Yes (5 categories) | Yes ($1,200 combined) | [ ] |
+| 23 | DBS Vantage Visa Infinite | DBS | VERIFIED | $599.50 | 1.0 | Yes (all, min spend) | No | [ ] |
+| 24 | OCBC Voyage Card | OCBC | VERIFIED | $497.06 | 1.3 | No | No | [ ] |
+| 25 | SC Journey Card | SC | VERIFIED | $196.20 | 1.2 | Yes (transport, groceries) | Yes ($1,000 combined) | [ ] |
+| 26 | SC Beyond Card | SC | VERIFIED | $1,635.00 | 1.5 | No | No | [ ] |
+| 27 | HSBC Premier Mastercard | HSBC | VERIFIED | $708.50* | 1.4 | No | No | [ ] |
+| 28 | Maybank XL Rewards | Maybank | VERIFIED | $87.20 | 0.4 | Yes (dining, online, travel) | Yes ($1,000 combined) | [ ] |
+| 29 | UOB Lady's Solitaire | UOB | VERIFIED | $414.20 | 0.4 | Yes (user-selectable) | Yes ($1,500 combined) | [ ] |
 
 > `*` = conditional fee (e.g., first year free, then fee applies)
 > `*` in bonus column = bonus restricted to specific merchant sub-types (e.g., fashion/beauty only)
@@ -1249,6 +1710,7 @@ For each card, the SME should verify:
   - [ ] Dining bonus: 4.0 mpd
   - [ ] Online bonus: 4.0 mpd
   - [ ] Combined cap: S$1,000/month
+  - [ ] Fast food (MCC 5814) excluded from 10X dining bonus [Sprint 21 — verify per HSBC T&Cs]
   - [ ] Supermarket (MCC 5411) excluded from 10X [ESTIMATED — verify]
   - [ ] Corrections: _______________
 
@@ -1365,6 +1827,89 @@ For each card, the SME should verify:
   - [ ] Fast food delivery exclusion [ESTIMATED — verify]
   - [ ] Corrections: _______________
 
+- [ ] **Card 21 — Maybank World Mastercard**
+  - [ ] Annual fee: S$261.60 (1st year waived)
+  - [ ] Base rate: 0.4 mpd
+  - [ ] Petrol bonus: 4.0 mpd (uncapped, no min spend)
+  - [ ] Min income: S$80,000
+  - [ ] Dining 4 mpd at selected merchants only (not category-wide) — verify merchant list
+  - [ ] FCY 3.2 mpd — verify (out of scope for recommendations)
+  - [ ] Corrections: _______________
+
+- [ ] **Card 22 — UOB Visa Signature**
+  - [ ] Annual fee: S$218.00 (1st year waived)
+  - [ ] Base rate: 0.4 mpd
+  - [ ] Contactless bonus: 4.0 mpd on dining, transport, groceries, general (contactless required)
+  - [ ] Petrol bonus: 4.0 mpd (NO contactless required)
+  - [ ] Min spend: $1,000/month (across petrol & contactless)
+  - [ ] Combined cap: S$1,200/month (shared across all bonus categories)
+  - [ ] Online: 0.4 mpd (mobile in-app != contactless) — verify per UOB T&Cs
+  - [ ] Bills: 0.4 mpd (utilities excluded from bonus) — verify
+  - [ ] Corrections: _______________
+
+- [ ] **Card 23 — DBS Vantage Visa Infinite**
+  - [ ] Annual fee: S$599.50 (non-waivable year 1)
+  - [ ] Base rate: 1.0 mpd (without min spend)
+  - [ ] Bonus: 1.5 mpd all local spend (with $2,000/month min spend)
+  - [ ] No monthly cap
+  - [ ] Exclusions: Government, Insurance
+  - [ ] Corrections: _______________
+
+- [ ] **Card 24 — OCBC Voyage Card**
+  - [ ] Annual fee: S$497.06
+  - [ ] Flat rate: 1.3 mpd all local spend
+  - [ ] VOYAGE Miles do not expire
+  - [ ] No caps, no min spend
+  - [ ] Exclusions: Government, Insurance
+  - [ ] Corrections: _______________
+
+- [ ] **Card 25 — SC Journey Card**
+  - [ ] Annual fee: S$196.20
+  - [ ] Base rate: 1.2 mpd
+  - [ ] Transport bonus: 3.0 mpd (online transport/food delivery only)
+  - [ ] Groceries bonus: 3.0 mpd (online grocery delivery only)
+  - [ ] Combined cap: S$1,000/month
+  - [ ] Exclusions: Government, Insurance
+  - [ ] Corrections: _______________
+
+- [ ] **Card 26 — SC Beyond Card**
+  - [ ] Annual fee: S$1,635.00 (non-waivable)
+  - [ ] Flat rate: 1.5 mpd all local spend
+  - [ ] Priority Banking: 2.0 mpd (not modeled) — verify
+  - [ ] No caps, no min spend
+  - [ ] Exclusions: Government, Insurance
+  - [ ] Corrections: _______________
+
+- [ ] **Card 27 — HSBC Premier Mastercard**
+  - [ ] Annual fee: S$708.50 (waived for Premier with $200K TRB)
+  - [ ] Flat rate: 1.4 mpd all local spend (KrisFlyer rate)
+  - [ ] Uncapped, no min spend
+  - [ ] Transfer fee waived for Premier customers — verify
+  - [ ] Exclusions: Government, Insurance
+  - [ ] Corrections: _______________
+
+- [ ] **Card 28 — Maybank XL Rewards**
+  - [ ] Annual fee: S$87.20
+  - [ ] Base rate: 0.4 mpd
+  - [ ] Dining bonus: 4.0 mpd (min spend $500/month)
+  - [ ] Online bonus: 4.0 mpd (min spend $500/month)
+  - [ ] Travel bonus: 4.0 mpd (min spend $500/month)
+  - [ ] Combined cap: S$1,000/month
+  - [ ] Age 21-39 only — verify eligibility restriction
+  - [ ] 1-year points expiry — verify
+  - [ ] Corrections: _______________
+
+- [ ] **Card 29 — UOB Lady's Solitaire**
+  - [ ] Annual fee: S$414.20
+  - [ ] Base rate: 0.4 mpd
+  - [ ] Bonus: 4.0 mpd on 2 chosen categories (10X UNI$)
+  - [ ] 7 selectable categories: Fashion, Dining, Travel, Beauty & Wellness, Family, Transport, Entertainment
+  - [ ] Combined cap: S$1,500/month ($750 per category)
+  - [ ] No min spend
+  - [ ] Re-selectable quarterly — verify frequency
+  - [ ] Uses `user_selectable` condition type — special case
+  - [ ] Corrections: _______________
+
 ---
 
 ### Category Mapping Verification
@@ -1375,14 +1920,13 @@ For each card, the SME should verify:
 - [ ] **Groceries MCC codes** — Are FairPrice/Cold Storage/Sheng Siong under 5411?
 - [ ] **Petrol MCC codes** (5541, 5542, 5983) — Shell/Esso/Caltex/SPC under these?
 - [ ] **Travel MCC codes** — Is the 3000-3299 airline range correct?
+- [ ] **Bills MCC codes** (4812, 4814, 4900, 6300, 6381, 6399) — Are telco/utility/insurance MCCs complete for SG? Note: insurance MCCs overlap with common exclusions (see Section 3.2 item #1).
 - [ ] **General** — Catch-all with empty MCC array; any concerns?
 
 ### Data Discrepancy Resolution
 
-- [ ] **Resolve category 5**: Should it be `petrol` or `bills`?
-  - Database earn rules reference `petrol`
-  - Frontend code uses `bills`
-  - Which is correct for the product?
+- [x] **Resolve category 5**: Should it be `petrol` or `bills`? **RESOLVED (Sprint 21)** — Both kept. 8 categories total. `petrol` (display_order=5) and `bills` (display_order=8) coexist. All 29 cards have base-rate earn rules for `bills`. Insurance warning banner shown on Bills screen.
+- [ ] **Verify HSBC Revolution MCC 5814 exclusion**: Fast food excluded from 10X bonus — confirm with HSBC T&Cs (Sprint 21 addition based on MileLion analysis)
 
 ---
 
