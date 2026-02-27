@@ -26,16 +26,9 @@
 -- Sprint:  16 — T&C Focus Refactor
 -- =============================================================================
 
-BEGIN;
-
-
--- ==========================================================================
--- SECTION 1: Add new enum values to source_type
--- ==========================================================================
-
-ALTER TYPE source_type ADD VALUE IF NOT EXISTS 'bank_tc_pdf';
-ALTER TYPE source_type ADD VALUE IF NOT EXISTS 'bank_index_page';
-
+-- NOTE: Enum values (bank_tc_pdf, bank_index_page) are added in a separate
+-- prior migration (20260227300000_add_source_type_enums.sql) because
+-- PostgreSQL cannot use newly-added enum values in the same transaction.
 
 -- ==========================================================================
 -- SECTION 2: Add T&C metadata columns to source_configs
@@ -450,7 +443,8 @@ $$;
 -- SECTION 7: Update v_pipeline_health view to include version info
 -- ==========================================================================
 
-CREATE OR REPLACE VIEW v_pipeline_health AS
+DROP VIEW IF EXISTS v_pipeline_health;
+CREATE VIEW v_pipeline_health AS
 SELECT
   sc.id AS source_id,
   sc.url,
@@ -547,9 +541,6 @@ COMMENT ON VIEW v_pipeline_health IS 'Per-source health metrics for the pipeline
 --   WHERE table_name = 'source_snapshots'
 --     AND column_name IN ('tc_version', 'tc_last_updated');
 --   -- Should return 2 rows
-
-
-COMMIT;
 
 
 -- ==========================================================================
