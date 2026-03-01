@@ -72,7 +72,7 @@ export const CATEGORIES: CategoryInfo[] = [
     icon: 'receipt-outline',
     iconFilled: 'receipt',
     displayOrder: 5,
-    description: 'Utilities, insurance, telco, recurring payments',
+    description: 'Utilities, telco, insurance, education, medical, pharmacy',
   },
   {
     id: 'travel',
@@ -106,3 +106,37 @@ export const getCategoryById = (id: string): CategoryInfo | undefined =>
 export const CATEGORY_MAP: Record<string, CategoryInfo> = Object.fromEntries(
   CATEGORIES.map((cat) => [cat.id, cat])
 );
+
+// =============================================================================
+// Bills Subcategories — Sprint 28
+// =============================================================================
+
+export interface BillsSubcategory {
+  id: string;
+  label: string;
+  emoji: string;
+  /** true = show 0-mpd empty state instead of recommendations */
+  zeroMpd: boolean;
+  zeroMpdMessage?: string;
+}
+
+export const BILLS_SUBCATEGORIES: BillsSubcategory[] = [
+  {
+    id: 'utilities',
+    label: 'Utilities',
+    emoji: '\u26A1',
+    zeroMpd: true,
+    zeroMpdMessage: 'Utility payments earn 0 miles on most cards.',
+  },
+  { id: 'telco', label: 'Telco', emoji: '\uD83D\uDCF1', zeroMpd: false },
+  {
+    id: 'insurance',
+    label: 'Insurance',
+    emoji: '\uD83D\uDEE1\uFE0F',
+    zeroMpd: true,
+    zeroMpdMessage: 'Insurance premiums earn 0 miles on all cards.',
+  },
+  { id: 'education', label: 'Education', emoji: '\uD83C\uDF93', zeroMpd: false },
+  { id: 'medical', label: 'Medical', emoji: '\uD83C\uDFE5', zeroMpd: false },
+  { id: 'pharmacy', label: 'Pharmacy', emoji: '\uD83D\uDC8A', zeroMpd: false },
+];

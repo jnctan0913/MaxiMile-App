@@ -52,6 +52,15 @@ interface NotificationPreferences {
 
 export default function NotificationSettingsScreen() {
   const router = useRouter();
+
+  const handleGoBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)/profile');
+    }
+  };
+
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -282,7 +291,7 @@ export default function NotificationSettingsScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Notification Settings</Text>

@@ -218,6 +218,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // -------------------------------------------------------------------------
   useEffect(() => {
     if (state.loading) return;
+    if (segments.length === 0) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';

@@ -428,7 +428,9 @@ export default function PayScreen() {
               params: {
                 amount: mockData.amount,
                 merchant: mockData.merchant,
-                card: mockData.card,
+                // Use the recommended card name so auto-capture pre-selects the
+                // correct card from the user's actual portfolio via fuzzy match.
+                card: recommendation?.card_name ?? mockData.card,
                 source: 'shortcut',
               },
             });
@@ -458,12 +460,12 @@ export default function PayScreen() {
         Animated.timing(pulseAnim, {
           toValue: 0.4,
           duration: 1000,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
           duration: 1000,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ]),
     );

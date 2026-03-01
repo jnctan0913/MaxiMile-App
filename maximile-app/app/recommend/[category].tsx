@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { getCategoryById } from '../../constants/categories';
+import { getCategoryById, BILLS_SUBCATEGORIES } from '../../constants/categories';
 import {
   Colors,
   Spacing,
@@ -172,7 +172,7 @@ const skeletonStyles = StyleSheet.create({
  * - Edge case: all caps exhausted
  */
 export default function RecommendResultScreen() {
-  const { category } = useLocalSearchParams<{ category: string }>();
+  const { category, subcategory } = useLocalSearchParams<{ category: string; subcategory?: string }>();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -183,6 +183,11 @@ export default function RecommendResultScreen() {
 
   const categoryInfo = category ? getCategoryById(category) : undefined;
 
+  // Sprint 28 — subcategory metadata
+  const subcategoryInfo = subcategory
+    ? BILLS_SUBCATEGORIES.find((s) => s.id === subcategory)
+    : undefined;
+
   // Progress bar animation
   const progressAnim = useRef(new Animated.Value(0)).current;
 
@@ -192,13 +197,25 @@ export default function RecommendResultScreen() {
   useEffect(() => {
     if (!user || !category) return;
 
+    // Sprint 28 (S28.4) — zero-mpd subcategories skip the RPC entirely
+    if (subcategoryInfo?.zeroMpd) {
+      setLoading(false);
+      return;
+    }
+
     const fetchRecommendation = async () => {
       setLoading(true);
       setError(null);
 
-      const { data, error: rpcError } = await supabase.rpc('recommend', {
+      // Sprint 28 (S28.3) — pass subcategory to RPC when present
+      const rpcParams: { p_category_id: string; p_subcategory?: string } = {
         p_category_id: category,
-      });
+      };
+      if (subcategory) {
+        rpcParams.p_subcategory = subcategory;
+      }
+
+      const { data, error: rpcError } = await supabase.rpc('recommend', rpcParams);
 
       if (rpcError) {
         console.error('Recommendation RPC error:', rpcError);
@@ -208,6 +225,7 @@ export default function RecommendResultScreen() {
         // Track MARU — north star metric
         track('recommendation_used', {
           category: category,
+          subcategory: subcategory ?? null,
           results_count: (data as RecommendRow[]).length,
           top_card: (data as RecommendRow[])[0]?.card_name ?? 'none',
         }, user.id);
@@ -224,7 +242,7 @@ export default function RecommendResultScreen() {
     };
 
     fetchRecommendation();
-  }, [user, category]);
+  }, [user, category, subcategory, subcategoryInfo]);
 
   // -----------------------------------------------------------------------
   // Fetch card images when results change
@@ -341,6 +359,70 @@ export default function RecommendResultScreen() {
   }
 
   // -----------------------------------------------------------------------
+  // Sprint 28 (S28.4) — 0-mpd empty state for Utilities and Insurance
+  // -----------------------------------------------------------------------
+  if (subcategoryInfo?.zeroMpd) {
+    const isUtilities = subcategory === 'utilities';
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: subcategoryInfo.label,
+            headerBackTitle: 'Bills',
+          }}
+        />
+        <ImageBackground
+          source={require('../../assets/background.png')}
+          style={styles.background}
+          imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
+        >
+          <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+            <View style={styles.zeroMpdContainer}>
+              <Text style={styles.zeroMpdEmoji}>{subcategoryInfo.emoji}</Text>
+              <Text style={styles.zeroMpdTitle}>{subcategoryInfo.label} Payments</Text>
+              {isUtilities ? (
+                <>
+                  <View style={styles.zeroMpdCard}>
+                    <Text style={styles.zeroMpdBody}>
+                      Most banks exclude utility payments (SP Services, Geneco, City Energy).
+                    </Text>
+                    <Text style={[styles.zeroMpdBody, styles.zeroMpdBodyBold]}>
+                      All cards earn 0 miles on utilities.
+                    </Text>
+                    <Text style={styles.zeroMpdBody}>No recommendation available.</Text>
+                  </View>
+                  <View style={styles.zeroMpdException}>
+                    <Ionicons name="information-circle-outline" size={16} color={Colors.textSecondary} />
+                    <Text style={styles.zeroMpdExceptionText}>
+                      Exception: Maybank Horizon earns ~0.16 mpd (limited earning).
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <View style={styles.zeroMpdCard}>
+                  <Text style={styles.zeroMpdBody}>
+                    Insurance premium payments earn 0 miles on all major bank cards.
+                  </Text>
+                  <Text style={[styles.zeroMpdBody, styles.zeroMpdBodyBold]}>
+                    No recommendation available.
+                  </Text>
+                </View>
+              )}
+              <TouchableOpacity
+                style={styles.zeroMpdBackBtn}
+                onPress={() => router.back()}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.zeroMpdBackBtnText}>Choose Another Bill Type</Text>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </ImageBackground>
+      </>
+    );
+  }
+
+  // -----------------------------------------------------------------------
   // Empty state: no cards
   // -----------------------------------------------------------------------
   if (results.length === 0) {
@@ -394,8 +476,9 @@ export default function RecommendResultScreen() {
     <>
       <Stack.Screen
         options={{
-          title: categoryInfo?.name ?? category,
-          headerBackTitle: 'Back',
+          // Sprint 28: when a subcategory is selected, title shows the subcategory name
+          title: subcategoryInfo?.label ?? categoryInfo?.name ?? category,
+          headerBackTitle: subcategory ? 'Bills' : 'Back',
         }}
       />
       <ImageBackground
@@ -410,12 +493,15 @@ export default function RecommendResultScreen() {
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
             <View>
-              {/* Insurance warning banner for Bills category */}
-              {category === 'bills' && (
-                <View style={styles.insuranceWarning}>
-                  <Ionicons name="warning-outline" size={18} color="#F59E0B" />
-                  <Text style={styles.insuranceWarningText}>
-                    Insurance payments are excluded from bonus earning on most cards. Base rate only.
+              {/* Sprint 28 (S28.5) — HealthHub tip for Medical subcategory */}
+              {subcategory === 'medical' && (
+                <View style={styles.healthHubTip}>
+                  <View style={styles.healthHubTipHeader}>
+                    <Ionicons name="bulb-outline" size={16} color="#1557B0" />
+                    <Text style={styles.healthHubTipTitle}>Tip: Pay via HealthHub app</Text>
+                  </View>
+                  <Text style={styles.healthHubTipBody}>
+                    Paying hospital bills via the HealthHub or Health Buddy app charges as MCC 8099 (online) — earning 4 mpd on DBS WWMC and Citi Rewards instead of 0 mpd.
                   </Text>
                 </View>
               )}
@@ -909,5 +995,104 @@ const styles = StyleSheet.create({
     color: '#D97706',
     fontSize: 11,
     marginTop: 2,
+  },
+
+  // Sprint 28 (S28.4) — 0-mpd empty state (Utilities / Insurance)
+  zeroMpdContainer: {
+    flex: 1,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: Spacing.xxxl,
+  },
+  zeroMpdEmoji: {
+    fontSize: 48,
+    marginBottom: Spacing.md,
+  },
+  zeroMpdTitle: {
+    ...Typography.subheading,
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+  },
+  zeroMpdCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(197, 165, 90, 0.2)',
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.lg,
+    marginBottom: Spacing.md,
+    width: '100%',
+    ...Shadows.sm,
+  },
+  zeroMpdBody: {
+    ...Typography.body,
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
+    lineHeight: 22,
+  },
+  zeroMpdBodyBold: {
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  zeroMpdException: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.xl,
+    width: '100%',
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.textTertiary,
+  },
+  zeroMpdExceptionText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    flex: 1,
+    lineHeight: 18,
+  },
+  zeroMpdBackBtn: {
+    borderRadius: 20,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.brandGold,
+    paddingHorizontal: Spacing.xl,
+  },
+  zeroMpdBackBtnText: {
+    ...Typography.bodyBold,
+    color: Colors.brandGold,
+  },
+
+  // Sprint 28 (S28.5) — HealthHub tip banner (Medical subcategory)
+  healthHubTip: {
+    backgroundColor: 'rgba(26, 115, 232, 0.08)',
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.md,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.primary,
+  },
+  healthHubTipHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: Spacing.xs,
+  },
+  healthHubTipTitle: {
+    ...Typography.captionBold,
+    color: Colors.primary,
+  },
+  healthHubTipBody: {
+    ...Typography.caption,
+    color: Colors.textPrimary,
+    lineHeight: 18,
   },
 });

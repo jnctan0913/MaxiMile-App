@@ -36,13 +36,16 @@ export interface PushNotificationData {
 // ============================================================================
 
 // Configure how notifications are presented when app is in foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true, // Show notification banner
-    shouldPlaySound: false, // Silent by default (configurable in future)
-    shouldSetBadge: true, // Update app icon badge
-  }),
-});
+// expo-notifications has no web implementation — skip on web entirely.
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true, // Show notification banner
+      shouldPlaySound: false, // Silent by default (configurable in future)
+      shouldSetBadge: true, // Update app icon badge
+    }),
+  });
+}
 
 // ============================================================================
 // Helper Functions
@@ -69,6 +72,9 @@ export function isPushNotificationSupported(): boolean {
  * Request push notification permissions from the OS
  */
 async function requestPermissions(): Promise<Notifications.PermissionStatus> {
+  // Push notifications are not supported on web.
+  if (Platform.OS === 'web') return 'undetermined';
+
   // In demo mode, don't request real permissions
   if (isDemoMode()) {
     console.log('[Demo Mode] Skipping real push permission request');
@@ -90,6 +96,9 @@ async function requestPermissions(): Promise<Notifications.PermissionStatus> {
  * Get Expo push token for this device
  */
 async function getExpoPushToken(): Promise<string | null> {
+  // Push tokens are not available on web.
+  if (Platform.OS === 'web') return null;
+
   // In demo mode, return a fake token
   if (isDemoMode()) {
     console.log('[Demo Mode] Returning fake push token');
@@ -339,7 +348,7 @@ export function usePushNotifications(
    * Refresh token when app resumes (in case it changed)
    */
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || Platform.OS === 'web') return;
 
     const subscription = Notifications.addNotificationResponseReceivedListener(() => {
       refreshToken();
@@ -369,6 +378,7 @@ export function usePushNotifications(
 export function setupNotificationReceivedListener(
   handler: (notification: Notifications.Notification) => void
 ): () => void {
+  if (Platform.OS === 'web') return () => {};
   const subscription = Notifications.addNotificationReceivedListener(handler);
   return () => subscription.remove();
 }
@@ -379,6 +389,7 @@ export function setupNotificationReceivedListener(
 export function setupNotificationResponseListener(
   handler: (response: Notifications.NotificationResponse) => void
 ): () => void {
+  if (Platform.OS === 'web') return () => {};
   const subscription = Notifications.addNotificationResponseReceivedListener(handler);
   return () => subscription.remove();
 }
@@ -405,6 +416,7 @@ export async function scheduleTestNotification(
   data?: PushNotificationData,
   delaySeconds = 1
 ): Promise<string> {
+  if (Platform.OS === 'web') return '';
   const notificationId = await Notifications.scheduleNotificationAsync({
     content: {
       title,
@@ -424,6 +436,7 @@ export async function scheduleTestNotification(
  * Cancel all scheduled notifications
  */
 export async function cancelAllNotifications(): Promise<void> {
+  if (Platform.OS === 'web') return;
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
@@ -431,6 +444,7 @@ export async function cancelAllNotifications(): Promise<void> {
  * Get badge count
  */
 export async function getBadgeCount(): Promise<number> {
+  if (Platform.OS === 'web') return 0;
   return await Notifications.getBadgeCountAsync();
 }
 
@@ -438,6 +452,7 @@ export async function getBadgeCount(): Promise<number> {
  * Set badge count
  */
 export async function setBadgeCount(count: number): Promise<void> {
+  if (Platform.OS === 'web') return;
   await Notifications.setBadgeCountAsync(count);
 }
 
@@ -445,5 +460,6 @@ export async function setBadgeCount(count: number): Promise<void> {
  * Clear badge
  */
 export async function clearBadge(): Promise<void> {
+  if (Platform.OS === 'web') return;
   await Notifications.setBadgeCountAsync(0);
 }

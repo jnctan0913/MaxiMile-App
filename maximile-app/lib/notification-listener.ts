@@ -6,7 +6,13 @@
 // =============================================================================
 
 import { Platform } from 'react-native';
-import RNNotificationListener from 'react-native-notification-listener';
+
+// Native module — not available on web. Use a conditional require so the
+// bundler never tries to resolve it on non-Android platforms.
+const RNNotificationListener =
+  Platform.OS === 'android'
+    ? require('react-native-notification-listener').default
+    : null;
 
 // =============================================================================
 // Banking App Package Whitelist

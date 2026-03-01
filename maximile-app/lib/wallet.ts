@@ -40,18 +40,40 @@ const GOOGLE_PAY_URL = 'https://pay.google.com';
 const GOOGLE_PAY_PLAY_STORE = 'https://play.google.com/store/apps/details?id=com.google.android.apps.walletnfcrel';
 
 // ---------------------------------------------------------------------------
+// Web Platform Detection
+// ---------------------------------------------------------------------------
+
+/**
+ * When running in a web browser, detect whether the browser is on iOS,
+ * Android, or a desktop OS. Mobile web browsers can open native deep links
+ * (shoebox:// on iOS Safari, https://pay.google.com on Android Chrome).
+ */
+function getWebPlatform(): 'ios' | 'android' | 'desktop' {
+  if (typeof navigator === 'undefined') return 'desktop';
+  const ua = navigator.userAgent;
+  if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
+  if (/android/i.test(ua)) return 'android';
+  return 'desktop';
+}
+
+// ---------------------------------------------------------------------------
 // Availability Check
 // ---------------------------------------------------------------------------
 
 /**
  * Check if the native Wallet app is available on this device.
  *
- * - iOS: Checks if shoebox:// scheme is handled
- * - Android: Checks if Google Pay URL can be opened
- * - Web: Always false
+ * - iOS native: Checks if shoebox:// scheme is handled
+ * - Android native: Checks if Google Pay URL can be opened
+ * - iOS web (Safari): Always true — Safari can open shoebox:// deep links
+ * - Android web (Chrome): Always true — Chrome can navigate to Google Pay
+ * - Desktop web: Always false — no wallet app available
  */
 export async function isWalletAvailable(): Promise<boolean> {
-  if (Platform.OS === 'web') return false;
+  if (Platform.OS === 'web') {
+    const webPlatform = getWebPlatform();
+    return webPlatform === 'ios' || webPlatform === 'android';
+  }
 
   try {
     if (Platform.OS === 'ios') {
@@ -83,10 +105,39 @@ export async function openWallet(): Promise<WalletOpenResult> {
   const platform = Platform.OS as 'ios' | 'android' | 'web';
 
   if (platform === 'web') {
+    const webPlatform = getWebPlatform();
+
+    if (webPlatform === 'ios') {
+      try {
+        await Linking.openURL(APPLE_WALLET_URL);
+        return { success: true, platform };
+      } catch {
+        return {
+          success: false,
+          platform,
+          error: 'Could not open Apple Wallet.',
+        };
+      }
+    }
+
+    if (webPlatform === 'android') {
+      try {
+        await Linking.openURL(GOOGLE_PAY_URL);
+        return { success: true, platform };
+      } catch {
+        return {
+          success: false,
+          platform,
+          error: 'Could not open Google Pay.',
+        };
+      }
+    }
+
+    // Desktop browser — no wallet app available
     return {
       success: false,
       platform,
-      error: 'Wallet is not available on web. Please use the mobile app.',
+      error: 'Open MaxiMile on your phone to use Smart Pay.',
     };
   }
 

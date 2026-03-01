@@ -117,12 +117,12 @@ export default function DemoNotificationPreview(props: DemoNotificationPreviewPr
           toValue: 0,
           tension: 150,
           friction: 15,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(opacityAnim, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ]).start();
     }
@@ -148,12 +148,12 @@ export default function DemoNotificationPreview(props: DemoNotificationPreviewPr
       Animated.timing(slideAnim, {
         toValue: -120,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
       Animated.timing(opacityAnim, {
         toValue: 0,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
     ]).start(() => {
       onDismiss?.();
@@ -165,7 +165,7 @@ export default function DemoNotificationPreview(props: DemoNotificationPreviewPr
   // -------------------------------------------------------------------------
   const handleGestureEvent = Animated.event(
     [{ nativeEvent: { translationY: slideAnim } }],
-    { useNativeDriver: true }
+    { useNativeDriver: Platform.OS !== 'web' }
   );
 
   const handleGestureStateChange = (event: any) => {
@@ -181,7 +181,7 @@ export default function DemoNotificationPreview(props: DemoNotificationPreviewPr
           toValue: 0,
           tension: 150,
           friction: 15,
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }).start();
       }
     }

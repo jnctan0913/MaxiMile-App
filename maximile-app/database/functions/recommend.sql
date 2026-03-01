@@ -13,11 +13,17 @@
 --                       User-Selectable Bonus Categories)
 --
 -- Signature:
---   recommend(p_category_id TEXT)
+--   recommend(p_category_id TEXT, p_subcategory TEXT DEFAULT NULL)
 --   -> TABLE(card_id, card_name, bank, network, earn_rate_mpd,
 --            remaining_cap, monthly_cap_amount, score, is_recommended,
 --            conditions_note, min_spend_threshold, min_spend_met,
 --            total_monthly_spend, requires_contactless)
+--
+-- p_subcategory (v1.7.0): optional bills subcategory filter.
+--   When provided (e.g. 'utilities', 'telco', 'education', 'medical', 'pharmacy'),
+--   the function uses subcategory-specific earn rules (is_bonus=FALSE with matching
+--   conditions->>'subcategory') as the base rate fallback, and filters bonus rules
+--   to those matching the subcategory or with no subcategory condition.
 --
 -- Security:
 --   SECURITY DEFINER -- executes as function owner (postgres) so it can read
@@ -44,7 +50,7 @@
 --        to base_rate_mpd
 -- =============================================================================
 
-CREATE OR REPLACE FUNCTION public.recommend(p_category_id TEXT)
+CREATE OR REPLACE FUNCTION public.recommend(p_category_id TEXT, p_subcategory TEXT DEFAULT NULL)
 RETURNS TABLE (
   card_id              UUID,
   card_name            TEXT,
@@ -112,7 +118,24 @@ BEGIN
 
   -- Pre-aggregate card-wide spending (all categories) for this month
   -- Moved before user_card_rates so we can use it for min_spend checks
-  WITH card_total_spending AS (
+  WITH subcategory_base AS (
+    -- When a subcategory is specified, find the subcategory-specific base rate.
+    -- Falls back to card base_rate_mpd if no subcategory rule found.
+    -- Used in user_card_rates to override c.base_rate_mpd for bills subcategory routing.
+    SELECT er.card_id, er.earn_rate_mpd AS subcategory_base_rate
+    FROM earn_rules er
+    WHERE er.category_id = p_category_id
+      AND er.is_bonus = FALSE
+      AND er.effective_to IS NULL
+      AND (
+        CASE WHEN p_subcategory IS NOT NULL
+          THEN er.conditions->>'subcategory' = p_subcategory
+          ELSE er.conditions->>'subcategory' IS NULL
+        END
+      )
+  ),
+
+  card_total_spending AS (
     SELECT t.card_id, SUM(t.amount) AS total_all
     FROM transactions t
     WHERE t.user_id = v_user_id
@@ -131,7 +154,8 @@ BEGIN
       c.name                                        AS card_name,
       c.bank                                        AS bank,
       c.network                                     AS network,
-      c.base_rate_mpd                               AS base_rate_mpd,
+      -- When subcategory provided, use subcategory-specific base rate; else card base.
+      COALESCE(sb.subcategory_base_rate, c.base_rate_mpd) AS base_rate_mpd,
       -- Extract min_spend_monthly from earn rule conditions JSONB
       (er.conditions->>'min_spend_monthly')::DECIMAL AS min_spend_threshold,
       -- Effective monthly spend: higher of actual vs estimated (handles early-month)
@@ -179,6 +203,13 @@ BEGIN
       AND er.category_id = p_category_id
       AND er.is_bonus = TRUE
       AND er.effective_to IS NULL
+      AND (
+        p_subcategory IS NULL
+        OR er.conditions->>'subcategory' = p_subcategory
+        OR er.conditions->>'subcategory' IS NULL
+      )
+    LEFT JOIN subcategory_base sb
+      ON sb.card_id = c.id
     -- LATERAL subquery picks the best matching cap:
     --   category-specific cap preferred over card-wide (NULL) cap.
     LEFT JOIN LATERAL (
@@ -349,10 +380,10 @@ $$;
 -- =============================================================================
 
 -- Authenticated users can call recommend() via Supabase RPC.
-GRANT EXECUTE ON FUNCTION public.recommend(TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.recommend(TEXT, TEXT) TO authenticated;
 
 -- Anonymous users cannot call recommend() (requires login).
-REVOKE EXECUTE ON FUNCTION public.recommend(TEXT) FROM anon;
+REVOKE EXECUTE ON FUNCTION public.recommend(TEXT, TEXT) FROM anon;
 
 -- =============================================================================
 -- Performance indexes (idempotent -- safe to re-run)

@@ -1,16 +1,21 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Image,
   StyleSheet,
   Animated,
   Easing,
+  Platform,
+  TouchableOpacity,
+  Text,
 } from 'react-native';
 import { Stack, SplashScreen, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Linking from 'expo-linking';
+import { useFonts } from 'expo-font';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { AndroidAutoCaptureProvider } from '../contexts/AndroidAutoCaptureContext';
 import { DemoNotificationProvider } from '../contexts/DemoNotificationContext';
@@ -21,9 +26,57 @@ import { parseAutoCaptureUrl } from '../lib/deep-link';
 SplashScreen.preventAutoHideAsync();
 
 /**
+ * Web-only back button rendered in the Stack header.
+ * Native uses the platform's default back button (chevron + title).
+ * On web, the default back button depends on Ionicons font loading timing,
+ * so we replace it with a plain text button that never has rendering issues.
+ */
+function WebBackButton() {
+  const router = useRouter();
+  return (
+    <TouchableOpacity
+      onPress={() => router.back()}
+      style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4 }}
+      accessibilityRole="button"
+      accessibilityLabel="Go back"
+    >
+      <Text style={{ color: Colors.brandGold, fontSize: 16, fontWeight: '600' }}>
+        ← Back
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
+/**
  * Root layout — wraps the entire app with global providers.
  */
 export default function RootLayout() {
+  // On native: load icon font via expo-font (native bundles don't auto-include it).
+  // On web: +html.tsx injects @font-face with font-display:block from /fonts/Ionicons.ttf
+  //         (a clean path with no @ character that caused 404s on Vercel CDN).
+  //         useFonts is still called so Font.isLoaded('ionicons') returns true,
+  //         which the icon component checks before rendering glyphs.
+  const [fontsLoaded] = useFonts({ ...Ionicons.font });
+
+  // On web, additionally wait for the browser to actually download the font bytes.
+  // useFonts resolves immediately on Safari/Firefox (expo-font skips FontObserver
+  // on those browsers), so we gate on document.fonts.load() which uses the
+  // /fonts/Ionicons.ttf @font-face declared in +html.tsx.
+  const [webFontsReady, setWebFontsReady] = useState(Platform.OS !== 'web');
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !fontsLoaded) return;
+    if (typeof document !== 'undefined' && document.fonts?.load) {
+      document.fonts.load('1em ionicons')
+        .then(() => setWebFontsReady(true))
+        .catch(() => setWebFontsReady(true));
+    } else {
+      setWebFontsReady(true);
+    }
+  }, [fontsLoaded]);
+
+  // Keep the splash screen up until fonts are ready.
+  if (!fontsLoaded || !webFontsReady) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -62,13 +115,13 @@ function RootContent() {
         toValue: 1,
         duration: 600,
         easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
       Animated.spring(logoScale, {
         toValue: 1,
         tension: 60,
         friction: 8,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }),
     ]).start();
 
@@ -79,13 +132,13 @@ function RootContent() {
           toValue: 1,
           duration: 1200,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
         Animated.timing(shimmerOpacity, {
           toValue: 0.3,
           duration: 1200,
           easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
+          useNativeDriver: Platform.OS !== 'web',
         }),
       ])
     );
@@ -102,7 +155,7 @@ function RootContent() {
         toValue: 0,
         duration: 400,
         easing: Easing.in(Easing.ease),
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web',
       }).start();
     }
   }, [loading]);
@@ -137,6 +190,9 @@ function RootContent() {
       <Stack
         screenOptions={{
           headerShown: false,
+          // On web, replace the icon-dependent default back button with a plain
+          // text button so it's always visible regardless of font loading state.
+          ...(Platform.OS === 'web' && { headerLeft: () => <WebBackButton /> }),
         }}
       >
         <Stack.Screen name="(auth)" />
@@ -145,6 +201,20 @@ function RootContent() {
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="onboarding-auto-capture" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding-miles" />
+        <Stack.Screen
+          name="recommend/bills-subcategory"
+          options={{
+            headerShown: true,
+            headerTitle: 'Bills',
+            headerBackTitle: 'Back',
+            headerTintColor: Colors.brandGold,
+            headerStyle: { backgroundColor: Colors.background },
+            headerTitleStyle: {
+              fontWeight: '600',
+              color: Colors.textPrimary,
+            },
+          }}
+        />
         <Stack.Screen
           name="recommend/[category]"
           options={{
