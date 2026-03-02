@@ -13,15 +13,15 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BILLS_SUBCATEGORIES } from '../../../constants/categories';
+import { BILLS_SUBCATEGORIES } from '../../constants/categories';
 import {
   Colors,
   Spacing,
   Typography,
   BorderRadius,
-} from '../../../constants/theme';
-import { track } from '../../../lib/analytics';
-import { useAuth } from '../../../contexts/AuthContext';
+} from '../../constants/theme';
+import { track } from '../../lib/analytics';
+import { useAuth } from '../../contexts/AuthContext';
 
 // ---------------------------------------------------------------------------
 // Per-subcategory gradient palettes (matching bills lilac base)
@@ -124,7 +124,7 @@ export default function BillsSubcategoryScreen() {
   return (
     <>
       <ImageBackground
-        source={require('../../../assets/background.png')}
+        source={require('../../assets/background.png')}
         style={styles.background}
         imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
       >

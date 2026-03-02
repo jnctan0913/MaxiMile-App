@@ -280,6 +280,29 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="bills-subcategory"
+        options={{
+          href: null,
+          headerShown: true,
+          headerTitle: 'Bills',
+          headerTintColor: Colors.brandGold,
+          headerStyle: { backgroundColor: Colors.background },
+          headerTitleStyle: { fontWeight: '600', color: Colors.textPrimary },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4 }}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Text style={{ color: Colors.brandGold, fontSize: 16, fontWeight: '600' }}>
+                ← Back
+              </Text>
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="miles"
         options={{
           title: 'Miles',

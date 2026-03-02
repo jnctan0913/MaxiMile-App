@@ -43,10 +43,6 @@ export default function RecommendLayout() {
       }}
     >
       <Stack.Screen
-        name="bills-subcategory"
-        options={{ headerTitle: 'Bills' }}
-      />
-      <Stack.Screen
         name="[category]"
         options={{ headerTitle: 'Recommendation' }}
       />

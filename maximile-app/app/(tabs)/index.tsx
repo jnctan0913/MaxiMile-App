@@ -122,7 +122,7 @@ export default function RecommendScreen() {
     track('screen_view', { screen: 'recommend', category: categoryId }, user?.id);
     // Bills routes to the subcategory picker first (Sprint 28 — S28.2)
     if (categoryId === 'bills') {
-      router.push('/recommend/bills-subcategory');
+      router.push('/(tabs)/bills-subcategory');
       return;
     }
     router.push(`/recommend/${categoryId}`);
