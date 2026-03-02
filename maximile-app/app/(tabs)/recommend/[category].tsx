@@ -464,7 +464,7 @@ export default function RecommendResultScreen() {
         >
           <SafeAreaView style={styles.safeArea} edges={['bottom']}>
             <View style={styles.zeroMpdContainer}>
-              <Text style={styles.zeroMpdEmoji}>{subcategoryInfo.emoji}</Text>
+              <Ionicons name={subcategoryInfo.icon as any} size={48} color={Colors.brandGold} style={styles.zeroMpdIcon} />
               <Text style={styles.zeroMpdTitle}>{subcategoryInfo.label} Payments</Text>
               {isUtilities ? (
                 <>
@@ -476,12 +476,6 @@ export default function RecommendResultScreen() {
                       All cards earn 0 miles on utilities.
                     </Text>
                     <Text style={styles.zeroMpdBody}>No recommendation available.</Text>
-                  </View>
-                  <View style={styles.zeroMpdException}>
-                    <Ionicons name="information-circle-outline" size={16} color={Colors.textSecondary} />
-                    <Text style={styles.zeroMpdExceptionText}>
-                      Exception: Maybank Horizon earns ~0.16 mpd (limited earning).
-                    </Text>
                   </View>
                 </>
               ) : isEducation ? (
@@ -719,6 +713,18 @@ export default function RecommendResultScreen() {
                         <Text style={styles.contactlessBadgeText}>Requires contactless payment</Text>
                       </View>
                     )}
+                    {subcategory === 'hospital' && topPick.conditions_note?.includes('Private hospital only') && (
+                      <View style={styles.privateHospitalBadge}>
+                        <Ionicons name="business" size={14} color="#8B5CF6" />
+                        <Text style={styles.privateHospitalText}>Private hospital only</Text>
+                      </View>
+                    )}
+                    {subcategory === 'telco' && topPick.conditions_note?.includes('via app') && (
+                      <View style={styles.paidOnlineBadge}>
+                        <Ionicons name="phone-portrait-outline" size={14} color="#D97706" />
+                        <Text style={styles.paidOnlineText}>Pay online / in app</Text>
+                      </View>
+                    )}
                     {healthHubByCardId.has(topPick.card_id) && (
                       <View style={styles.healthHubBadge}>
                         <Ionicons name="medkit" size={14} color="#10B981" />
@@ -808,6 +814,16 @@ export default function RecommendResultScreen() {
                   {item.requires_contactless && (
                     <Text style={styles.altContactless} numberOfLines={1}>
                       Contactless only
+                    </Text>
+                  )}
+                  {subcategory === 'hospital' && item.conditions_note?.includes('Private hospital only') && (
+                    <Text style={styles.altPrivateHospital} numberOfLines={1}>
+                      Private hospital only
+                    </Text>
+                  )}
+                  {subcategory === 'telco' && item.conditions_note?.includes('via app') && (
+                    <Text style={styles.altPaidOnline} numberOfLines={1}>
+                      Pay online / in app
                     </Text>
                   )}
                   {healthHubByCardId.has(item.card_id) && (
@@ -1173,8 +1189,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingBottom: Spacing.xxxl,
   },
-  zeroMpdEmoji: {
-    fontSize: 48,
+  zeroMpdIcon: {
     marginBottom: Spacing.md,
   },
   zeroMpdTitle: {
@@ -1340,6 +1355,33 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 
+  // Private hospital badge (on top pick card)
+  privateHospitalBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: Spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  privateHospitalText: {
+    ...Typography.caption,
+    color: '#7C3AED',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+
+  // Private hospital caption (alt cards)
+  altPrivateHospital: {
+    ...Typography.caption,
+    color: '#8B5CF6',
+    fontSize: 11,
+    marginTop: 2,
+  },
+
   // HealthHub inline badge (on top pick card)
   healthHubBadge: {
     flexDirection: 'row',
@@ -1356,6 +1398,33 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: '#059669',
     fontWeight: '600',
+  },
+
+  // "Pay online / in app" badge (top card — telco)
+  paidOnlineBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(217, 119, 6, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: Spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  paidOnlineText: {
+    ...Typography.caption,
+    color: '#D97706',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+
+  // "Pay online / in app" caption (alt cards — telco)
+  altPaidOnline: {
+    ...Typography.caption,
+    color: '#D97706',
+    fontSize: 11,
+    marginTop: 2,
   },
 
   // HealthHub inline badge (on alternative rows)

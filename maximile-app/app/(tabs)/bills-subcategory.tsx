@@ -269,10 +269,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.4)',
   },
-  emoji: {
-    fontSize: 22,
-  },
-
   tileLabel: {
     fontSize: 16,
     fontWeight: '700',

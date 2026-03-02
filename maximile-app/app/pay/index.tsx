@@ -407,18 +407,20 @@ export default function PayScreen() {
           // =====================================================================
           if (isDemoMode()) {
             // Smart matching: Use mock transaction from user's selected category
+            // but preserve the merchant already shown on the Smart Pay screen
             const mockData = getMockTransaction(selectedCategoryId || undefined);
+            const merchantName = merchant?.name || mockData.merchant;
 
             console.log(
               `[DEMO MODE] Generated mock transaction for category "${selectedCategoryId}":`,
-              mockData.merchant,
+              merchantName,
               mockData.amount
             );
 
             track('auto_capture_handoff', {
               source: 'demo_smart_pay',
               amount: mockData.amount,
-              merchant: mockData.merchant,
+              merchant: merchantName,
               category: selectedCategoryId,
               demo_mode: true,
             }, user?.id);
@@ -427,7 +429,7 @@ export default function PayScreen() {
               pathname: '/auto-capture',
               params: {
                 amount: mockData.amount,
-                merchant: mockData.merchant,
+                merchant: merchantName,
                 card: recommendation
                   ? `${recommendation.bank} ${recommendation.card_name}`
                   : mockData.card,
@@ -449,7 +451,7 @@ export default function PayScreen() {
 
     const sub = AppState.addEventListener('change', handleAppState);
     return () => sub.remove();
-  }, [state, startAutoCaptureHandoff, router, user, selectedCategoryId, recommendation]);
+  }, [state, startAutoCaptureHandoff, router, user, selectedCategoryId, recommendation, merchant]);
 
   // -------------------------------------------------------------------------
   // Auto-capture deep link listener (S16.9)

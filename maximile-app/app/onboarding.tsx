@@ -20,6 +20,7 @@ import { showNetworkErrorAlert, handleSupabaseError } from '../lib/error-handler
 import { track } from '../lib/analytics';
 import type { Card } from '../lib/supabase-types';
 import EligibilityBadge from '../components/EligibilityBadge';
+import CategorySelectionSheet from '../components/CategorySelectionSheet';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -52,6 +53,11 @@ export default function OnboardingScreen() {
   const [existingCardIds, setExistingCardIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // User-selectable card preference sheet state
+  const [prefSheetVisible, setPrefSheetVisible] = useState(false);
+  const [selectableCard, setSelectableCard] = useState<Card | null>(null);
+  const [pendingCardIds, setPendingCardIds] = useState<string | null>(null);
 
   // -----------------------------------------------------------------------
   // Fetch all available cards + pre-select existing user cards
@@ -163,12 +169,27 @@ export default function OnboardingScreen() {
         // Adding more cards from My Cards tab — go back directly
         router.back();
       } else {
-        // Fresh onboarding — proceed to Step 1.5 (auto-capture setup)
+        // Fresh onboarding
         track('onboarding_completed', { cards_count: selectedIds.size }, user.id);
-        router.replace({
-          pathname: '/onboarding-auto-capture',
-          params: { cardIds: JSON.stringify(Array.from(selectedIds)) },
-        });
+        const cardIdsJson = JSON.stringify(Array.from(selectedIds));
+
+        // Check if any selected card has user-selectable bonus categories
+        const foundSelectable = allCards.find(
+          (c) => selectedIds.has(c.id) && c.notes?.includes('self-selected'),
+        );
+
+        if (foundSelectable) {
+          // Show preference sheet before continuing
+          setSelectableCard(foundSelectable);
+          setPendingCardIds(cardIdsJson);
+          setPrefSheetVisible(true);
+        } else {
+          // No selectable cards — go straight to auto-capture setup
+          router.replace({
+            pathname: '/onboarding-auto-capture',
+            params: { cardIds: cardIdsJson },
+          });
+        }
       }
     }
   };
@@ -305,6 +326,48 @@ export default function OnboardingScreen() {
             )}
           </TouchableOpacity>
         </View>
+        {/* Category preference sheet for user-selectable cards */}
+        {selectableCard && (
+          <CategorySelectionSheet
+            visible={prefSheetVisible}
+            onDismiss={() => {
+              // Treat dismiss as skip — continue onboarding
+              setPrefSheetVisible(false);
+              track('onboarding_card_preferences_skipped', {
+                card_id: selectableCard.id,
+              }, user?.id);
+              router.replace({
+                pathname: '/onboarding-auto-capture',
+                params: { cardIds: pendingCardIds || JSON.stringify([]) },
+              });
+            }}
+            cardId={selectableCard.id}
+            cardName={selectableCard.name}
+            currentSelections={[]}
+            maxSelections={2}
+            onSave={async (selectedCategories) => {
+              if (!user) return;
+              await supabase.from('user_card_preferences').upsert(
+                {
+                  user_id: user.id,
+                  card_id: selectableCard.id,
+                  selected_categories: selectedCategories,
+                  max_selections: 2,
+                },
+                { onConflict: 'user_id,card_id' },
+              );
+              track('onboarding_card_preferences_saved', {
+                card_id: selectableCard.id,
+                selected_categories: selectedCategories,
+              }, user.id);
+              setPrefSheetVisible(false);
+              router.replace({
+                pathname: '/onboarding-auto-capture',
+                params: { cardIds: pendingCardIds || JSON.stringify([]) },
+              });
+            }}
+          />
+        )}
       </SafeAreaView>
     </ImageBackground>
   );

@@ -81,14 +81,15 @@ export default function OnboardingAutoCaptureScreen() {
       track('onboarding_auto_capture_cta_tapped', { platform: Platform.OS }, user.id);
     }
 
-    if (Platform.OS === 'ios') {
-      // iOS: Route to Shortcuts-based auto-capture setup
+    if (Platform.OS === 'ios' || Platform.OS === 'web') {
+      // iOS native or web PWA (Safari on iOS): Route to Shortcuts-based setup
+      // The shortcut download works on web via direct file download
       router.replace({ pathname: '/auto-capture-setup', params: { skipIntro: '1' } });
     } else if (Platform.OS === 'android') {
       // Android: Route to notification-based auto-capture setup (Sprint 17)
       router.replace('/android-auto-capture-setup');
     } else {
-      // Fallback for other platforms (web, etc.)
+      // Fallback for other platforms
       handleSkip();
     }
   };
@@ -111,9 +112,9 @@ export default function OnboardingAutoCaptureScreen() {
     });
   };
 
-  const subtitle = Platform.OS === 'ios'
-    ? 'Pay with Apple Pay, and MaxiMile logs it for you.'
-    : 'MaxiMile reads your banking notifications to log transactions automatically.';
+  const subtitle = Platform.OS === 'android'
+    ? 'MaxiMile reads your banking notifications to log transactions automatically.'
+    : 'Pay with Apple Pay, and MaxiMile logs it for you.';
 
   return (
     <ImageBackground

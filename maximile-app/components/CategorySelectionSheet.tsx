@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomSheet from './BottomSheet';
-import { CATEGORIES, getCategoryById } from '../constants/categories';
 import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
 
 // ---------------------------------------------------------------------------
@@ -20,13 +19,34 @@ export interface CategorySelectionSheetProps {
   onDismiss: () => void;
   cardId: string;
   cardName: string;
-  currentSelections: string[]; // currently selected category IDs
+  currentSelections: string[]; // currently selected UOB category names
   maxSelections: number;       // default 2
   onSave: (selectedCategories: string[]) => void;
 }
 
-// The 5 selectable bonus categories for UOB Lady's Solitaire (MaxiMile IDs)
-const SELECTABLE_CATEGORIES = ['dining', 'transport', 'groceries', 'travel', 'general'];
+// ---------------------------------------------------------------------------
+// UOB Lady's Card selectable categories (per UOB FAQ faqs-final.pdf)
+// ---------------------------------------------------------------------------
+// These are the official UOB Preferred Rewards Category names.
+// Stored as-is in user_card_preferences.selected_categories.
+// The recommend() function maps MaxiMile categories → these names.
+// ---------------------------------------------------------------------------
+
+interface UobCategory {
+  name: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconFilled: keyof typeof Ionicons.glyphMap;
+}
+
+const UOB_SELECTABLE_CATEGORIES: UobCategory[] = [
+  { name: 'Beauty & Wellness', icon: 'flower-outline',       iconFilled: 'flower' },
+  { name: 'Dining',            icon: 'restaurant-outline',   iconFilled: 'restaurant' },
+  { name: 'Entertainment',     icon: 'film-outline',         iconFilled: 'film' },
+  { name: 'Family',            icon: 'cart-outline',          iconFilled: 'cart' },
+  { name: 'Fashion',           icon: 'shirt-outline',        iconFilled: 'shirt' },
+  { name: 'Transport',         icon: 'car-outline',          iconFilled: 'car' },
+  { name: 'Travel',            icon: 'airplane-outline',     iconFilled: 'airplane' },
+];
 
 // ---------------------------------------------------------------------------
 // Component
@@ -55,10 +75,10 @@ export default function CategorySelectionSheet({
     }
   }, [visible, currentSelections]);
 
-  const handleToggle = (categoryId: string) => {
-    if (selected.includes(categoryId)) {
+  const handleToggle = (categoryName: string) => {
+    if (selected.includes(categoryName)) {
       // Deselect
-      setSelected((prev) => prev.filter((id) => id !== categoryId));
+      setSelected((prev) => prev.filter((n) => n !== categoryName));
     } else {
       // Check max limit
       if (selected.length >= maxSelections) {
@@ -68,11 +88,11 @@ export default function CategorySelectionSheet({
         );
         return;
       }
-      setSelected((prev) => [...prev, categoryId]);
+      setSelected((prev) => [...prev, categoryName]);
     }
   };
 
-  const canSave = selected.length === maxSelections;
+  const canSave = selected.length > 0 && selected.length <= maxSelections;
 
   const handleSave = () => {
     if (!canSave) return;
@@ -92,21 +112,18 @@ export default function CategorySelectionSheet({
 
       {/* Category chips */}
       <View style={styles.chipWrap}>
-        {SELECTABLE_CATEGORIES.map((catId) => {
-          const cat = getCategoryById(catId);
-          if (!cat) return null;
-
-          const isActive = selected.includes(catId);
+        {UOB_SELECTABLE_CATEGORIES.map((cat) => {
+          const isActive = selected.includes(cat.name);
 
           return (
             <TouchableOpacity
-              key={catId}
+              key={cat.name}
               style={[styles.categoryChip, isActive && styles.categoryChipActive]}
-              onPress={() => handleToggle(catId)}
+              onPress={() => handleToggle(cat.name)}
               activeOpacity={0.7}
             >
               <Ionicons
-                name={(isActive ? cat.iconFilled : cat.icon) as keyof typeof Ionicons.glyphMap}
+                name={isActive ? cat.iconFilled : cat.icon}
                 size={16}
                 color={isActive ? Colors.brandGold : Colors.brandCharcoal}
               />
@@ -156,7 +173,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
 
-  // Category chips — flex-wrap grid (same pattern as log.tsx)
+  // Category chips — flex-wrap grid
   chipWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',

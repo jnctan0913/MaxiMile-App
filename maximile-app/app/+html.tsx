@@ -21,6 +21,17 @@ export default function Root({ children }: { children: React.ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
+
+        {/* PWA: iOS standalone mode — hides Safari browser bar on home screen */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="MaxiMile" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+
+        {/* PWA: Android + desktop */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#F5F0E8" />
+
         <ScrollViewStyleReset />
         {/* Preload the font so the browser fetches it at high priority */}
         <link

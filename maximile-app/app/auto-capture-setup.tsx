@@ -299,26 +299,28 @@ export default function AutoCaptureSetupScreen() {
     setDownloading(true);
     try {
       if (Platform.OS === 'web') {
-        // Web: use the native iOS share sheet (Web Share API) so the user
-        // gets a slide-up widget with "Open in Shortcuts" etc., just like
-        // a native app. Falls back to opening in a new tab on browsers
-        // that don't support navigator.share with files.
+        // Web: trigger a direct download so Safari shows the native
+        // "Open in Shortcuts" banner. navigator.share() with File objects
+        // shows the share sheet but iOS Shortcuts doesn't register as a
+        // share target — only direct downloads work reliably.
         const [asset] = await Asset.loadAsync(SHORTCUT_ASSET);
         const response = await fetch(asset.uri);
         const blob = await response.blob();
-        const file = new File([blob], 'MaxiMile.shortcut', {
-          type: 'application/x-apple-shortcuts',
-        });
 
-        if (typeof navigator !== 'undefined' && navigator.canShare?.({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'MaxiMile Shortcut',
-          });
-        } else {
-          // Fallback: open in new tab for non-Safari browsers
-          window.open(asset.uri, '_blank');
-        }
+        const blobUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = blobUrl;
+        anchor.download = 'MaxiMile.shortcut';
+        anchor.style.display = 'none';
+        document.body.appendChild(anchor);
+        anchor.click();
+
+        // Clean up after a short delay to allow download to start
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+          document.body.removeChild(anchor);
+        }, 1000);
+
         setShortcutAdded(true);
         track('shortcut_downloaded' as any, { method: 'web_download' }, user?.id);
       } else {
@@ -388,7 +390,7 @@ export default function AutoCaptureSetupScreen() {
       <View style={styles.glassCard}>
         <Text style={styles.instructionHeader}>Quick setup:</Text>
         {[
-          'Tap "Add Shortcut" above → Select "Shortcuts"',
+          'Tap "Add Shortcut" above → Open the downloaded file',
           'In Shortcuts app → tap "+ Add Shortcut"',
           'Open Automation tab → tap "+"',
           'Choose: "When I tap a Wallet Card or Pass"',
