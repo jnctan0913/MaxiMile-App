@@ -359,6 +359,19 @@ export default function RecommendResultScreen() {
       }));
   }, [subcategory, results, cardSlugs]);
 
+  // Quick lookup: card_id → HealthHub info (for inline badges)
+  const healthHubByCardId = useMemo(() => {
+    const map = new Map<string, HealthHubCard>();
+    if (subcategory !== 'hospital') return map;
+    for (const r of results) {
+      const slug = cardSlugs[r.card_id];
+      if (slug && slug in HEALTHHUB_ELIGIBLE) {
+        map.set(r.card_id, HEALTHHUB_ELIGIBLE[slug]);
+      }
+    }
+    return map;
+  }, [subcategory, results, cardSlugs]);
+
   const toggleSteps = useCallback((cardId: string) => {
     setExpandedSteps((prev) => ({ ...prev, [cardId]: !prev[cardId] }));
   }, []);
@@ -583,8 +596,8 @@ export default function RecommendResultScreen() {
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
             <View>
-              {/* HealthHub personalization for Hospital subcategory */}
-              {subcategory === 'hospital' && healthHubMatches.length > 0 && (
+              {/* HealthHub tip for Hospital subcategory (no eligible cards) */}
+              {false && subcategory === 'hospital' && healthHubMatches.length > 0 && (
                 <>
                   {healthHubMatches.map((match) => (
                     <View key={`hh-${match.card_id}`} style={styles.healthHubCard}>
@@ -706,6 +719,14 @@ export default function RecommendResultScreen() {
                         <Text style={styles.contactlessBadgeText}>Requires contactless payment</Text>
                       </View>
                     )}
+                    {healthHubByCardId.has(topPick.card_id) && (
+                      <View style={styles.healthHubBadge}>
+                        <Ionicons name="medkit" size={14} color="#10B981" />
+                        <Text style={styles.healthHubBadgeText}>
+                          Pay via HealthHub → {healthHubByCardId.get(topPick.card_id)!.earnRate} mpd
+                        </Text>
+                      </View>
+                    )}
                     {hasTopCap ? (
                       <View style={styles.topCapSection}>
                         <Text style={styles.topCapLabel}>Remaining Cap</Text>
@@ -788,6 +809,14 @@ export default function RecommendResultScreen() {
                     <Text style={styles.altContactless} numberOfLines={1}>
                       Contactless only
                     </Text>
+                  )}
+                  {healthHubByCardId.has(item.card_id) && (
+                    <View style={styles.healthHubBadgeInline}>
+                      <Ionicons name="medkit" size={12} color="#10B981" />
+                      <Text style={styles.healthHubBadgeInlineText}>
+                        HealthHub → {healthHubByCardId.get(item.card_id)!.earnRate} mpd
+                      </Text>
+                    </View>
                   )}
                 </View>
                 <Text style={styles.altRate}>
@@ -1309,5 +1338,41 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.textPrimary,
     lineHeight: 18,
+  },
+
+  // HealthHub inline badge (on top pick card)
+  healthHubBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: Spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  healthHubBadgeText: {
+    ...Typography.caption,
+    color: '#059669',
+    fontWeight: '600',
+  },
+
+  // HealthHub inline badge (on alternative rows)
+  healthHubBadgeInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginTop: 2,
+    alignSelf: 'flex-start',
+  },
+  healthHubBadgeInlineText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#059669',
   },
 });
