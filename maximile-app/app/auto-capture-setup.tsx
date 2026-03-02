@@ -21,6 +21,7 @@ import * as ExpoLinking from 'expo-linking';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Asset } from 'expo-asset';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Colors,
@@ -30,6 +31,9 @@ import {
   Shadows,
 } from '../constants/theme';
 import { track } from '../lib/analytics';
+
+/** AsyncStorage key indicating the user has completed shortcut setup */
+export const SHORTCUT_SETUP_COMPLETE_KEY = 'auto_capture_shortcut_setup_complete';
 
 // Bundled shortcut file — create once on iPhone/iPad, then bundle with app
 // See BUNDLE_SHORTCUT_FILE.md for instructions on creating the file
@@ -295,14 +299,26 @@ export default function AutoCaptureSetupScreen() {
     setDownloading(true);
     try {
       if (Platform.OS === 'web') {
-        // Web: trigger browser file download using an anchor element
+        // Web: use the native iOS share sheet (Web Share API) so the user
+        // gets a slide-up widget with "Open in Shortcuts" etc., just like
+        // a native app. Falls back to opening in a new tab on browsers
+        // that don't support navigator.share with files.
         const [asset] = await Asset.loadAsync(SHORTCUT_ASSET);
-        const link = document.createElement('a');
-        link.href = asset.uri;
-        link.download = 'MaxiMile.shortcut';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const response = await fetch(asset.uri);
+        const blob = await response.blob();
+        const file = new File([blob], 'MaxiMile.shortcut', {
+          type: 'application/x-apple-shortcuts',
+        });
+
+        if (typeof navigator !== 'undefined' && navigator.canShare?.({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'MaxiMile Shortcut',
+          });
+        } else {
+          // Fallback: open in new tab for non-Safari browsers
+          window.open(asset.uri, '_blank');
+        }
         setShortcutAdded(true);
         track('shortcut_downloaded' as any, { method: 'web_download' }, user?.id);
       } else {
@@ -396,7 +412,11 @@ export default function AutoCaptureSetupScreen() {
       <TouchableOpacity
         style={styles.primaryButton}
         activeOpacity={0.8}
-        onPress={() => setStep(1)}
+        onPress={() => {
+          AsyncStorage.setItem(SHORTCUT_SETUP_COMPLETE_KEY, 'true').catch(() => {});
+          track('shortcut_setup_confirmed' as any, {}, user?.id);
+          setStep(1);
+        }}
       >
         <LinearGradient
           colors={['#D4B96A', Colors.brandGold, '#B8953F']}

@@ -1,11 +1,11 @@
 # Sprint Plan: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 13.0
+**Version**: 14.0
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
 **Source**: PRD v2.3, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0
-**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprints 21-22 Planned (Recommendation Accuracy), Sprints 23-24 Planned (Card Expansion 22→29)
-**Change Log**: v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
+**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprints 21-22 Planned (Recommendation Accuracy), Sprints 23-24 Planned (Card Expansion 22→29), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01)
+**Change Log**: v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
 
@@ -105,6 +105,8 @@ All 5 agents work **simultaneously across 4 phases** with staggered starts:
 | **E12** | Transaction Auto-Capture | F26, F27 | P1 | Sprint 16–17 |
 | **E13** | Demo Mode | F28 | P1 | Sprint 18 (Shipped) |
 | **E14** | Push Notifications for Rate Alerts | New Feature | P1 | Sprint 19–22 |
+| **E15** | Earn Rate Data Integrity | F34, F35 | P0 | Sprint 25–27 |
+| **E16** | Bills Subcategory Intelligence | F36 | P1 | Sprint 27–28 |
 
 **Critical Path**: F5 (Rules DB) → F1 (Card Setup) → F2 (Recommendation) → F4 (Transaction Log) → F3 (Cap Tracker)
 
@@ -4868,7 +4870,7 @@ S22.1 (recommend() RPC) ──→ S22.2 (Nudge UI)
 
 **Duration**: 1 week (5 working days)
 **Sprint Goal**: Add 6 straightforward miles cards to the database (DBS Vantage, OCBC Voyage, SC Journey, SC Beyond, HSBC Premier MC, Maybank XL Rewards) — all follow existing data patterns with no new UX required.
-**Epic**: E15 — Card Database Expansion (F33)
+**Epic**: E10 — Card Coverage Expansion & Rate Monitoring (F33)
 **PRD Feature**: F33 (P1, RICE 4050)
 **Phase**: v2.3 — Card Expansion
 **Predecessor**: Sprint 22 (F31 min spend enforcement must be complete — DBS Vantage and Maybank XL have min spend conditions)
@@ -5193,7 +5195,7 @@ S23.3 (SC Journey) ────────────────────�
 
 **Duration**: 1 week (5 working days)
 **Sprint Goal**: Add UOB Lady's Solitaire with user-selectable bonus categories — the only card in the database where the user chooses which categories earn the bonus rate, requiring new UX and recommend() logic.
-**Epic**: E15 — Card Database Expansion (F33)
+**Epic**: E10 — Card Coverage Expansion & Rate Monitoring (F33)
 **PRD Feature**: F33 (P1, RICE 4050)
 **Phase**: v2.3 — Card Expansion
 **Predecessor**: Sprint 23 (28-card database must be stable before adding UX complexity)
@@ -5688,3 +5690,685 @@ GitHub Actions (weekly or manual trigger)
 5. Complete Sprints 21-22 (Recommendation Accuracy)
 6. Begin Sprint 23 — 6 straightforward cards (Day 1: flat-rate cards first)
 7. Sprint 24 begins after Sprint 23 ships — UOB Lady's Solitaire with category selection UX
+8. **Sprint 25 (P0 Hotfix)** — Apply 5 verified earn rate corrections from MileLion gap analysis (see `docs/technical/DATA_CORRECTION_PLAN.md`). These fixes address wrong recommendations currently being served to users.
+9. **Sprints 26-28** — Telco bonus rules, bills subcategory data expansion, bills subcategory UI picker
+
+---
+
+## Sprint 25: "Earn Rate Hotfix" (MileLion Gap Analysis — Phase 1 P0 Data Corrections)
+
+**Duration**: 1 week (5 working days)
+**Sprint Goal**: Fix 5 verified wrong earn rates discovered via MileLion 2026 gap analysis. The current database causes the recommendation engine to confidently recommend the wrong card in 5 documented scenarios. These are SQL-only corrections — no UI changes.
+**Epic**: E15 — Earn Rate Data Integrity
+**PRD Features**: F34 (P0 — Earn Rate Accuracy Corrections)
+**Phase**: v2.3 — Data Integrity
+**Predecessor**: Sprint 24 (29-card DB complete; corrections apply cleanly to full dataset)
+**Source of Truth**: `docs/technical/DATA_CORRECTION_PLAN.md` Part 1
+
+> **P0 CRITICAL**: The current DB has 5 verified wrong earn rates. Until these are fixed, the recommendation engine is producing incorrect results for bills (all 29 cards), dining/transport/online (Card 5), transport/online (Card 20), transport (Card 6), and groceries (Card 7).
+>
+> **QA process**: All Phase 1 fixes must follow the same QA process as any earn rule change — update `all_cards.sql`, run `recommendation.test.ts`, and manually verify against bank T&Cs before merging.
+
+---
+
+### Sprint 25 — Definition of Ready (DoR) Checklist
+
+Before any story enters the sprint, it must satisfy:
+
+- [ ] User story has clear "As a... I want... So that..." statement
+- [ ] Acceptance criteria defined and reviewed by PM + Data Engineer
+- [ ] T-shirt size estimated by the team
+- [ ] Sprint 24 complete (all 29 cards stable in DB)
+- [ ] MileLion source for each correction confirmed (URL + date of verification)
+- [ ] SQL correction statements drafted and peer-reviewed before merge
+- [ ] `recommendation.test.ts` test cases written for each affected card+category pair
+
+### Sprint 25 — Definition of Done (DoD) Checklist
+
+A story is "Done" when:
+
+- [ ] `all_cards.sql` updated with corrected earn rate
+- [ ] Database migration written and applied to staging
+- [ ] `recommendation.test.ts` passes for affected card+category (new test added where missing)
+- [ ] Manual spot-check: recommendation results match expected ranked order post-fix
+- [ ] Verified against MileLion 2026 source — link recorded in PR description
+- [ ] No regressions in existing test suite
+- [ ] Code committed to main branch and peer-reviewed
+
+---
+
+### Sprint 25 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S25.1** | Fix bills earn rate: set 0 mpd on utilities for all 29 cards | P0 | M | 3 | Data Engineer |
+| **S25.2** | Fix Card 5 KrisFlyer UOB: remove incorrect 2 mpd contactless bonus; revert to 1.2 mpd flat | P0 | S | 2 | Data Engineer |
+| **S25.3** | Fix Card 20 UOB PPV: add missing 4 mpd rules for transport (SimplyGo) and online spend | P0 | S | 2 | Data Engineer |
+| **S25.4** | Fix Card 6 HSBC Revolution: add 4 mpd contactless transport (Revo Up promo); fix cap $1,000 → $1,500 | P0 | S | 2 | Data Engineer |
+| **S25.5** | Fix Card 7 Amex KrisFlyer Ascend: correct groceries 2 mpd → 1.1 mpd base rate | P0 | XS | 1 | Data Engineer |
+| **S25.6** | Write/update recommendation.test.ts for all 5 corrected scenarios | P0 | S | 2 | Tester |
+| **S25.7** | Post-fix verification: spot-check recommendations for bills, Card 5, Card 20, Card 6, Card 7 | P0 | S | 1 | Tester |
+| **Total** | | | | **13** | |
+
+---
+
+### Sprint 25 — User Story Details
+
+#### S25.1: Fix Bills Earn Rate — 0 mpd for Utilities (All 29 Cards)
+
+> **As a** user asking "which card should I use for my SP Services bill?",
+> **I want** the recommendation engine to return 0 mpd for utilities across all cards,
+> **So that** I am not incorrectly directed to use a card that earns 0 miles on utility payments.
+
+**Priority**: P0 (Critical data correction — affects all 29 cards)
+**T-Shirt Size**: M (Medium) — ~1.5 days (29-row SQL update + conditions_note update)
+**Feature**: F34
+
+**Background**: All 29 cards currently show `bills` earn_rate_mpd = their base_rate_mpd (e.g., BOC Elite 1.5 mpd, SC Beyond 1.5 mpd). In reality, MCC 4900 (utilities: SP Services, Geneco, Sembcorp) earns **0 mpd** on all major Singapore bank cards. The engine currently recommends "use BOC Elite for 1.5 mpd on your utilities bill" — which is factually wrong.
+
+**Exception**: Maybank Horizon (Card 16) may earn 0.16 mpd on utilities — confirm before applying this fix to Card 16.
+
+**Correction**:
+- Set `earn_rate_mpd = 0` for `bills` on all 29 cards (pending Maybank Horizon confirmation)
+- Add MCC 4900 to each card's `exclusions` table entry
+- Update `conditions_note` to: `"Utilities (electricity, water) earn 0 mpd — excluded by bank. See subcategory for telco rates."`
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | The bills earn rate migration runs | I call `recommend('bills')` | All cards return 0 mpd for utilities (or 0.16 mpd for Maybank Horizon if confirmed) |
+| AC2 | Bills earn rates are corrected | I query `earn_rules WHERE category_id='bills'` | All 29 rows have `earn_rate_mpd = 0` (or 0.16 for Maybank Horizon) |
+| AC3 | MCC 4900 is in exclusions | I query `exclusions WHERE mcc_code='4900'` | 29 rows exist, one per card |
+| AC4 | Bills correction is live | I verify `conditions_note` for Card 1 (DBS Altitude) bills | Note reads "Utilities (electricity, water) earn 0 mpd — excluded by bank. See subcategory for telco rates." |
+| AC5 | All other categories unchanged | I call `recommend('dining')` | Results identical to pre-fix (no regressions) |
+
+---
+
+#### S25.2: Fix Card 5 KrisFlyer UOB — Remove Incorrect 2 mpd Contactless Bonus
+
+> **As a** user who holds the KrisFlyer UOB Credit Card,
+> **I want** recommendations to reflect my card's true 1.2 mpd flat rate for local spend,
+> **So that** I am not incorrectly told I earn 2 mpd on dining, transport, or online purchases.
+
+**Priority**: P0 (Critical — Card 5 is being over-recommended across 3 high-frequency categories)
+**T-Shirt Size**: S (Small) — ~0.5 day (3-row SQL update)
+**Feature**: F34
+
+**Background**: The DB currently shows Card 5 earning 2 mpd with `{"contactless": true}` on dining, transport, and online. This is wrong — the 2 mpd contactless bonus belongs to Card 22 (UOB Visa Signature) and was incorrectly applied to Card 5. KrisFlyer UOB earns 1.2 mpd flat on all local spend except SIA Group (3 mpd).
+
+**Correction** (3 rows in `earn_rules`):
+```
+dining:    1.2 mpd, is_bonus=FALSE, {}
+transport: 1.2 mpd, is_bonus=FALSE, {}
+online:    1.2 mpd, is_bonus=FALSE, {}
+```
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Card 5 earn rules are corrected | I call `recommend('dining')` | Card 5 appears with 1.2 mpd (not 2 mpd); ranked below 4 mpd cards |
+| AC2 | Card 5 earn rules are corrected | I call `recommend('transport')` | Card 5 appears with 1.2 mpd (not 2 mpd) |
+| AC3 | Card 5 earn rules are corrected | I call `recommend('online')` | Card 5 appears with 1.2 mpd (not 2 mpd) |
+| AC4 | is_bonus corrected | I query `earn_rules WHERE card_id='card-05'` | `is_bonus = FALSE` for dining/transport/online; conditions JSONB is `{}` |
+| AC5 | Card 22 unchanged | I query `earn_rules WHERE card_id='card-22'` | Card 22 retains 2 mpd contactless bonus (no regression) |
+
+---
+
+#### S25.3: Fix Card 20 UOB PPV — Add Missing 4 mpd Transport and Online Rules
+
+> **As a** user who holds the UOB Preferred Platinum Visa,
+> **I want** the app to recognise that my card earns 4 mpd on mobile contactless transport and online spend,
+> **So that** UOB PPV appears in my top recommendations for transport and online (not just dining).
+
+**Priority**: P0 (Critical — Card 20 severely under-recommended for transport and online)
+**T-Shirt Size**: S (Small) — ~0.5 day (2 INSERT rows + 1 cap UPDATE)
+**Feature**: F34
+
+**Correction**: Add two missing earn_rule rows and update shared cap scope:
+```sql
+-- Add transport bonus rule
+('card-20', 'transport', 4.0, TRUE,
+ '{"min_spend_monthly": 600, "contactless": true}',
+ 'Earn 4 mpd (10X UNI$) on mobile contactless transport incl. SimplyGo. Min spend $600/month. Cap $1,000/month shared with dining and online.', NULL),
+
+-- Add online bonus rule
+('card-20', 'online', 4.0, TRUE,
+ '{"min_spend_monthly": 600}',
+ 'Earn 4 mpd (10X UNI$) on online spend. Min spend $600/month. Cap $1,000/month shared with dining and transport.', NULL)
+```
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Card 20 transport rule added | I call `recommend('transport')` | Card 20 appears in top-3 at 4 mpd (was missing entirely) |
+| AC2 | Card 20 online rule added | I call `recommend('online')` | Card 20 appears in top-3 at 4 mpd (was showing 0.4 mpd) |
+| AC3 | Conditions correct | I query Card 20 transport earn_rule | `conditions = {"min_spend_monthly": 600, "contactless": true}`, `is_bonus = TRUE` |
+| AC4 | Dining rule unchanged | I call `recommend('dining')` | Card 20 still shows 4 mpd dining (no regression) |
+| AC5 | Shared cap noted | I view Card 20 detail screen | Cap displayed as "$1,000/month combined across dining, transport, online" |
+
+---
+
+#### S25.4: Fix Card 6 HSBC Revolution — Add 4 mpd Transport (Revo Up) + Fix Cap
+
+> **As a** user who holds the HSBC Revolution card with the Revo Up promotion active,
+> **I want** the app to show me 4 mpd for contactless transport and the correct $1,500 monthly cap,
+> **So that** I am not leaving miles on the table by using a different card for transport.
+
+**Priority**: P0 (Critical — Card 6 missing transport bonus; cap is understated by $500/month)
+**T-Shirt Size**: S (Small) — ~0.5 day (1 earn_rule UPDATE + 1 cap UPDATE)
+**Feature**: F34
+
+**Correction**:
+```sql
+-- Update transport to 4 mpd contactless (Revo Up promo, valid to 31 Mar 2026)
+UPDATE earn_rules SET earn_rate_mpd=4.0, is_bonus=TRUE,
+  conditions='{"contactless": true}',
+  conditions_note='Earn 4 mpd on contactless transport (Revo Up promo, valid to 31 Mar 2026). Reverts to 0.4 mpd after promo ends.'
+WHERE card_id='card-06' AND category_id='transport';
+
+-- Fix cap from $1,000 to $1,500
+UPDATE caps SET monthly_cap_amount=1500.00,
+  notes='Revo Up promo cap $1,500/month across dining, online, transport. Valid to 31 Mar 2026. Reverts to $1,000 after.'
+WHERE card_id='card-06';
+```
+
+**Note**: Both corrections carry a promo expiry of 31 March 2026. Add a backlog item to revert both after April 2026.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Card 6 transport rule updated | I call `recommend('transport')` | Card 6 appears in top-3 at 4 mpd contactless (was 0.4 mpd) |
+| AC2 | Cap corrected | I query `caps WHERE card_id='card-06'` | `monthly_cap_amount = 1500.00` |
+| AC3 | Promo noted | I view Card 6 conditions_note for transport | Note references "Revo Up promo, valid to 31 Mar 2026" |
+| AC4 | Other Card 6 categories unchanged | I call `recommend('dining')` | Card 6 dining result unchanged at 4 mpd |
+
+---
+
+#### S25.5: Fix Card 7 Amex KrisFlyer Ascend — Correct Groceries 2 mpd → 1.1 mpd
+
+> **As a** user who holds the Amex KrisFlyer Ascend card,
+> **I want** the app to reflect that my card earns only 1.1 mpd (base rate) at supermarkets,
+> **So that** I am not misled into using my Amex Ascend for groceries when better options exist.
+
+**Priority**: P0 (Critical — Card 7 over-recommended for groceries at 2 mpd vs true 1.1 mpd)
+**T-Shirt Size**: XS (Extra Small) — ~2 hours (1-row SQL update)
+**Feature**: F34
+
+**Correction**:
+```sql
+UPDATE earn_rules SET earn_rate_mpd=1.1, is_bonus=FALSE, conditions='{}'
+WHERE card_id='card-07' AND category_id='groceries';
+```
+
+**Background**: The 2 mpd bonus on Card 7 applies to dining and travel only. Supermarkets earn base rate 1.1 mpd.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Card 7 groceries corrected | I call `recommend('groceries')` | Card 7 shows 1.1 mpd (not 2 mpd); ranked below 4 mpd grocery cards |
+| AC2 | is_bonus corrected | I query Card 7 groceries earn_rule | `earn_rate_mpd=1.1`, `is_bonus=FALSE` |
+| AC3 | Dining/travel unchanged | I call `recommend('dining')` | Card 7 dining result unchanged (no regression) |
+
+---
+
+#### S25.6: Write/Update recommendation.test.ts for All 5 Corrected Scenarios
+
+> **As a** developer merging earn rate corrections,
+> **I want** automated tests that validate the expected output for each corrected card+category pair,
+> **So that** future data changes cannot silently reintroduce wrong rates.
+
+**Priority**: P0 (Required gate before merging any S25.1–S25.5 fix)
+**T-Shirt Size**: S (Small) — ~1 day
+**Feature**: F34
+
+**Test cases to add or update in `recommendation.test.ts`**:
+
+| Test ID | Input | Expected output |
+|---------|-------|-----------------|
+| T25.A | `recommend('bills')` | Top result is NOT a 0 mpd card promoted above Maybank Horizon; all 29 cards return 0 mpd except Maybank Horizon (pending confirmation) |
+| T25.B | `recommend('dining')` with Card 5 in portfolio | Card 5 ranked at 1.2 mpd (not 2 mpd) |
+| T25.C | `recommend('transport')` with Card 20 in portfolio | Card 20 appears at 4 mpd (was absent) |
+| T25.D | `recommend('online')` with Card 20 in portfolio | Card 20 appears at 4 mpd (was 0.4 mpd) |
+| T25.E | `recommend('transport')` with Card 6 in portfolio | Card 6 appears at 4 mpd contactless |
+| T25.F | `recommend('groceries')` with Card 7 in portfolio | Card 7 ranked at 1.1 mpd (not 2 mpd) |
+
+---
+
+#### S25.7: Post-Fix Verification Spot-Check
+
+> **As a** QA engineer,
+> **In order to** confirm that all 5 P0 data corrections produce correct recommendations end-to-end,
+> **I want** to manually verify the recommendation output for each corrected scenario against the MileLion 2026 source.
+
+**Priority**: P0 (Release gate)
+**T-Shirt Size**: S (Small) — ~3 hours
+**Feature**: F34
+
+**Verification Checklist** (from `DATA_CORRECTION_PLAN.md`):
+- [ ] Bills recommendation returns 0 mpd for a test user paying utilities
+- [ ] Card 5 KrisFlyer UOB no longer appears top-3 for dining (should be ~1.2 mpd, beaten by 4 mpd cards)
+- [ ] Card 20 UOB PPV appears in top-3 for transport and online at 4 mpd
+- [ ] Card 6 HSBC Revolution appears in top-3 for transport at 4 mpd contactless
+- [ ] Card 7 Amex Ascend no longer appears top for groceries (should be 1.1 mpd)
+- [ ] All existing `recommendation.test.ts` cases pass (no regressions)
+
+---
+
+### Sprint 25 — Dependencies Map
+
+```
+S25.6 (Tests) ──────────────────────────────────────────────────────────────────────── Gate for merge
+     ↑                                                                                       ↓
+S25.1 (Bills 0mpd fix) ──┐                                                           S25.7 (Spot-check)
+S25.2 (Card 5 fix) ──────┤
+S25.3 (Card 20 fix) ─────┤──── all_cards.sql migration drafted → peer review → merge ──────┘
+S25.4 (Card 6 fix) ──────┤
+S25.5 (Card 7 fix) ──────┘
+
+Sprint 24 (29-card DB stable) ─── Hard prerequisite ───── Sprint 25 begins
+```
+
+### Sprint 25 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Maybank Horizon (Card 16) utility rate unconfirmed | Medium | Low | Apply 0 mpd to Card 16 with a TODO comment; confirm separately and patch if 0.16 mpd is correct |
+| HSBC Revo Up promo ends before sprint completes | Low | Low | Promo valid to 31 Mar 2026; note expiry in conditions_note; add Apr 2026 revert to backlog |
+| Test suite breaks on bills change (expects base rate) | Medium | High | Update test expectations as part of S25.6 before merging S25.1 |
+| Card 20 shared cap scope logic untested | Medium | Medium | Add explicit cap-deduction integration test for dining+transport+online combined cap |
+
+### Sprint 25 — Schedule
+
+| Day | Focus | Exit Criteria |
+|-----|-------|---------------|
+| **Day 1** | S25.1 (Bills 0 mpd) + S25.6 test scaffolding | Migration written; failing tests written for all 5 fixes |
+| **Day 2** | S25.2 (Card 5) + S25.3 (Card 20) corrections | SQL drafted; T25.B/C/D passing |
+| **Day 3** | S25.4 (Card 6) + S25.5 (Card 7) corrections | SQL drafted; T25.E/F passing |
+| **Day 4** | S25.6 finalize tests + peer review migrations | All 6 test cases green; migrations reviewed |
+| **Day 5** | S25.7 spot-check + deploy to staging | All verification checklist items ticked; ready for prod merge |
+
+---
+
+**Sprint 25 Status**: ✅ COMPLETED — v1.4.0 (earn rate P0 fixes applied 2026-03-01)
+
+---
+
+## Sprint 26: "Telco Bonus Rules" (MileLion Gap Analysis — Phase 2 P1 Missing Data)
+
+**Duration**: 1 week (5 working days)
+**Sprint Goal**: Add 4 mpd telco one-off online payment earn rules for the 4 cards that support this bonus (HSBC Revolution, DBS WWMC, Citi Rewards, UOB PPV). These rules are not causing wrong winners today (the bill payer likely gets 0 mpd or base rate), but they represent genuine untapped value the app is failing to surface.
+**Epic**: E15 — Earn Rate Data Integrity
+**PRD Features**: F35 (P1 — Telco Bonus Rule Data)
+**Phase**: v2.3 — Data Integrity
+**Predecessor**: Sprint 25 complete (bills earn rates corrected; telco rules build on the corrected bills foundation)
+**Source of Truth**: `docs/technical/DATA_CORRECTION_PLAN.md` Part 2
+
+---
+
+### Sprint 26 — Definition of Ready (DoR) Checklist
+
+- [ ] Sprint 25 complete (bills earn rates = 0 mpd for utilities)
+- [ ] Telco MCC list confirmed (4812, 4814, 4816, 4899 — Singtel, StarHub, M1)
+- [ ] Confirmed that one-off online telco payments (not GIRO) trigger the bonus on all 4 cards
+- [ ] `{"telco_online": true}` condition key agreed as naming convention with Data Engineer + Software Engineer
+- [ ] `recommendation.test.ts` scaffolding in place from Sprint 25
+
+### Sprint 26 — Definition of Done (DoD) Checklist
+
+- [ ] 4 new `earn_rules` rows inserted (one per card, `bills`, `is_bonus=TRUE`, `{"telco_online": true}`)
+- [ ] Recommendation engine handles `telco_online` condition key without breaking existing logic
+- [ ] `recommend('bills', {telco_online: true})` returns Card 6/10/18/20 in top-4 at 4 mpd
+- [ ] `recommendation.test.ts` updated with telco_online test case
+- [ ] No regressions on base bills (0 mpd utility) or other categories
+- [ ] Code committed and peer-reviewed
+
+---
+
+### Sprint 26 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S26.1** | Add 4 mpd telco one-off earn rules for Cards 6, 10, 18, 20 | P1 | S | 2 | Data Engineer |
+| **S26.2** | Update recommendation engine to handle `telco_online` condition in bills routing | P1 | S | 2 | Software Engineer |
+| **S26.3** | Write recommendation.test.ts test for `recommend('bills', {telco_online: true})` | P1 | XS | 1 | Tester |
+| **Total** | | | | **5** | |
+
+---
+
+### Sprint 26 — User Story Details
+
+#### S26.1: Add 4 mpd Telco One-Off Earn Rules
+
+> **As a** user paying a one-off Singtel or StarHub bill online,
+> **I want** the app to tell me that HSBC Revolution, DBS WWMC, Citi Rewards, or UOB PPV earns 4 mpd on my payment,
+> **So that** I use the right card and earn maximum miles on my telco bill.
+
+**Priority**: P1
+**T-Shirt Size**: S — ~0.5 day (4 INSERT rows)
+**Feature**: F35
+
+**Correction** (4 INSERT rows, one per card):
+```sql
+-- Card 6 HSBC Revolution
+('card-06', 'bills', 4.0, TRUE,
+ '{"telco_online": true, "recurring_excluded": true}',
+ 'Earn 4 mpd on one-off online telco payments (Singtel, StarHub, M1 direct website). Recurring GIRO/auto-debit excluded.', NULL),
+
+-- Card 10 DBS Woman''s World MC
+('card-10', 'bills', 4.0, TRUE,
+ '{"telco_online": true, "recurring_excluded": true}',
+ 'Earn 4 mpd on one-off online telco payments (Singtel, StarHub, M1 direct website). Recurring GIRO/auto-debit excluded.', NULL),
+
+-- Card 18 Citi Rewards
+('card-18', 'bills', 4.0, TRUE,
+ '{"telco_online": true, "recurring_excluded": true}',
+ 'Earn 4 mpd on one-off online telco payments (Singtel, StarHub, M1 direct website). Recurring GIRO/auto-debit excluded.', NULL),
+
+-- Card 20 UOB PPV
+('card-20', 'bills', 4.0, TRUE,
+ '{"telco_online": true, "min_spend_monthly": 600, "recurring_excluded": true}',
+ 'Earn 4 mpd on one-off online telco payments (Singtel, StarHub, M1 direct website). Min spend $600/month. Recurring GIRO/auto-debit excluded.', NULL),
+```
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Telco bonus rules inserted | `recommend('bills', {telco_online: true})` | Cards 6, 10, 18, 20 appear at 4 mpd |
+| AC2 | Base bills unchanged | `recommend('bills')` (no telco flag) | All cards still return 0 mpd for utilities (no regression from Sprint 25) |
+| AC3 | UOB PPV min_spend noted | Card 20 telco bonus rule | `conditions` includes `{"min_spend_monthly": 600}` |
+| AC4 | Recurring excluded | conditions_note for all 4 cards | Note reads "Recurring GIRO/auto-debit excluded" |
+
+---
+
+### Sprint 26 — Schedule
+
+| Day | Focus | Exit Criteria |
+|-----|-------|---------------|
+| **Day 1** | S26.1 — write 4 SQL INSERT rows + peer review | 4 rows drafted; conditions JSONB agreed |
+| **Day 2** | S26.2 — engine handles `telco_online` condition | `recommend('bills', {telco_online: true})` returns correct top-4 |
+| **Day 3** | S26.3 — write test + full regression run | All tests green including new telco case |
+| **Day 4-5** | Deploy to staging, spot-check, merge to main | No regressions; staging verified |
+
+---
+
+**Sprint 26 Status**: ✅ COMPLETED — v1.6.0 (telco bonus rules applied 2026-03-01)
+
+---
+
+## Sprint 27: "Bills Subcategory Data" (MileLion Gap Analysis — Phase 3 Data Expansion)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Expand the bills category MCC list to include education, medical/hospital, and pharmacy MCCs, and add per-subcategory earn rules for all 29 cards reflecting actual bank exclusion policies. This is a data-layer change only — no UI changes.
+**Epic**: E16 — Bills Subcategory Intelligence
+**PRD Features**: F36 Part 1 (P1 — Bills Subcategory Data)
+**Phase**: v2.4 — Bills Intelligence
+**Predecessor**: Sprint 26 complete (telco bonus rules live; bills data foundation ready for subcategory expansion)
+**Source of Truth**: `docs/technical/DATA_CORRECTION_PLAN.md` Part 3
+
+---
+
+### Sprint 27 — Definition of Ready (DoR) Checklist
+
+- [ ] Sprint 26 complete (telco bonus rules live)
+- [ ] MCC list for education (8211, 8220, 8249, 8299) confirmed via MileLion + bank T&Cs
+- [ ] MCC list for medical (8011, 8021, 8062, 8099) confirmed
+- [ ] MCC 5912 (pharmacy) confirmed as not excluded by most banks
+- [ ] Bank exclusion matrix (which bank excludes education/medical) confirmed for all 29 cards
+- [ ] `subcategory` JSONB key agreed as naming convention in conditions field
+- [ ] `categories.ts` MCC array expansion reviewed by Software Engineer before implementation
+
+### Sprint 27 — Definition of Done (DoD) Checklist
+
+- [ ] `categories.ts` bills MCC list expanded with education, medical, pharmacy MCCs
+- [ ] `subcategory` field added to earn_rules conditions JSONB schema documentation
+- [ ] Earn rules added per subcategory for all 29 cards (utilities, telco, insurance, education, medical, pharmacy)
+- [ ] `recommend('bills', {subcategory: 'education'})` returns 0 mpd for DBS/Citi/UOB/OCBC/HSBC/SC/Amex
+- [ ] `recommend('bills', {subcategory: 'pharmacy'})` returns base_rate_mpd rankings (not 0)
+- [ ] MCC 8099 (HealthHub → Citi Rewards / DBS WWMC 4 mpd) documented in earn rules conditions_note
+- [ ] `recommendation.test.ts` updated with subcategory test cases
+- [ ] No regressions on existing category recommendations
+
+---
+
+### Sprint 27 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S27.1** | Expand bills MCC list in `categories.ts` with education (8211/8220/8249/8299), hospital (8011/8021/8062/8099), pharmacy (5912) | P1 | S | 2 | Data Engineer |
+| **S27.2** | Add `subcategory` field to earn_rules conditions JSONB; seed utilities subcategory rows (29 cards, 0 mpd) | P1 | M | 3 | Data Engineer |
+| **S27.3** | Add education subcategory earn rules (0 mpd DBS/Citi/UOB/OCBC/HSBC/SC/Amex; 0.16 mpd Maybank Horizon) | P1 | M | 3 | Data Engineer |
+| **S27.4** | Add medical subcategory earn rules (0 mpd for DBS/UOB/Citi/SC/OCBC; base rate for HSBC/Amex; 0.16 mpd Maybank) | P1 | M | 3 | Data Engineer |
+| **S27.5** | Add pharmacy subcategory earn rules (base_rate_mpd for all 29 cards; MCC 8099 HealthHub tip noted) | P1 | S | 2 | Data Engineer |
+| **S27.6** | Update recommendation engine to route on `subcategory` condition in bills | P1 | M | 3 | Software Engineer |
+| **S27.7** | Write recommendation.test.ts subcategory test cases (education, medical, pharmacy) | P1 | S | 2 | Tester |
+| **Total** | | | | **18** | |
+
+---
+
+### Sprint 27 — User Story Details
+
+#### S27.1: Expand Bills MCC List
+
+> **As a** data engineer maintaining the bills category,
+> **In order to** correctly classify education, medical, and pharmacy transactions under bills,
+> **I want** the bills MCC list in `categories.ts` to include MCCs 8211, 8220, 8249, 8299, 8011, 8021, 8062, 8099, and 5912.
+
+**Priority**: P1
+**T-Shirt Size**: S — ~2 hours (single file edit to `maximile-app/constants/categories.ts`)
+
+**Change**:
+```typescript
+// Add to bills MCCs in categories.ts:
+'8211', '8220', '8249', '8299',  // Education / school fees
+'8011', '8021', '8062', '8099',  // Medical / hospital
+'5912',                           // Pharmacy (standalone — Guardian, Watsons, Unity)
+```
+
+---
+
+#### S27.2–S27.5: Add Subcategory Earn Rules (All 29 Cards)
+
+> **As a** user paying school fees, a hospital bill, or buying medicine,
+> **I want** the app to tell me the correct earn rate for my specific type of bill,
+> **So that** I use the right card and am not misled by a "base rate" that my bank actually excludes.
+
+**Priority**: P1 (S27.2–S27.5)
+**T-Shirt Size**: M per story — database migration work
+
+**Subcategory earn rule matrix**:
+
+| Subcategory | DBS / UOB / Citi / OCBC / SC | HSBC / Amex | Maybank Horizon |
+|-------------|------------------------------|-------------|-----------------|
+| Utilities | 0 mpd | 0 mpd | 0.16 mpd (confirm) |
+| Education | 0 mpd | 0 mpd | 0.16 mpd |
+| Medical | 0 mpd | Base rate (private hospitals) | 0.16 mpd |
+| Pharmacy (MCC 5912) | Base rate | Base rate | Base rate |
+| Telco (one-off online) | 0 mpd / 4 mpd (Cards 6/10/18/20) | — | — |
+
+**Key note for Medical/MCC 8099**: Paying hospital bills via HealthHub, Health Buddy, or OneNUHS app routes as MCC 8099. Citi Rewards (Card 18) and DBS WWMC (Card 10) treat MCC 8099 as "online shopping" → **4 mpd**. This must be captured in the earn rule `conditions_note` for these two cards under the medical subcategory.
+
+---
+
+### Sprint 27 — Schedule
+
+| Day | Focus | Exit Criteria |
+|-----|-------|---------------|
+| **Day 1-2** | S27.1 (MCC expansion) + S27.2 (utilities subcategory rows) | `categories.ts` updated; 29 utility rows seeded |
+| **Day 3-4** | S27.3 (education rows) | 29 education rows; DBS/Citi etc = 0 mpd; Maybank = 0.16 mpd |
+| **Day 4-5** | S27.4 (medical rows incl. MCC 8099 note) | 29 medical rows; HealthHub tip in conditions_note |
+| **Day 6** | S27.5 (pharmacy rows) | 29 pharmacy rows; all at base_rate_mpd |
+| **Day 7-8** | S27.6 (engine subcategory routing) | `recommend('bills', {subcategory: 'pharmacy'})` returns ranked results |
+| **Day 9** | S27.7 (tests) | All subcategory test cases green |
+| **Day 10** | Regression run + staging deploy | No regressions; ready for Sprint 28 UI |
+
+---
+
+**Sprint 27 Status**: ✅ COMPLETED — v1.7.0 (bills subcategory data + exclusions Phase 2 applied 2026-03-01)
+
+---
+
+## Sprint 28: "Bills Subcategory UI" (MileLion Gap Analysis — Phase 4 UI Picker)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Add a subcategory picker to the bills recommendation screen so users explicitly select the bill type before receiving a recommendation. Route recommendations based on selection. Surface the HealthHub → 4 mpd tip for medical bills.
+**Epic**: E16 — Bills Subcategory Intelligence
+**PRD Features**: F36 Part 2 (P1 — Bills Subcategory UI)
+**Phase**: v2.4 — Bills Intelligence
+**Predecessor**: Sprint 27 complete (subcategory earn rules fully seeded; recommendation engine routes on subcategory)
+**Source of Truth**: `docs/technical/DATA_CORRECTION_PLAN.md` Part 3 (UI wireframe section)
+
+---
+
+### Sprint 28 — Definition of Ready (DoR) Checklist
+
+- [ ] Sprint 27 complete (all subcategory earn rules live; engine routing on subcategory)
+- [ ] Designer wireframe for bills subcategory picker approved
+- [ ] `recommend('bills', {subcategory: 'X'})` confirmed working end-to-end from Sprint 27
+- [ ] HealthHub tip copy confirmed with PM (MCC 8099 → Citi Rewards / DBS WWMC 4 mpd)
+- [ ] Category 7 tile ("Bills") current UX documented (no regression spec)
+
+### Sprint 28 — Definition of Done (DoD) Checklist
+
+- [ ] Bills recommendation screen shows subcategory picker before displaying results
+- [ ] 6 subcategory tiles shown: Utilities, Telco, Insurance, Education, Medical, Pharmacy
+- [ ] Selecting a subcategory routes to `recommend('bills', {subcategory: 'X'})` results
+- [ ] Utilities and Insurance subcategories show "0 mpd — no recommendation" state with explanatory copy
+- [ ] Medical subcategory shows HealthHub tip: "Paying via HealthHub app → MCC 8099 → 4 mpd on Citi Rewards / DBS WWMC"
+- [ ] E2E test: select Bills → select Medical → verify HealthHub tip shown
+- [ ] Works on iOS (TestFlight) and Android (APK)
+- [ ] No regressions on other category tiles
+
+---
+
+### Sprint 28 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S28.1** | Design bills subcategory picker wireframe (6 tiles + 0-mpd empty states + HealthHub tip) | P1 | M | 3 | Designer |
+| **S28.2** | Build bills subcategory picker UI (6 tiles: Utilities / Telco / Insurance / Education / Medical / Pharmacy) | P1 | M | 5 | Developer |
+| **S28.3** | Route recommendation results based on selected subcategory | P1 | S | 3 | Developer |
+| **S28.4** | Build 0-mpd empty state for Utilities and Insurance subcategories with explanatory copy | P1 | S | 2 | Developer + Designer |
+| **S28.5** | Add HealthHub tip to Medical subcategory result screen | P1 | S | 2 | Developer + Designer |
+| **S28.6** | E2E test: Bills → subcategory picker → results → HealthHub tip flow | P1 | S | 2 | Tester |
+| **Total** | | | | **17** | |
+
+---
+
+### Sprint 28 — User Story Details
+
+#### S28.2: Bills Subcategory Picker UI
+
+> **As a** user who selects "Bills" from the category grid,
+> **I want** to choose the specific type of bill I am paying before seeing card recommendations,
+> **So that** the recommendation reflects the actual MCC my payment will attract (not a generic base rate).
+
+**Priority**: P1
+**T-Shirt Size**: M — ~3 days (new UI component + 6 tile states)
+**Feature**: F36
+
+**UI reference** (from `DATA_CORRECTION_PLAN.md` wireframe):
+```
+Bills
+──────────────────────────────
+What type of bill are you paying?
+
+  [Utilities]  [Telco]  [Insurance]
+  [Education]  [Medical]  [Pharmacy]
+
+──────────────────────────────
+Selected: Utilities
+
+All cards earn 0 mpd on utility payments
+(SP Services, Geneco, Sembcorp).
+No recommendation — any card earns the same.
+
+Exception: Maybank Horizon earns 0.16 mpd.
+```
+
+---
+
+#### S28.5: HealthHub Medical Bill Tip
+
+> **As a** user paying a hospital bill,
+> **I want** the app to tell me that paying via the HealthHub app routes as MCC 8099 (online shopping) and earns 4 mpd on Citi Rewards or DBS WWMC,
+> **So that** I can earn up to 4 mpd on a payment category that most people assume earns 0 mpd.
+
+**Priority**: P1 (High-value insight unique to MaxiMile)
+**T-Shirt Size**: S — ~1 day
+
+**Tip copy**:
+> "Paying hospital bills? Use the HealthHub, Health Buddy, or OneNUHS app. These payments are coded as MCC 8099 (online), not MCC 8062 (hospital) — which means Citi Rewards and DBS WWMC earn 4 mpd instead of 0 mpd."
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | User selects Bills → Medical | Medical results screen loads | HealthHub tip card shown above recommendations |
+| AC2 | HealthHub tip shown | Citi Rewards / DBS WWMC in portfolio | These two cards are highlighted with "4 mpd via HealthHub" label |
+| AC3 | Other subcategories | User selects Bills → Pharmacy | No HealthHub tip shown (only Medical) |
+
+---
+
+### Sprint 28 — Schedule
+
+| Day | Focus | Exit Criteria |
+|-----|-------|---------------|
+| **Day 1-2** | S28.1 (wireframes) | All 6 subcategory states + 0-mpd empty state + HealthHub tip wireframed and approved |
+| **Day 3-5** | S28.2 (picker UI) + S28.3 (routing) | Picker renders; selecting a tile calls `recommend('bills', {subcategory: 'X'})` |
+| **Day 6-7** | S28.4 (0-mpd empty states) + S28.5 (HealthHub tip) | Utilities shows 0-mpd state; Medical shows HealthHub tip |
+| **Day 8-9** | S28.6 (E2E tests) | E2E flow passes; regression run clean |
+| **Day 10** | Deploy to staging + TestFlight build | All acceptance criteria met; ready for beta |
+
+---
+
+**Sprint 28 Status**: ✅ COMPLETED — v1.7.0 (bills subcategory UI shipped 2026-03-01)
+
+---
+
+## Sprint 25-28 Summary: MileLion Gap Analysis Roadmap
+
+### Total Effort
+
+| Sprint | Phase | Name | Stories | Points | Duration |
+|--------|-------|------|---------|--------|----------|
+| **Sprint 25** | Phase 1 — P0 Data Corrections | Earn Rate Hotfix | 7 | 13 | 1 week |
+| **Sprint 26** | Phase 2 — Telco Bonus Rules | Telco Bonus Rules | 3 | 5 | 1 week |
+| **Sprint 27** | Phase 3 — Bills Subcategory Data | Bills Subcategory Data | 7 | 18 | 2 weeks |
+| **Sprint 28** | Phase 4 — Bills Subcategory UI | Bills Subcategory UI | 6 | 17 | 2 weeks |
+| **Total** | | | **23** | **53** | **6 weeks** |
+
+### Key Milestones
+
+| Milestone | Sprint | Success Criteria |
+|-----------|--------|------------------|
+| **P0 Wrong Recommendations Fixed** | Sprint 25 | 5 verified wrong earn rates corrected; recommendation.test.ts all green |
+| **Telco 4 mpd Surfaced** | Sprint 26 | Cards 6/10/18/20 show 4 mpd on one-off telco bills |
+| **Bills Subcategory Data Complete** | Sprint 27 | All 29 cards have per-subcategory earn rules; engine routes correctly |
+| **Bills Subcategory UI Live** | Sprint 28 | Subcategory picker in app; HealthHub tip surfaced for medical bills |
+
+### Dependencies & Prerequisites
+
+| Sprint | Hard Dependencies | Soft Dependencies |
+|--------|-------------------|-------------------|
+| **Sprint 25** | Sprint 24 complete (29-card DB stable) | MileLion 2026 source confirmed per fix |
+| **Sprint 26** | Sprint 25 complete (bills = 0 mpd for utilities) | Telco MCC list confirmed |
+| **Sprint 27** | Sprint 26 complete (telco bonus rules live) | Bank exclusion matrix for education/medical |
+| **Sprint 28** | Sprint 27 complete (subcategory engine routing working) | Designer wireframe approved |
+
+### Reference Documentation
+
+- **Data Correction Source of Truth**: `docs/technical/DATA_CORRECTION_PLAN.md`
+- **Recommendation Logic**: `docs/technical/RECOMMENDATION_AND_CATEGORY_LOGIC.md`
+- **Card Data**: `maximile-app/database/seeds/all_cards.sql`
+- **Category MCCs**: `maximile-app/constants/categories.ts`
+- **Tests**: `maximile-app/tests/recommendation.test.ts`
+
+---
+
+**Sprint 25-28 Status**: Sprint 25 ✅ COMPLETED | Sprint 26 ✅ COMPLETED | Sprint 27 ✅ COMPLETED | Sprint 28 ✅ COMPLETED

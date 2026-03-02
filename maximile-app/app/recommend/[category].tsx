@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -30,6 +30,53 @@ import CapProgressBar from '../../components/CapProgressBar';
 import EmptyState from '../../components/EmptyState';
 import { track } from '../../lib/analytics';
 import { getCardImage } from '../../constants/cardImages';
+
+// ---------------------------------------------------------------------------
+// HealthHub-eligible cards (static map — no DB changes needed)
+// ---------------------------------------------------------------------------
+
+interface HealthHubCard {
+  slug: string;
+  earnRate: number;
+  capDescription: string;
+  steps: string[];
+}
+
+const HEALTHHUB_ELIGIBLE: Record<string, HealthHubCard> = {
+  'citi-rewards': {
+    slug: 'citi-rewards',
+    earnRate: 4.0,
+    capDescription: '$1,000/mo shared with online',
+    steps: [
+      'Download the HealthHub app from the App Store or Google Play.',
+      'Log in with your Singpass and navigate to "Pay Hospital Bills".',
+      'Select the hospital and enter your bill reference number.',
+      'Pay with your Citi Rewards card — charges as MCC 8099 (online), earning 4 mpd.',
+    ],
+  },
+  'dbs-womans-world-card': {
+    slug: 'dbs-womans-world-card',
+    earnRate: 4.0,
+    capDescription: '$2,000/mo',
+    steps: [
+      'Download the HealthHub app from the App Store or Google Play.',
+      'Log in with your Singpass and navigate to "Pay Hospital Bills".',
+      'Select the hospital and enter your bill reference number.',
+      'Pay with your DBS Woman\'s World Card — charges as MCC 8099 (online), earning 4 mpd.',
+    ],
+  },
+  'hsbc-revolution': {
+    slug: 'hsbc-revolution',
+    earnRate: 4.0,
+    capDescription: '$1,000/mo shared across bonus categories',
+    steps: [
+      'Download the HealthHub app from the App Store or Google Play.',
+      'Log in with your Singpass and navigate to "Pay Hospital Bills".',
+      'Select the hospital and enter your bill reference number.',
+      'Pay with your HSBC Revolution card — charges as MCC 8099 (online), earning 4 mpd.',
+    ],
+  },
+};
 
 // ---------------------------------------------------------------------------
 // Types
@@ -180,6 +227,8 @@ export default function RecommendResultScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cardImages, setCardImages] = useState<Record<string, ImageSourcePropType | { uri: string }>>({});
+  const [cardSlugs, setCardSlugs] = useState<Record<string, string>>({});
+  const [expandedSteps, setExpandedSteps] = useState<Record<string, boolean>>({});
 
   const categoryInfo = category ? getCategoryById(category) : undefined;
 
@@ -261,7 +310,9 @@ export default function RecommendResultScreen() {
       if (!data) return;
 
       const imageMap: Record<string, ImageSourcePropType | { uri: string }> = {};
+      const slugMap: Record<string, string> = {};
       for (const card of data as { id: string; slug: string; image_url: string | null }[]) {
+        if (card.slug) slugMap[card.id] = card.slug;
         const localImage = card.slug ? getCardImage(card.slug) : undefined;
         if (card.image_url) {
           imageMap[card.id] = { uri: card.image_url };
@@ -270,6 +321,7 @@ export default function RecommendResultScreen() {
         }
       }
       setCardImages(imageMap);
+      setCardSlugs(slugMap);
     };
 
     fetchCardImages();
@@ -289,6 +341,26 @@ export default function RecommendResultScreen() {
       next[altIdx] = { ...next[altIdx], is_recommended: true };
       return next;
     });
+  }, []);
+
+  // -----------------------------------------------------------------------
+  // HealthHub personalization (Part 2)
+  // -----------------------------------------------------------------------
+  const healthHubMatches = useMemo(() => {
+    if (subcategory !== 'hospital') return [];
+    return results
+      .filter((r) => {
+        const slug = cardSlugs[r.card_id];
+        return slug && slug in HEALTHHUB_ELIGIBLE;
+      })
+      .map((r) => ({
+        ...r,
+        healthHub: HEALTHHUB_ELIGIBLE[cardSlugs[r.card_id]],
+      }));
+  }, [subcategory, results, cardSlugs]);
+
+  const toggleSteps = useCallback((cardId: string) => {
+    setExpandedSteps((prev) => ({ ...prev, [cardId]: !prev[cardId] }));
   }, []);
 
   // -----------------------------------------------------------------------
@@ -511,15 +583,64 @@ export default function RecommendResultScreen() {
           contentContainerStyle={styles.listContent}
           ListHeaderComponent={
             <View>
-              {/* Sprint 28 (S28.5) — HealthHub tip for Medical subcategory */}
-              {subcategory === 'medical' && (
+              {/* HealthHub personalization for Hospital subcategory */}
+              {subcategory === 'hospital' && healthHubMatches.length > 0 && (
+                <>
+                  {healthHubMatches.map((match) => (
+                    <View key={`hh-${match.card_id}`} style={styles.healthHubCard}>
+                      <View style={styles.healthHubCardHeader}>
+                        <Ionicons name="medkit" size={16} color={Colors.brandGold} />
+                        <Text style={styles.healthHubCardTitle}>
+                          {match.card_name}
+                        </Text>
+                        <Text style={styles.healthHubCardBank}>{match.bank}</Text>
+                      </View>
+                      <View style={styles.healthHubRateRow}>
+                        <Text style={styles.healthHubRateOld}>0 mpd direct</Text>
+                        <Ionicons name="arrow-forward" size={14} color={Colors.textSecondary} />
+                        <Text style={styles.healthHubRateNew}>
+                          {match.healthHub.earnRate} mpd via HealthHub
+                        </Text>
+                      </View>
+                      <Text style={styles.healthHubCapText}>
+                        Cap: {match.healthHub.capDescription}
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.healthHubStepsToggle}
+                        onPress={() => toggleSteps(match.card_id)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.healthHubStepsToggleText}>
+                          How to pay via HealthHub
+                        </Text>
+                        <Ionicons
+                          name={expandedSteps[match.card_id] ? 'chevron-up' : 'chevron-down'}
+                          size={16}
+                          color={Colors.brandGold}
+                        />
+                      </TouchableOpacity>
+                      {expandedSteps[match.card_id] && (
+                        <View style={styles.healthHubStepsList}>
+                          {match.healthHub.steps.map((step, idx) => (
+                            <View key={idx} style={styles.healthHubStepRow}>
+                              <Text style={styles.healthHubStepNumber}>{idx + 1}</Text>
+                              <Text style={styles.healthHubStepText}>{step}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </>
+              )}
+              {subcategory === 'hospital' && healthHubMatches.length === 0 && (
                 <View style={styles.healthHubTip}>
                   <View style={styles.healthHubTipHeader}>
                     <Ionicons name="bulb-outline" size={16} color="#1557B0" />
-                    <Text style={styles.healthHubTipTitle}>Tip: Pay via HealthHub app</Text>
+                    <Text style={styles.healthHubTipTitle}>Did you know?</Text>
                   </View>
                   <Text style={styles.healthHubTipBody}>
-                    Paying hospital bills via the HealthHub or Health Buddy app charges as MCC 8099 (online) — earning 4 mpd on DBS WWMC and Citi Rewards instead of 0 mpd.
+                    Some cards earn 4 mpd on hospital bills when paid via the HealthHub app (MCC changes from 8062 to 8099). Eligible cards: Citi Rewards, DBS Woman's World Card, HSBC Revolution.
                   </Text>
                 </View>
               )}
@@ -1088,7 +1209,83 @@ const styles = StyleSheet.create({
     color: Colors.brandGold,
   },
 
-  // Sprint 28 (S28.5) — HealthHub tip banner (Medical subcategory)
+  // HealthHub personalized card (Hospital subcategory)
+  healthHubCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    marginBottom: Spacing.md,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.brandGold,
+    ...Shadows.sm,
+  },
+  healthHubCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: Spacing.sm,
+  },
+  healthHubCardTitle: {
+    ...Typography.bodyBold,
+    color: Colors.textPrimary,
+    flex: 1,
+  },
+  healthHubCardBank: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+  },
+  healthHubRateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs,
+  },
+  healthHubRateOld: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    textDecorationLine: 'line-through',
+  },
+  healthHubRateNew: {
+    ...Typography.captionBold,
+    color: '#16A34A',
+  },
+  healthHubCapText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
+  },
+  healthHubStepsToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.xs,
+  },
+  healthHubStepsToggleText: {
+    ...Typography.captionBold,
+    color: Colors.brandGold,
+  },
+  healthHubStepsList: {
+    marginTop: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  healthHubStepRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  healthHubStepNumber: {
+    ...Typography.captionBold,
+    color: Colors.brandGold,
+    width: 16,
+  },
+  healthHubStepText: {
+    ...Typography.caption,
+    color: Colors.textPrimary,
+    flex: 1,
+    lineHeight: 18,
+  },
+
+  // HealthHub educational tip (user doesn't own eligible cards)
   healthHubTip: {
     backgroundColor: 'rgba(26, 115, 232, 0.08)',
     borderRadius: BorderRadius.md,

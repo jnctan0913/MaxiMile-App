@@ -173,7 +173,7 @@ VALUES
     '8244',  -- Business and Secretarial Schools
     '8249',  -- Trade and Vocational Schools
     '8299',  -- Schools and Educational Services — Not Elsewhere Classified
-    -- Medical / Hospital (v1.7.0)
+    -- Hospital (v1.7.0)
     '8011',  -- Doctors and Physicians — Not Elsewhere Classified
     '8021',  -- Dentists and Orthodontists
     '8062',  -- Hospitals
@@ -181,7 +181,7 @@ VALUES
     -- Pharmacy — standalone only (v1.7.0)
     '5912'   -- Drug Stores and Pharmacies (Guardian, Watsons, Unity — standalone)
   ],
-  'Utilities, telco, insurance, education, medical, pharmacy'
+  'Utilities, telco, insurance, education, hospital, pharmacy'
 ),
 
 -- 7. Travel / Hotels
@@ -1152,7 +1152,7 @@ ON CONFLICT (card_id, category_id, is_bonus, effective_from) DO UPDATE SET
 -- Subcategories:
 --   utilities  — 0 mpd (excluded) for most cards; 0.4 mpd Maybank Horizon only
 --   education  — 0 mpd for DBS/Citi/UOB/OCBC/HSBC/SC/BOC/Amex; 0.16 mpd Maybank
---   medical    — 0 mpd for DBS/Citi/UOB/OCBC/SC/BOC; base rate for HSBC/Amex; 0.16 mpd Maybank
+--   hospital   — 0 mpd for DBS/Citi/UOB/OCBC/SC/BOC; base rate for HSBC/Amex; 0.16 mpd Maybank
 --   pharmacy   — base_rate_mpd for all cards (standalone pharmacy not excluded)
 --   telco      — base rate fallback for all 29 cards (bonus rows already in Section 3/FIX 6)
 -- ============================================================
@@ -1421,7 +1421,7 @@ VALUES
  NULL, '2026-03-01'::date),
 
 -- ============================================================
--- MEDICAL subcategory
+-- HOSPITAL subcategory
 -- DBS/Citi/UOB/OCBC/SC/BOC: 0.0 mpd [VERIFIED]
 -- HSBC (6, 13, 27): base rate (0.4, 1.0, 1.4) [VERIFIED — private hospital exception]
 -- Amex (7, 14): 1.1 mpd [VERIFIED — private hospital exception]
@@ -1429,110 +1429,110 @@ VALUES
 -- ============================================================
 
 -- DBS cards: 0.0 mpd
-('00000000-0000-0000-0001-000000000001', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0001-000000000001', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0001-000000000010', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0001-000000000010', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0002-000000000019', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0002-000000000019', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0004-000000000023', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0004-000000000023', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
 
 -- Citi cards: 0.0 mpd
-('00000000-0000-0000-0001-000000000002', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0001-000000000002', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0002-000000000018', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0002-000000000018', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
 
 -- UOB cards: 0.0 mpd
-('00000000-0000-0000-0001-000000000003', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0001-000000000003', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0001-000000000005', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0001-000000000005', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0002-000000000011', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0002-000000000011', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0002-000000000020', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0002-000000000020', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0003-000000000022', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0003-000000000022', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0004-000000000029', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0004-000000000029', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
 
 -- OCBC cards: 0.0 mpd
-('00000000-0000-0000-0001-000000000004', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0001-000000000004', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0002-000000000012', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0002-000000000012', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0004-000000000024', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0004-000000000024', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
 
 -- SC cards: 0.0 mpd
-('00000000-0000-0000-0001-000000000009', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0001-000000000009', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0002-000000000015', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0002-000000000015', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0004-000000000025', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0004-000000000025', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0004-000000000026', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0004-000000000026', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
 
 -- BOC card: 0.0 mpd
-('00000000-0000-0000-0001-000000000008', 'bills', 0.0, FALSE, '{"subcategory": "medical"}',
- 'Hospital/medical bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
+('00000000-0000-0000-0001-000000000008', 'bills', 0.0, FALSE, '{"subcategory": "hospital"}',
+ 'Hospital bill payments earn 0 mpd. MCC 8062 excluded by bank. [VERIFIED]',
  NULL, '2026-03-01'::date),
 
 -- HSBC cards: base rate (private hospital exception — public hospitals excluded only)
 -- Card 6: HSBC Revolution (0.4 mpd base)
-('00000000-0000-0000-0001-000000000006', 'bills', 0.4, FALSE, '{"subcategory": "medical"}',
+('00000000-0000-0000-0001-000000000006', 'bills', 0.4, FALSE, '{"subcategory": "hospital"}',
  'Private hospital bills earn base rate (HSBC excludes public hospitals only — MCC 8062 at public hospitals). [VERIFIED]',
  NULL, '2026-03-01'::date),
 -- Card 13: HSBC TravelOne (1.0 mpd base)
-('00000000-0000-0000-0002-000000000013', 'bills', 1.0, FALSE, '{"subcategory": "medical"}',
+('00000000-0000-0000-0002-000000000013', 'bills', 1.0, FALSE, '{"subcategory": "hospital"}',
  'Private hospital bills earn base rate (HSBC excludes public hospitals only — MCC 8062 at public hospitals). [VERIFIED]',
  NULL, '2026-03-01'::date),
 -- Card 27: HSBC Premier Mastercard (1.4 mpd base)
-('00000000-0000-0000-0004-000000000027', 'bills', 1.4, FALSE, '{"subcategory": "medical"}',
+('00000000-0000-0000-0004-000000000027', 'bills', 1.4, FALSE, '{"subcategory": "hospital"}',
  'Private hospital bills earn base rate (HSBC excludes public hospitals only — MCC 8062 at public hospitals). [VERIFIED]',
  NULL, '2026-03-01'::date),
 
 -- Amex cards: 1.1 mpd (private hospital exception)
-('00000000-0000-0000-0001-000000000007', 'bills', 1.1, FALSE, '{"subcategory": "medical"}',
+('00000000-0000-0000-0001-000000000007', 'bills', 1.1, FALSE, '{"subcategory": "hospital"}',
  'Private hospital bills earn base rate. Public hospital bills excluded (Amex excludes public MCC 8062). [VERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0002-000000000014', 'bills', 1.1, FALSE, '{"subcategory": "medical"}',
+('00000000-0000-0000-0002-000000000014', 'bills', 1.1, FALSE, '{"subcategory": "hospital"}',
  'Private hospital bills earn base rate. Public hospital bills excluded (Amex excludes public MCC 8062). [VERIFIED]',
  NULL, '2026-03-01'::date),
 
 -- Maybank cards: 0.16 mpd [UNVERIFIED]
-('00000000-0000-0000-0002-000000000016', 'bills', 0.16, FALSE, '{"subcategory": "medical"}',
+('00000000-0000-0000-0002-000000000016', 'bills', 0.16, FALSE, '{"subcategory": "hospital"}',
  'Hospital bill payments earn approx 0.16 mpd (unverified — Maybank may have shorter exclusion list). [UNVERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0002-000000000017', 'bills', 0.16, FALSE, '{"subcategory": "medical"}',
+('00000000-0000-0000-0002-000000000017', 'bills', 0.16, FALSE, '{"subcategory": "hospital"}',
  'Hospital bill payments earn approx 0.16 mpd (unverified — Maybank may have shorter exclusion list). [UNVERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0003-000000000021', 'bills', 0.16, FALSE, '{"subcategory": "medical"}',
+('00000000-0000-0000-0003-000000000021', 'bills', 0.16, FALSE, '{"subcategory": "hospital"}',
  'Hospital bill payments earn approx 0.16 mpd (unverified — Maybank may have shorter exclusion list). [UNVERIFIED]',
  NULL, '2026-03-01'::date),
-('00000000-0000-0000-0004-000000000028', 'bills', 0.16, FALSE, '{"subcategory": "medical"}',
+('00000000-0000-0000-0004-000000000028', 'bills', 0.16, FALSE, '{"subcategory": "hospital"}',
  'Hospital bill payments earn approx 0.16 mpd (unverified — Maybank may have shorter exclusion list). [UNVERIFIED]',
  NULL, '2026-03-01'::date),
 

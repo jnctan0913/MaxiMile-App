@@ -31,7 +31,7 @@ const SUBCATEGORY_PALETTES: Record<string, [string, string]> = {
   telco:      ['#7EC8E3', '#5EB0D0'],  // baby blue — connectivity
   insurance:  ['#A78BDA', '#8B6FC0'],  // lilac — security / protection
   education:  ['#5BAD7A', '#3D8F5C'],  // sage green — growth
-  medical:    ['#E87A7A', '#D45E5E'],  // soft red — health
+  hospital:   ['#E87A7A', '#D45E5E'],  // soft red — hospital
   pharmacy:   ['#C5A55A', '#A8893E'],  // brand gold — care
 };
 

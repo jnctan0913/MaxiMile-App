@@ -9,8 +9,8 @@
 -- Task:    T2.08 -- Implement Recommendation Engine as Supabase RPC Function
 -- Author:  Software Engineer
 -- Created: 2026-02-19
--- Updated: 2026-02-27 (F31 — Min Spend Enforcement, Contactless Badge,
---                       User-Selectable Bonus Categories)
+-- Updated: 2026-03-02 (Fix subcategory base rate fallback & bonus rule
+--                       subcategory leakage)
 --
 -- Signature:
 --   recommend(p_category_id TEXT, p_subcategory TEXT DEFAULT NULL)
@@ -20,7 +20,7 @@
 --            total_monthly_spend, requires_contactless)
 --
 -- p_subcategory (v1.7.0): optional bills subcategory filter.
---   When provided (e.g. 'utilities', 'telco', 'education', 'medical', 'pharmacy'),
+--   When provided (e.g. 'utilities', 'telco', 'education', 'hospital', 'pharmacy'),
 --   the function uses subcategory-specific earn rules (is_bonus=FALSE with matching
 --   conditions->>'subcategory') as the base rate fallback, and filters bonus rules
 --   to those matching the subcategory or with no subcategory condition.
@@ -172,7 +172,7 @@ BEGIN
         WHEN (er.conditions->>'min_spend_monthly') IS NOT NULL
           AND GREATEST(COALESCE(cts.total_all, 0), v_estimated_spend)
               < (er.conditions->>'min_spend_monthly')::DECIMAL
-          THEN c.base_rate_mpd
+          THEN COALESCE(sb.subcategory_base_rate, c.base_rate_mpd)
         -- User-selectable bonus category: only apply bonus if the user has
         -- explicitly selected this category in their card preferences.
         -- If no preferences exist (ucp is NULL) or the category is not in
@@ -180,8 +180,8 @@ BEGIN
         WHEN er.conditions->>'user_selectable' = 'true'
           AND (ucp.selected_categories IS NULL
                OR NOT (p_category_id = ANY(ucp.selected_categories)))
-          THEN c.base_rate_mpd
-        ELSE COALESCE(er.earn_rate_mpd, c.base_rate_mpd)
+          THEN COALESCE(sb.subcategory_base_rate, c.base_rate_mpd)
+        ELSE COALESCE(er.earn_rate_mpd, COALESCE(sb.subcategory_base_rate, c.base_rate_mpd))
       END AS earn_rate_mpd,
       cap.monthly_cap_amount                        AS monthly_cap_amount,
       cap.category_id                               AS cap_category_id,
@@ -197,9 +197,10 @@ BEGIN
       AND er.is_bonus = TRUE
       AND er.effective_to IS NULL
       AND (
-        p_subcategory IS NULL
-        OR er.conditions->>'subcategory' = p_subcategory
-        OR er.conditions->>'subcategory' IS NULL
+        CASE WHEN p_subcategory IS NOT NULL
+          THEN er.conditions->>'subcategory' = p_subcategory
+          ELSE er.conditions->>'subcategory' IS NULL
+        END
       )
     LEFT JOIN subcategory_base sb
       ON sb.card_id = c.id

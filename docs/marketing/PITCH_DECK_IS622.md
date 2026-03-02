@@ -111,7 +111,7 @@ across 3–7 cards  without notice      at every checkout   confusion
 | **Actions** | Reads friend's post about free business class flight to Tokyo | Explores MileLion blog, Suitesmile, Telegram groups | Sets up Excel spreadsheet to track caps & earn rates | At checkout: hesitates 10-30 sec deciding which card | Discovers cap breach too late; rules changed without notice | Gives up optimization; reduces from 7 cards to 2 |
 | **Emotion** | 😊 **Motivated**<br/>FOMO from peers<br/>Travel goals | 🔍 **Researching**<br/>Information overload<br/>Too many variables | ✅ **Committed**<br/>Implementation optimism<br/>"I got this!" | 😰 **Struggling**<br/>Cognitive overload<br/>Chronic stress | 😫 **Breaking**<br/>System failure<br/>Confidence erosion | 😔 **Abandoned**<br/>Learned helplessness<br/>Resignation |
 | **Touchpoint** | Social media<br/>Friend conversations<br/>Miles community posts | MileLion blog<br/>Telegram groups<br/>Comparison sites | Excel / Google Sheets<br/>Notes app<br/>MileLion guides | Point of payment<br/>Wallet (4-5 cards)<br/>Spreadsheet | Bank app<br/>Monthly statement<br/>Cap tracker | Defaults to 1 card<br/>Stops checking apps |
-| **Evidence** | 📊 **Survey**: 80%+ actively want to optimize miles<br/>💭 *"I want those business class flights for free"* | 📊 **Survey**: Primary info sources are blogs (MileLion 70%, Telegram 45%)<br/>💭 *"I read MileLion every week but still forget at checkout"* | 📊 **Survey**: Manual tracking dominates (spreadsheets 65%, memory, notes)<br/>💭 *"I'll track this properly in Excel. I can do this!"* | 📊 **Survey**: Avg decision time 10-30 sec per transaction; anxiety spikes at every checkout<br/>💭 *"Did I already hit my dining cap this month?"* | 📊 **Survey**: Majority exceeded cap ≥1x or "unsure" (Pain point #1 validated)<br/>💭 *"Rules changed and I didn't know until I lost 10K miles"* | 📊 **HardwareZone**: Users report abandoning optimization (7-10 cards → 2)<br/>💭 *"It's too much mental load for the return I actually get"* |
+| **Evidence** | 📊 **Survey (n=32)**: 96.9% believe <85% of their transactions are optimally selected; 78.1% have breached a bonus cap or don't know if they have<br/>💭 *"I want those business class flights for free"* | 📊 **Survey (n=32)**: Top info sources — SingSaver 43.8%, The MileLion 37.5%, Friends/word-of-mouth 34.4%; 25% don't track rule changes at all; **0% use a dedicated app to decide which card to use**<br/>💭 *"I read MileLion every week but still forget at checkout"* | 📊 **Survey (n=32)**: 100% rely on manual methods — one main card for everything (46.9%), memory (25%), blog lookup at POS (12.5%), spreadsheet (9.4%); **zero use an app**<br/>💭 *"I'll track this properly in Excel. I can do this!"* | 📊 **Survey (n=32)**: Mean confidence in optimal card use: 3.31/5; 71.9% experience moderate-to-high MCC uncertainty; 87.5% not tracking caps carefully; 62.5% expect an answer in ≤10 seconds<br/>💭 *"Did I already hit my dining cap this month?"* | 📊 **Survey (n=32)**: 78.1% have breached a cap or can't tell if they have; Top pains — rule changes 65.6%, time & effort 59.4%, not knowing best card for merchant 56.3%<br/>💭 *"Rules changed and I didn't know until I lost 10K miles"* | 📊 **HardwareZone**: Users report abandoning optimization (7-10 cards → 2)<br/>📊 **Survey (n=32)**: 59.4% cite time & effort as a top-3 pain; 28.1% feel they're "leaving miles on the table but don't know how many" — the exact cocktail that drives resignation<br/>💭 *"It's too much mental load for the return I actually get"* |
 
 
 **Key Insight**: This is a **classic product adoption journey — but with no product to retain users**. Users progress naturally from awareness through engagement, but **friction at Stage 5 drives 70%+ to churn at Stage 6**. Manual methods cannot scale to handle real-time complexity.
@@ -134,15 +134,16 @@ With no product to intervene at Stage 5, the optimization strategy collapses und
 
 ### Key Survey Findings *(Directional — pre-launch validation)*
 
-| Finding | Data Signal | Implication |
+| Finding | Data Signal *(n=32 qualified respondents)* | Implication |
 |---------|------------|-------------|
-| Multi-card usage confirmed | Target segment reports 3–5 active miles cards on average | Core assumption validated; product is relevant |
-| Manual tracking dominates | Top methods: memory, spreadsheets, single "safe" card default | No automated tool currently fills this gap |
-| Cap breaches are common | Majority reported exceeding a bonus cap at least once or being unsure | Pain point #1 validated — the product's core differentiator is justified |
-| Low optimization confidence | Average confidence in card selection: below midpoint on 1–5 scale | Users *know* they're suboptimal; they want a solution |
-| Core feature appeal high | MCC recommendation + cap tracking scored ≥4/5 by majority | Product-market fit signal strong |
-| Time tolerance: 5–10 sec | Majority acceptable at checkout; "won't use if slow" is a real risk | UX constraint: recommendation must render in <1 second |
-| Freemium preferred | Majority prefer freemium; median WTP SGD 3–5/month for premium | Validates freemium model; premium conversion is achievable |
+| Multi-card complexity is real | 50% hold 3+ cards; 84.4% hold 2+. Most-held cards are Citi Rewards, HSBC Revolution, UOB Preferred Platinum — all MCC-sensitive 4 mpd cards with complex bonus category rules | Core assumption validated; product is most relevant to the highest-value card segment |
+| Market is entirely unserved | 100% of respondents use manual methods: single main card (46.9%), memory (25%), blog lookup at POS (12.5%), spreadsheet (9.4%); **0% use a dedicated app** | No incumbent to displace — MaxiMile creates a new behaviour, not replaces one |
+| Cap anxiety is pervasive | 78.1% either confirmed exceeding a bonus cap (37.5%) or don't know if they have (40.6%); only 21.9% are certain they haven't breached | The uncertainty itself is the pain — "not knowing" is as damaging as the breach |
+| Users know they're suboptimal | Mean confidence in card selection: **3.31/5**; 96.9% estimate <85% of transactions are optimally chosen; 34.4% estimate <50% optimal | Users will accept a tool that proves value quickly — they already believe the gap exists |
+| Rule-change fatigue is the #1 pain | Top 3 pains: rule changes **65.6%**, time & effort **59.4%**, not knowing best card **56.3%**. MCC uncertainty is 4th (40.6%). Cap breaches rank 7th (18.8%). | Lead messaging with rule-change relief and time savings — not MCC complexity |
+| Core features score near-ceiling | MCC card recommendation: **4.5/5** (59% gave 5 stars; 0% gave 1–2 stars); Cap tracker: **4.4/5**; Best card recommendation selected for weekly use by **90.6%** of respondents | PMF signal is strong; both MVP features are validated; best card reco is the product's universal hook |
+| Time tolerance is not a blocker | 62.5% expect an answer in ≤10 seconds; 93.7% will use the app. Only **6.3%** won't use if it takes time — well below the 40% red flag threshold | UX target is <10 seconds (not <2 sec); recommendation render time is not a barrier to adoption |
+| Freemium is the only viable model | 81.3% want a free baseline (46.9% free+ads; 34.4% freemium); **0% support for pure subscription**; 56.3% willing to pay $1+; sweet spot **$2.99–4.99/month** for premium | Free tier must be substantive; monetise through demonstrated value over time, not a paywall |
 
 ### Two Validated Personas (Derived from Research Segments)
 
@@ -197,7 +198,7 @@ With no product to intervene at Stage 5, the optimization strategy collapses und
 
 | Dimension | Score | Evidence |
 |-----------|-------|----------|
-| **Desirability** | HIGH (85%) | Community research confirms unsatisfied demand; survey validates feature appeal ≥4/5; **journey map shows 70% churn at Stage 6 without intervention** |
+| **Desirability** | HIGH (85%) | Community research confirms unsatisfied demand; survey (n=32): MCC recommendation 4.5/5, cap tracker 4.4/5, best card reco selected for weekly use by 90.6%; 0% scored core features 1–2 stars; journey map shows 70% churn at Stage 6 without intervention |
 | **Feasibility** | MEDIUM-HIGH (75%) | React Native + Supabase stack; card rules are publicly available; no novel technology required |
 | **Viability** | MEDIUM-HIGH (70%) | Freemium model validated; US precedent (Kudos USD 10.2M); SG market size supports growth |
 
@@ -268,7 +269,7 @@ Research showed "rules changed and I didn't know" is a critical trust-breaking m
 | **Value Proposition** | Turn complex multi-card rules into simple, real-time, one-tap decisions. Automated cap tracking prevents the #1 cause of miles loss. |
 | **Customer Segments** | (1) Active optimizers — Maya profile; ~100–200K in SG. (2) Passive holders — Peter profile; ~100–200K in SG. (3) Future B2B: banks seeking card engagement data |
 | **Channels** | Miles blogs (MileLion, Suitesmile — combined ~1M+ monthly visits); Telegram communities (35–50K members); App Store organic; future: referral and content SEO |
-| **Revenue Streams** | Freemium → Premium subscription (~SGD 4.99/month, target 10–15% conversion); B2B bank data partnerships (v2); Affiliate card links (v1.5, post-trust) |
+| **Revenue Streams** | Freemium → Premium subscription (survey-validated: $2.99–4.99/month sweet spot; 56.3% WTP $1+; target 10–15% conversion of active segment); B2B bank data partnerships (v2); Affiliate card links (v1.5, post-trust) |
 | **Key Activities** | Card rules database maintenance (update within 48hrs); recommendation engine QA; community engagement; user retention loops (alerts, insights) |
 | **Key Resources** | Proprietary card rules database; recommendation algorithm; community trust; accumulated user spending-state data |
 | **Key Partners** | MileLion/Suitesmile (distribution + credibility); Supabase (infrastructure); banks (future API + co-marketing) |
@@ -598,7 +599,7 @@ A: The database itself can be replicated — it takes 3–6 months and significa
 A: The product degrades gracefully — if a user doesn't log, we fall back to showing the best card by earn rate (without cap state). The recommendation is still useful, just less personalized. We track log rates as a leading indicator and have designed the logging flow to minimize friction. The SGFinDex integration in v2 would eliminate this entirely.
 
 **Q: What is your path to profitability?**
-A: Freemium drives adoption. Premium conversion (target 10–15%) at SGD 4.99/month creates SGD 15K MRR at 3,000 premium users. That's achievable from a 50,000-user base at 6% conversion — conservative relative to our 10% target. B2B revenue from aggregated spend analytics is a v2 track that doesn't require any additional user-facing development.
+A: Freemium drives adoption. Our survey (n=32) found 56.3% of miles users willing to pay $1+/month and a sweet spot at $2.99–4.99/month — the most concentrated bracket for willingness to pay. Premium conversion target of 10–15% at SGD 4.99/month creates SGD 15K MRR at 3,000 premium users. That's achievable from a 50,000-user base at 6% conversion — conservative relative to our 10% target. Notably, the active optimizer segment (31% of our sample) showed 70% WTP, so acquisition targeting matters as much as conversion rate. B2B revenue from aggregated spend analytics is a v2 track that doesn't require any additional user-facing development.
 
 **Q: What IS622 concept do you think was most important for this product?**
 A: JTBD. Getting the job definition right changed everything. If we had framed the job as "earn more miles," we would have built a miles calculator. Because we framed it as "never feel uncertain about which card to tap," we built a point-of-payment tool. That framing shift is what separates MaxiMile from every existing solution.

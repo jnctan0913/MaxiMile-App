@@ -106,6 +106,7 @@ export default function DemoControlsScreen() {
             try {
               await AsyncStorage.removeItem('demo_notification_shown');
               await AsyncStorage.removeItem('demo_auto_capture_onboarding_shown');
+              await AsyncStorage.removeItem('auto_capture_shortcut_setup_complete');
               Alert.alert('Success', 'Demo state has been reset.');
             } catch (err) {
               Alert.alert('Error', 'Failed to reset demo state.');

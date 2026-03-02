@@ -1,9 +1,10 @@
 # PRD: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 2.4
-**Last Updated**: 2026-02-28
+**Version**: 2.5
+**Last Updated**: 2026-03-01
 **Author**: PM Agent
 **Status**: Draft
+**Changelog (v2.5)**: MileLion 2026 gap analysis — bills category architectural correction. Full 29-card × 8-category cross-verification revealed that the `bills` category incorrectly models six distinct MCC groups as a single earn rule. Utilities (MCC 4900), insurance (MCCs 6300/6381/6399), and education (MCCs 8211–8299) earn 0 mpd (excluded by all major banks), not base rate. Pharmacy (MCC 5912) earns base rate (not excluded). Medical/hospital earns 0 mpd on most banks but base rate on HSBC/Amex for private hospitals. Added F34 (Bills Subcategory Selection) under Epic 14 (Recommendation Accuracy), updated data accuracy requirements to mandate 0 mpd for excluded MCCs, added HealthHub MCC 8099 tip for medical payments, and reversed the v2.2 decision to keep bills as a single category. See `docs/technical/DATA_CORRECTION_PLAN.md` for full correction plan.
 **Changelog (v2.4)**: Rate change detection pivot — switched from bank T&C PDF monitoring to MileLion review page monitoring. 35 fragile bank sources paused, replaced by 25 reliable MileLion review sources with JSON-LD date-gated detection. AI now compares MileLion article content against our database (instead of old-vs-new T&C diff). New source type `milelion_review` added. See `docs/technical/RATE_DETECTION_ARCHITECTURE.md` v1.1 for full architecture update.
 **Changelog (v2.3)**: Card database expansion planning. Cards 21-22 (Maybank World MC, UOB Visa Signature) already implemented. Added F33 (Card Database Expansion 22→29) for 7 remaining miles cards. SC Smart Card deferred (P3) — cashback card with poor miles conversion doesn't fit miles optimizer positioning. UOB Lady's Solitaire requires user category selection UX (choose 2 of 7). Updated F22 to reflect partial completion. Fixed Maybank World MC slug mismatch (`maybank-world-mc`).
 **Changelog (v2.2)**: Recommendation accuracy improvements based on MileLion competitive analysis. Added F30 (Petrol/Bills Category Resolution), F31 (Min Spend Condition Enforcement), F32 (Condition Transparency in UI). Decision: Bills kept as single category with insurance warning — no sub-categories. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md` for full comparative analysis.
@@ -346,11 +347,18 @@ Enable miles-focused users to consistently use the optimal credit card for every
 
 > **Context**: Comparative analysis against [MileLion's credit card guide](https://milelion.com/credit-cards/guide/) (Feb 2026) identified three gaps where MaxiMile's recommendations can be inaccurate. These features address data integrity and scoring accuracy — the foundation that all other features depend on. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md` for full analysis.
 
+> **Data Accuracy Requirement (v2.5 update)**: A full 29-card × 8-category cross-verification against MileLion 2026 data established the following mandatory modeling rule: **"not a bonus category" and "excluded" are not the same thing and must never be modeled identically.** Earn rates for MCCs that are explicitly excluded by a bank must be stored and displayed as **0 mpd**, not as the card's base rate. Showing base rate (e.g., 0.4 mpd) for an excluded MCC produces a confidently wrong recommendation — the user earns nothing but the app recommends a card. The critical distinction:
+> - **Not a bonus category**: card earns its base rate (e.g., 0.4 mpd flat-rate cards, 1.2 mpd flat-rate cards)
+> - **Explicitly excluded MCC**: card earns **0 mpd** — no points at all
+>
+> MCCs confirmed excluded by all major banks (DBS, Citi, UOB, OCBC, HSBC, SC, Amex): utilities (MCC 4900), insurance (MCCs 6300/6381/6399), government payments (MCCs 9211/9222/9311/9399), education (MCCs 8211/8220/8249/8299). Medical/hospital (MCCs 8011/8021/8062/8099) is excluded by DBS, UOB, Citi, SC, OCBC but earns base rate on HSBC, Amex, and Maybank. Pharmacy (MCC 5912) is **not excluded** — earns base rate on most banks. See `docs/technical/DATA_CORRECTION_PLAN.md` for the full correction plan and per-card fix list.
+
 | # | Feature | Description | Reach | Impact | Confidence | Effort (wks) | RICE Score | Acceptance Criteria |
 |---|---------|-------------|-------|--------|------------|--------------|------------|---------------------|
 | F30 | **Petrol/Bills Category Resolution** | Resolve the petrol/bills data conflict: (1) Add base-rate earn rules for `bills` across all 20 cards so `recommend('bills')` returns meaningful results instead of undifferentiated base rates, (2) Fix `gas_station` Google Places mapping from `transport` to `petrol` in `lib/merchant.ts`, (3) Add `bills` to AI scraper schema (`scraper/src/ai/schema.ts` and `prompts.ts`). **Decision**: Both `petrol` AND `bills` remain as separate categories (8 total). Bills is NOT sub-categorized — telco and utilities produce identical recommendations (all base rate). Insurance warning banner added instead. See `docs/technical/CARD_DATA_VERIFICATION.md` Section 3.1 for full conflict timeline | 5000 | 3 | 95% | 1.5 | 9500 | `recommend('bills')` returns differentiated results for all 20 cards; `recommend('petrol')` returns existing petrol-specific earn rates; Google Places `gas_station` type maps to `petrol` category; AI scraper schema accepts `bills` as valid category; insurance warning banner shown on Bills recommendation screen ("Insurance payments are excluded from earning on most cards — rates shown apply to telco and utility bills"); 8 categories visible in app UI; all existing tests pass |
 | F31 | **Min Spend Condition Enforcement** | Enforce minimum monthly spend conditions in the recommendation scoring algorithm. Currently, SC X Card (3.3 mpd, requires $500/month), UOB Preferred Platinum (4 mpd, requires $600/month), and Maybank cards (requires $300/month) are recommended at their bonus rate regardless of user's actual spending level — producing **wrong recommendations** for low spenders. Fix: (1) Add user monthly spend estimate input (onboarding or settings), (2) Modify `recommend()` RPC to check `earn_rules.conditions->>'min_spend_monthly'` against user's actual monthly spend from `transactions`, (3) If condition not met, use `base_rate_mpd` instead of bonus rate. Affects ~5 of 20 cards | 4000 | 3 | 85% | 3 | 3400 | Cards with min spend conditions downranked to base rate when user's monthly spend is below threshold; SC X Card shows 0.4 mpd (not 3.3 mpd) for users spending <$500/month; UOB Preferred Platinum shows 0.4 mpd (not 4 mpd) for users spending <$600/month; `recommend()` RPC checks `conditions->>'min_spend_monthly'` against current month's `SUM(transactions.amount)`; user can set a monthly spend estimate in settings; recommendation cards show condition note when min spend not yet met ("Spend $X more this month to unlock bonus rate") |
 | F32 | **Condition Transparency in Recommendation UI** | Surface card conditions and exclusions on recommendation cards so users understand the fine print behind each recommendation. Three sub-features: (1) **Conditions display**: Show `earn_rules.conditions_note` on recommendation cards (e.g., "SIA bookings only", "Requires contactless payment", "Min spend $500/month required"), (2) **HSBC Revolution fast food exclusion**: Add MCC 5814 exclusion row to `exclusions` table — HSBC Revolution earns 4 mpd on dining but excludes fast food (MCC 5814), which MileLion explicitly flags, (3) **Insurance warning on Bills screen**: Static warning banner on Bills recommendation screen noting that insurance payments (MCC 6300/6381/6399) are excluded from earning on most cards despite being in the bills category. This is a UI-only change — the data already exists in `earn_rules.conditions_note` and `exclusions` table | 4000 | 2 | 90% | 1.5 | 4800 | Recommendation cards display `conditions_note` text when present (non-null); HSBC Revolution excluded from dining recommendation for MCC 5814 merchants; Bills recommendation screen shows insurance exclusion warning banner; condition text styled as secondary/muted below earn rate; no algorithm changes required — purely UI surfacing of existing data |
+| F34 | **Bills Subcategory Selection** | MileLion 2026 gap analysis revealed the `bills` category is architecturally wrong: it bundles six MCC groups with fundamentally different earn behaviors into one earn rule. Utilities (MCC 4900) and insurance (MCCs 6300/6381/6399) earn **0 mpd** (excluded by all major banks). Education (MCCs 8211/8220/8249/8299) earns **0 mpd** (DBS, Citi, UOB, OCBC, HSBC, SC, Amex all exclude). Medical/hospital (MCCs 8011/8021/8062/8099) earns **0 mpd** on most banks but base rate on HSBC/Amex for private hospitals. Pharmacy (MCC 5912) earns **base rate** (not excluded by most banks). Telco (MCCs 4812/4814/4816/4899) earns base rate / 4 mpd on 4 cards for one-off online payments. Solution: When user taps Bills, show a subcategory picker (Utilities / Telco / Insurance / Education / Medical / Pharmacy) before showing recommendations. Each subcategory routes to the correct earn rules. **Data fix required**: Set bills earn_rate_mpd = 0 for utilities, insurance, and education across all 29 cards (currently incorrectly showing base rate). Add subcategory-keyed earn rules per card. **In-app tip**: Medical subcategory surfaces the HealthHub/Health Buddy tip — paying hospital bills via these apps changes MCC to 8099, treated as online spend by Citi Rewards and DBS WWMC = 4 mpd. **Reverses the v2.2 decision** to keep bills as a single category — that decision was based on the incorrect assumption that telco and utilities produce identical recommendations; in reality utilities = 0 mpd (excluded) while telco earns base rate or 4 mpd. See `docs/technical/DATA_CORRECTION_PLAN.md` Part 3 for full implementation plan | 2000 | 3 | 80% | 3 | 1600 | Bills screen shows subcategory picker (6 options) before displaying recommendations; Utilities subcategory returns 0 mpd for all major bank cards with "excluded by bank" message; Insurance subcategory returns 0 mpd for all cards; Education subcategory returns 0 mpd for DBS/Citi/UOB/OCBC/HSBC/SC/Amex and 0.16 mpd for Maybank Horizon; Medical subcategory returns 0 mpd for most cards, base rate for HSBC/Amex; Medical subcategory shows HealthHub tip ("Pay via HealthHub or Health Buddy app for 4 mpd on Citi Rewards and DBS WWMC"); Pharmacy subcategory returns base rate for all cards (not 0); Telco subcategory returns base rate / 4 mpd on Cards 6/10/18/20 for one-off online payments; earn_rate_mpd for bills set to 0 in DB for excluded MCCs across all 29 cards; `subcategory` field added to earn_rules conditions JSONB; all existing recommendation tests pass |
 
 #### P2 — Could Have
 
@@ -398,6 +406,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | F30: Petrol/Bills Category Resolution | **Must-Have** (data integrity) | Without this fix, 140 petrol earn rules are invisible to users and bills recommendations are meaningless (all cards show undifferentiated base rate). This is a data quality issue that undermines trust in the core recommendation engine — the #1 value prop. Blocking prerequisite for accurate recommendations in 2 of 8 categories |
 | F31: Min Spend Condition Enforcement | **Must-Have** (recommendation accuracy) | Without this, ~5 of 20 cards produce wrong recommendations for low spenders. SC X Card appears as 3.3 mpd but earns 0.4 mpd if user doesn't hit $500/month. Users who follow a wrong recommendation and check their statement will lose trust permanently. This is the most impactful recommendation accuracy gap identified in the MileLion comparison |
 | F32: Condition Transparency in UI | **Performance** (trust building) | More condition transparency = more user trust. Directly correlated with recommendation confidence. Without it, users see "4 mpd" but don't know it requires contactless payment or SIA bookings only — leading to disappointment when actual earning differs. Low effort, high trust impact |
+| F34: Bills Subcategory Selection | **Must-Have** (data integrity) | Without subcategory routing, the bills recommendation is actively misleading — showing base rate for MCCs where the bank earns 0 mpd. A user told "use BOC Elite for 1.5 mpd" on their electricity bill earns nothing. This destroys trust more than showing no recommendation at all. The subcategory picker is also the only mechanism to surface the HealthHub 4 mpd tip for medical bills. Reverses the v2.2 "no sub-categories" decision, which was based on a false premise that all bill types produce identical recommendations |
 
 ### Impact-Effort Matrix
 
@@ -428,7 +437,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
    LOW EFFORT ──────────────── HIGH EFFORT
 ```
 
-> **Note**: F30 (Petrol/Bills Fix) is marked with ★★ as the highest-priority data integrity fix — highest RICE score (9,500) across all features, unlocks 140 existing earn rules, and resolves a long-standing category conflict. F32 (Condition UI) is marked ★ as a high-impact quick win (surfaces existing data). F31 (Min Spend Enforcement) sits at the intersection of high impact and medium effort — prevents wrong recommendations for ~5 cards.
+> **Note**: F30 (Petrol/Bills Fix) is marked with ★★ as the highest-priority data integrity fix — highest RICE score (9,500) across all features, unlocks 140 existing earn rules, and resolves a long-standing category conflict. F32 (Condition UI) is marked ★ as a high-impact quick win (surfaces existing data). F31 (Min Spend Enforcement) sits at the intersection of high impact and medium effort — prevents wrong recommendations for ~5 cards. F34 (Bills Subcategory Selection) is a high-impact, medium-effort feature (RICE 1,600) that corrects the bills category architectural error identified in the MileLion 2026 gap analysis — currently showing base rate for MCCs that earn 0 mpd on all major banks, producing confidently wrong recommendations for all bill-paying users.
 
 > **Note**: F26 (iOS Shortcuts Auto-Capture) is marked with ★ as the highest-value quick win in the matrix — high impact (solves #1 product risk) with low effort (2-3 sprints, zero native code). F27 (Android Notification Auto-Capture) is high impact but higher effort due to native module requirement. F28 (Demo Mode) is low effort and primarily enables go-to-market activities (demos, presentations) rather than direct end-user value.
 
@@ -440,7 +449,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | Cashback card optimization | Miles-only focus for v1; dilutes positioning | v2 if market demands |
 | Card application / affiliate links | Avoid conflict of interest in recommendations; trust-first approach | v1.5 after establishing credibility |
 | International card support | Singapore-only focus for v1 | v2 (Malaysia, Hong Kong) |
-| Bills sub-categories (telco/utilities/insurance) | Telco and utilities produce identical recommendations (all base rate). Insurance handled via warning banner (F32). Sub-categories add UI complexity for zero accuracy gain. Decision: Feb 2026 | Only if cards differentiate telco vs utility earn rates |
+| ~~Bills sub-categories (telco/utilities/insurance)~~ | ~~Telco and utilities produce identical recommendations (all base rate). Insurance handled via warning banner (F32). Sub-categories add UI complexity for zero accuracy gain. Decision: Feb 2026~~ **REVERSED (v2.5, Mar 2026)**: MileLion 2026 gap analysis disproved the core assumption. Utilities earn 0 mpd (excluded), not base rate — they are fundamentally different from telco. Insurance and education also earn 0 mpd. Pharmacy earns base rate (not excluded). Sub-categories are now required for correctness, not optional for granularity. Moved to F34 (P0.5). | **In scope as F34** |
 | MCC-level earn rule granularity | Category-level scoring sufficient for 95% of transactions. MCC-level would require major schema change. Only known impact: HSBC Rev fast food exclusion, handled via `exclusions` table (F32) | v2 if accuracy demands increase |
 | Card stacking / combo recommendations | Different product scope — MaxiMile is a per-transaction recommender, not a portfolio advisor. MileLion covers this editorially | v2 if user demand emerges |
 | MCC switching strategies (HeyMax, Atome) | Power-user optimization beyond core recommendation scope. Requires partnership integrations | v2+ |
@@ -571,6 +580,16 @@ Enable miles-focused users to consistently use the optimal credit card for every
 - As a user looking at HSBC Revolution for dining, I want to know that fast food (MCC 5814) is excluded from the 4 mpd bonus, so that I use a different card at McDonald's or KFC
 - As a user browsing Bills recommendations, I want a visible warning that insurance MCCs (6300/6381/6399) are excluded by most cards, so that I have realistic expectations for insurance payments
 
+#### F34 — Bills Subcategory Selection
+- As a user about to pay a utility bill (SP Services, Geneco), I want to select "Utilities" in the Bills subcategory picker and see that all major cards earn 0 mpd, so that I am not misled into expecting miles that will never arrive
+- As a user paying a Singtel or StarHub bill by card, I want to select "Telco" and see that HSBC Revolution, DBS WWMC, Citi Rewards, and UOB PPV earn 4 mpd on one-off online telco payments, so that I use the right card and earn the maximum miles available
+- As a user paying insurance premiums, I want to select "Insurance" and immediately see a clear message that insurance payments (MCCs 6300/6381/6399) earn 0 mpd on all cards, so that I do not use a valuable bonus card unnecessarily
+- As a user or parent paying school fees, I want to select "Education" and see 0 mpd for all major cards, so that I understand no card earns miles on school fee payments
+- As a patient paying a hospital bill at the counter, I want to select "Medical" and see which cards (HSBC, Amex) still earn base rate on private hospital visits, so that I use the best card available
+- As a patient paying a hospital bill via the HealthHub or Health Buddy app, I want the app to surface a tip that this changes the MCC to 8099 (treated as online spend by Citi Rewards and DBS WWMC = 4 mpd), so that I can earn significantly more miles on the same payment by using the right method and card
+- As a user buying medication at Guardian or Watsons, I want to select "Pharmacy" and see that most cards earn their base rate (pharmacy is not excluded), so that I know I will earn some miles even if it is not a bonus category
+- As a user, I want the Bills subcategory picker to appear before recommendations are shown, so that I always select the correct bill type and receive an accurate, non-misleading recommendation
+
 ---
 
 ## 10. Assumptions & Hypotheses
@@ -631,6 +650,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | **Inaccurate recommendations erode trust** | Low | Critical | Rigorous QA on card rules; community flagging system; transparency in recommendation logic | Data/QA |
 | **Min spend conditions not enforced in scoring** | High | High | ~5 of 20 cards have min spend conditions (SC X Card: $500/mo, UOB Preferred Platinum: $600/mo, Maybank cards: $300/mo) that are stored but not enforced — producing wrong recommendations for low spenders. F31 addresses this by checking `conditions->>'min_spend_monthly'` against actual monthly spend. Without F31, users who follow recommendations and check their statement will lose trust permanently. Identified via MileLion competitive analysis (Feb 2026) | Product/Engineering |
 | **Petrol/bills data conflict produces empty recommendations** | High | Medium | 140 petrol earn rules exist in DB but were previously invisible in frontend. Bills category had UI but zero earn rules — `recommend('bills')` returned undifferentiated base rates. F30 resolves by ensuring both categories have complete data and correct mappings. Identified via CARD_DATA_VERIFICATION.md review | Data/Engineering |
+| **Bills category models excluded MCCs as base rate (0 mpd shown as 0.4–1.5 mpd)** | High | Critical | All 29 cards currently show bills earn_rate_mpd = their base_rate_mpd (e.g., 1.5 mpd for BOC Elite). In reality, utilities (MCC 4900), insurance (MCCs 6300/6381/6399), and education (MCCs 8211–8299) earn 0 mpd — explicitly excluded by all major banks. The engine confidently recommends "use BOC Elite for 1.5 mpd on bills" when a user paying SP Services earns zero. This is the most widespread data accuracy error in the database (affects all 29 cards × 3 bill subcategories). F34 corrects by adding subcategory routing and setting excluded MCCs to 0 mpd. See `docs/technical/DATA_CORRECTION_PLAN.md` Fix 1 | Data/Engineering |
 | **Miles program devaluations reduce user motivation** | Medium | Medium | Position value as "get the most from what you have" regardless of program changes; track sentiment | Product |
 | **Regulatory issues with financial data/advice** | Low | High | Legal review; position as informational tool, not financial advice; comply with MAS guidelines | Legal |
 | **Transfer rates change without notice** | High | Medium | Automated monitoring of bank transfer pages; community-sourced alerts; version-stamped rates with "last verified" dates shown to users | Data/Ops Team |
@@ -678,7 +698,7 @@ Enable miles-focused users to consistently use the optimal credit card for every
 | What is the monetization split between freemium subscription and future affiliate revenue? | Business | Sprint 2 | Open |
 | Can we partner with MileLion/Suitesmile for launch distribution? | Growth | Sprint 1 | Open |
 | Should we build iOS-first or cross-platform from day one? | Tech Lead | Sprint 0 | Open |
-| Should `bills` category be sub-categorized into telco/utilities/insurance? | PM/SME | 2026-02-26 | **Resolved: No** — Telco and utilities produce identical recommendations (all base rate across 20 cards). Insurance is the only sub-type that differs (excluded by most cards). Solution: single `bills` category with insurance warning banner instead of sub-categories. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md` |
+| Should `bills` category be sub-categorized into telco/utilities/insurance? | PM/SME | 2026-02-26 | **Resolved: Yes (v2.5, Mar 2026 — reversal of Feb 2026 decision)** — MileLion 2026 full gap analysis disproved the premise of the original "No" decision. Utilities (MCC 4900) earn 0 mpd (excluded), not base rate — making them fundamentally different from telco, which earns base rate or 4 mpd on 4 cards. Insurance and education are also excluded (0 mpd). Pharmacy is not excluded (base rate). The v2.2 decision was based on an incorrect data assumption. Sub-categories are required for recommendation correctness, not just granularity. Implemented as F34. See `docs/technical/DATA_CORRECTION_PLAN.md` Part 3 for full implementation plan |
 | Should we match MileLion's 12+ category granularity? | PM/SME | 2026-02-26 | **Resolved: No** — 8 categories sufficient. MileLion's splits (air vs hotels, SimplyGo vs ride-hailing) produce identical earn rates within MaxiMile's scoring algorithm. Focus on condition enforcement (F31) over category proliferation |
 | How deep should card recommendation logic go ("just enough" vs "holy bible")? | PM/SME | 2026-02-26 | **Resolved: "Just enough"** — Focus on accurate per-transaction recommendations (our core value prop), not comprehensive consumer education (MileLion's value prop). MileLion serves card selection; MaxiMile serves card usage. Different products, different depth requirements |
 
@@ -705,7 +725,7 @@ A mobile app where users can:
 | **v1.2** | F7, F13–F14: Miles Earning Insights (integrated into Miles tab) + Miles Portfolio Dashboard + Manual Balance Entry. **Includes Phase 1 Earning Insights (P0 quick wins)**: I1 Top Earning Card highlight, I2 Category spending breakdown, I5 Fixed Miles Saved baseline (1.4 mpd) | Months 5–6 | 40% of users enter at least one balance; Miles tab DAU = 30% of MAU; 60% of active users view earning insights weekly; top earning card visible on insights screen; category breakdown renders for users with 5+ transactions |
 | **v1.3** | F15–F16: Miles Redemption Logging + Goal Tracker. **Includes Phase 2 Earning Insights (P1 value deepening)**: I3 Actionable insight cards, I7 Cap utilisation summary. **Phase 3 Earning Insights (P1 engagement loop)**: I4 Goal projection tie-in, I6 Monthly summary notification | Months 6–7 | 25% of users log at least one redemption; 30% create a goal; engagement loop established; actionable tip cards shown for users with underutilised caps; month-end push notification delivered with >20% open rate |
 | **v1.4** | F18–F21: Two-Layer Architecture + Transfer Partners + Expanded Programs + Smart Nudges | Months 7–9 | All 9 SG banks covered; 50%+ of users view Layer 1 (My Miles) daily; transfer nudge CTR > 15%; Asia Miles and KrisFlyer both tracked by 40%+ of active users |
-| **v1.5** | F22 (DONE): Card Coverage 20→22 (Maybank World MC + UOB Visa Signature). F33: Card Expansion 22→29 (DBS Vantage, UOB Lady's Solitaire, OCBC Voyage, SC Journey, SC Beyond, HSBC Premier MC, Maybank XL Rewards). F23: Rate Change Monitoring & Alerts. SC Smart Card deferred (cashback). UOB Lady's Solitaire category selection UX | Months 9–11 | 29 cards in database (~85% market coverage); 25% increase in addressable users; UOB Lady's Solitaire category selection functional; rate change alerts delivered within 48 hrs; age-restricted cards filtered in setup |
+| **v1.5** | F22 (DONE): Card Coverage 20→22 (Maybank World MC + UOB Visa Signature). F33: Card Expansion 22→29 (DBS Vantage, UOB Lady's Solitaire, OCBC Voyage, SC Journey, SC Beyond, HSBC Premier MC, Maybank XL Rewards). F23: Rate Change Monitoring & Alerts. F34: Bills Subcategory Selection — subcategory picker (Utilities/Telco/Insurance/Education/Medical/Pharmacy), 0 mpd data corrections for excluded MCCs across all 29 cards, HealthHub 4 mpd tip for medical payments. SC Smart Card deferred (cashback). UOB Lady's Solitaire category selection UX | Months 9–11 | 29 cards in database (~85% market coverage); 25% increase in addressable users; UOB Lady's Solitaire category selection functional; rate change alerts delivered within 48 hrs; age-restricted cards filtered in setup; Bills subcategory picker functional; utilities/insurance/education return 0 mpd; HealthHub tip shown on medical subcategory |
 | **v1.6** | F24: Community-Sourced Rate Change Submissions + admin verification dashboard. Closes Layer 1 detection gap with user-generated content | Months 11–12 | 10+ community submissions/month by month 3; <15 min/day admin review time; 0 false positives published; contributor badge system active |
 | **v1.7** | F25: Automated Rate Change Detection — GitHub Actions scraper + Gemini Flash AI classifier. $0/month infrastructure. Full detection pipeline | Months 12–14 | 90%+ of real rate changes auto-detected within 48 hours; 95%+ precision on published changes; pipeline uptime >=99%; admin review <30 min/month |
 | **v1.8** | F29: Push Notifications (Complete System + Demo Mode) + F26: Apple Pay Shortcuts Auto-Capture — F29: production-ready push notification infrastructure with demo mode for stakeholder presentations (system built but not user-enabled pending launch decision); F26: deep link handler, merchant→category mapping, card name fuzzy matching, downloadable Shortcut template (user must manually add via Shortcuts app — Apple platform constraint), in-app setup wizard offered during onboarding Step 1.5, recommendation match indicator on confirmation screen, Smart Pay auto-capture handoff (60s window). **Solves the #1 product risk (manual logging paradox) with zero native code. Closes the Recommend->Log feedback loop.** | Months 13–15 | F29: Complete notification system built with demo mode showcasing all severity levels; stakeholder demo feedback >4.5/5.0; F26: 30%+ of iOS users complete Shortcut setup; auto-captured transactions confirmed in <3 sec; transaction logging rate improves from 70% to 85%+; Day-7 retention improves by 10%+ for Shortcut-enabled users; recommendation match shown on 100% of auto-captured confirmations |
@@ -996,6 +1016,73 @@ Key design decisions:
 | Admin review time | < 15 min/day | Pipeline health dashboard |
 | Pipeline uptime | >= 99% scraper success rate | `v_pipeline_health` view |
 
+### Bills Subcategory Selection Design Notes (F34)
+
+**Background**: The v2.2 PRD deferred bills sub-categorization on the basis that "telco and utilities produce identical recommendations (all base rate)." The MileLion 2026 full gap analysis (29 cards × 8 categories) disproved this. Utilities (MCC 4900) earn 0 mpd because they are explicitly excluded — not because they are a non-bonus category. The entire bills category is a bundle of six MCC groups with materially different earn behaviors that must be modeled separately.
+
+**Subcategory MCC Map**:
+| Subcategory | MCCs | Correct earn on most cards | Notable exceptions |
+|---|---|---|---|
+| Utilities | 4900 | 0 mpd (excluded) | Maybank Horizon: 0.16 mpd — confirm before shipping |
+| Telco & Internet | 4812, 4814, 4816, 4899 | Base rate / 4 mpd (Cards 6/10/18/20, one-off online only) | Recurring GIRO excluded from bonus |
+| Insurance | 6300, 6381, 6399 | 0 mpd (excluded) | No exceptions across 29 cards |
+| Education | 8211, 8220, 8249, 8299 | 0 mpd (excluded) | Maybank Horizon: 0.16 mpd |
+| Medical / Hospital | 8011, 8021, 8062, 8099 | 0 mpd (excluded) | HSBC/Amex: base rate for private hospitals; Maybank: 0.16 mpd |
+| Pharmacy | 5912 | Base rate (not excluded) | Hospital-linked pharmacies (MCC 9399) = 0 mpd |
+
+**UI Flow**:
+```
+User taps "Bills"
+    → Subcategory picker shown (6 options, full-width grid)
+    → User selects subcategory
+    → Recommendation screen loads with subcategory-specific earn rules
+    → For 0 mpd subcategories: show "No miles earned" state with explanation
+    → For earning subcategories: show ranked card list as normal
+```
+
+**Key Design Decisions**:
+- Subcategory picker is mandatory (not skippable) — showing an undifferentiated bills recommendation without subcategory is worse than showing no recommendation
+- For 0 mpd subcategories (utilities, insurance, education), show a clear "no miles earned" state rather than recommending a card at 0 mpd. Include a brief explanation ("Banks exclude utility payments from earning miles") and optionally show Maybank Horizon as the only exception if applicable
+- For Medical subcategory: always surface the HealthHub tip before showing card recommendations (see below)
+- For Telco subcategory: note that the 4 mpd bonus applies only to one-off manual payments — not recurring GIRO/auto-debit, which earns base rate on all cards
+
+**HealthHub / Health Buddy Tip (Medical Subcategory)**:
+
+This tip should appear as a highlighted info card at the top of the Medical subcategory recommendation screen, above the card list:
+
+```
+Paying a hospital bill?
+─────────────────────────────────────────────
+💡 Pay via HealthHub or Health Buddy app
+
+When you pay via the HealthHub or Health Buddy
+(OneNUHS) mobile app, the MCC changes from
+8062 (hospital) to 8099 (online transaction).
+
+Citi Rewards and DBS Woman's World MC treat
+MCC 8099 as online shopping: 4 mpd.
+
+Without the app: 0 mpd on most cards.
+With the app:    4 mpd on Citi Rewards / DBS WWMC.
+─────────────────────────────────────────────
+```
+
+The recommendation engine should then show the normal card list, but Citi Rewards and DBS WWMC should be ranked at 4 mpd (online earn rate) with a note "when paid via HealthHub or Health Buddy app." Cards that earn 0 mpd on MCC 8062/8099 should show 0 mpd with "does not earn on hospital bills."
+
+**Data Changes Required** (see `docs/technical/DATA_CORRECTION_PLAN.md` Fix 1 for SQL):
+- Set `earn_rate_mpd = 0` for the bills earn_rule on all 29 cards where utilities MCCs are excluded
+- Add `subcategory` field to `earn_rules.conditions` JSONB for routing
+- Add per-subcategory earn rules for all 29 cards × 6 subcategories
+- Expand MCC list in `maximile-app/constants/categories.ts` to include education (8211/8220/8249/8299), medical (8011/8021/8062/8099), and pharmacy (5912) MCCs under the bills category
+
+**Success Metrics for F34**:
+| Metric | Target |
+|--------|--------|
+| Bills subcategory picker adoption | >90% of bills recommendation sessions select a subcategory |
+| 0 mpd accuracy | Utilities/insurance/education recommendation returns 0 mpd for all major bank cards |
+| HealthHub tip CTR | >15% of Medical subcategory users tap the HealthHub tip |
+| User trust (post-F34) | Bills category NPS improves vs pre-F34 baseline |
+
 ---
 
 ## Appendix
@@ -1068,7 +1155,7 @@ See PRD Section 4 for full competitive matrix, SWOT, and Porter's Five Forces an
 | **Month 5–6** | Miles & Portfolio + Earning Insights Phase 1 | Miles Earning Insights (integrated into Miles tab) with I1 Top Earning Card highlight, I2 Category spending breakdown, I5 Fixed Miles Saved baseline (1.4 mpd); Miles Portfolio Dashboard; Manual Balance Entry | v1.2 Release |
 | **Month 6–7** | Engagement Loop + Earning Insights Phase 2 & 3 | Miles Redemption Logging, Miles Goal Tracker, I3 Actionable insight cards, I7 Cap utilisation summary, I4 Goal projection tie-in, I6 Monthly summary notification | v1.3 Release |
 | **Month 7–9** | Miles Ecosystem — "Your Complete Miles Picture" | Two-Layer Architecture (My Miles + My Points), Transfer Partner Database, Expanded Programs (7→20), Smart Transfer Nudges | v1.4 Release |
-| **Month 9–11** | Market Coverage & Intelligence — "Every Card, Every Change" | Card Coverage Expansion (22→30 cards, 85% market coverage), Rate Change Monitoring & Alerts, POSB Everyday reclassification, Eligibility metadata for restricted cards | v1.5 Release |
+| **Month 9–11** | Market Coverage & Intelligence — "Every Card, Every Change" | Card Coverage Expansion (22→30 cards, 85% market coverage), Rate Change Monitoring & Alerts, POSB Everyday reclassification, Eligibility metadata for restricted cards, **F34 Bills Subcategory Selection** — subcategory picker, 0 mpd corrections for excluded MCCs (utilities/insurance/education) across all 29 cards, HealthHub 4 mpd tip for medical payments | v1.5 Release |
 | **Month 11–12** | Community Intelligence — "Crowdsourced Accuracy" | Community rate change submissions, admin verification dashboard (Cloudflare Pages), dedup fingerprinting, contributor badges, submission status tracking | v1.6 Release |
 | **Month 12–14** | Automated Intelligence — "Always Up to Date" | GitHub Actions scraper (25 MileLion review pages), date-gated detection via JSON-LD `dateModified`, AI comparison of MileLion content vs our DB, Gemini 2.0 Flash classification, confidence-based routing, pipeline health monitoring. $0/month infrastructure | v1.7 Release |
 | **Month 13** | Proactive Engagement Foundation — "Build Once, Demo Well, Launch Later" | **F29 Push Notifications Complete System + Demo Mode**: Build production-ready push notification infrastructure with full feature completeness (token registration, permission flow, severity-based routing, batching, deep linking, notification history, granular settings, F6 cap alerts integration). System is fully functional but NOT enabled for end users in production — launch date TBD pending business decision. Includes comprehensive demo mode that auto-triggers realistic notifications on Miles tab visit for stakeholder presentations and investor demos. Enables immediate value demonstration without requiring beta cohorts or gradual rollout. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` | v1.8 Release |
@@ -1116,3 +1203,4 @@ See PRD Section 4 for full competitive matrix, SWOT, and Porter's Five Forces an
 | P2 | F12: Social / community features | Feature | Future | Backlog |
 | P3 | Invite-only ultra-premium cards (Insignia, ULTIMA, Centurion) | Feature | Deferred | v2.0 |
 | P3 | Niche cards (Diners Club, RHB, ICBC) | Feature | Deferred | v2.0 |
+| **P0.5** | **F34: Bills Subcategory Selection (subcategory picker + 0 mpd data corrections + HealthHub tip)** | **Feature** | **✅ Shipped Sprint 28** | **Sprint 28** |

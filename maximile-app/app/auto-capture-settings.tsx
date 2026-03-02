@@ -15,8 +15,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserCardMappings } from '../lib/card-matcher';
+import { SHORTCUT_SETUP_COMPLETE_KEY } from './auto-capture-setup';
 import {
   Colors,
   Spacing,
@@ -38,13 +40,14 @@ export default function AutoCaptureSettingsScreen() {
   const router = useRouter();
 
   const [mappedCount, setMappedCount] = useState(0);
+  const [shortcutSetUp, setShortcutSetUp] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [howItWorksOpen, setHowItWorksOpen] = useState(false);
+  const [howItWorksOpen, setHowItWorksOpen] = useState(true);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  const isActive = mappedCount > 0;
+  const isActive = mappedCount > 0 || shortcutSetUp;
 
   useEffect(() => {
     Animated.parallel([
@@ -65,17 +68,21 @@ export default function AutoCaptureSettingsScreen() {
   useEffect(() => {
     if (!user) return;
 
-    const fetchMappings = async () => {
+    const fetchStatus = async () => {
       try {
-        const mappings = await getUserCardMappings(user.id);
+        const [mappings, setupFlag] = await Promise.all([
+          getUserCardMappings(user.id),
+          AsyncStorage.getItem(SHORTCUT_SETUP_COMPLETE_KEY),
+        ]);
         setMappedCount(mappings.length);
+        setShortcutSetUp(setupFlag === 'true');
       } catch {
         setMappedCount(0);
       }
       setLoading(false);
     };
 
-    fetchMappings();
+    fetchStatus();
     track('screen_view', { screen: 'auto_capture_settings' }, user.id);
   }, [user]);
 
@@ -132,7 +139,9 @@ export default function AutoCaptureSettingsScreen() {
                 <View style={{ flex: 1 }}>
                   <Text style={styles.statusLabel}>Active — iOS Shortcuts</Text>
                   <Text style={styles.statusDetail}>
-                    {mappedCount} card{mappedCount !== 1 ? 's' : ''} mapped
+                    {mappedCount > 0
+                      ? `${mappedCount} card${mappedCount !== 1 ? 's' : ''} mapped`
+                      : 'Shortcut installed — waiting for first tap to pay'}
                   </Text>
                 </View>
                 <View style={styles.activeBadge}>
