@@ -273,6 +273,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="recommend"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
         name="miles"
         options={{
           title: 'Miles',

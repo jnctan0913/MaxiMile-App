@@ -13,9 +13,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
-import { getCategoryById, BILLS_SUBCATEGORIES } from '../../constants/categories';
+import { useAuth } from '../../../contexts/AuthContext';
+import { supabase } from '../../../lib/supabase';
+import { getCategoryById, BILLS_SUBCATEGORIES } from '../../../constants/categories';
 import {
   Colors,
   Spacing,
@@ -23,13 +23,13 @@ import {
   BorderRadius,
   Shadows,
   Glass,
-} from '../../constants/theme';
+} from '../../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import GlassCard from '../../components/GlassCard';
-import CapProgressBar from '../../components/CapProgressBar';
-import EmptyState from '../../components/EmptyState';
-import { track } from '../../lib/analytics';
-import { getCardImage } from '../../constants/cardImages';
+import GlassCard from '../../../components/GlassCard';
+import CapProgressBar from '../../../components/CapProgressBar';
+import EmptyState from '../../../components/EmptyState';
+import { track } from '../../../lib/analytics';
+import { getCardImage } from '../../../constants/cardImages';
 
 // ---------------------------------------------------------------------------
 // HealthHub-eligible cards (static map — no DB changes needed)
@@ -386,7 +386,7 @@ export default function RecommendResultScreen() {
           options={{ title: categoryInfo?.name ?? 'Recommendation', headerBackTitle: 'Back' }}
         />
         <ImageBackground
-          source={require('../../assets/background.png')}
+          source={require('../../../assets/background.png')}
           style={styles.background}
           imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
         >
@@ -408,7 +408,7 @@ export default function RecommendResultScreen() {
           options={{ title: categoryInfo?.name ?? 'Recommendation', headerBackTitle: 'Back' }}
         />
         <ImageBackground
-          source={require('../../assets/background.png')}
+          source={require('../../../assets/background.png')}
           style={styles.background}
           imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
         >
@@ -445,7 +445,7 @@ export default function RecommendResultScreen() {
           }}
         />
         <ImageBackground
-          source={require('../../assets/background.png')}
+          source={require('../../../assets/background.png')}
           style={styles.background}
           imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
         >
@@ -522,7 +522,7 @@ export default function RecommendResultScreen() {
           options={{ title: categoryInfo?.name ?? 'Recommendation', headerBackTitle: 'Back' }}
         />
         <ImageBackground
-          source={require('../../assets/background.png')}
+          source={require('../../../assets/background.png')}
           style={styles.background}
           imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
         >
@@ -572,7 +572,7 @@ export default function RecommendResultScreen() {
         }}
       />
       <ImageBackground
-        source={require('../../assets/background.png')}
+        source={require('../../../assets/background.png')}
         style={styles.background}
         imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
       >

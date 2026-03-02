@@ -203,34 +203,6 @@ function RootContent() {
         <Stack.Screen name="onboarding-auto-capture" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding-miles" />
         <Stack.Screen
-          name="recommend/bills-subcategory"
-          options={{
-            headerShown: true,
-            headerTitle: 'Bills',
-            headerBackTitle: 'Back',
-            headerTintColor: Colors.brandGold,
-            headerStyle: { backgroundColor: Colors.background },
-            headerTitleStyle: {
-              fontWeight: '600',
-              color: Colors.textPrimary,
-            },
-          }}
-        />
-        <Stack.Screen
-          name="recommend/[category]"
-          options={{
-            headerShown: true,
-            headerTitle: 'Recommendation',
-            headerBackTitle: 'Back',
-            headerTintColor: Colors.brandGold,
-            headerStyle: { backgroundColor: Colors.background },
-            headerTitleStyle: {
-              fontWeight: '600',
-              color: Colors.textPrimary,
-            },
-          }}
-        />
-        <Stack.Screen
           name="pay/index"
           options={{
             headerShown: true,
