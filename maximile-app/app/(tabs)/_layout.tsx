@@ -290,7 +290,7 @@ export default function TabsLayout() {
           headerTitleStyle: { fontWeight: '600', color: Colors.textPrimary },
           headerLeft: () => (
             <TouchableOpacity
-              onPress={() => router.back()}
+              onPress={() => router.replace('/(tabs)')}
               style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4 }}
               accessibilityRole="button"
               accessibilityLabel="Go back"

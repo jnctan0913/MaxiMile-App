@@ -1,21 +1,12 @@
 -- =============================================================================
--- Migration: Fix recommend() — remove user_settings dependency
--- 2026-03-02
---
--- Root cause: recommend() referenced user_settings table (estimated_monthly_spend)
--- which was never created, causing '42P01 relation does not exist' on every call.
--- Fix: default v_estimated_spend to 0 directly (edge case 3.11 fallback).
---
--- Also drops the old single-param overload recommend(TEXT) if it still exists,
--- to eliminate PostgREST 404 ambiguity errors.
+-- Migration: Re-apply subcategory COALESCE fix to recommend()
+-- =============================================================================
+-- Migration 20260302000003 (remove user_settings) accidentally overwrote the
+-- subcategory base rate fix from 20260302000002, reverting three CASE fallback
+-- lines back to c.base_rate_mpd and the bonus rule JOIN back to the leaky OR
+-- pattern. This migration re-applies both fixes.
 -- =============================================================================
 
-BEGIN;
-
--- Drop old single-param overload if it exists (causes 404 ambiguity)
-DROP FUNCTION IF EXISTS public.recommend(TEXT);
-
--- Recreate recommend with fixed body (no user_settings reference)
 CREATE OR REPLACE FUNCTION public.recommend(p_category_id TEXT, p_subcategory TEXT DEFAULT NULL)
 RETURNS TABLE (
   card_id              UUID,
@@ -53,8 +44,6 @@ BEGIN
   END IF;
 
   v_current_month := to_char(NOW(), 'YYYY-MM');
-
-  -- Edge case 3.11: user_settings table not yet deployed; default to 0.
   v_estimated_spend := 0;
 
   RETURN QUERY
@@ -97,6 +86,7 @@ BEGIN
              >= (er.conditions->>'min_spend_monthly')::DECIMAL THEN TRUE
         ELSE FALSE
       END AS min_spend_met,
+      -- FIX: All three fallback paths use subcategory-aware base rate
       CASE
         WHEN (er.conditions->>'min_spend_monthly') IS NOT NULL
           AND GREATEST(COALESCE(cts.total_all, 0), v_estimated_spend)
@@ -115,6 +105,7 @@ BEGIN
       COALESCE((er.conditions->>'contactless')::BOOLEAN, FALSE)  AS requires_contactless
     FROM user_cards uc
     INNER JOIN cards c ON c.id = uc.card_id
+    -- FIX: Strict subcategory matching prevents bonus rule leakage
     LEFT JOIN earn_rules er
       ON er.card_id = c.id
       AND er.category_id = p_category_id
@@ -212,5 +203,3 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.recommend(TEXT, TEXT) TO authenticated;
 REVOKE EXECUTE ON FUNCTION public.recommend(TEXT, TEXT) FROM anon;
-
-COMMIT;

@@ -1,22 +1,29 @@
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { Text, TouchableOpacity } from 'react-native';
 import { Colors } from '../../../constants/theme';
 
 /**
- * Back button matching the root layout's BackButton style (← Back in brand gold).
- * Falls back to the tabs home if there's nothing to go back to.
+ * Back button that routes explicitly based on context:
+ *  - Bills subcategory results → back to bills subcategory picker
+ *  - All other categories → back to Recommend tab (home)
  */
 function BackButton() {
   const router = useRouter();
+  const { category } = useLocalSearchParams<{ category?: string }>();
+
+  const handlePress = () => {
+    if (category === 'bills') {
+      // Bills results → back to bills subcategory picker
+      router.replace('/(tabs)/bills-subcategory');
+    } else {
+      // Non-bills categories → back to Recommend tab
+      router.replace('/(tabs)');
+    }
+  };
+
   return (
     <TouchableOpacity
-      onPress={() => {
-        if (router.canGoBack()) {
-          router.back();
-        } else {
-          router.replace('/(tabs)');
-        }
-      }}
+      onPress={handlePress}
       style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4 }}
       accessibilityRole="button"
       accessibilityLabel="Go back"
