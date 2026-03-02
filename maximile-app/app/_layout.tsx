@@ -26,12 +26,11 @@ import { parseAutoCaptureUrl } from '../lib/deep-link';
 SplashScreen.preventAutoHideAsync();
 
 /**
- * Web-only back button rendered in the Stack header.
- * Native uses the platform's default back button (chevron + title).
- * On web, the default back button depends on Ionicons font loading timing,
- * so we replace it with a plain text button that never has rendering issues.
+ * Custom back button rendered in the Stack header on all platforms.
+ * Replaces the system back button (which is unreliable on iOS simulator)
+ * and the icon-dependent web back button with a consistent plain-text button.
  */
-function WebBackButton() {
+function BackButton() {
   const router = useRouter();
   return (
     <TouchableOpacity
@@ -56,7 +55,11 @@ export default function RootLayout() {
   //         (a clean path with no @ character that caused 404s on Vercel CDN).
   //         useFonts is still called so Font.isLoaded('ionicons') returns true,
   //         which the icon component checks before rendering glyphs.
-  const [fontsLoaded] = useFonts({ ...Ionicons.font });
+  // On web the font is loaded via the @font-face in +html.tsx (/fonts/Ionicons.ttf).
+  // Passing an empty object resolves immediately without attempting to load the
+  // hashed /assets/node_modules/... path, which breaks on Vercel CDN because the
+  // '@' character in the path causes the CDN to return an HTML error page.
+  const [fontsLoaded] = useFonts(Platform.OS === 'web' ? {} : { ...Ionicons.font });
 
   // On web, additionally wait for the browser to actually download the font bytes.
   // useFonts resolves immediately on Safari/Firefox (expo-font skips FontObserver
@@ -190,9 +193,7 @@ function RootContent() {
       <Stack
         screenOptions={{
           headerShown: false,
-          // On web, replace the icon-dependent default back button with a plain
-          // text button so it's always visible regardless of font loading state.
-          ...(Platform.OS === 'web' && { headerLeft: () => <WebBackButton /> }),
+          headerLeft: () => <BackButton />,
         }}
       >
         <Stack.Screen name="(auth)" />

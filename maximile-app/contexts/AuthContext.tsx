@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSegments, useGlobalSearchParams } from 'expo-router';
 import { Session, User, AuthError } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseAuth } from '../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
@@ -114,10 +114,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // -------------------------------------------------------------------------
   useEffect(() => {
     // Get the initial session — handle stale/invalid refresh tokens gracefully
-    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+    supabaseAuth.auth.getSession().then(async ({ data: { session }, error }) => {
       if (error) {
         console.warn('Session recovery failed, signing out:', error.message);
-        await supabase.auth.signOut();
+        await supabaseAuth.auth.signOut();
         setState({
           user: null,
           session: null,
@@ -133,10 +133,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // wipe), the cached session would appear valid but all queries would
       // silently return empty rows. getUser() always hits the server.
       if (session) {
-        const { error: userError } = await supabase.auth.getUser();
+        const { error: userError } = await supabaseAuth.auth.getUser();
         if (userError) {
           console.warn('Server-side session validation failed, signing out:', userError.message);
-          await supabase.auth.signOut();
+          await supabaseAuth.auth.signOut();
           setState({
             user: null,
             session: null,
@@ -161,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isRecovery: false,
       });
     }).catch(async () => {
-      await supabase.auth.signOut();
+      await supabaseAuth.auth.signOut();
       setState({
         user: null,
         session: null,
@@ -172,7 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Subscribe to future auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription } } = supabaseAuth.auth.onAuthStateChange(
       async (event, session) => {
         // INITIAL_SESSION fires on startup from the local cache before server
         // validation completes. We handle it exclusively in getSession().then()
@@ -182,7 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (event === 'INITIAL_SESSION') return;
 
         if (event === 'TOKEN_REFRESHED' && !session) {
-          await supabase.auth.signOut();
+          await supabaseAuth.auth.signOut();
           setState({
             user: null,
             session: null,
@@ -265,13 +265,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Auth methods
   // -------------------------------------------------------------------------
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabaseAuth.auth.signInWithPassword({ email, password });
     return { error };
   }, []);
 
   const signUp = useCallback(async (email: string, password: string) => {
     const { SITE_URL } = await import('../lib/supabase');
-    const { error } = await supabase.auth.signUp({ 
+    const { error } = await supabaseAuth.auth.signUp({ 
       email, 
       password,
       options: {
@@ -285,14 +285,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { SITE_URL } = await import('../lib/supabase');
     const redirectUrl = `${SITE_URL}/auth/reset-password.html`;
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabaseAuth.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
     });
     return { error: error as AuthError | null };
   }, []);
 
   const updatePassword = useCallback(async (newPassword: string) => {
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    const { error } = await supabaseAuth.auth.updateUser({ password: newPassword });
     if (!error) {
       setState((prev) => ({ ...prev, isRecovery: false }));
     }
@@ -301,7 +301,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     try {
-      await supabase.auth.signOut();
+      await supabaseAuth.auth.signOut();
     } catch {
       // Force-clear local state even if the server-side sign-out fails
       // (e.g., expired/invalid refresh token)
@@ -325,7 +325,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const changeEmail = useCallback(async (newEmail: string) => {
     const { SITE_URL } = await import('../lib/supabase');
-    const { error } = await supabase.auth.updateUser({ 
+    const { error } = await supabaseAuth.auth.updateUser({ 
       email: newEmail,
       options: {
         emailRedirectTo: `${SITE_URL}/auth/confirm.html`,
@@ -335,13 +335,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const changePassword = useCallback(async (newPassword: string) => {
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    const { error } = await supabaseAuth.auth.updateUser({ password: newPassword });
     return { error: error as AuthError | null };
   }, []);
 
   const deleteAccount = useCallback(async () => {
     try {
-      await supabase.auth.signOut();
+      await supabaseAuth.auth.signOut();
       return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error('Failed to process account deletion') };

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, Stack, useFocusEffect } from 'expo-router';
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAuth } from '../../lib/supabase';
 import { CATEGORIES, CATEGORY_MAP } from '../../constants/categories';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../../constants/theme';
@@ -114,7 +114,7 @@ export default function CardDetailScreen() {
               .select('selected_categories')
               .eq('user_id', user.id)
               .eq('card_id', id)
-              .single();
+              .maybeSingle();
             if (prefs) setSelectedCategories(prefs.selected_categories);
           }
 
@@ -174,7 +174,7 @@ export default function CardDetailScreen() {
   // Save category selections for user-selectable cards
   // -----------------------------------------------------------------------
   const handleSaveCategories = async (categories: string[]) => {
-    const { data: { user: authUser } } = await supabase.auth.getUser();
+    const { data: { user: authUser } } = await supabaseAuth.auth.getUser();
     if (!authUser) return;
 
     await supabase.from('user_card_preferences').upsert({

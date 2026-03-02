@@ -112,7 +112,7 @@ export default function LogScreen() {
   // -------------------------------------------------------------------------
   useFocusEffect(
     useCallback(() => {
-      if (!user) return;
+      if (!user) { setLoading(false); return; }
 
       const fetchCards = async () => {
         try {

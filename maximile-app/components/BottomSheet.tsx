@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,16 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  // On web, blur any focused element before dismissing so focus isn't stranded
+  // inside the aria-hidden region that React Native Web sets on the app root
+  // during the Modal close transition.
+  const handleDismiss = useCallback(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      (document.activeElement as HTMLElement | null)?.blur();
+    }
+    onDismiss();
+  }, [onDismiss]);
 
   useEffect(() => {
     if (visible) {
@@ -65,8 +75,9 @@ export default function BottomSheet({
       visible={visible}
       transparent
       animationType="none"
-      onRequestClose={onDismiss}
+      onRequestClose={handleDismiss}
       statusBarTranslucent
+      accessibilityViewIsModal
     >
       <KeyboardAvoidingView
         style={styles.wrapper}
@@ -77,7 +88,7 @@ export default function BottomSheet({
           <TouchableOpacity
             style={StyleSheet.absoluteFill}
             activeOpacity={1}
-            onPress={onDismiss}
+            onPress={handleDismiss}
             accessibilityRole="button"
             accessibilityLabel="Close bottom sheet"
           />

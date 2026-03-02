@@ -16,7 +16,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
 import GlassCard from '../components/GlassCard';
 import { handleAuthError } from '../lib/error-handler';
-import { supabase } from '../lib/supabase';
+import { supabaseAuth } from '../lib/supabase';
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function ChangePasswordScreen() {
 
     setLoading(true);
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabaseAuth.auth.signInWithPassword({
         email: user?.email ?? '',
         password: currentPassword,
       });

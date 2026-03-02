@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
 import GlassCard from '../components/GlassCard';
-import { supabase } from '../lib/supabase';
+import { supabaseAuth } from '../lib/supabase';
 
 export default function DeleteAccountScreen() {
   const { user, deleteAccount } = useAuth();
@@ -61,7 +61,7 @@ export default function DeleteAccountScreen() {
   const performDelete = async () => {
     setLoading(true);
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabaseAuth.auth.signInWithPassword({
         email: user?.email ?? '',
         password,
       });

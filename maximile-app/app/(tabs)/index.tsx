@@ -63,7 +63,10 @@ export default function RecommendScreen() {
   // -----------------------------------------------------------------------
   useFocusEffect(
     useCallback(() => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       const fetchUserCards = async () => {
         try {

@@ -72,6 +72,7 @@ export default function AutoCaptureScreen() {
     amount?: string;
     merchant?: string;
     card?: string;
+    cardId?: string;
     source?: string;
   }>();
 
@@ -168,18 +169,39 @@ export default function AutoCaptureScreen() {
   // Auto-match card name → user card
   // -------------------------------------------------------------------------
   useEffect(() => {
-    if (!user || !params.card || cards.length === 0) return;
+    if (!user || cards.length === 0) return;
 
-    const doMatch = async () => {
-      const result = await matchCard(user.id, params.card!);
-      if (result) {
-        setSelectedCardId(result.cardId);
-        setOriginalCardId(result.cardId);
+    // If a direct cardId was passed (e.g. from Smart Pay recommendation),
+    // use it directly — no fuzzy matching needed.
+    if (params.cardId) {
+      const match = cards.find((uc) => uc.card.id === params.cardId);
+      if (match) {
+        setSelectedCardId(match.card.id);
+        setOriginalCardId(match.card.id);
+        return;
       }
-    };
+    }
 
-    doMatch();
-  }, [user, params.card, cards]);
+    // Fallback: fuzzy match by card name
+    if (params.card) {
+      const doMatch = async () => {
+        const result = await matchCard(user.id, params.card!);
+        if (result) {
+          setSelectedCardId(result.cardId);
+          setOriginalCardId(result.cardId);
+        } else if (cards.length > 0) {
+          // Last resort: select first card so user can just tap Confirm
+          setSelectedCardId(cards[0].card.id);
+          setOriginalCardId(cards[0].card.id);
+        }
+      };
+      doMatch();
+    } else if (cards.length > 0) {
+      // No card name provided at all — select first card
+      setSelectedCardId(cards[0].card.id);
+      setOriginalCardId(cards[0].card.id);
+    }
+  }, [user, params.card, params.cardId, cards]);
 
   // -------------------------------------------------------------------------
   // Parsed amount
@@ -211,25 +233,58 @@ export default function AutoCaptureScreen() {
 
     const today = new Date().toISOString().split('T')[0];
 
-    const { error } = await supabase.from('transactions').insert({
-      user_id: user.id,
-      card_id: selectedCardId!,
-      category_id: selectedCategory!,
-      amount: parsedAmount,
-      transaction_date: today,
-      merchant_name: merchantName || null,
-      source: source || 'manual',
-      notes: null,
-    });
+    try {
+      const insertPayload = {
+        user_id: user.id,
+        card_id: selectedCardId!,
+        category_id: selectedCategory!,
+        amount: parsedAmount,
+        transaction_date: today,
+        merchant_name: merchantName || null,
+      };
 
-    if (error) {
+      console.log('[AutoCapture] Inserting transaction...');
+      const { error } = await supabase
+        .from('transactions')
+        .insert(insertPayload);
+
+      console.log('[AutoCapture] Insert complete, error:', error);
+
+      if (error) {
+        console.error('[AutoCapture] Insert error:', error);
+        setSubmitting(false);
+        const msg = `Transaction failed: ${error.message}`;
+        if (Platform.OS === 'web') {
+          window.alert(msg);
+        } else {
+          Alert.alert('Error', msg);
+        }
+        return;
+      }
+    } catch (e) {
+      console.error('[AutoCapture] Insert exception:', e);
       setSubmitting(false);
-      const msg = handleSupabaseError(error);
-      Alert.alert('Error', msg || 'Failed to log transaction. Please try again.');
+      if (Platform.OS === 'web') {
+        window.alert('Failed to log transaction. Please try again.');
+      } else {
+        Alert.alert('Error', 'Failed to log transaction. Please try again.');
+      }
       return;
     }
 
-    // Save overrides if user changed the auto-matched values
+    // Show success immediately — don't let override saves block the UI
+    setSubmitting(false);
+    setShowSuccess(true);
+
+    track('transaction_logged', {
+      amount: parsedAmount,
+      category: selectedCategory!,
+      card_id: selectedCardId!,
+      source,
+      auto_captured: true,
+    }, user.id);
+
+    // Save overrides in background — best-effort
     try {
       if (merchantName && selectedCategory && selectedCategory !== originalCategoryId) {
         await saveMerchantOverride(user.id, merchantName, selectedCategory);
@@ -240,17 +295,6 @@ export default function AutoCaptureScreen() {
     } catch {
       // Override saves are best-effort
     }
-
-    track('transaction_logged', {
-      amount: parsedAmount,
-      category: selectedCategory!,
-      card_id: selectedCardId!,
-      source,
-      auto_captured: true,
-    }, user.id);
-
-    setSubmitting(false);
-    setShowSuccess(true);
   }, [
     user, canSubmit, selectedCardId, selectedCategory, parsedAmount,
     merchantName, source, originalCategoryId, originalCardId, params.card,

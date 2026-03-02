@@ -99,16 +99,9 @@ BEGIN
   -- Current calendar month in YYYY-MM form (used to filter spending_state).
   v_current_month := to_char(NOW(), 'YYYY-MM');
 
-  -- Fetch user's estimated monthly spend (edge case 3.11: default to 0)
-  SELECT COALESCE(us.estimated_monthly_spend, 0)
-  INTO v_estimated_spend
-  FROM user_settings us
-  WHERE us.user_id = v_user_id;
-
-  -- If no row found, default to 0
-  IF v_estimated_spend IS NULL THEN
-    v_estimated_spend := 0;
-  END IF;
+  -- Edge case 3.11: user_settings table not yet deployed; default to 0.
+  -- When user_settings is available, replace with a SELECT INTO query.
+  v_estimated_spend := 0;
 
   -- =======================================================================
   -- 2. Build the ranked recommendation result set

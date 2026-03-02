@@ -363,6 +363,7 @@ export default function RecommendResultScreen() {
   // -----------------------------------------------------------------------
   if (subcategoryInfo?.zeroMpd) {
     const isUtilities = subcategory === 'utilities';
+    const isEducation = subcategory === 'education';
     return (
       <>
         <Stack.Screen
@@ -395,6 +396,23 @@ export default function RecommendResultScreen() {
                     <Ionicons name="information-circle-outline" size={16} color={Colors.textSecondary} />
                     <Text style={styles.zeroMpdExceptionText}>
                       Exception: Maybank Horizon earns ~0.16 mpd (limited earning).
+                    </Text>
+                  </View>
+                </>
+              ) : isEducation ? (
+                <>
+                  <View style={styles.zeroMpdCard}>
+                    <Text style={styles.zeroMpdBody}>
+                      School fees (MCCs 8211/8220) earn 0 miles on all major bank cards — DBS, Citi, UOB, OCBC, HSBC, SC, Amex, and BOC all exclude education MCCs.
+                    </Text>
+                    <Text style={[styles.zeroMpdBody, styles.zeroMpdBodyBold]}>
+                      No direct recommendation available.
+                    </Text>
+                  </View>
+                  <View style={styles.zeroMpdException}>
+                    <Ionicons name="information-circle-outline" size={16} color={Colors.textSecondary} />
+                    <Text style={styles.zeroMpdExceptionText}>
+                      Workaround: Pay via Atome (codes as MCC 5999) to earn 4 mpd on Citi Rewards, DBS Woman's World, or HSBC Revolution. CardUp also accepts school fees for miles at a small admin fee.
                     </Text>
                   </View>
                 </>

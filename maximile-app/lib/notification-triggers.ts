@@ -15,7 +15,7 @@
  * - Feature flag gating
  */
 
-import { supabase } from './supabase';
+import { supabase, supabaseAuth } from './supabase';
 import { trackEvent } from './analytics';
 
 // ============================================================================
@@ -187,7 +187,7 @@ export async function sendNotification(
 ): Promise<boolean> {
   try {
     // Get current session for auth
-    const { data: sessionData } = await supabase.auth.getSession();
+    const { data: sessionData } = await supabaseAuth.auth.getSession();
     const token = sessionData?.session?.access_token;
 
     if (!token) {

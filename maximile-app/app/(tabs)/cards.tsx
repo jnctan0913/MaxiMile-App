@@ -62,7 +62,7 @@ export default function CardsScreen() {
   // Fetch user's cards with earn rules to find best rate per card
   // -----------------------------------------------------------------------
   const fetchCards = useCallback(async () => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
 
     try {
     // Step 1: Get user's cards with card details

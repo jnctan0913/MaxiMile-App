@@ -764,7 +764,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000004', 'groceries',  1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000004', 'petrol',     1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000004', 'bills',      0.0,  FALSE, '{}', 'Utility payments (electricity, water) earn 0 mpd — excluded by bank. For telco see conditions. [VERIFIED from MileLion 2026]', NULL),
-('00000000-0000-0000-0001-000000000004', 'travel',     1.2,  FALSE, '{}', 'Overseas travel spend earns 2.1 mpd.', NULL),
+('00000000-0000-0000-0001-000000000004', 'travel',     2.1,  TRUE,  '{}', 'Earns 2.1 mpd on overseas / FCY transactions and travel merchants. Local SGD transactions earn the base rate of 1.2 mpd. No monthly cap. [VERIFIED from OCBC website]', 'https://www.ocbc.com/personal-banking/cards/90n-card'),
 ('00000000-0000-0000-0001-000000000004', 'general',    1.2,  FALSE, '{}', NULL, NULL),
 
 -- ============================================================

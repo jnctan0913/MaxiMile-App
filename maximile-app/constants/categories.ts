@@ -136,7 +136,13 @@ export const BILLS_SUBCATEGORIES: BillsSubcategory[] = [
     zeroMpd: true,
     zeroMpdMessage: 'Insurance premiums earn 0 miles on all cards.',
   },
-  { id: 'education', label: 'Education', emoji: '\uD83C\uDF93', zeroMpd: false },
+  {
+    id: 'education',
+    label: 'Education',
+    emoji: '\uD83C\uDF93',
+    zeroMpd: true,
+    zeroMpdMessage: 'School fees earn 0 miles on all major bank cards.',
+  },
   { id: 'medical', label: 'Medical', emoji: '\uD83C\uDFE5', zeroMpd: false },
   { id: 'pharmacy', label: 'Pharmacy', emoji: '\uD83D\uDC8A', zeroMpd: false },
 ];

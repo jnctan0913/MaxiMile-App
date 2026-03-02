@@ -98,7 +98,7 @@ export default function CapsScreen() {
   const daysUntilReset = getDaysUntilReset();
 
   const fetchCapStatus = useCallback(async () => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
 
     try {
     // Fetch user's cards

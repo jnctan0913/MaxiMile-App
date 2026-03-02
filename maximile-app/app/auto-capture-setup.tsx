@@ -294,23 +294,30 @@ export default function AutoCaptureSetupScreen() {
   const handleDownloadShortcut = async () => {
     setDownloading(true);
     try {
-      // Load the bundled .shortcut file
-      // This file is created once on iPhone/iPad and bundled with the app
-      const [asset] = await Asset.loadAsync(SHORTCUT_ASSET);
-
-      // Copy to cache directory so it can be shared
-      const destUri = FileSystem.cacheDirectory + 'MaxiMile.shortcut';
-      await FileSystem.downloadAsync(asset.uri, destUri);
-
-      // Share the file — iOS shows native share sheet with "Add to Shortcuts" option
-      await Sharing.shareAsync(destUri, {
-        mimeType: 'application/x-apple-shortcuts',
-        UTI: 'com.apple.shortcuts.shortcut',
-        dialogTitle: 'Add MaxiMile to Shortcuts',
-      });
-
-      setShortcutAdded(true);
-      track('shortcut_downloaded' as any, { method: 'file_sharing' }, user?.id);
+      if (Platform.OS === 'web') {
+        // Web: trigger browser file download using an anchor element
+        const [asset] = await Asset.loadAsync(SHORTCUT_ASSET);
+        const link = document.createElement('a');
+        link.href = asset.uri;
+        link.download = 'MaxiMile.shortcut';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setShortcutAdded(true);
+        track('shortcut_downloaded' as any, { method: 'web_download' }, user?.id);
+      } else {
+        // iOS native: share via system share sheet
+        const [asset] = await Asset.loadAsync(SHORTCUT_ASSET);
+        const destUri = FileSystem.cacheDirectory + 'MaxiMile.shortcut';
+        await FileSystem.downloadAsync(asset.uri, destUri);
+        await Sharing.shareAsync(destUri, {
+          mimeType: 'application/x-apple-shortcuts',
+          UTI: 'com.apple.shortcuts.shortcut',
+          dialogTitle: 'Add MaxiMile to Shortcuts',
+        });
+        setShortcutAdded(true);
+        track('shortcut_downloaded' as any, { method: 'file_sharing' }, user?.id);
+      }
     } catch (err) {
       Alert.alert(
         'Could Not Share Shortcut',

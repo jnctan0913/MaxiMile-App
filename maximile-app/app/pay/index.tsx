@@ -428,9 +428,11 @@ export default function PayScreen() {
               params: {
                 amount: mockData.amount,
                 merchant: mockData.merchant,
-                // Use the recommended card name so auto-capture pre-selects the
-                // correct card from the user's actual portfolio via fuzzy match.
-                card: recommendation?.card_name ?? mockData.card,
+                card: recommendation
+                  ? `${recommendation.bank} ${recommendation.card_name}`
+                  : mockData.card,
+                // Pass card_id directly so auto-capture can select without fuzzy matching
+                ...(recommendation?.card_id ? { cardId: recommendation.card_id } : {}),
                 source: 'shortcut',
               },
             });
@@ -447,7 +449,7 @@ export default function PayScreen() {
 
     const sub = AppState.addEventListener('change', handleAppState);
     return () => sub.remove();
-  }, [state, startAutoCaptureHandoff, router, user, selectedCategoryId]);
+  }, [state, startAutoCaptureHandoff, router, user, selectedCategoryId, recommendation]);
 
   // -------------------------------------------------------------------------
   // Auto-capture deep link listener (S16.9)
@@ -498,7 +500,8 @@ export default function PayScreen() {
         params: {
           amount: parsed.amount?.toString() ?? '',
           merchant: parsed.merchant ?? merchant?.name ?? '',
-          card: parsed.card ?? recommendation?.card_name ?? '',
+          card: parsed.card
+            ?? (recommendation ? `${recommendation.bank} ${recommendation.card_name}` : ''),
           source: handoffSource,
         },
       });

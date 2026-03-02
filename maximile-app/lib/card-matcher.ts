@@ -42,7 +42,7 @@ export async function matchCard(
 ): Promise<CardMatch | null> {
   const { data: mapping } = await supabase
     .from('card_name_mappings' as any)
-    .select('card_id, card_name, confidence')
+    .select('card_id, confidence')
     .eq('user_id', userId)
     .eq('wallet_name', walletCardName)
     .maybeSingle();
@@ -50,7 +50,7 @@ export async function matchCard(
   if (mapping) {
     return {
       cardId: (mapping as any).card_id,
-      cardName: (mapping as any).card_name ?? walletCardName,
+      cardName: walletCardName,
       confidence: (mapping as any).confidence ?? 1.0,
       source: 'verified',
     };
@@ -113,7 +113,7 @@ export async function getUserCardMappings(
 ): Promise<Array<{ walletName: string; cardId: string; cardName: string }>> {
   const { data, error } = await supabase
     .from('card_name_mappings' as any)
-    .select('wallet_name, card_id, card_name')
+    .select('wallet_name, card_id, cards(name, bank)')
     .eq('user_id', userId);
 
   if (error) throw error;
@@ -121,6 +121,6 @@ export async function getUserCardMappings(
   return ((data as any[]) ?? []).map((row) => ({
     walletName: row.wallet_name,
     cardId: row.card_id,
-    cardName: row.card_name ?? '',
+    cardName: row.cards ? `${row.cards.bank} ${row.cards.name}` : row.wallet_name,
   }));
 }

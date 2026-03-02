@@ -155,7 +155,7 @@ export default function MilesScreen() {
   // Data fetching
   // -------------------------------------------------------------------------
   const fetchMilesPortfolio = useCallback(async () => {
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
 
     try {
       // Check card count

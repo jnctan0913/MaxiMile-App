@@ -27,7 +27,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
           rel="preload"
           href="/fonts/Ionicons.ttf"
           as="font"
-          type="font/truetype"
+          type="font/ttf"
           // @ts-ignore — crossOrigin is valid HTML here
           crossOrigin="anonymous"
         />
