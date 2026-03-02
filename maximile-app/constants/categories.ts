@@ -115,6 +115,8 @@ export interface BillsSubcategory {
   id: string;
   label: string;
   emoji: string;
+  /** Ionicons icon name for the subcategory tile */
+  icon: string;
   /** true = show 0-mpd empty state instead of recommendations */
   zeroMpd: boolean;
   zeroMpdMessage?: string;
@@ -125,14 +127,16 @@ export const BILLS_SUBCATEGORIES: BillsSubcategory[] = [
     id: 'utilities',
     label: 'Utilities',
     emoji: '\u26A1',
+    icon: 'flash-outline',
     zeroMpd: true,
     zeroMpdMessage: 'Utility payments earn 0 miles on most cards.',
   },
-  { id: 'telco', label: 'Telco', emoji: '\uD83D\uDCF1', zeroMpd: false },
+  { id: 'telco', label: 'Telco', emoji: '\uD83D\uDCF1', icon: 'phone-portrait-outline', zeroMpd: false },
   {
     id: 'insurance',
     label: 'Insurance',
     emoji: '\uD83D\uDEE1\uFE0F',
+    icon: 'shield-checkmark-outline',
     zeroMpd: true,
     zeroMpdMessage: 'Insurance premiums earn 0 miles on all cards.',
   },
@@ -140,9 +144,10 @@ export const BILLS_SUBCATEGORIES: BillsSubcategory[] = [
     id: 'education',
     label: 'Education',
     emoji: '\uD83C\uDF93',
+    icon: 'school-outline',
     zeroMpd: true,
     zeroMpdMessage: 'School fees earn 0 miles on all major bank cards.',
   },
-  { id: 'hospital', label: 'Hospital', emoji: '\uD83C\uDFE5', zeroMpd: false },
-  { id: 'pharmacy', label: 'Pharmacy', emoji: '\uD83D\uDC8A', zeroMpd: false },
+  { id: 'hospital', label: 'Hospital', emoji: '\uD83C\uDFE5', icon: 'medkit-outline', zeroMpd: false },
+  { id: 'pharmacy', label: 'Pharmacy', emoji: '\uD83D\uDC8A', icon: 'medical-outline', zeroMpd: false },
 ];

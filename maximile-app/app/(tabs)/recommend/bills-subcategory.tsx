@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BILLS_SUBCATEGORIES } from '../../../constants/categories';
@@ -43,12 +44,12 @@ const DEFAULT_PALETTE: [string, string] = ['#A78BDA', '#8B6FC0'];
 
 interface SubcategoryTileProps {
   id: string;
-  emoji: string;
+  icon: string;
   label: string;
   onPress: (id: string) => void;
 }
 
-function SubcategoryTile({ id, emoji, label, onPress }: SubcategoryTileProps) {
+function SubcategoryTile({ id, icon, label, onPress }: SubcategoryTileProps) {
   const gradient = SUBCATEGORY_PALETTES[id] ?? DEFAULT_PALETTE;
 
   return (
@@ -79,7 +80,7 @@ function SubcategoryTile({ id, emoji, label, onPress }: SubcategoryTileProps) {
 
         {/* Content */}
         <View style={styles.tileContent}>
-          {/* Gradient emoji circle */}
+          {/* Gradient icon circle */}
           <View style={styles.iconOuter}>
             <View style={styles.iconShadow} />
             <LinearGradient
@@ -88,7 +89,7 @@ function SubcategoryTile({ id, emoji, label, onPress }: SubcategoryTileProps) {
               end={{ x: 1, y: 1 }}
               style={styles.iconCircle}
             >
-              <Text style={styles.emoji}>{emoji}</Text>
+              <Ionicons name={icon as any} size={24} color="#FFFFFF" />
             </LinearGradient>
           </View>
           <Text style={styles.tileLabel} numberOfLines={1}>
@@ -146,7 +147,7 @@ export default function BillsSubcategoryScreen() {
                 <SubcategoryTile
                   key={sub.id}
                   id={sub.id}
-                  emoji={sub.emoji}
+                  icon={sub.icon}
                   label={sub.label}
                   onPress={handleSubcategoryPress}
                 />

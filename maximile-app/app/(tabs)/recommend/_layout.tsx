@@ -1,9 +1,12 @@
 import { Stack, useRouter } from 'expo-router';
-import { TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Text, TouchableOpacity } from 'react-native';
 import { Colors } from '../../../constants/theme';
 
-function BackToHome() {
+/**
+ * Back button matching the root layout's BackButton style (← Back in brand gold).
+ * Falls back to the tabs home if there's nothing to go back to.
+ */
+function BackButton() {
   const router = useRouter();
   return (
     <TouchableOpacity
@@ -14,10 +17,13 @@ function BackToHome() {
           router.replace('/(tabs)');
         }
       }}
-      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-      style={{ marginLeft: 4 }}
+      style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4 }}
+      accessibilityRole="button"
+      accessibilityLabel="Go back"
     >
-      <Ionicons name="chevron-back" size={24} color={Colors.brandGold} />
+      <Text style={{ color: Colors.brandGold, fontSize: 16, fontWeight: '600' }}>
+        ← Back
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -27,14 +33,13 @@ export default function RecommendLayout() {
     <Stack
       screenOptions={{
         headerShown: true,
-        headerBackTitle: 'Back',
         headerTintColor: Colors.brandGold,
         headerStyle: { backgroundColor: Colors.background },
         headerTitleStyle: {
           fontWeight: '600',
           color: Colors.textPrimary,
         },
-        headerLeft: () => <BackToHome />,
+        headerLeft: () => <BackButton />,
       }}
     >
       <Stack.Screen
