@@ -725,7 +725,7 @@ VALUES
 ('00000000-0000-0000-0001-000000000001', 'groceries',  1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000001', 'petrol',     1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000001', 'bills',      0.0,  FALSE, '{}', 'Utility payments (electricity, water) earn 0 mpd — excluded by bank. For telco see conditions. [VERIFIED from MileLion 2026]', NULL),
-('00000000-0000-0000-0001-000000000001', 'travel',     4.0,  TRUE,  '{"online_travel_portal": true}', 'Up to 10X DBS Points (4 mpd) for online travel bookings. Standard 1.2 mpd at travel agencies.', 'https://www.dbs.com.sg/personal/cards/credit-cards/altitude-visa-signature-card'),
+('00000000-0000-0000-0001-000000000001', 'travel',     1.2,  FALSE, '{}', 'Travel bonus removed (previously 4 mpd via online portal). Now earns base 1.2 mpd on all travel. [VERIFIED from MileLion March 2026]', NULL),
 ('00000000-0000-0000-0001-000000000001', 'general',    1.2,  FALSE, '{}', NULL, NULL),
 
 -- ============================================================
@@ -773,6 +773,7 @@ VALUES
 -- [VERIFIED from UOB website]
 ('00000000-0000-0000-0001-000000000005', 'dining',    1.2,  FALSE, '{}', NULL, 'https://www.uob.com.sg/personal/cards/credit/krisflyer-uob-credit-card.page'),
 ('00000000-0000-0000-0001-000000000005', 'transport',  1.2,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000005', 'transport',  2.4,  TRUE,  '{"contactless": true, "sia_spend_yearly": 1000}', 'Earn 2.4 mpd on public transport (contactless/SimplyGo). Requires $1,000/year SIA spend to qualify. Uncapped. [VERIFIED from MileLion March 2026]', NULL),
 ('00000000-0000-0000-0001-000000000005', 'online',     1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000005', 'groceries',  1.2,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000005', 'petrol',     1.2,  FALSE, '{}', NULL, NULL),
@@ -784,13 +785,14 @@ VALUES
 -- CARD 6: HSBC Revolution (4 mpd on dining/entertainment/online, 0.4 mpd else)
 -- ============================================================
 -- [VERIFIED from HSBC website]
-('00000000-0000-0000-0001-000000000006', 'dining',    4.0,  TRUE,  '{}', 'Earn 4 mpd on dining (10X HSBC rewards). Capped at $1,000/month across bonus categories.', 'https://www.hsbc.com.sg/credit-cards/products/revolution/'),
+('00000000-0000-0000-0001-000000000006', 'dining',    4.0,  TRUE,  '{}', 'Earn 4 mpd on dining (10X HSBC rewards). Capped at $1,500/month across bonus categories. [VERIFIED from MileLion March 2026]', 'https://www.hsbc.com.sg/credit-cards/products/revolution/'),
 ('00000000-0000-0000-0001-000000000006', 'transport',  4.0,  TRUE,  '{"contactless": true}', 'Earn 4 mpd on contactless transport (Revo Up promo, valid to 31 Mar 2026). Cap $1,500/month shared across dining, online, transport. Reverts to 0.4 mpd base after promo ends. [VERIFIED from MileLion 2026]', NULL),
-('00000000-0000-0000-0001-000000000006', 'online',     4.0,  TRUE,  '{}', 'Earn 4 mpd on online spend (10X HSBC rewards). Capped at $1,000/month across bonus categories.', NULL),
+('00000000-0000-0000-0001-000000000006', 'online',     4.0,  TRUE,  '{}', 'Earn 4 mpd on online spend (10X HSBC rewards). Capped at $1,500/month across bonus categories. [VERIFIED from MileLion March 2026]', NULL),
 ('00000000-0000-0000-0001-000000000006', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000006', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000006', 'bills',      0.0,  FALSE, '{}', 'Utility payments (electricity, water) earn 0 mpd — excluded by bank. For telco see conditions. [VERIFIED from MileLion 2026]', NULL),
-('00000000-0000-0000-0001-000000000006', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0001-000000000006', 'travel',     0.4,  FALSE, '{}', 'Base rate 0.4 mpd. Bonus 4 mpd available for direct airline/hotel bookings (contactless). See bonus rule. [VERIFIED from MileLion March 2026]', NULL),
+('00000000-0000-0000-0001-000000000006', 'travel',     4.0,  TRUE,  '{"contactless": true, "direct_booking_only": true}', 'Earn 4 mpd on direct airline, hotel, car rental, and cruise bookings (contactless). Online travel agencies (Expedia, Airbnb) NOT eligible. Cap $1,500/mo shared across bonus categories. [VERIFIED from MileLion March 2026]', NULL),
 ('00000000-0000-0000-0001-000000000006', 'general',    0.4,  FALSE, '{}', NULL, NULL),
 
 -- ============================================================
@@ -838,7 +840,7 @@ VALUES
 -- [VERIFIED from DBS website]
 ('00000000-0000-0000-0001-000000000010', 'dining',    0.4,  FALSE, '{}', NULL, 'https://www.dbs.com.sg/personal/cards/credit-cards/womans-card'),
 ('00000000-0000-0000-0001-000000000010', 'transport',  0.4,  FALSE, '{}', NULL, NULL),
-('00000000-0000-0000-0001-000000000010', 'online',     4.0,  TRUE,  '{}', 'Earn 4 mpd (10X DBS Points) on online spend. Capped at $2,000/month.', NULL),
+('00000000-0000-0000-0001-000000000010', 'online',     4.0,  TRUE,  '{}', 'Earn 4 mpd (10X DBS Points) on online spend. Capped at $1,000/month (cut from $2,000 in August 2025). [VERIFIED from MileLion March 2026]', NULL),
 ('00000000-0000-0000-0001-000000000010', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000010', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0001-000000000010', 'bills',      0.0,  FALSE, '{}', 'Utility payments (electricity, water) earn 0 mpd — excluded by bank. For telco see conditions. [VERIFIED from MileLion 2026]', NULL),
@@ -857,6 +859,7 @@ VALUES
 ('00000000-0000-0000-0002-000000000011', 'transport',  0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000011', 'online',     4.0,  TRUE,  '{"category_restriction": "fashion_beauty_bags_shoes"}', 'Earn 4 mpd (10X UNI$) on online fashion, beauty, bags and shoes merchants. Other online merchants earn 0.4 mpd. [VERIFIED]', NULL),
 ('00000000-0000-0000-0002-000000000011', 'groceries',  0.4,  FALSE, '{}', NULL, NULL),
+('00000000-0000-0000-0002-000000000011', 'groceries',  4.0,  TRUE,  '{"user_selectable": true}', 'Earn 4 mpd (10X UNI$) on supermarkets. Select Beauty & Wellness category to cover grocery MCCs. Cap $1,000/mo shared. [VERIFIED from MileLion March 2026]', NULL),
 ('00000000-0000-0000-0002-000000000011', 'petrol',     0.4,  FALSE, '{}', NULL, NULL),
 ('00000000-0000-0000-0002-000000000011', 'bills',      0.0,  FALSE, '{}', 'Utility payments (electricity, water) earn 0 mpd — excluded by bank. For telco see conditions. [VERIFIED from MileLion 2026]', NULL),
 ('00000000-0000-0000-0002-000000000011', 'travel',     0.4,  FALSE, '{}', NULL, NULL),
@@ -1889,8 +1892,8 @@ VALUES
   -- CARD 9: SC Visa Infinite — No monthly cap documented for local spend
 
   -- CARD 10: DBS Woman's World Card
-  ('00000000-0000-0000-0001-000000000010', 'online', 2000.00, 'spend',
-   'Cap on 10X bonus for online spending. [VERIFIED from DBS website]'),
+  ('00000000-0000-0000-0001-000000000010', 'online', 1000.00, 'spend',
+   'Cap on 10X bonus for online spending. Cut from $2,000 to $1,000/mo in August 2025. [VERIFIED from MileLion March 2026]'),
 
   -- =============================================
   -- BATCH 2 CAPS

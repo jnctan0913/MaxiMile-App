@@ -200,14 +200,6 @@ export default function RecommendScreen() {
             Tap a category to find your best card
           </Text>
 
-          {rateAlerts.length > 0 && (
-            <RateChangeBanner
-              alerts={rateAlerts}
-              onViewDetails={handleViewDetails}
-              onDismiss={handleDismissAlert}
-            />
-          )}
-
           {/* 2-column grid for all 8 categories */}
           <View style={styles.categoryGrid}>
             {CATEGORIES.map((category) => (

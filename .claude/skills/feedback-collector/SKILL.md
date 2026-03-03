@@ -128,6 +128,63 @@ Systematically collect, categorize, and synthesize feedback from users and stake
 | | | |
 ```
 
+## Mixed Methods Framework
+
+Strong feedback collection combines quantitative signals (the "what") with qualitative insights (the "why"). Use funnel data to direct where you collect qualitative feedback — don't ask users blind questions when the data can already tell you where to look.
+
+### Approach Selection
+
+| Approach | When to Use | How |
+|----------|-------------|-----|
+| **Sequential** | You have quant data showing a problem | Analytics first → target interviews at the identified drop-off point |
+| **Parallel** | You're validating something with no existing data | Run survey + interviews simultaneously; compare for consistency |
+| **Iterative** | You're exploring and refining | Qual surfaces a hypothesis → quant validates at scale → qual explains anomalies |
+
+### Funnel-Driven Targeting
+
+Use product funnel data to choose WHERE to focus feedback collection, rather than spreading effort evenly.
+
+```
+Step 1: Check funnel / analytics for highest drop-off step
+Step 2: Segment — who drops off? who converts? (different behaviour = different feedback)
+Step 3: Recruit participants specifically from the drop-off segment
+Step 4: Focus interview/survey questions on that step only
+Step 5: Synthesise: "Users drop off at [step] because [root cause]"
+Step 6: Propose fix → A/B test → measure impact
+```
+
+### Quant → Qual Loop Template
+
+```markdown
+## Mixed Methods Research Brief
+
+**Research question**: [What do we need to understand?]
+
+### Phase 1: Quantitative (what is happening)
+- Data source: [Analytics tool / existing survey data]
+- Metric / funnel step examined: [Specific metric]
+- Finding: [What the data shows]
+- Gap: [What the data cannot explain]
+
+### Phase 2: Qualitative (why it is happening)
+- Method: [User interviews / usability test / focus group]
+- Target participants: [Defined from Phase 1 segmentation — e.g., "users who dropped at step 3"]
+- Recruitment size: [5–8 for interviews; 5–10 for focus groups]
+- Key questions: [3–5 focused questions]
+- Finding: [Themes from sessions]
+
+### Synthesis
+- **Quantitative finding**: [Summary]
+- **Qualitative finding**: [Summary]
+- **Combined insight**: [What we now know that neither method alone could tell us]
+- **Recommended action**: [Change / test / investigate further]
+- **RICE Impact**: [How this affects feature priorities]
+```
+
+> Use `/analytics-advisor` to run funnel analysis before targeting feedback collection.
+
+---
+
 ## Analysis Methods
 
 ### Affinity Mapping

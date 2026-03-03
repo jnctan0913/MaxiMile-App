@@ -116,6 +116,30 @@ Track against expected workflow:
 | Blockers | 0 active | 1-2 active | 3+ active |
 | Context switches | <3 per sprint | 3-5 | >5 |
 
+### 6. Product Metrics Health
+
+Checks whether the team has defined, instrumented, and is actively tracking their key product metrics.
+
+| Indicator | Green | Amber | Red |
+|-----------|-------|-------|-----|
+| North Star Metric | Defined + tracked | Defined but not tracked | Not defined |
+| Core product KPIs | All defined (DAU/Churn/Conversion/LTV) | Some defined | None defined |
+| Analytics instrumentation | Plan exists + events firing | Plan exists, not implemented | No plan |
+| Dashboard | Active dashboard in use | Dashboard exists but stale | No dashboard |
+| Analytics maturity | Level 2+ (Diagnostic) | Level 1 (Descriptive) | No analytics at all |
+
+**Check command**:
+```
+!cat docs/ANALYTICS_PLAN.md 2>/dev/null | head -20 || echo "No analytics plan found."
+```
+
+**Scoring**:
+- GREEN: `docs/ANALYTICS_PLAN.md` exists with North Star + KPIs defined, instrumentation planned
+- AMBER: Metrics mentioned in PRD but no dedicated analytics plan or instrumentation
+- RED: No metrics defined anywhere in project docs
+
+> If RED or AMBER: recommend running `/analytics-advisor` to define the metrics framework.
+
 ## Output Format
 
 ```markdown
@@ -134,6 +158,7 @@ Track against expected workflow:
 | Risk Health | [RAG] | X critical | [Issue or "On track"] |
 | Codebase | [RAG] | [State] | [Issue or "On track"] |
 | Velocity | [RAG] | [Metric] | [Issue or "On track"] |
+| Product Metrics | [RAG] | [Maturity level] | [Issue or "On track"] |
 
 ## Attention Required
 

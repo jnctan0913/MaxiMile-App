@@ -84,7 +84,7 @@ export default function OnboardingAutoCaptureScreen() {
     if (Platform.OS === 'ios' || Platform.OS === 'web') {
       // iOS native or web PWA (Safari on iOS): Route to Shortcuts-based setup
       // The shortcut download works on web via direct file download
-      router.replace({ pathname: '/auto-capture-setup', params: { skipIntro: '1' } });
+      router.replace({ pathname: '/auto-capture-setup', params: { skipIntro: '1', cardIds: cardIds || JSON.stringify([]) } });
     } else if (Platform.OS === 'android') {
       // Android: Route to notification-based auto-capture setup (Sprint 17)
       router.replace('/android-auto-capture-setup');

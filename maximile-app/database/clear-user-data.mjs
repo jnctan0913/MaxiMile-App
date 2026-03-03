@@ -65,6 +65,7 @@ async function main() {
     'privacy_consents',
     'user_merchant_overrides',
     'card_name_mappings',
+    'user_card_preferences',
   ];
 
   const NULL_UUID = '00000000-0000-0000-0000-000000000000';

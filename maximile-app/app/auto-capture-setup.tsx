@@ -240,8 +240,8 @@ const pulseStyles = StyleSheet.create({
 export default function AutoCaptureSetupScreen() {
   const { user } = useAuth();
   const router = useRouter();
-  const { skipIntro } = useLocalSearchParams<{ skipIntro?: string }>();
-  const [step, setStep] = useState(skipIntro === '1' ? 1 : 0);
+  const { skipIntro, cardIds } = useLocalSearchParams<{ skipIntro?: string; cardIds?: string }>();
+  const [step, setStep] = useState(0);
 
   // Step 2 state
   const [shortcutAdded, setShortcutAdded] = useState(false);
@@ -286,11 +286,11 @@ export default function AutoCaptureSetupScreen() {
   };
 
   const handleSetUpLater = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/(tabs)');
-    }
+    // Skip shortcut setup, continue onboarding flow to miles entry
+    router.replace({
+      pathname: '/onboarding-miles',
+      params: { cardIds: cardIds || JSON.stringify([]) },
+    });
   };
 
   const [downloading, setDownloading] = useState(false);
@@ -468,7 +468,13 @@ export default function AutoCaptureSetupScreen() {
       <TouchableOpacity
         style={styles.primaryButton}
         activeOpacity={0.8}
-        onPress={() => router.replace('/(tabs)')}
+        onPress={() => {
+          // Continue onboarding flow to miles entry
+          router.replace({
+            pathname: '/onboarding-miles',
+            params: { cardIds: cardIds || JSON.stringify([]) },
+          });
+        }}
       >
         <LinearGradient
           colors={['#D4B96A', Colors.brandGold, '#B8953F']}

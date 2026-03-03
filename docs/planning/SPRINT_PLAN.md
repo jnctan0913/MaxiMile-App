@@ -1,11 +1,11 @@
 # Sprint Plan: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 14.0
+**Version**: 16.0
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
-**Source**: PRD v2.3, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0
-**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprints 21-22 Planned (Recommendation Accuracy), Sprints 23-24 Planned (Card Expansion 22→29), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01)
-**Change Log**: v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
+**Source**: PRD v2.6, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0, AUDIT_MILELION_VS_RANKINGS v1.0
+**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprints 21-22 Planned (Recommendation Accuracy), Sprints 23-24 Planned (Card Expansion 22→29), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01), Sprint 29 Planned (Earn Rate Refresh — MileLion March 2026 Audit Phase 5), Sprint 30 Planned (DBS yuu Card Integration), Sprint 31 Planned (SC Smart Card Bonus Tiers)
+**Change Log**: v16.0 — Added Sprint 30 "DBS yuu Card Integration" (F37, Epic E18) and Sprint 31 "SC Smart Card Bonus Tiers" (F38, Epic E19). Sprint 30: 8 stories, 18 SP, 2 weeks — adds DBS yuu AMEX + DBS yuu Visa as cards #30-31, 10 mpd grocery/food delivery bonus rules, caps, AMEX acceptance warning, rankings update. Sprint 31: 7 stories, 16 SP, 2 weeks — models SC Smart Card tiered cashback-to-miles equivalence (5.6/7.42/9.28 mpd), requires policy decision on cashback-to-miles conversion, recommend() logic update for tiered earn rates. v15.0 — Added Sprint 29 "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5) and Epic E17 (Earn Rate Accuracy). 8 stories, 14 SP, 1 week. Corrects 7 earn rate/cap discrepancies: DBS Altitude travel bonus removed (4.0→1.2 mpd), HSBC Revolution cap $1,000→$1,500, DBS Woman's World cap $2,000→$1,000, UOB Lady's Card added to groceries, HSBC Revolution added to travel, KrisFlyer UOB transport 2.0→2.4 mpd, UOB PP transport verified. DBS yuu Card and SC Smart Card bonus tiers deferred to Sprint 30+. Source: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`. v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
 
@@ -107,6 +107,9 @@ All 5 agents work **simultaneously across 4 phases** with staggered starts:
 | **E14** | Push Notifications for Rate Alerts | New Feature | P1 | Sprint 19–22 |
 | **E15** | Earn Rate Data Integrity | F34, F35 | P0 | Sprint 25–27 |
 | **E16** | Bills Subcategory Intelligence | F36 | P1 | Sprint 27–28 |
+| **E17** | Earn Rate Accuracy (March 2026 Refresh) | F36 | P0 | Sprint 29 |
+| **E18** | DBS yuu Card Integration | F37 | P0 | Sprint 30 |
+| **E19** | SC Smart Card Bonus Tiers | F38 | P0 | Sprint 31 |
 
 **Critical Path**: F5 (Rules DB) → F1 (Card Setup) → F2 (Recommendation) → F4 (Transaction Log) → F3 (Cap Tracker)
 
@@ -4590,7 +4593,7 @@ A story is "Done" when:
 |----|-------|----------|------|--------|-------|
 | **S22.1** | Modify `recommend()` RPC to check min spend conditions | P0 | L | 5 | Software Engineer |
 | **S22.2** | Add "Spend more to unlock" nudge on recommendation cards | P1 | M | 3 | Developer |
-| **S22.3** | Add user monthly spending estimate in Settings | P1 | M | 3 | Developer |
+| **S22.3** | ~~Add user monthly spending estimate in Settings~~ **DEFERRED — hidden from demo UI** | P1 | M | 3 | Developer |
 | **S22.4** | Comprehensive testing of condition-aware recommendations | P1 | M | 3 | Tester |
 | **Total** | | | | **14** | |
 
@@ -4673,6 +4676,10 @@ A story is "Done" when:
 
 #### S22.3: User Monthly Spending Estimate in Settings
 
+> **STATUS: DEFERRED — Not included in demo.** UI page (`spending-settings`) exists in codebase but navigation link commented out. `recommend()` hardcodes spend to 0. Database table not deployed. Code preserved for post-demo enablement.
+>
+> **Affected cards** (7): SC X Card ($500/mo), Maybank Horizon ($300/mo), Maybank Barcelona ($300/mo), UOB Preferred Platinum ($600/mo), UOB Visa Signature ($1,000/mo), DBS Insignia, Maybank Family & Friends.
+
 > **As a** user,
 > **I want** to set my estimated monthly spending level in Settings,
 > **So that** the app knows whether I'm likely to meet card-specific minimum spend thresholds even before I've logged enough transactions this month.
@@ -4680,6 +4687,7 @@ A story is "Done" when:
 **Priority**: P1 (Should Have — improves first-month accuracy)
 **T-Shirt Size**: **M** (Medium) — ~2 days
 **Feature**: F31
+**Status**: **Deferred** — hidden from demo, implement post-demo
 
 **Acceptance Criteria**:
 
@@ -6372,3 +6380,911 @@ Exception: Maybank Horizon earns 0.16 mpd.
 ---
 
 **Sprint 25-28 Status**: Sprint 25 ✅ COMPLETED | Sprint 26 ✅ COMPLETED | Sprint 27 ✅ COMPLETED | Sprint 28 ✅ COMPLETED
+
+---
+
+## Sprint 29: "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5)
+
+**Duration**: 1 week (5 working days)
+**Sprint Goal**: Apply 7 earn rate/cap corrections discovered via systematic MileLion March 2026 audit. These are SQL-only corrections to existing earn_rules and caps — no UI changes, no new cards. Addresses 3 P0 (critical) and 4 P1 (major) discrepancies between our data and MileLion's authoritative guide. DBS yuu Card (P0 new card), SC Smart Card bonus tiers (P0 complex logic), and currency quality tiebreaker (P2) are deferred to Sprint 30+.
+**Epic**: E17 — Earn Rate Accuracy (March 2026 Refresh)
+**PRD Features**: F36 (P0 — Earn Rate Data Refresh)
+**Phase**: v2.6 — Data Accuracy
+**Predecessor**: Sprint 28 complete (bills subcategory UI live; all prior data corrections applied)
+**Source of Truth**: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`
+
+---
+
+### Sprint 29 — Definition of Ready (DoR) Checklist
+
+- [x] Sprint 28 complete (bills subcategory data + UI live)
+- [x] MileLion March 2026 audit complete (`docs/technical/AUDIT_MILELION_VS_RANKINGS.md`)
+- [x] Each discrepancy verified against MileLion's published data
+- [x] DBS Altitude travel bonus removal confirmed (MileLion says old 6 mpd Expedia / 3 mpd online travel bonuses removed)
+- [x] HSBC Revolution cap $1,500/mo confirmed (boosted from $1,000/mo)
+- [x] DBS Woman's World cap $1,000/mo confirmed (cut from $2,000/mo in August 2025)
+- [x] KrisFlyer UOB transport 2.4 mpd confirmed (with $1,000/year SIA spend condition)
+- [ ] SQL correction statements drafted and peer-reviewed
+- [ ] RECOMMENDATION_RANKINGS.md update plan prepared
+
+### Sprint 29 — Definition of Done (DoD) Checklist
+
+- [ ] Migration SQL applied successfully (idempotent — safe to re-run)
+- [ ] DBS Altitude no longer appears at 4 mpd in Travel rankings
+- [ ] HSBC Revolution cap references updated to $1,500/mo in all affected earn_rules
+- [ ] DBS Woman's World cap updated to $1,000/mo
+- [ ] UOB Lady's Card appears in Groceries rankings at 4 mpd
+- [ ] HSBC Revolution appears in Travel rankings at 4 mpd
+- [ ] KrisFlyer UOB shows 2.4 mpd for transport
+- [ ] RECOMMENDATION_RANKINGS.md Quick Reference table matches new data
+- [ ] Seed file (`all_cards.sql`) updated to match migration
+- [ ] No regressions in other category rankings
+
+---
+
+### Sprint 29 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| S29.1 | Correct DBS Altitude travel earn_rule (4.0 → 1.2 mpd, bonus removed) | P0 | S | 2 | Data Engineer |
+| S29.2 | Update HSBC Revolution cap to $1,500/mo (all bonus categories) | P0 | S | 2 | Data Engineer |
+| S29.3 | Update DBS Woman's World cap to $1,000/mo (online shopping) | P0 | S | 2 | Data Engineer |
+| S29.4 | Add UOB Lady's Card groceries bonus rule (4 mpd supermarkets) | P1 | S | 2 | Data Engineer |
+| S29.5 | Add HSBC Revolution travel bonus rule (4 mpd direct airline/hotel) | P1 | S | 2 | Data Engineer |
+| S29.6 | Update KrisFlyer UOB transport rate (add 2.4 mpd bonus rule) | P1 | S | 1 | Data Engineer |
+| S29.7 | Verify UOB Preferred Platinum transport in rankings doc | P1 | XS | 1 | Data Engineer |
+| S29.8 | Update RECOMMENDATION_RANKINGS.md to reflect all changes | P0 | S | 2 | Data Engineer |
+| **Total** | | | | **14** | |
+
+---
+
+### Sprint 29 — User Story Details
+
+#### S29.1: Correct DBS Altitude Travel Earn Rule
+
+**As a** user with DBS Altitude Visa checking travel recommendations,
+**I want** the app to show 1.2 mpd (not 4.0 mpd) for travel spend,
+**So that** I don't use this card for travel expecting 4 mpd when the bonus has been removed.
+
+**Priority**: P0 (Critical — Card 1 is being over-recommended for travel at 4 mpd when it earns 1.2 mpd)
+**T-Shirt Size**: S — ~0.5 day (DELETE or UPDATE 1 earn_rule row)
+**Feature**: F36
+
+**Correction**:
+```sql
+-- Remove the 4.0 mpd travel bonus rule (bonus was removed per MileLion)
+DELETE FROM earn_rules
+WHERE card_id = '00000000-0000-0000-0001-000000000001'
+  AND category_id = 'travel'
+  AND is_bonus = TRUE;
+```
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | DBS Altitude travel bonus deleted | `recommend('travel')` | DBS Altitude shows 1.2 mpd (base rate), not 4.0 mpd |
+| AC2 | Other DBS Altitude earn rates unchanged | `recommend('dining')` | Still shows 1.2 mpd base rate |
+
+---
+
+#### S29.2: Update HSBC Revolution Cap to $1,500/mo
+
+**As a** user with HSBC Revolution checking dining/online recommendations,
+**I want** the cap to show $1,500/mo (not $1,000/mo),
+**So that** I know my actual remaining cap and don't prematurely switch to a different card.
+
+**Priority**: P0 (Cap already correct in caps table at $1,500; conditions_note text is stale at $1,000)
+**T-Shirt Size**: S — ~0.5 day (UPDATE conditions_note on 2-3 earn_rule rows)
+**Feature**: F36
+
+**Correction**:
+```sql
+-- Update conditions_note to reflect $1,500/mo cap (caps table already correct)
+UPDATE earn_rules
+SET conditions_note = REPLACE(conditions_note, '$1,000/month', '$1,500/month')
+WHERE card_id = '00000000-0000-0000-0001-000000000006'
+  AND conditions_note LIKE '%$1,000/month%';
+```
+
+---
+
+#### S29.3: Update DBS Woman's World Cap to $1,000/mo
+
+**As a** user with DBS Woman's World checking online shopping recommendations,
+**I want** the cap to show $1,000/mo (not $2,000/mo),
+**So that** I know my actual cap limit and don't overspend expecting a higher cap.
+
+**Priority**: P0 (Cap is $2,000 in caps table but MileLion confirms cut to $1,000 in August 2025)
+**T-Shirt Size**: S — ~0.5 day (UPDATE 1 caps row + conditions_note)
+**Feature**: F36
+
+**Correction**:
+```sql
+-- Update caps table
+UPDATE caps
+SET monthly_cap_amount = 1000.00,
+    notes = 'Cap on 10X bonus for online spending. Cut from $2,000 to $1,000/mo in August 2025. [VERIFIED from MileLion 2026]'
+WHERE card_id = '00000000-0000-0000-0001-000000000010'
+  AND category_id = 'online';
+
+-- Update conditions_note in earn_rules
+UPDATE earn_rules
+SET conditions_note = 'Earn 4 mpd (10X DBS Points) on online spend. Capped at $1,000/month (cut from $2,000 in August 2025). [VERIFIED from MileLion 2026]'
+WHERE card_id = '00000000-0000-0000-0001-000000000010'
+  AND category_id = 'online'
+  AND is_bonus = TRUE;
+```
+
+---
+
+#### S29.4: Add UOB Lady's Card Groceries Bonus Rule
+
+**As a** user with UOB Lady's Card shopping at supermarkets,
+**I want** to see 4 mpd for groceries,
+**So that** I use this card at FairPrice/Cold Storage and earn maximum miles.
+
+**Priority**: P1 (Card 11 missing from grocery rankings despite MileLion listing it)
+**T-Shirt Size**: S — ~0.5 day (1 INSERT row)
+**Feature**: F36
+
+**Correction**:
+```sql
+INSERT INTO earn_rules (card_id, category_id, earn_rate_mpd, is_bonus, conditions, conditions_note, source_url)
+VALUES (
+  '00000000-0000-0000-0002-000000000011', 'groceries', 4.0, TRUE,
+  '{"user_selectable": true}',
+  'Earn 4 mpd (10X UNI$) on supermarkets. Select Beauty & Wellness category to cover grocery MCCs. Cap $1,000/mo shared. [VERIFIED from MileLion 2026]',
+  NULL
+);
+```
+
+---
+
+#### S29.5: Add HSBC Revolution Travel Bonus Rule
+
+**As a** user with HSBC Revolution booking flights or hotels,
+**I want** to see 4 mpd for direct airline/hotel bookings,
+**So that** I use this card for travel (not just dining/online).
+
+**Priority**: P1 (Card 6 missing from travel rankings despite MileLion listing it)
+**T-Shirt Size**: S — ~0.5 day (1 INSERT row)
+**Feature**: F36
+
+**Correction**:
+```sql
+INSERT INTO earn_rules (card_id, category_id, earn_rate_mpd, is_bonus, conditions, conditions_note, source_url)
+VALUES (
+  '00000000-0000-0000-0001-000000000006', 'travel', 4.0, TRUE,
+  '{"contactless": true, "direct_booking_only": true}',
+  'Earn 4 mpd on direct airline, hotel, car rental, and cruise bookings (contactless). Online travel agencies (Expedia, Airbnb) NOT eligible. Cap $1,500/mo shared across bonus categories. [VERIFIED from MileLion 2026]',
+  NULL
+);
+```
+
+---
+
+#### S29.6: Update KrisFlyer UOB Transport Rate
+
+**As a** user with KrisFlyer UOB taking public transport,
+**I want** to see 2.4 mpd for transport (not 1.2 mpd base),
+**So that** I know to use this card on SimplyGo for a higher earn rate.
+
+**Priority**: P1 (Card 5 shows 1.2 mpd base for transport; MileLion says 2.4 mpd uncapped)
+**T-Shirt Size**: S — ~0.5 day (1 INSERT row for bonus rule)
+**Feature**: F36
+
+**Correction**:
+```sql
+INSERT INTO earn_rules (card_id, category_id, earn_rate_mpd, is_bonus, conditions, conditions_note, source_url)
+VALUES (
+  '00000000-0000-0000-0001-000000000005', 'transport', 2.4, TRUE,
+  '{"contactless": true, "sia_spend_yearly": 1000}',
+  'Earn 2.4 mpd on public transport (contactless/SimplyGo). Requires $1,000/year SIA spend to qualify. Uncapped. [VERIFIED from MileLion 2026]',
+  NULL
+);
+```
+
+---
+
+#### S29.7: Verify UOB Preferred Platinum Transport in Rankings
+
+**As a** user with UOB Preferred Platinum,
+**I want** to see this card appear in transport rankings,
+**So that** I know it earns 4 mpd on SimplyGo contactless transport.
+
+**Priority**: P1 (Card 20 already has transport bonus rule in DB from Sprint 25 fix; just missing from RECOMMENDATION_RANKINGS.md)
+**T-Shirt Size**: XS — ~1 hour (doc update only)
+**Feature**: F36
+
+**Note**: No SQL change needed. The bonus rule was added in Sprint 25 (S25.3). This story ensures the rankings doc is updated.
+
+---
+
+#### S29.8: Update RECOMMENDATION_RANKINGS.md
+
+**As a** developer or PM reviewing card rankings,
+**I want** the RECOMMENDATION_RANKINGS.md to reflect all Sprint 29 corrections,
+**So that** the documentation matches the database and is the single source of truth.
+
+**Priority**: P0 (Documentation must match data)
+**T-Shirt Size**: S — ~0.5 day
+**Feature**: F36
+
+**Changes required**:
+- Travel: Remove DBS Altitude from #1 (now 1.2 mpd base), add HSBC Revolution at 4 mpd
+- Dining: Update HSBC Revolution cap reference from $1,000 to $1,500/mo
+- Online Shopping: Update HSBC Revolution cap to $1,500/mo, DBS Woman's World cap to $1,000/mo
+- Transport: Add UOB Preferred Platinum at 4 mpd, add KrisFlyer UOB bonus at 2.4 mpd
+- Groceries: Add UOB Lady's Card at 4 mpd
+- Bills > Telco: Update DBS Woman's World cap reference to $1,000/mo
+- Bills > Pharmacy: Update HSBC Revolution cap reference to $1,500/mo
+- Bills > Hospital: Update HSBC Revolution cap to $1,500/mo, DBS Woman's World cap to $1,000/mo
+- Quick Reference table: Update accordingly
+- Add migration history entry
+
+---
+
+### Sprint 29 — Dependencies Map
+
+```
+S29.1 (DBS Altitude) ─────────┐
+S29.2 (HSBC Rev cap) ─────────┤
+S29.3 (DBS WWC cap) ──────────┤
+S29.4 (UOB Lady's groceries) ─┼──── S29.8 (Rankings doc update)
+S29.5 (HSBC Rev travel) ──────┤
+S29.6 (KrisFlyer UOB) ────────┤
+S29.7 (UOB PP verify) ────────┘
+
+Sprint 28 (bills subcategory live) ─── Hard prerequisite ───── Sprint 29 begins
+```
+
+### Sprint 29 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| DBS Altitude travel bonus removal unverified | Low | High | MileLion explicitly states "old bonuses removed"; verify with DBS T&C page before merging |
+| HSBC Revolution cap revert after Revo Up promo (31 Mar 2026) | Medium | Medium | Note the promo expiry in conditions_note; schedule a follow-up check in April 2026 |
+| KrisFlyer UOB 2.4 mpd requires SIA spend condition users may not meet | Medium | Low | Document the condition clearly; F31 (min spend enforcement) will handle this in a future sprint |
+
+### Sprint 29 — Schedule
+
+| Day | Focus | Exit Criteria |
+|-----|-------|---------------|
+| **Day 1** | S29.1 (DBS Altitude) + S29.2 (HSBC cap) + S29.3 (DBS WWC cap) | P0 corrections applied |
+| **Day 2** | S29.4 (UOB Lady's) + S29.5 (HSBC Rev travel) + S29.6 (KrisFlyer UOB) | P1 corrections applied |
+| **Day 3** | S29.7 (UOB PP verify) + S29.8 (Rankings doc) | All docs updated |
+| **Day 4** | Regression testing + seed file sync | No regressions |
+| **Day 5** | Final review + staging deploy | Sprint 29 complete |
+
+---
+
+**Sprint 29 Status**: 🔄 PLANNED — Migration drafted (2026-03-03)
+
+---
+
+## Sprint 30: "DBS yuu Card Integration" (MileLion March 2026 Audit — Phase 6)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Add DBS yuu AMEX and DBS yuu Visa as cards #30-31. These cards earn 10 mpd at yuu merchants (FairPrice, 7-Eleven, Giant) for groceries and 10 mpd for food delivery (Deliveroo, GrabFood, Foodpanda). This is the single largest gap in our recommendation engine — DBS yuu would rank #1 in Groceries at 10 mpd (2.5x higher than any existing card) and #1 in Dining (food delivery) at 10 mpd. Adding two card variants (AMEX + Visa) because many SG merchants don't accept AMEX.
+**Epic**: E18 — DBS yuu Card Integration
+**PRD Features**: F37 (P0 — DBS yuu Card Integration)
+**Phase**: v2.7 — Card Expansion (yuu)
+**Predecessor**: Sprint 29 complete (earn rate refresh applied; all existing cards corrected)
+**Source of Truth**: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md` (Discrepancy #1, #6)
+
+---
+
+### Sprint 30 — Definition of Ready (DoR) Checklist
+
+- [x] Sprint 29 complete (earn rate refresh applied)
+- [x] DBS yuu Card earn rates confirmed from MileLion (10 mpd groceries at yuu merchants, 10 mpd food delivery)
+- [x] Card variants identified: DBS yuu AMEX (primary) + DBS yuu Visa (fallback for non-AMEX merchants)
+- [x] Cap confirmed: $800/mo on bonus categories, $800/mo minimum spend
+- [x] yuu merchant list confirmed: FairPrice, Giant, 7-Eleven, Cold Storage, CS Fresh, Unity
+- [x] Food delivery platforms confirmed: Deliveroo, GrabFood, Foodpanda
+- [ ] Card images sourced (placeholder acceptable for Sprint 30)
+- [ ] AMEX acceptance warning UX pattern approved
+
+### Sprint 30 — Definition of Done (DoD) Checklist
+
+- [ ] DBS yuu AMEX and DBS yuu Visa inserted into cards table with correct metadata
+- [ ] 10 mpd grocery bonus rules created for both cards (yuu merchants, $800/mo cap, $800/mo min spend)
+- [ ] 10 mpd food delivery bonus rules created for both cards (Deliveroo, GrabFood, Foodpanda)
+- [ ] Base rate earn rules (0.4 mpd) created for all 8 categories
+- [ ] Caps table entries created ($800/mo for groceries and dining)
+- [ ] DBS yuu AMEX appears as #1 in Groceries recommendations at 10 mpd
+- [ ] DBS yuu AMEX appears as #1 in Dining (food delivery) at 10 mpd
+- [ ] AMEX acceptance warning displayed when DBS yuu AMEX is recommended
+- [ ] DBS yuu Visa recommended as alternative when AMEX not accepted
+- [ ] Seed file (`all_cards.sql`) updated with both cards
+- [ ] RECOMMENDATION_RANKINGS.md updated with DBS yuu in Groceries (#1), Dining (#1 for food delivery)
+- [ ] No regressions in other category rankings
+
+---
+
+### Sprint 30 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| S30.1 | Add DBS yuu AMEX to cards table (card #30) | P0 | S | 2 | Data Engineer |
+| S30.2 | Add DBS yuu Visa to cards table (card #31) | P0 | S | 2 | Data Engineer |
+| S30.3 | Create 10 mpd grocery bonus rules for both yuu cards | P0 | M | 3 | Data Engineer |
+| S30.4 | Create 10 mpd food delivery bonus rules for both yuu cards | P0 | M | 3 | Data Engineer |
+| S30.5 | Create base rate earn rules (0.4 mpd) for all categories | P0 | S | 2 | Data Engineer |
+| S30.6 | Create caps table entries ($800/mo for grocery + dining) | P0 | S | 1 | Data Engineer |
+| S30.7 | Add AMEX acceptance warning to recommendation UI | P1 | M | 3 | Developer |
+| S30.8 | Update RECOMMENDATION_RANKINGS.md with DBS yuu rankings | P0 | S | 2 | Data Engineer |
+| **Total** | | | | **18** | |
+
+---
+
+### Sprint 30 — User Story Details
+
+#### S30.1: Add DBS yuu AMEX to Cards Table
+
+**As a** user who holds a DBS yuu AMEX card,
+**I want** to add it to my portfolio,
+**So that** I get recommendations that leverage its 10 mpd earning rate at yuu merchants.
+
+**Priority**: P0 (Card missing entirely — largest gap in recommendation engine)
+**T-Shirt Size**: S — ~0.5 day (1 INSERT into cards table)
+**Feature**: F37
+
+**Card metadata**:
+```sql
+INSERT INTO cards (id, bank, name, slug, network, annual_fee, base_rate_mpd, image_url, is_active, notes)
+VALUES (
+  '00000000-0000-0000-0005-000000000030',
+  'DBS',
+  'DBS yuu AMEX',
+  'dbs-yuu-amex',
+  'amex',
+  0.00,
+  0.4,
+  NULL,
+  TRUE,
+  'DBS yuu AMEX. 10 mpd at yuu merchants (FairPrice, Giant, 7-Eleven, Cold Storage, CS Fresh, Unity). 10 mpd food delivery (Deliveroo, GrabFood, Foodpanda). Base 0.4 mpd. Min spend $800/mo. Cap $800/mo on bonus categories. Primary yuu card but AMEX not universally accepted — pair with DBS yuu Visa. No annual fee. [VERIFIED from MileLion March 2026]'
+);
+```
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | DBS yuu AMEX in cards table | User searches for DBS cards | DBS yuu AMEX appears in card list |
+| AC2 | Card has correct metadata | User views card details | Shows AMEX network, $0 annual fee, 0.4 mpd base |
+| AC3 | Card is active | App loads card list | Card is available for portfolio addition |
+
+---
+
+#### S30.2: Add DBS yuu Visa to Cards Table
+
+**As a** user who holds a DBS yuu Visa card,
+**I want** to add it to my portfolio,
+**So that** I get yuu merchant recommendations at non-AMEX merchants.
+
+**Priority**: P0 (Visa variant needed for merchants that don't accept AMEX)
+**T-Shirt Size**: S — ~0.5 day (1 INSERT into cards table)
+**Feature**: F37
+
+**Card metadata**:
+```sql
+INSERT INTO cards (id, bank, name, slug, network, annual_fee, base_rate_mpd, image_url, is_active, notes)
+VALUES (
+  '00000000-0000-0000-0005-000000000031',
+  'DBS',
+  'DBS yuu Visa',
+  'dbs-yuu-visa',
+  'visa',
+  0.00,
+  0.4,
+  NULL,
+  TRUE,
+  'DBS yuu Visa. Same yuu merchant bonuses as DBS yuu AMEX (10 mpd at FairPrice, Giant, 7-Eleven, Cold Storage, CS Fresh, Unity). 10 mpd food delivery (Deliveroo, GrabFood, Foodpanda). Base 0.4 mpd. Min spend $800/mo. Cap $800/mo on bonus categories. Visa variant for merchants that don''t accept AMEX. No annual fee. [VERIFIED from MileLion March 2026]'
+);
+```
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | DBS yuu Visa in cards table | User searches for DBS cards | DBS yuu Visa appears in card list |
+| AC2 | Card has Visa network | User views card details | Shows Visa network, $0 annual fee, 0.4 mpd base |
+
+---
+
+#### S30.3: Create 10 mpd Grocery Bonus Rules
+
+**As a** user with a DBS yuu card shopping at FairPrice or Giant,
+**I want** to see 10 mpd for groceries,
+**So that** I use this card at yuu merchants and earn maximum miles (2.5x better than any other card).
+
+**Priority**: P0 (10 mpd would rank #1 in Groceries, displacing all 4 mpd cards)
+**T-Shirt Size**: M — ~1 day (2 INSERT rows + conditions for yuu merchants + min spend)
+**Feature**: F37
+
+**Correction**:
+```sql
+-- DBS yuu AMEX groceries bonus
+INSERT INTO earn_rules (card_id, category_id, earn_rate_mpd, is_bonus, conditions, conditions_note, source_url)
+VALUES (
+  '00000000-0000-0000-0005-000000000030', 'groceries', 10.0, TRUE,
+  '{"yuu_merchants": true, "min_spend_monthly": 800}'::jsonb,
+  'Earn 10 mpd at yuu merchants (FairPrice, Giant, 7-Eleven, Cold Storage, CS Fresh, Unity). Min spend $800/mo. Cap $800/mo on bonus categories shared with food delivery. [VERIFIED from MileLion March 2026]',
+  NULL
+);
+
+-- DBS yuu Visa groceries bonus
+INSERT INTO earn_rules (card_id, category_id, earn_rate_mpd, is_bonus, conditions, conditions_note, source_url)
+VALUES (
+  '00000000-0000-0000-0005-000000000031', 'groceries', 10.0, TRUE,
+  '{"yuu_merchants": true, "min_spend_monthly": 800}'::jsonb,
+  'Earn 10 mpd at yuu merchants (FairPrice, Giant, 7-Eleven, Cold Storage, CS Fresh, Unity). Min spend $800/mo. Cap $800/mo on bonus categories shared with food delivery. [VERIFIED from MileLion March 2026]',
+  NULL
+);
+```
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Both yuu cards have grocery bonus rules | `recommend('groceries')` | DBS yuu AMEX shows 10 mpd, ranked #1 |
+| AC2 | Conditions documented | User taps card for details | Shows yuu merchant list, $800/mo cap, $800/mo min spend |
+| AC3 | Existing grocery rankings unaffected | `recommend('groceries')` | UOB Visa Sig still at 4 mpd, just ranked lower |
+
+---
+
+#### S30.4: Create 10 mpd Food Delivery Bonus Rules
+
+**As a** user with a DBS yuu card ordering from Deliveroo, GrabFood, or Foodpanda,
+**I want** to see 10 mpd for food delivery,
+**So that** I use this card for delivery orders and earn maximum miles.
+
+**Priority**: P0 (10 mpd food delivery would rank #1 in Dining subcategory)
+**T-Shirt Size**: M — ~1 day (2 INSERT rows + merchant-specific conditions)
+**Feature**: F37
+
+**Correction**:
+```sql
+-- DBS yuu AMEX food delivery bonus (modeled as dining bonus with food_delivery condition)
+INSERT INTO earn_rules (card_id, category_id, earn_rate_mpd, is_bonus, conditions, conditions_note, source_url)
+VALUES (
+  '00000000-0000-0000-0005-000000000030', 'dining', 10.0, TRUE,
+  '{"food_delivery": true, "merchants": ["deliveroo", "grabfood", "foodpanda"], "min_spend_monthly": 800}'::jsonb,
+  'Earn 10 mpd on food delivery (Deliveroo, GrabFood, Foodpanda). Min spend $800/mo. Cap $800/mo shared with grocery bonus. [VERIFIED from MileLion March 2026]',
+  NULL
+);
+
+-- DBS yuu Visa food delivery bonus
+INSERT INTO earn_rules (card_id, category_id, earn_rate_mpd, is_bonus, conditions, conditions_note, source_url)
+VALUES (
+  '00000000-0000-0000-0005-000000000031', 'dining', 10.0, TRUE,
+  '{"food_delivery": true, "merchants": ["deliveroo", "grabfood", "foodpanda"], "min_spend_monthly": 800}'::jsonb,
+  'Earn 10 mpd on food delivery (Deliveroo, GrabFood, Foodpanda). Min spend $800/mo. Cap $800/mo shared with grocery bonus. [VERIFIED from MileLion March 2026]',
+  NULL
+);
+```
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Both yuu cards have dining bonus rules | `recommend('dining')` | DBS yuu AMEX shows 10 mpd for food delivery |
+| AC2 | Food delivery condition noted | User taps card | Shows "food delivery only" — not restaurant dining |
+| AC3 | Non-food-delivery dining | `recommend('dining')` for restaurants | DBS yuu shows 0.4 mpd base (not 10 mpd) |
+
+---
+
+#### S30.5: Create Base Rate Earn Rules for All Categories
+
+**As a** data engineer setting up DBS yuu cards,
+**I want** base rate earn rules (0.4 mpd) for all 8 categories,
+**So that** the cards show in recommendation results even for non-bonus categories.
+
+**Priority**: P0 (Missing base rules would cause cards to not appear in category recommendations)
+**T-Shirt Size**: S — ~0.5 day (16 INSERT rows — 8 categories × 2 cards)
+**Feature**: F37
+
+**Note**: Bills base rate is 0 mpd (utilities/insurance excluded). Travel, transport, petrol, online all earn 0.4 mpd base.
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | All 8 categories have base earn rules | `recommend('transport')` | DBS yuu AMEX shows 0.4 mpd (base) |
+| AC2 | Bills set to 0 mpd | `recommend('bills')` | DBS yuu cards show 0 mpd for utilities |
+
+---
+
+#### S30.6: Create Caps Table Entries
+
+**As a** user tracking spending caps,
+**I want** accurate cap data for DBS yuu cards,
+**So that** I see when I'm approaching the $800/mo bonus cap.
+
+**Priority**: P0 (Cap tracking requires caps table rows)
+**T-Shirt Size**: S — ~2 hours (4 INSERT rows — groceries + dining × 2 cards)
+**Feature**: F37
+
+**Correction**:
+```sql
+-- DBS yuu AMEX caps
+INSERT INTO caps (card_id, category_id, monthly_cap_amount, cap_type, notes)
+VALUES
+  ('00000000-0000-0000-0005-000000000030', 'groceries', 800.00, 'bonus_spend', 'Cap on 10X yuu bonus for groceries. $800/mo shared across bonus categories. [VERIFIED from MileLion March 2026]'),
+  ('00000000-0000-0000-0005-000000000030', 'dining', 800.00, 'bonus_spend', 'Cap on 10X yuu bonus for food delivery. $800/mo shared across bonus categories. [VERIFIED from MileLion March 2026]');
+
+-- DBS yuu Visa caps
+INSERT INTO caps (card_id, category_id, monthly_cap_amount, cap_type, notes)
+VALUES
+  ('00000000-0000-0000-0005-000000000031', 'groceries', 800.00, 'bonus_spend', 'Cap on 10X yuu bonus for groceries. $800/mo shared across bonus categories. [VERIFIED from MileLion March 2026]'),
+  ('00000000-0000-0000-0005-000000000031', 'dining', 800.00, 'bonus_spend', 'Cap on 10X yuu bonus for food delivery. $800/mo shared across bonus categories. [VERIFIED from MileLion March 2026]');
+```
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Caps created for both cards | User views cap tracker | Shows $800/mo cap for groceries and dining |
+| AC2 | Shared cap documented | Conditions note visible | States "shared across bonus categories" |
+
+---
+
+#### S30.7: AMEX Acceptance Warning in Recommendation UI
+
+**As a** user seeing DBS yuu AMEX recommended at #1,
+**I want** a warning that AMEX may not be accepted everywhere,
+**So that** I carry the DBS yuu Visa as backup or use another card.
+
+**Priority**: P1 (UX improvement — AMEX acceptance is ~60% in SG)
+**T-Shirt Size**: M — ~1-2 days (UI component + conditional rendering)
+**Feature**: F37
+
+**Design**:
+- Show amber badge "AMEX — may not be accepted at all merchants" on DBS yuu AMEX recommendation card
+- Below the AMEX card, show a "Visa alternative" row: "DBS yuu Visa (same benefits, Visa accepted everywhere)"
+- Badge should appear for ALL AMEX cards in the system (also Amex KrisFlyer Ascend, Amex KrisFlyer CC)
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | DBS yuu AMEX recommended | User views groceries recommendation | Amber AMEX badge visible |
+| AC2 | DBS yuu Visa shown as alternative | User sees AMEX warning | DBS yuu Visa listed below as "Visa alternative" |
+| AC3 | Other AMEX cards also show badge | User sees Amex KrisFlyer Ascend | Same amber AMEX badge shown |
+
+---
+
+#### S30.8: Update RECOMMENDATION_RANKINGS.md
+
+**As a** developer or PM reviewing card rankings,
+**I want** the RECOMMENDATION_RANKINGS.md to include DBS yuu cards,
+**So that** the documentation is the single source of truth.
+
+**Priority**: P0 (Documentation must match data)
+**T-Shirt Size**: S — ~0.5 day
+**Feature**: F37
+
+**Changes required**:
+- Groceries: Add DBS yuu AMEX at #1 (10 mpd), DBS yuu Visa at #2 (10 mpd)
+- Dining: Add DBS yuu AMEX/Visa for food delivery at 10 mpd (note: restaurant dining is 0.4 mpd base)
+- Quick Reference table: Update Groceries and Dining top picks
+- Card Reference table: Add DBS yuu AMEX and DBS yuu Visa
+- Add migration history entry
+- Note AMEX acceptance caveat in rankings
+
+---
+
+### Sprint 30 — Dependencies Map
+
+```
+S30.1 (yuu AMEX card) ──────────┐
+S30.2 (yuu Visa card) ──────────┤
+                                 ├── S30.3 (grocery bonus rules) ──┐
+                                 ├── S30.4 (food delivery bonus)  ─┤
+                                 ├── S30.5 (base rate rules) ──────┼── S30.8 (Rankings doc)
+                                 └── S30.6 (caps) ────────────────┘
+                                                                    │
+S30.7 (AMEX warning UI) ──────────────────────── Independent ──────┘
+
+Sprint 29 (earn rate refresh) ─── Hard prerequisite ───── Sprint 30 begins
+```
+
+### Sprint 30 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| yuu merchant MCC list incomplete | Medium | Medium | Cross-reference with DBS T&C page; add "yuu_merchants" condition flag for future merchant additions |
+| Food delivery MCCs overlap with restaurant dining | Medium | High | Use merchant-specific conditions (Deliveroo, GrabFood, Foodpanda) rather than MCC-based matching |
+| $800/mo cap shared across groceries and dining may confuse users | Low | Medium | Clearly state "shared cap" in conditions_note and cap tracker UI |
+| AMEX acceptance warning may discourage users from DBS yuu AMEX | Low | Low | Frame as informational, not prohibitive; show Visa alternative prominently |
+| Min spend $800/mo condition may not be met by all users | Medium | Medium | Document condition clearly; F31 (min spend enforcement) will handle this in a future sprint |
+
+### Sprint 30 — Schedule
+
+| Day | Focus | Exit Criteria |
+|-----|-------|---------------|
+| **Day 1-2** | S30.1 (yuu AMEX) + S30.2 (yuu Visa) — card table entries | Both cards in DB |
+| **Day 3-4** | S30.3 (grocery bonus) + S30.4 (food delivery bonus) — earn rules | 10 mpd rules live |
+| **Day 5** | S30.5 (base rates) + S30.6 (caps) | All earn rules + caps complete |
+| **Day 6-7** | S30.7 (AMEX warning UI) | AMEX badge in recommendation UI |
+| **Day 8** | S30.8 (Rankings doc) + seed file sync | Docs match DB |
+| **Day 9-10** | Regression testing + staging deploy | Sprint 30 complete |
+
+---
+
+**Sprint 30 Status**: 📋 PLANNED — Awaiting Sprint 29 completion
+
+---
+
+## Sprint 31: "SC Smart Card Bonus Tiers" (MileLion March 2026 Audit — Phase 7)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Model SC Smart Card's tiered cashback-to-miles equivalence. Currently listed at 0.4 mpd (base only), but MileLion values it at 5.6 mpd equivalent on transport, fast food, streaming, and EV charging (rising to 7.42 mpd at $800-$1,500/mo total spend, 9.28 mpd at $1,500+). This is the second-largest gap in our recommendation engine — SC Smart Card would rank #1 or #2 in Transport at 5.6+ mpd. Requires a **policy decision** on showing cashback-to-miles conversion in a miles-focused app, and **engineering changes** to model tiered earn rates in the recommendation engine.
+**Epic**: E19 — SC Smart Card Bonus Tiers
+**PRD Features**: F38 (P0 — SC Smart Card Bonus Tiers)
+**Phase**: v2.8 — Cashback-to-Miles Equivalence
+**Predecessor**: Sprint 30 complete (DBS yuu cards integrated; recommendation engine stable)
+**Source of Truth**: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md` (Discrepancy #2)
+
+---
+
+### Sprint 31 — Definition of Ready (DoR) Checklist
+
+- [x] Sprint 30 complete (DBS yuu cards integrated)
+- [x] SC Smart Card bonus tiers confirmed from MileLion (5.6/7.42/9.28 mpd equiv.)
+- [x] Eligible categories identified: transport, fast food, streaming, EV charging
+- [x] Tier thresholds confirmed: base tier (<$800/mo), mid tier ($800-$1,500/mo), high tier ($1,500+/mo)
+- [ ] **Policy decision made**: How to display cashback-to-miles equivalence in a miles-focused app
+- [ ] Conversion formula documented: 1% cashback = X mpd equivalent
+- [ ] recommend() RPC function reviewed for tiered earn rate support
+- [ ] Design for tiered rate display approved (e.g., "5.6 mpd equiv.*" with asterisk explanation)
+
+### Sprint 31 — Definition of Done (DoD) Checklist
+
+- [ ] Policy decision on cashback-to-miles conversion documented in PRD
+- [ ] SC Smart Card earn rules updated from 0.4 mpd to tiered rates for transport, fast food, streaming, EV charging
+- [ ] Tiered earn rates modeled in earn_rules conditions JSONB (base/mid/high tiers)
+- [ ] recommend() function returns correct tiered rate based on user's declared monthly spend (or base tier as default)
+- [ ] UI shows "mpd equiv." label for cashback-to-miles converted cards
+- [ ] SC Smart Card appears competitively in Transport rankings (rank #1-2 at 5.6+ mpd)
+- [ ] RECOMMENDATION_RANKINGS.md updated with SC Smart Card tiered rates
+- [ ] Seed file updated with new earn rules
+- [ ] Conversion formula documented and unit tested
+- [ ] No regressions in other category rankings
+
+---
+
+### Sprint 31 Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| S31.1 | Document cashback-to-miles conversion policy decision | P0 | S | 2 | PM + Data Engineer |
+| S31.2 | Update SC Smart Card transport earn rule to 5.6 mpd equiv. (base tier) | P0 | M | 3 | Data Engineer |
+| S31.3 | Add SC Smart Card fast food bonus rule (5.6 mpd equiv.) | P0 | S | 2 | Data Engineer |
+| S31.4 | Add SC Smart Card streaming + EV charging bonus rules | P1 | S | 2 | Data Engineer |
+| S31.5 | Model tiered spend thresholds in earn_rules conditions | P0 | L | 3 | Software Engineer |
+| S31.6 | Update recommend() to support tiered earn rates | P0 | L | 3 | Software Engineer |
+| S31.7 | Update RECOMMENDATION_RANKINGS.md with SC Smart Card tiers | P0 | S | 1 | Data Engineer |
+| **Total** | | | | **16** | |
+
+---
+
+### Sprint 31 — User Story Details
+
+#### S31.1: Document Cashback-to-Miles Conversion Policy
+
+**As a** product team deciding how to display cashback cards,
+**I want** a documented policy on cashback-to-miles equivalence,
+**So that** we have a consistent approach for SC Smart Card and any future cashback cards.
+
+**Priority**: P0 (Blocks all other stories — must decide before implementation)
+**T-Shirt Size**: S — ~0.5 day (policy document + PRD update)
+**Feature**: F38
+
+**Policy options to evaluate**:
+1. **Show equivalent mpd with label**: "5.6 mpd equiv.*" — clearest for users comparing cards
+2. **Show cashback % with conversion note**: "5.6% cashback (≈5.6 mpd)" — more transparent
+3. **Separate cashback ranking**: Don't mix cashback and miles cards — most conservative
+4. **MileLion approach**: Show equivalent mpd using 1 cpp = 1 mpd conversion (MileLion's method)
+
+**Recommended**: Option 1 (equivalent mpd with label), matching MileLion's approach. This keeps the ranking system consistent while flagging that the card earns cashback, not miles.
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Policy decision documented | Team reviews | Clear conversion formula: 1% cashback = 1 mpd equivalent |
+| AC2 | PRD updated | F38 acceptance criteria | Reflects chosen policy |
+| AC3 | UI label defined | Design review | "mpd equiv." label approved for cashback cards |
+
+---
+
+#### S31.2: Update SC Smart Card Transport Earn Rule
+
+**As a** user with SC Smart Card taking public transport,
+**I want** to see 5.6 mpd equivalent (not 0.4 mpd) for transport,
+**So that** I know this card is competitive for SimplyGo and transit payments.
+
+**Priority**: P0 (Currently massively understated — 0.4 mpd vs. actual 5.6 mpd equiv.)
+**T-Shirt Size**: M — ~1 day (UPDATE existing rule + add tiered conditions)
+**Feature**: F38
+
+**Correction**:
+```sql
+-- Update existing SC Smart Card transport base rule to show bonus tier
+UPDATE earn_rules
+SET earn_rate_mpd = 5.6,
+    is_bonus = TRUE,
+    conditions = '{"cashback_equivalent": true, "tier": "base", "tiered_rates": {"base": 5.6, "mid": 7.42, "high": 9.28}, "tier_thresholds": {"mid_min": 800, "high_min": 1500}}'::jsonb,
+    conditions_note = 'SC Smart Card earns 5.6% cashback on transport (≈5.6 mpd equiv. using 1 cpp = 1 mpd). Tiered by total monthly spend: 7.42 mpd equiv. at $800-$1,500/mo; 9.28 mpd equiv. at $1,500+/mo. [VERIFIED from MileLion March 2026]',
+    updated_at = NOW()
+WHERE card_id = (SELECT id FROM cards WHERE slug = 'sc-smart-card' LIMIT 1)
+  AND category_id = 'transport';
+
+-- Keep a base rate rule at 0.4 mpd for non-bonus categories
+```
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | SC Smart Card transport updated | `recommend('transport')` | Shows 5.6 mpd equiv. (base tier), ranked #1-2 |
+| AC2 | Tiered rates in conditions | User taps card for details | Shows tiers: 5.6 / 7.42 / 9.28 mpd equiv. |
+| AC3 | "mpd equiv." label visible | Recommendation card | Clearly labeled as cashback equivalent, not actual miles |
+
+---
+
+#### S31.3: Add SC Smart Card Fast Food Bonus Rule
+
+**As a** user with SC Smart Card buying fast food,
+**I want** to see 5.6 mpd equivalent for fast food,
+**So that** I use this card at McDonald's, KFC, and similar outlets.
+
+**Priority**: P0 (Fast food is a new bonus category for SC Smart Card not currently modeled)
+**T-Shirt Size**: S — ~0.5 day (1 INSERT row)
+**Feature**: F38
+
+**Note**: Fast food may need to be modeled as a dining subcategory with MCC filter (5812, 5814), or as a separate conditions flag. Decision depends on whether our category system supports MCC-level filtering within dining.
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | SC Smart Card fast food rule created | `recommend('dining')` with fast food context | Shows 5.6 mpd equiv. |
+| AC2 | Non-fast-food dining unaffected | `recommend('dining')` for restaurants | SC Smart Card shows 0.4 mpd base |
+
+---
+
+#### S31.4: Add SC Smart Card Streaming + EV Charging Bonus Rules
+
+**As a** user with SC Smart Card paying for Netflix or EV charging,
+**I want** to see 5.6 mpd equivalent for these categories,
+**So that** I know this card earns bonus rates on streaming and EV charging.
+
+**Priority**: P1 (Lower priority than transport/fast food — smaller user impact)
+**T-Shirt Size**: S — ~0.5 day (2 INSERT rows)
+**Feature**: F38
+
+**Note**: Streaming may map to online or bills subcategory. EV charging may map to petrol or transport. Category mapping decisions needed.
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Streaming bonus rule created | Streaming payment recommendation | Shows 5.6 mpd equiv. for SC Smart Card |
+| AC2 | EV charging bonus rule created | EV charging recommendation | Shows 5.6 mpd equiv. for SC Smart Card |
+
+---
+
+#### S31.5: Model Tiered Spend Thresholds in Earn Rules
+
+**As a** data engineer modeling tiered earn rates,
+**I want** a consistent JSONB structure for tiered rates,
+**So that** the recommendation engine can look up the correct tier based on user spend.
+
+**Priority**: P0 (Foundation for tiered rate display)
+**T-Shirt Size**: L — ~2-3 days (JSONB schema design + documentation + validation)
+**Feature**: F38
+
+**Proposed JSONB structure**:
+```json
+{
+  "cashback_equivalent": true,
+  "tier": "base",
+  "tiered_rates": {
+    "base": 5.6,
+    "mid": 7.42,
+    "high": 9.28
+  },
+  "tier_thresholds": {
+    "mid_min": 800,
+    "high_min": 1500
+  }
+}
+```
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | JSONB schema documented | Data engineer reviews | Consistent structure for all tiered cards |
+| AC2 | All SC Smart Card bonus rules use schema | DB query | All bonus rules have `tiered_rates` in conditions |
+| AC3 | Schema extensible | Future tiered card added | Same structure works without migration |
+
+---
+
+#### S31.6: Update recommend() to Support Tiered Earn Rates
+
+**As a** user with varying monthly spend levels,
+**I want** the recommendation engine to show the correct tier rate,
+**So that** I see 7.42 mpd equiv. if I spend $800-$1,500/mo or 9.28 mpd at $1,500+.
+
+**Priority**: P0 (Without this, recommend() can't display tiered rates correctly)
+**T-Shirt Size**: L — ~2-3 days (RPC function modification + testing)
+**Feature**: F38
+
+**Implementation approach**:
+1. Default to base tier (5.6 mpd) when user's monthly spend is unknown
+2. If user's transaction history shows total monthly spend, calculate tier automatically
+3. Allow manual tier override in user preferences (future sprint)
+4. Display all three tiers in card detail view regardless of current tier
+
+**Acceptance Criteria**:
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | User with no spend history | `recommend('transport')` | SC Smart Card shows 5.6 mpd equiv. (base tier) |
+| AC2 | User spending $1,000/mo | `recommend('transport')` | SC Smart Card shows 7.42 mpd equiv. (mid tier) |
+| AC3 | User spending $2,000/mo | `recommend('transport')` | SC Smart Card shows 9.28 mpd equiv. (high tier) |
+| AC4 | Card detail view | User taps SC Smart Card | All 3 tiers displayed with threshold labels |
+
+---
+
+#### S31.7: Update RECOMMENDATION_RANKINGS.md
+
+**As a** developer or PM reviewing card rankings,
+**I want** the RECOMMENDATION_RANKINGS.md to reflect SC Smart Card's tiered rates,
+**So that** documentation is the single source of truth.
+
+**Priority**: P0 (Documentation must match data)
+**T-Shirt Size**: S — ~2 hours
+**Feature**: F38
+
+**Changes required**:
+- Transport: Add SC Smart Card at 5.6 mpd equiv. (rank #1-2), note tiered rates
+- Dining (fast food): Note SC Smart Card 5.6 mpd equiv. for fast food MCCs
+- Add "Cashback-to-Miles Equivalence" section explaining the conversion formula
+- Quick Reference table: Update Transport top pick
+- Card Reference table: Update SC Smart Card entry with bonus categories
+- Add migration history entry
+
+---
+
+### Sprint 31 — Dependencies Map
+
+```
+S31.1 (Policy decision) ────── BLOCKS ────── S31.2 (transport rule)
+                                              S31.3 (fast food rule)
+                                              S31.4 (streaming/EV rules)
+                                              S31.5 (tiered JSONB schema)
+
+S31.5 (tiered JSONB schema) ── BLOCKS ────── S31.6 (recommend() update)
+
+S31.2 + S31.3 + S31.4 + S31.6 ────────────── S31.7 (Rankings doc)
+
+Sprint 30 (DBS yuu) ─── Hard prerequisite ───── Sprint 31 begins
+```
+
+### Sprint 31 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Policy deadlock on cashback-to-miles conversion | Medium | High | Default to MileLion's approach (1 cpp = 1 mpd equiv.) if no team consensus by Day 2 |
+| Tiered rate logic adds complexity to recommend() | High | Medium | Keep tier lookup simple — one CASE statement based on total monthly spend; avoid over-engineering |
+| "mpd equiv." label confuses users unfamiliar with conversion | Medium | Medium | Add tooltip/info icon explaining "this card earns cashback, not miles — shown as miles equivalent for comparison" |
+| SC Smart Card cashback rates change | Low | Medium | Document source and verification date; schedule quarterly re-check |
+| Fast food MCC overlap with dining category | Medium | Medium | Use specific MCC codes (5812, 5814) in conditions to distinguish fast food from full-service restaurants |
+| User monthly spend data may not be available for tier calculation | High | Low | Default to base tier (5.6 mpd equiv.); show all tiers in card detail view for user reference |
+
+### Sprint 31 — Schedule
+
+| Day | Focus | Exit Criteria |
+|-----|-------|---------------|
+| **Day 1** | S31.1 (Policy decision) — team alignment on conversion approach | Policy documented, conversion formula agreed |
+| **Day 2-3** | S31.5 (Tiered JSONB schema) — design and document | Schema approved and documented |
+| **Day 4-5** | S31.2 (transport) + S31.3 (fast food) + S31.4 (streaming/EV) | All earn rules created with tiered conditions |
+| **Day 6-8** | S31.6 (recommend() update) — implement tiered rate lookup | Tiered rates returned correctly by recommend() |
+| **Day 9** | S31.7 (Rankings doc) + seed file sync | Docs match DB |
+| **Day 10** | Regression testing + staging deploy | Sprint 31 complete |
+
+---
+
+**Sprint 31 Status**: 📋 PLANNED — Awaiting Sprint 30 completion + cashback-to-miles policy decision

@@ -133,7 +133,7 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* Settings */}
+        {/* Settings — Monthly Spend Estimate temporarily hidden
         <Text style={styles.sectionLabel}>Settings</Text>
         <View style={styles.menuSection}>
           <MenuItem
@@ -143,6 +143,7 @@ export default function ProfileScreen() {
             isLast
           />
         </View>
+        */}
 
         {/* Account */}
         <Text style={styles.sectionLabel}>Account</Text>

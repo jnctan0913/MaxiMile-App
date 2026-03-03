@@ -232,6 +232,83 @@ A strong problem statement has **5 components**:
 
 ---
 
+## Phase 2.3: Metrics Framework (FULL tier — required; STANDARD — recommended)
+
+Every PRD must define how success will be measured before any feature is built.
+
+### North Star Metric
+
+Identify the single metric that best captures the core value delivered to users. Everything else should ladder up to it.
+
+```markdown
+## North Star Metric
+**Metric**: [e.g., "Weekly active profiles viewed by recruiters"]
+**Why**: [Why this captures the core value exchange]
+**Target**: [Specific threshold]
+```
+
+### Product Performance KPIs
+
+Define which of the following are relevant for this product and set initial targets:
+
+| Metric | Objective | Track? | Target |
+|--------|-----------|--------|--------|
+| **Daily Active Users (DAU)** | Engagement & stickiness | | |
+| **Churn Rate** | Retention health | | |
+| **Lifetime Value (LTV)** | Revenue potential | | |
+| **Conversion Rate** | Feature/flow effectiveness | | |
+
+### Marketing KPIs (if applicable)
+
+| Metric | Objective | Track? | Target |
+|--------|-----------|--------|--------|
+| **Traffic** | Channel performance | | |
+| **Click-Through Rate (CTR)** | User interest | | |
+| **Customer Acquisition Cost (CAC)** | Acquisition efficiency | | |
+| **Engagement** (time on site, bounce rate) | Behavioural depth | | |
+
+### Analytics Maturity Question
+
+Before closing the metrics section, ask:
+> "What is our current analytics maturity level and what do we need to reach the next level?"
+
+| Level | Type | We can currently answer... |
+|-------|------|---------------------------|
+| 1 | Descriptive | What happened? |
+| 2 | Diagnostic | Why did it happen? |
+| 3 | Predictive | What could happen? |
+| 4 | Prescriptive | What should we do? |
+
+Record the current level and the single most important gap to address in the PRD.
+
+> Use `/analytics-advisor` for a full analytics maturity assessment and instrumentation plan.
+
+---
+
+## Phase 3.0: Funnel Thinking (Before Prioritization)
+
+Before RICE scoring, map each candidate feature to the user funnel. This prevents prioritising features that don't address the biggest drop-off point.
+
+```markdown
+## Funnel Analysis
+
+[Entry] → [Activation] → [Core Action] → [Retention] → [Conversion]
+  100%        X%              X%              X%             X%
+
+### Biggest Drop-Off: [Step name] at X%
+
+### Features mapped to this drop-off:
+- [Feature A] — directly addresses drop-off at [Step]
+- [Feature B] — addresses retention, not the primary drop-off
+
+### Prioritisation implication:
+Features that address the biggest funnel drop-off get a Reach/Impact boost in RICE.
+```
+
+> Use `/analytics-advisor` to run a proper funnel analysis if data is available.
+
+---
+
 ## Phase 3.1: RICE Scoring
 
 ```markdown
