@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "195425949677",
+    "project_id": "maximile-app",
+    "storage_bucket": "maximile-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:195425949677:android:22574b3d3af075801d39e4",
+        "android_client_info": {
+          "package_name": "com.maximile.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPTZbY0mZ_7kGca1i73L1nCwmwpZTguo8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

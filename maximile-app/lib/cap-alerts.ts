@@ -16,7 +16,7 @@
 
 import { supabase } from './supabase';
 import { buildCapApproachingNotification, triggerNotification } from './notification-triggers';
-import { trackEvent } from './analytics';
+import { trackEvent, logCapBreach } from './analytics';
 
 // ============================================================================
 // Types
@@ -423,6 +423,17 @@ async function sendCapAlert(
         threshold,
         percentage: capUsage.percentage,
       });
+
+      // If the cap is fully breached, log the specific event for analytics
+      if (threshold === 100) {
+        logCapBreach({
+          card_id: capUsage.card_id,
+          category_id: capUsage.category_id,
+          percentage: capUsage.percentage,
+          limit: capUsage.limit,
+          usage: capUsage.usage,
+        });
+      }
 
       console.log(
         `[Cap Alert] Sent ${threshold}% alert for ${capUsage.card_name} - ${capUsage.category_name}`

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
+import { logAccountDeleted } from '../lib/analytics';
 import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
 import GlassCard from '../components/GlassCard';
 import { supabaseAuth } from '../lib/supabase';
@@ -71,6 +72,9 @@ export default function DeleteAccountScreen() {
         setErrorMsg('Password is incorrect.');
         return;
       }
+
+      // Log the churn event before signing the user out.
+      logAccountDeleted({ userId: user?.id });
 
       const { error } = await deleteAccount();
       setLoading(false);

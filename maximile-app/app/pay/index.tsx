@@ -37,7 +37,7 @@ import {
 import GlassCard from '../../components/GlassCard';
 import MerchantCard from '../../components/MerchantCard';
 import CapProgressBar from '../../components/CapProgressBar';
-import { track } from '../../lib/analytics';
+import { track, logRecommendationAction } from '../../lib/analytics';
 import * as Linking from 'expo-linking';
 import { parseAutoCaptureUrl } from '../../lib/deep-link';
 import { getCardImage } from '../../constants/cardImages';
@@ -248,14 +248,6 @@ export default function PayScreen() {
             const topPick = results.find((r) => r.is_recommended) ?? results[0];
             setRecommendation(topPick);
             setAlternatives(results.filter((r) => r.card_id !== topPick.card_id));
-
-            track('recommendation_used', {
-              category: categoryToRecommend,
-              results_count: results.length,
-              top_card: topPick.card_name,
-              via: 'smart_pay',
-              demo_mode: isDemoMode(),
-            }, user?.id);
           }
         } catch {
           // Non-blocking: recommendation will just not show
@@ -343,12 +335,6 @@ export default function PayScreen() {
       setAlternatives(results.filter((r) => r.card_id !== topPick.card_id));
 
       // Track MARU
-      track('recommendation_used', {
-        category: selectedCategoryId,
-        results_count: results.length,
-        top_card: topPick.card_name,
-        via: 'smart_pay',
-      }, user?.id);
 
       setState('result');
     } catch {
@@ -357,9 +343,26 @@ export default function PayScreen() {
   }, [selectedCategoryId, merchant, user]);
 
   // -------------------------------------------------------------------------
-  // State 5: Open Wallet
+  // State 5: Open Wallet or Log Manually
   // -------------------------------------------------------------------------
+  const handleLogTransactionIntent = useCallback(() => {
+    logRecommendationAction({
+      category: selectedCategoryId,
+      top_card: recommendation?.card_name,
+      action_type: 'manual_log',
+      via: 'smart_pay',
+    });
+    setState('logging');
+  }, [selectedCategoryId, recommendation]);
+
   const handleOpenWallet = useCallback(async () => {
+    logRecommendationAction({
+      category: selectedCategoryId,
+      top_card: recommendation?.card_name,
+      action_type: 'smart_pay_wallet',
+      via: 'smart_pay',
+    });
+
     walletOpenTime.current = Date.now();
     setState('wallet');
 
@@ -372,7 +375,7 @@ export default function PayScreen() {
     if (!result.success) {
       showWalletFallback(recommendation?.card_name);
     }
-  }, [recommendation, user]);
+  }, [recommendation, user, selectedCategoryId]);
 
   // -------------------------------------------------------------------------
   // Start auto-capture handoff (S16.9)
@@ -684,13 +687,6 @@ export default function PayScreen() {
         const topPick = results.find((r) => r.is_recommended) ?? results[0];
         setRecommendation(topPick);
         setAlternatives(results.filter((r) => r.card_id !== topPick.card_id));
-
-        track('recommendation_used', {
-          category: catId,
-          results_count: results.length,
-          top_card: topPick.card_name,
-          via: 'smart_pay_category_change',
-        }, user?.id);
       } else {
         setRecommendation(null);
         setAlternatives([]);
@@ -898,7 +894,7 @@ export default function PayScreen() {
 
                     <TouchableOpacity
                       style={styles.skipWalletButton}
-                      onPress={() => setState('logging')}
+                      onPress={handleLogTransactionIntent}
                       activeOpacity={0.7}
                     >
                       <Text style={styles.skipWalletText}>Log Transaction</Text>

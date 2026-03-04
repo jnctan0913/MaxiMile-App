@@ -11,6 +11,7 @@
 
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { analytics } from './firebase';
 
 // Web-safe storage wrapper (AsyncStorage breaks during SSR)
 const storage = {
@@ -105,7 +106,9 @@ export type AnalyticsEvent =
   | 'add_program_sheet_opened'
   | 'program_added_manually'
   | 'onboarding_auto_capture_cta_tapped'
-  | 'onboarding_auto_capture_skipped';
+  | 'onboarding_auto_capture_skipped'
+  | 'cap_breached'
+  | 'account_deleted';
 
 export interface AnalyticsPayload {
   event: AnalyticsEvent;
@@ -157,6 +160,23 @@ export async function track(
     // Track MARU separately for the north star metric
     if (event === 'recommendation_used') {
       await incrementMARU();
+    }
+
+    // Also log the event to Firebase Analytics
+    if (analytics) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { logEvent } = require('firebase/analytics');
+      if (properties) {
+        const firebaseProperties: { [key: string]: string | number | boolean } = {};
+        for (const key in properties) {
+          if (Object.prototype.hasOwnProperty.call(properties, key) && properties[key] !== null) {
+            firebaseProperties[key] = properties[key] as string | number | boolean;
+          }
+        }
+        logEvent(analytics, event, firebaseProperties);
+      } else {
+        logEvent(analytics, event);
+      }
     }
 
     if (__DEV__) {
@@ -266,3 +286,49 @@ export function trackEvent(
     // Silent fail
   });
 }
+
+// =============================================================================
+// Firebase Analytics Specific Helpers
+// =============================================================================
+// The following functions are specifically for logging events to Firebase
+// to track our key metrics.
+
+/**
+ * [METRIC] MARU - Monthly Active Recommendations Used
+ * Logs an event when a user acts on a card recommendation.
+ * This is our North Star metric.
+ */
+export function logRecommendationAction(
+  properties?: Record<string, string | number | boolean | null>
+): void {
+  trackEvent('recommendation_used', properties);
+}
+
+/**
+ * [METRIC] Cap Breach Rate
+ * Logs an event when a user exceeds a card's bonus spending cap.
+ */
+export function logCapBreach(
+  properties?: Record<string, string | number | boolean | null>
+): void {
+  trackEvent('cap_breached', properties);
+}
+
+/**
+ * [METRIC] Churn Rate - Account Deletion
+ * Logs an event when a user successfully deletes their account.
+ * This is a direct measure of voluntary churn.
+ */
+export function logAccountDeleted(
+  properties?: Record<string, string | number | boolean | null>
+): void {
+  trackEvent('account_deleted', properties);
+}
+
+/**
+ * [METRIC] Churn Rate
+ * Churn is tracked by monitoring monthly active users (MAU). Firebase
+ * Analytics handles this automatically by logging user engagement and session
+ * data whenever the app is used. No specific event is required. The key is to
+ * ensure events are consistently sent, which is now handled in the track() function.
+ */

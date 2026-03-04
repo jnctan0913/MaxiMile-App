@@ -28,7 +28,7 @@ import { Ionicons } from '@expo/vector-icons';
 import GlassCard from '../../../components/GlassCard';
 import CapProgressBar from '../../../components/CapProgressBar';
 import EmptyState from '../../../components/EmptyState';
-import { track } from '../../../lib/analytics';
+import { logRecommendationAction } from '../../../lib/analytics';
 import { getCardImage } from '../../../constants/cardImages';
 
 // ---------------------------------------------------------------------------
@@ -271,13 +271,6 @@ export default function RecommendResultScreen() {
         setError('Unable to load recommendations. Please try again.');
       } else if (data) {
         setResults(data as RecommendRow[]);
-        // Track MARU — north star metric
-        track('recommendation_used', {
-          category: category,
-          subcategory: subcategory ?? null,
-          results_count: (data as RecommendRow[]).length,
-          top_card: (data as RecommendRow[])[0]?.card_name ?? 'none',
-        }, user.id);
         // Animate progress bar
         Animated.timing(progressAnim, {
           toValue: 1,
@@ -380,13 +373,33 @@ export default function RecommendResultScreen() {
   // Navigation
   // -----------------------------------------------------------------------
   const handleLogTransaction = () => {
-    // Navigate to log transaction screen with pre-filled category + card
     const topCard = results.find((r) => r.is_recommended) ?? results[0];
+    logRecommendationAction({
+      category: category,
+      subcategory: subcategory ?? null,
+      top_card: topCard?.card_name,
+      action_type: 'log_transaction',
+      via: 'recommendations',
+    });
+
+    // Navigate to log transaction screen with pre-filled category + card
     if (topCard) {
       router.push(`/(tabs)/log?category=${category}&card=${topCard.card_id}`);
     } else {
       router.push(`/(tabs)/log?category=${category}`);
     }
+  };
+
+  const handleSmartPay = () => {
+    const topCard = results.find((r) => r.is_recommended) ?? results[0];
+    logRecommendationAction({
+      category: category,
+      subcategory: subcategory ?? null,
+      top_card: topCard?.card_name,
+      action_type: 'smart_pay',
+      via: 'recommendations',
+    });
+    router.push(`/pay?source=recommend_cta&category=${category}`);
   };
 
   // -----------------------------------------------------------------------
@@ -762,7 +775,7 @@ export default function RecommendResultScreen() {
               {/* Smart Pay CTA */}
               <TouchableOpacity
                 style={styles.smartPayCta}
-                onPress={() => router.push(`/pay?source=recommend_cta&category=${category}`)}
+                onPress={handleSmartPay}
                 activeOpacity={0.8}
               >
                 <Ionicons name="flash" size={18} color={Colors.brandGold} />
