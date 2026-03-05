@@ -11,7 +11,10 @@
 
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { analytics } from './firebase';
+import { app } from './firebase';
+import { Analytics } from 'firebase/analytics';
+
+let analytics: Analytics | null = null;
 
 // Web-safe storage wrapper (AsyncStorage breaks during SSR)
 const storage = {
@@ -163,6 +166,12 @@ export async function track(
     }
 
     // Also log the event to Firebase Analytics
+    if (!analytics && typeof window !== 'undefined') {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getAnalytics } = require('firebase/analytics');
+      analytics = getAnalytics(app);
+      console.log('[Analytics] Firebase Analytics initialized');
+    }
     if (analytics) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { logEvent } = require('firebase/analytics');

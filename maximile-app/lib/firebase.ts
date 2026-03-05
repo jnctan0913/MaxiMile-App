@@ -13,16 +13,4 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Conditionally initialize analytics only on the client-side to avoid SSR errors.
-const getAnalyticsIfSupported = () => {
-  if (typeof window !== 'undefined') {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getAnalytics } = require('firebase/analytics');
-    return getAnalytics(app);
-  }
-  return null;
-};
-
-const analytics = getAnalyticsIfSupported();
-
-export { analytics };
+export { app };
