@@ -251,11 +251,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         router.replace('/welcome');
       }
     } else {
-      // Authenticated with cards -> redirect to home (if in auth/onboarding group)
-      // But allow onboarding access when user is adding more cards (from=cards)
+      // Authenticated with cards -> redirect to home (if in auth group)
+      // Allow ALL onboarding routes when the user is actively completing the
+      // onboarding flow.  The flow itself handles navigation to /(tabs) at the
+      // end (via completeOnboarding in onboarding-miles).  Redirecting away from
+      // onboarding mid-flow caused a race condition: the user_cards upsert could
+      // trigger a token refresh → needsOnboarding becomes false → auth guard
+      // redirected to /(tabs) before the next onboarding step loaded.
       if (inAuthGroup) {
         router.replace('/(tabs)');
-      } else if (inOnboarding && globalParams.from !== 'cards') {
+      } else if (inWelcome) {
+        // If onboarding is done but user is on welcome screen, redirect to home
         router.replace('/(tabs)');
       }
     }

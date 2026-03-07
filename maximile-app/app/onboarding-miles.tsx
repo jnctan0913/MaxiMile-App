@@ -245,17 +245,22 @@ export default function OnboardingMilesScreen() {
   };
 
   // -----------------------------------------------------------------------
+  // If no programs derived (cards have no miles_program_id), skip automatically.
+  // Moved to useEffect to avoid calling completeOnboarding/router.replace
+  // during render (React anti-pattern that caused skipped steps).
+  // -----------------------------------------------------------------------
+  useEffect(() => {
+    if (!loading && programs.length === 0) {
+      completeOnboarding();
+      router.replace('/(tabs)');
+    }
+  }, [loading, programs.length, completeOnboarding, router]);
+
+  // -----------------------------------------------------------------------
   // Loading state
   // -----------------------------------------------------------------------
-  if (loading) {
+  if (loading || programs.length === 0) {
     return <LoadingSpinner message="Loading miles programs..." />;
-  }
-
-  // If no programs derived (cards have no miles_program_id), skip automatically
-  if (programs.length === 0) {
-    completeOnboarding();
-    router.replace('/(tabs)');
-    return null;
   }
 
   // -----------------------------------------------------------------------
