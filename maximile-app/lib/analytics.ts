@@ -1,9 +1,10 @@
 // =============================================================================
 // MaxiMile — Analytics Instrumentation (T4.07)
 // =============================================================================
-// Lightweight analytics module for tracking key events locally.
-// Events are buffered in AsyncStorage and can be extended to send to
-// Mixpanel, Amplitude, or a custom Supabase analytics_events table.
+// Dual-write analytics: Firebase (real-time + Google Ads) + Supabase (warehouse).
+// Events are sent to both Firebase Analytics and the Supabase analytics_events
+// table. Local buffer provides offline resilience — events are retried on next
+// app open.
 //
 // North Star Metric: MARU (Monthly Active Recommendations Used)
 // Key Events: card_added, recommendation_used, transaction_logged, screen_view
@@ -13,6 +14,8 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { app } from './firebase';
 import { Analytics } from 'firebase/analytics';
+import { supabase } from './supabase';
+import { restInsert, useDirectRest } from './supabase-rest';
 
 let analytics: Analytics | null = null;
 
@@ -131,12 +134,65 @@ const MARU_KEY = '@maximile_maru'; // Monthly Active Recommendations Used
 // Core API
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Supabase Sync
+// ---------------------------------------------------------------------------
+
+async function insertToSupabase(
+  event: AnalyticsEvent,
+  properties?: Record<string, string | number | boolean | null>,
+): Promise<boolean> {
+  const row = {
+    event,
+    properties: properties ?? {},
+    platform: Platform.OS,
+  };
+
+  if (useDirectRest) {
+    const { ok } = await restInsert('analytics_events', row);
+    return ok;
+  }
+
+  const { error } = await supabase.from('analytics_events').insert(row);
+  return !error;
+}
+
 /**
- * Track an analytics event. Buffers locally in AsyncStorage.
- *
- * @param event  - The event name (e.g. 'recommendation_used')
- * @param properties - Optional key-value properties for the event
- * @param userId - Optional user ID to associate with the event
+ * Flush any events that failed to sync to Supabase (e.g. offline).
+ * Call on app foreground or after login.
+ */
+export async function flushBufferedEvents(): Promise<void> {
+  try {
+    const existing = await storage.getItem(ANALYTICS_BUFFER_KEY);
+    if (!existing) return;
+
+    const buffer: AnalyticsPayload[] = JSON.parse(existing);
+    if (buffer.length === 0) return;
+
+    const failed: AnalyticsPayload[] = [];
+    for (const payload of buffer) {
+      const ok = await insertToSupabase(payload.event, payload.properties);
+      if (!ok) failed.push(payload);
+    }
+
+    if (failed.length === 0) {
+      await storage.removeItem(ANALYTICS_BUFFER_KEY);
+    } else {
+      await storage.setItem(ANALYTICS_BUFFER_KEY, JSON.stringify(failed));
+    }
+
+    if (__DEV__) {
+      console.log(`[Analytics] Flushed buffer: ${buffer.length - failed.length} synced, ${failed.length} remaining`);
+    }
+  } catch {
+    // Silent fail
+  }
+}
+
+/**
+ * Track an analytics event. Dual-writes to Firebase + Supabase.
+ * If Supabase insert fails (offline, auth error), the event is buffered
+ * locally and retried on next flushBufferedEvents() call.
  */
 export async function track(
   event: AnalyticsEvent,
@@ -144,28 +200,12 @@ export async function track(
   userId?: string
 ): Promise<void> {
   try {
-    const payload: AnalyticsPayload = {
-      event,
-      properties,
-      timestamp: new Date().toISOString(),
-      userId,
-    };
-
-    // Append to local buffer
-    const existing = await storage.getItem(ANALYTICS_BUFFER_KEY);
-    const buffer: AnalyticsPayload[] = existing ? JSON.parse(existing) : [];
-    buffer.push(payload);
-
-    // Keep buffer capped at 500 events to prevent storage bloat
-    const trimmed = buffer.length > 500 ? buffer.slice(-500) : buffer;
-    await storage.setItem(ANALYTICS_BUFFER_KEY, JSON.stringify(trimmed));
-
     // Track MARU separately for the north star metric
     if (event === 'recommendation_used') {
       await incrementMARU();
     }
 
-    // Also log the event to Firebase Analytics
+    // 1. Firebase Analytics (real-time + Google Ads)
     if (!analytics && typeof window !== 'undefined') {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { getAnalytics } = require('firebase/analytics');
@@ -188,8 +228,26 @@ export async function track(
       }
     }
 
+    // 2. Supabase analytics_events (warehouse — queryable, joinable)
+    const synced = await insertToSupabase(event, properties);
+
+    if (!synced) {
+      // Buffer for retry if Supabase insert failed (offline, etc.)
+      const payload: AnalyticsPayload = {
+        event,
+        properties,
+        timestamp: new Date().toISOString(),
+        userId,
+      };
+      const existing = await storage.getItem(ANALYTICS_BUFFER_KEY);
+      const buffer: AnalyticsPayload[] = existing ? JSON.parse(existing) : [];
+      buffer.push(payload);
+      const trimmed = buffer.length > 500 ? buffer.slice(-500) : buffer;
+      await storage.setItem(ANALYTICS_BUFFER_KEY, JSON.stringify(trimmed));
+    }
+
     if (__DEV__) {
-      console.log(`[Analytics] ${event}`, properties ?? '');
+      console.log(`[Analytics] ${event}`, properties ?? '', synced ? '(supabase ✓)' : '(buffered)');
     }
   } catch {
     // Analytics should never crash the app

@@ -21,6 +21,7 @@ import { AndroidAutoCaptureProvider } from '../contexts/AndroidAutoCaptureContex
 import { DemoNotificationProvider } from '../contexts/DemoNotificationContext';
 import { Colors } from '../constants/theme';
 import { parseAutoCaptureUrl } from '../lib/deep-link';
+import { flushBufferedEvents } from '../lib/analytics';
 
 // Prevent the splash screen from auto-hiding before auth state is resolved
 SplashScreen.preventAutoHideAsync();
@@ -150,10 +151,11 @@ function RootContent() {
     return () => shimmer.stop();
   }, []);
 
-  // Fade out the loading overlay once auth resolves
+  // Fade out the loading overlay once auth resolves + flush buffered analytics
   useEffect(() => {
     if (!loading) {
       SplashScreen.hideAsync();
+      flushBufferedEvents();
       Animated.timing(overlayOpacity, {
         toValue: 0,
         duration: 400,
