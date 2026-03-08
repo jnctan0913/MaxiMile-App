@@ -172,7 +172,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="cards"
+        name="caps"
         options={{
           title: 'My Cards',
           headerTitle: () => (
@@ -183,14 +183,17 @@ export default function TabsLayout() {
             />
           ),
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'card' : 'card-outline'} size={size} color={color} />
+            <View>
+              <Ionicons name={focused ? 'card' : 'card-outline'} size={size} color={color} />
+              {showCapBadge && <View style={tabBadgeStyles.badge} />}
+            </View>
           ),
         }}
       />
       <Tabs.Screen
-        name="caps"
+        name="cards"
         options={{
-          title: 'Caps',
+          title: 'Transactions',
           headerTitle: () => (
             <Image
               source={require('../../assets/Name.png')}
@@ -199,10 +202,7 @@ export default function TabsLayout() {
             />
           ),
           tabBarIcon: ({ color, size, focused }) => (
-            <View>
-              <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={size} color={color} />
-              {showCapBadge && <View style={tabBadgeStyles.badge} />}
-            </View>
+            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={size} color={color} />
           ),
         }}
       />

@@ -2,40 +2,95 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  FlatList,
-  ImageBackground,
+  SectionList,
   StyleSheet,
-  TouchableOpacity,
-  Alert,
+  ImageBackground,
+  Platform,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useFocusEffect } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../../constants/theme';
 import { CATEGORY_MAP } from '../../constants/categories';
-import CardListItem from '../../components/CardListItem';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Spacing, Typography } from '../../constants/theme';
 import EmptyState from '../../components/EmptyState';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { showNetworkErrorAlert, handleSupabaseError } from '../../lib/error-handler';
+import { showNetworkErrorAlert } from '../../lib/error-handler';
 import { track } from '../../lib/analytics';
-import type { Card, EarnRule } from '../../lib/supabase-types';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-interface UserCardWithDetails {
+interface TransactionRow {
+  id: string;
   card_id: string;
-  added_at: string;
-  cards: Card;
+  category_id: string;
+  amount: number;
+  transaction_date: string;
+  logged_at: string;
+  cards: { bank: string; name: string } | null;
+  categories: { name: string } | null;
 }
 
-interface CardDisplay {
-  card: Card;
-  bestRate: number;
-  bestCategory: string;
+interface TransactionSection {
+  title: string; // e.g. "February 2026"
+  data: TransactionRow[];
+}
+
+// ---------------------------------------------------------------------------
+// Per-category icon gradients (same as CategoryTile)
+// ---------------------------------------------------------------------------
+
+const ICON_PALETTES: Record<string, [string, string]> = {
+  dining:    ['#C5A55A', '#A8893E'],
+  transport: ['#E8967A', '#D4775E'],
+  online:    ['#7EC8E3', '#5EB0D0'],
+  travel:    ['#3D7A8B', '#2D5E6A'],
+  groceries: ['#5BAD7A', '#3D8F5C'],
+  petrol:    ['#E8A44D', '#D08A2D'],
+  bills:     ['#A78BDA', '#8B6FC0'],
+  general:   ['#5F6D7E', '#4A5568'],
+};
+
+const DEFAULT_GRADIENT: [string, string] = ['#C5A55A', '#A8893E'];
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function groupByMonth(transactions: TransactionRow[]): TransactionSection[] {
+  const groups = new Map<string, TransactionRow[]>();
+
+  for (const tx of transactions) {
+    const date = new Date(tx.transaction_date);
+    const key = date.toLocaleDateString('en-SG', {
+      month: 'long',
+      year: 'numeric',
+    });
+
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key)!.push(tx);
+  }
+
+  return Array.from(groups.entries()).map(([title, data]) => ({
+    title,
+    data,
+  }));
+}
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-SG', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -43,181 +98,59 @@ interface CardDisplay {
 // ---------------------------------------------------------------------------
 
 /**
- * My Cards screen -- View and manage the user's card portfolio.
- *
- * DRD Section 5: FlatList of user's cards with pull-to-refresh.
- * Each card shows: card name, bank, best earn rate + category badge.
- * Swipe-left to remove with confirmation dialog (loss framing).
- * "Add More Cards" button at bottom.
- * Tap card -> navigate to card/[id].
+ * Transactions tab — Shows all user transactions grouped by month.
+ * Replaces the old "My Cards" tab content.
  */
-export default function CardsScreen() {
-  const router = useRouter();
+export default function TransactionsTabScreen() {
   const { user } = useAuth();
-  const [cards, setCards] = useState<CardDisplay[]>([]);
+  const [sections, setSections] = useState<TransactionSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // -----------------------------------------------------------------------
-  // Fetch user's cards with earn rules to find best rate per card
-  // -----------------------------------------------------------------------
-  const fetchCards = useCallback(async () => {
+  const fetchTransactions = useCallback(async () => {
     if (!user) { setLoading(false); return; }
 
     try {
-    // Step 1: Get user's cards with card details
-    const { data: userCardsData, error: ucError } = await supabase
-      .from('user_cards')
-      .select('card_id, added_at, cards(*)')
-      .order('added_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('id, card_id, category_id, amount, transaction_date, logged_at, cards(bank, name), categories(name)')
+        .eq('user_id', user.id)
+        .order('transaction_date', { ascending: false })
+        .order('logged_at', { ascending: false })
+        .limit(200);
 
-    if (ucError || !userCardsData) {
-      if (__DEV__) console.error('user_cards fetch error:', ucError);
-      setLoading(false);
-      setRefreshing(false);
-      return;
-    }
-
-    const typedData = userCardsData as unknown as UserCardWithDetails[];
-    const cardIds = typedData.map((uc) => uc.cards.id);
-
-    // Step 2: Get earn rules for all user's cards to find best rate
-    let earnRules: EarnRule[] = [];
-    if (cardIds.length > 0) {
-      const { data: rulesData } = await supabase
-        .from('earn_rules')
-        .select('*')
-        .in('card_id', cardIds)
-        .is('effective_to', null);
-
-      if (rulesData) {
-        earnRules = rulesData as EarnRule[];
-      }
-    }
-
-    // Step 3: Compute best earn rate and category per card
-    const cardDisplayList: CardDisplay[] = typedData.map((uc) => {
-      const cardRules = earnRules.filter((r) => r.card_id === uc.cards.id);
-      let bestRate = uc.cards.base_rate_mpd;
-      let bestCategory = 'General';
-
-      for (const rule of cardRules) {
-        if (rule.earn_rate_mpd > bestRate) {
-          bestRate = rule.earn_rate_mpd;
-          const cat = CATEGORY_MAP[rule.category_id];
-          bestCategory = cat?.name ?? rule.category_id;
-        }
+      if (!error && data) {
+        const grouped = groupByMonth(data as unknown as TransactionRow[]);
+        setSections(grouped);
       }
 
-      return {
-        card: uc.cards,
-        bestRate,
-        bestCategory,
-      };
-    });
+      await track('screen_view', { screen: 'transactions_tab' }, user.id);
+    } catch {
+      showNetworkErrorAlert(() => fetchTransactions());
+    }
 
-    setCards(cardDisplayList);
     setLoading(false);
     setRefreshing(false);
-    } catch (err) {
-      if (__DEV__) console.error('Cards fetch error:', err);
-      showNetworkErrorAlert(() => fetchCards());
-      setLoading(false);
-      setRefreshing(false);
-    }
   }, [user]);
 
   useFocusEffect(
     useCallback(() => {
-      fetchCards();
-    }, [fetchCards])
+      fetchTransactions();
+    }, [fetchTransactions])
   );
 
-  // -----------------------------------------------------------------------
-  // Pull-to-refresh
-  // -----------------------------------------------------------------------
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchCards();
+    fetchTransactions();
   };
 
-  // -----------------------------------------------------------------------
-  // Navigation
-  // -----------------------------------------------------------------------
-  const handleCardPress = (cardId: string) => {
-    router.push(`/card/${cardId}`);
-  };
-
-  // -----------------------------------------------------------------------
-  // Remove card with loss framing confirmation
-  // -----------------------------------------------------------------------
-  const handleRemoveCard = async (cardId: string) => {
-    try {
-      const { error } = await supabase
-        .from('user_cards')
-        .delete()
-        .eq('card_id', cardId);
-
-      if (error) {
-        const msg = handleSupabaseError(error);
-        Alert.alert('Error', msg);
-      } else {
-        setCards((prev) => prev.filter((c) => c.card.id !== cardId));
-        await track('card_removed', { card_id: cardId }, user?.id);
-      }
-    } catch {
-      Alert.alert('Error', 'Failed to remove card. Please check your connection.');
-    }
-  };
-
-  // -----------------------------------------------------------------------
-  // Loading state
-  // -----------------------------------------------------------------------
   if (loading) {
-    return <LoadingSpinner message="Loading your cards..." />;
+    return <LoadingSpinner message="Loading transactions..." />;
   }
 
-  // -----------------------------------------------------------------------
-  // Empty state
-  // -----------------------------------------------------------------------
-  if (cards.length === 0) {
-    return (
-      <ImageBackground
-        source={require('../../assets/background.png')}
-        style={styles.background}
-        imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
-      >
-        <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-          <View style={styles.emptyContainer}>
-            <View style={styles.header}>
-              <View style={styles.headerText}>
-                <Text style={styles.screenTitle}>My Cards</Text>
-                <Text style={styles.screenSubtitle}>Manage your miles credit cards</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.addButtonCircle}
-                onPress={() => router.push('/onboarding')}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="add" size={22} color={Colors.brandGold} />
-              </TouchableOpacity>
-            </View>
-            <EmptyState
-              icon="card-outline"
-              title="No cards in your portfolio"
-              description="Add your miles cards to get started."
-              ctaLabel="+ Add Cards"
-              onCtaPress={() => router.push('/onboarding')}
-            />
-          </View>
-        </SafeAreaView>
-      </ImageBackground>
-    );
-  }
+  // Count total transactions
+  const totalCount = sections.reduce((sum, s) => sum + s.data.length, 0);
 
-  // -----------------------------------------------------------------------
-  // Render
-  // -----------------------------------------------------------------------
   return (
     <ImageBackground
       source={require('../../assets/background.png')}
@@ -225,44 +158,81 @@ export default function CardsScreen() {
       imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
     >
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-        <FlatList
-          data={cards}
-          keyExtractor={(item) => item.card.id}
-          contentContainerStyle={styles.listContent}
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          ListHeaderComponent={
-            <View style={styles.header}>
-              <View style={styles.headerText}>
-                <Text style={styles.screenTitle}>My Cards</Text>
-                <Text style={styles.screenSubtitle}>Manage your miles credit cards</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.addButtonCircle}
-                onPress={() => router.push('/onboarding?from=cards')}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="add" size={22} color={Colors.brandGold} />
-              </TouchableOpacity>
-            </View>
-          }
-          renderItem={({ item }) => (
-            <CardListItem
-              id={item.card.id}
-              name={item.card.name}
-              bank={item.card.bank}
-              network={item.card.network}
-              slug={item.card.slug}
-              earnRate={item.bestRate}
-              bestCategory={item.bestCategory}
-              imageUrl={item.card.image_url}
-              onPress={handleCardPress}
-              onRemove={handleRemoveCard}
-              showChevron
-              eligibilityCriteria={item.card.eligibility_criteria}
+        {sections.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.screenTitle}>Transactions</Text>
+            <EmptyState
+              icon="document-text-outline"
+              title="No transactions logged yet"
+              description="Log your first transaction from the Log tab to see your history here."
             />
-          )}
-        />
+          </View>
+        ) : (
+          <SectionList
+            sections={sections}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            stickySectionHeadersEnabled={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            }
+            ListHeaderComponent={
+              <View style={styles.listHeader}>
+                <Text style={styles.screenTitle}>Transactions</Text>
+                <Text style={styles.screenSubtitle}>
+                  {totalCount} transaction{totalCount !== 1 ? 's' : ''}
+                </Text>
+              </View>
+            }
+            renderSectionHeader={({ section }) => (
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionHeaderText}>{section.title}</Text>
+              </View>
+            )}
+            renderItem={({ item }) => {
+              const categoryInfo = CATEGORY_MAP[item.category_id];
+              const iconName = categoryInfo?.icon ?? 'wallet-outline';
+              const categoryName = item.categories?.name ?? categoryInfo?.name ?? item.category_id;
+              const cardLabel = item.cards?.name ?? 'Unknown card';
+              const gradient = ICON_PALETTES[item.category_id] ?? DEFAULT_GRADIENT;
+
+              return (
+                <View style={styles.transactionRow}>
+                  <View style={styles.rowLeft}>
+                    <LinearGradient
+                      colors={gradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.rowIconCircle}
+                    >
+                      <Ionicons
+                        name={iconName as keyof typeof Ionicons.glyphMap}
+                        size={18}
+                        color="#FFFFFF"
+                      />
+                    </LinearGradient>
+                    <View style={styles.rowDetails}>
+                      <Text style={styles.rowCategory}>{categoryName}</Text>
+                      <Text style={styles.rowCard} numberOfLines={1}>
+                        {cardLabel}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.rowRight}>
+                    <Text style={styles.rowAmount}>
+                      ${item.amount.toFixed(2)}
+                    </Text>
+                    <Text style={styles.rowDate}>
+                      {formatDate(item.transaction_date)}
+                    </Text>
+                  </View>
+                </View>
+              );
+            }}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+          />
+        )}
       </SafeAreaView>
     </ImageBackground>
   );
@@ -281,19 +251,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
   },
+  emptyContainer: {
+    flex: 1,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+  },
   listContent: {
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xl,
     paddingBottom: Spacing.xxxl + 40,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.xl + 4,
-  },
-  headerText: {
-    flex: 1,
-    paddingRight: Spacing.md,
+
+  // Header
+  listHeader: {
+    marginBottom: Spacing.sm,
   },
   screenTitle: {
     ...Typography.heading,
@@ -305,21 +276,83 @@ const styles = StyleSheet.create({
     ...Typography.body,
     fontSize: 15,
     color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
   },
-  emptyContainer: {
-    flex: 1,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
+
+  // Section headers
+  sectionHeader: {
+    paddingVertical: Spacing.sm,
+    paddingTop: Spacing.lg,
   },
-  addButtonCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+  sectionHeaderText: {
+    ...Typography.captionBold,
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+
+  // Transaction rows — glass card style
+  transactionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(197, 165, 90, 0.3)',
+    borderColor: 'rgba(197, 165, 90, 0.15)',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+      },
+      android: { elevation: 2 },
+    }),
+  },
+  rowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  rowIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.sm,
+    marginRight: Spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+  },
+  rowDetails: {
+    flex: 1,
+  },
+  rowCategory: {
+    ...Typography.bodyBold,
+    color: Colors.textPrimary,
+    marginBottom: 2,
+  },
+  rowCard: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+  },
+  rowRight: {
+    alignItems: 'flex-end',
+    marginLeft: Spacing.md,
+  },
+  rowAmount: {
+    ...Typography.bodyBold,
+    color: Colors.textPrimary,
+    marginBottom: 2,
+  },
+  rowDate: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
+  },
+  separator: {
+    height: Spacing.sm,
   },
 });

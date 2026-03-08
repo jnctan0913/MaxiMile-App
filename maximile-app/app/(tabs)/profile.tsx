@@ -105,11 +105,6 @@ export default function ProfileScreen() {
         <Text style={styles.sectionLabel}>Activity</Text>
         <View style={styles.menuSection}>
           <MenuItem
-            icon="receipt-outline"
-            label="Transaction History"
-            onPress={() => router.push('/transactions')}
-          />
-          <MenuItem
             icon="flash-outline"
             label="Auto-Capture"
             onPress={() => router.push('/auto-capture-settings')}

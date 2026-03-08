@@ -1,11 +1,11 @@
 # Sprint Plan: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 16.0
+**Version**: 17.0
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
-**Source**: PRD v2.6, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0, AUDIT_MILELION_VS_RANKINGS v1.0
-**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprints 21-22 Planned (Recommendation Accuracy), Sprints 23-24 Planned (Card Expansion 22→29), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01), Sprint 29 Planned (Earn Rate Refresh — MileLion March 2026 Audit Phase 5), Sprint 30 Planned (DBS yuu Card Integration), Sprint 31 Planned (SC Smart Card Bonus Tiers)
-**Change Log**: v16.0 — Added Sprint 30 "DBS yuu Card Integration" (F37, Epic E18) and Sprint 31 "SC Smart Card Bonus Tiers" (F38, Epic E19). Sprint 30: 8 stories, 18 SP, 2 weeks — adds DBS yuu AMEX + DBS yuu Visa as cards #30-31, 10 mpd grocery/food delivery bonus rules, caps, AMEX acceptance warning, rankings update. Sprint 31: 7 stories, 16 SP, 2 weeks — models SC Smart Card tiered cashback-to-miles equivalence (5.6/7.42/9.28 mpd), requires policy decision on cashback-to-miles conversion, recommend() logic update for tiered earn rates. v15.0 — Added Sprint 29 "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5) and Epic E17 (Earn Rate Accuracy). 8 stories, 14 SP, 1 week. Corrects 7 earn rate/cap discrepancies: DBS Altitude travel bonus removed (4.0→1.2 mpd), HSBC Revolution cap $1,000→$1,500, DBS Woman's World cap $2,000→$1,000, UOB Lady's Card added to groceries, HSBC Revolution added to travel, KrisFlyer UOB transport 2.0→2.4 mpd, UOB PP transport verified. DBS yuu Card and SC Smart Card bonus tiers deferred to Sprint 30+. Source: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`. v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
+**Source**: PRD v2.9, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0, AUDIT_MILELION_VS_RANKINGS v1.0
+**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprint 21 ⚠️ PARTIAL (F30 done, F32 incomplete), Sprint 22 ✅ COMPLETED (Min Spend Enforcement), Sprints 23-24 ✅ COMPLETED (Card Expansion 22→29 + UOB Lady's Solitaire UX), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01), Sprint 29 ✅ COMPLETED (Earn Rate Refresh — MileLion March 2026 Audit Phase 5), Sprint 30 Planned (DBS yuu Card Integration), Sprint 31 Planned (SC Smart Card Bonus Tiers), Sprint 32 Planned (Auto-Capture Setup Carousel), Sprint 33 ✅ COMPLETED (Navigation Restructure)
+**Change Log**: v17.0 — Added Sprint 33 "Navigation Restructure" (F41, Epic E20). Merges My Cards + Cap Status tabs into single "My Cards" tab, promotes Transaction History to dedicated "Transactions" tab, adds "See Transactions" button to Card Detail, removes Transaction History from Profile. 5 stories, 8 SP, 0.5 weeks. v16.0 — Added Sprint 30 "DBS yuu Card Integration" (F37, Epic E18) and Sprint 31 "SC Smart Card Bonus Tiers" (F38, Epic E19). Sprint 30: 8 stories, 18 SP, 2 weeks — adds DBS yuu AMEX + DBS yuu Visa as cards #30-31, 10 mpd grocery/food delivery bonus rules, caps, AMEX acceptance warning, rankings update. Sprint 31: 7 stories, 16 SP, 2 weeks — models SC Smart Card tiered cashback-to-miles equivalence (5.6/7.42/9.28 mpd), requires policy decision on cashback-to-miles conversion, recommend() logic update for tiered earn rates. v15.0 — Added Sprint 29 "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5) and Epic E17 (Earn Rate Accuracy). 8 stories, 14 SP, 1 week. Corrects 7 earn rate/cap discrepancies: DBS Altitude travel bonus removed (4.0→1.2 mpd), HSBC Revolution cap $1,000→$1,500, DBS Woman's World cap $2,000→$1,000, UOB Lady's Card added to groceries, HSBC Revolution added to travel, KrisFlyer UOB transport 2.0→2.4 mpd, UOB PP transport verified. DBS yuu Card and SC Smart Card bonus tiers deferred to Sprint 30+. Source: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`. v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
 
@@ -45,7 +45,7 @@
 - S3.1: Transaction logging (<10 sec)
 - S3.2: Cap status view with progress bars
 - User authentication (signup/login)
-- Basic navigation (Recommend, My Cards, Cap Status, Log)
+- Basic navigation (My Cards, Transactions, Recommend, Log, Miles)
 
 **OUT (deferred to v1.1):**
 - S2.2: "Why this card?" explanation
@@ -110,6 +110,7 @@ All 5 agents work **simultaneously across 4 phases** with staggered starts:
 | **E17** | Earn Rate Accuracy (March 2026 Refresh) | F36 | P0 | Sprint 29 |
 | **E18** | DBS yuu Card Integration | F37 | P0 | Sprint 30 |
 | **E19** | SC Smart Card Bonus Tiers | F38 | P0 | Sprint 31 |
+| **E20** | Navigation Restructure | F41 | P1 | Sprint 33 |
 
 **Critical Path**: F5 (Rules DB) → F1 (Card Setup) → F2 (Recommendation) → F4 (Transaction Log) → F3 (Cap Tracker)
 
@@ -4864,7 +4865,7 @@ S22.1 (recommend() RPC) ──→ S22.2 (Nudge UI)
 
 ---
 
-**Sprint 21-22 Status**: Sprint 21 📋 PLANNED | Sprint 22 📋 PLANNED | Card Expansion (20→22) ✅ COMPLETED
+**Sprint 21-22 Status**: Sprint 21 ⚠️ PARTIAL (Bills category works; F32 Condition Transparency incomplete) | Sprint 22 ✅ COMPLETED (Min Spend Enforcement — migration 020, spending-settings.tsx) | Card Expansion (20→22) ✅ COMPLETED
 
 **Next Steps**:
 1. Complete Sprint 20 (Push Notifications)
@@ -5510,7 +5511,7 @@ S24.2 (Category UX) ────────┘              │
 
 ---
 
-**Sprint 23-24 Status**: Sprint 23 📋 PLANNED | Sprint 24 📋 PLANNED
+**Sprint 23-24 Status**: Sprint 23 ✅ COMPLETED (Card Expansion 22→29, migration 014) | Sprint 24 ✅ COMPLETED (UOB Lady's Solitaire category selection, migration 021, CategorySelectionSheet.tsx)
 
 ---
 
@@ -6658,7 +6659,7 @@ Sprint 28 (bills subcategory live) ─── Hard prerequisite ───── S
 
 ---
 
-**Sprint 29 Status**: 🔄 PLANNED — Migration drafted (2026-03-03)
+**Sprint 29 Status**: ✅ COMPLETED — Migration 20260303000009 applied (2026-03-03). 7 earn rate/cap corrections: DBS Altitude travel 4.0→1.2, HSBC Revolution cap $1K→$1.5K, DBS WWC cap $2K→$1K, UOB Lady's groceries, HSBC Revolution travel, KrisFlyer UOB transport 2.0→2.4, UOB PP transport verified
 
 ---
 
@@ -7288,3 +7289,331 @@ Sprint 30 (DBS yuu) ─── Hard prerequisite ───── Sprint 31 begins
 ---
 
 **Sprint 31 Status**: 📋 PLANNED — Awaiting Sprint 30 completion + cashback-to-miles policy decision
+
+---
+
+## Sprint 32: "Visual Setup" (F40 — Auto-Capture Setup Carousel)
+
+**Duration**: 0.5 weeks (2-3 working days)
+**Sprint Goal**: Replace the 6-item numbered text instruction list on the auto-capture setup screen with a swipeable carousel. Each setup step gets its own visual card with an icon illustration, step badge, title, and short description. Reduces cognitive load and improves shortcut setup completion rate.
+**Epic**: E12 — Transaction Auto-Capture (UX improvement)
+**PRD Features**: F40 (P1.5 — Auto-Capture Setup Carousel)
+**Phase**: v2.7 — Onboarding UX Polish
+**Predecessor**: None — no hard dependencies; can be scheduled at any time
+**Files Modified**: `maximile-app/app/auto-capture-setup.tsx` (single file change)
+
+---
+
+### Sprint 32 — Definition of Ready (DoR) Checklist
+
+- [x] Auto-capture setup screen exists and is functional (`auto-capture-setup.tsx`)
+- [x] 6 setup steps defined with icons, titles, and descriptions
+- [x] No new dependencies required — `FlatList` and `Dimensions` are built into React Native
+- [x] Design spec: each slide has step badge (gold pill), 72px icon circle (gold tint), optional secondary icon, centered title, centered description
+- [x] Pagination: active dot = 20px gold pill, inactive dots = 7px circles
+
+### Sprint 32 — Definition of Done (DoD) Checklist
+
+- [ ] 6-slide horizontal carousel renders in place of the old numbered instruction list
+- [ ] Each slide displays: step badge, icon illustration, title, description
+- [ ] Pagination dots below carousel update on swipe
+- [ ] Carousel works on both iOS (native) and web (Vercel)
+- [ ] Download button still functions correctly
+- [ ] "I've set this up" button still advances to success step
+- [ ] "Set up later" still skips to miles entry
+- [ ] Old instruction styles removed (no dead code)
+- [ ] `npx expo export --platform web` builds successfully
+
+---
+
+### Sprint 32 — Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S32.1** | As a user, I want the shortcut setup instructions displayed as a swipeable visual carousel so I can focus on one step at a time | P0 | S | 3 | Developer |
+| **Total** | | | | **3** | |
+
+---
+
+### Sprint 32 — User Story Details
+
+#### S32.1: Auto-Capture Setup Carousel
+
+**As a** user viewing the shortcut setup instructions,
+**I want** each step presented as a visual card in a swipeable carousel,
+**So that** I can focus on one step at a time and feel less overwhelmed.
+
+**Priority**: P0
+**T-Shirt Size**: S — ~2-3 days (single file, UI-only change)
+**Feature**: F40
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I am on the auto-capture setup screen (Step 0) | The screen loads | I see a horizontal carousel where the numbered instruction list used to be |
+| AC2 | I view a carousel slide | I look at the slide | I see a step badge (e.g. "Step 3"), a 72px gold-tinted icon circle with an Ionicons icon, a title, and a short description |
+| AC3 | A slide has a secondary icon (Steps 1, 3, 4, 6) | I view that slide | I see a 32px secondary icon badge at the bottom-right of the main icon circle |
+| AC4 | I swipe left or right on the carousel | The carousel animates | The next/previous slide scrolls into view and the pagination dots update |
+| AC5 | I view the pagination dots | I count them | There are 6 dots; the active dot is a 20px gold pill, inactive dots are 7px circles |
+| AC6 | I tap the "Add Shortcut" download button | Button is pressed | The shortcut download still works as before |
+| AC7 | I tap "I've set this up" | Button is pressed | The screen advances to the success step (Step 1) |
+
+**Task Breakdown**:
+
+| Task | Description | Size | Owner |
+|------|-------------|------|-------|
+| T32.1 | Add `SETUP_SLIDES` data constant (6 objects with id, stepNumber, icon, secondaryIcon, title, description) | XS | Developer |
+| T32.2 | Build `CarouselSlide` sub-component (step badge, icon illustration with optional secondary icon, title, description) | S | Developer |
+| T32.3 | Build `CarouselPagination` sub-component (6 dots, active = gold pill, inactive = circle) | XS | Developer |
+| T32.4 | Replace instruction list in `renderStep0()` with horizontal `FlatList` + pagination | S | Developer |
+| T32.5 | Add `activeSlide` state, `flatListRef`, and `onViewableItemsChanged` callback | XS | Developer |
+| T32.6 | Add carousel and pagination StyleSheets | XS | Developer |
+| T32.7 | Remove unused instruction styles (`instructionHeader`, `instructionRow`, `instructionNumber`, `instructionNumberText`, `instructionText`) | XS | Developer |
+| T32.8 | Add `FlatList` and `Dimensions` to react-native imports | XS | Developer |
+| T32.9 | Verify build with `npx expo export --platform web` | XS | Developer |
+
+---
+
+### Sprint 32 — Slide Data Reference
+
+| Step | Icon | Secondary Icon | Title | Description |
+|------|------|----------------|-------|-------------|
+| 1 | `download-outline` | `open-outline` | Download & Open | Tap "Add Shortcut" above, then open the downloaded file. |
+| 2 | `add-circle-outline` | — | Add the Shortcut | In the Shortcuts app, tap "+ Add Shortcut" to install it. |
+| 3 | `git-branch-outline` | `add-outline` | Create Automation | Open the Automation tab and tap "+" to create a new one. |
+| 4 | `wallet-outline` | `hand-left-outline` | Set Trigger | Choose "When I tap a Wallet Card or Pass" as the trigger. |
+| 5 | `search-outline` | — | Select MaxiMile | Under "My Shortcuts", find and tap "MaxiMile". |
+| 6 | `flash-outline` | `checkmark-circle-outline` | Run Immediately | Set the automation to "Run Immediately", then tap "Done". |
+
+---
+
+### Sprint 32 — Dependencies Map
+
+```
+No external dependencies.
+All tasks are sequential within a single file.
+
+T32.8 (imports) → T32.1 (slide data) → T32.2 (CarouselSlide) → T32.3 (CarouselPagination)
+                                                                         ↓
+T32.5 (state/refs) ──────────────────────────────────────────→ T32.4 (replace instruction list)
+                                                                         ↓
+                                                               T32.6 (new styles) → T32.7 (remove old styles)
+                                                                         ↓
+                                                               T32.9 (verify build)
+```
+
+---
+
+### Sprint 32 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| FlatList horizontal scroll doesn't work well on web | Medium | Medium | `pagingEnabled` works on web via react-native-web; test on Vercel deployment; fallback to `ScrollView` with `snapToInterval` if needed |
+| Carousel slides too wide/narrow on different screen sizes | Low | Low | Use `Dimensions.get('window').width` minus padding for slide width; test on multiple viewport sizes |
+
+---
+
+### Sprint 32 — Schedule
+
+| Day | Focus | Exit Criteria |
+|-----|-------|---------------|
+| **Day 1** | T32.8 + T32.1 + T32.2 + T32.3 (imports, data, components) | Slide and pagination components render in isolation |
+| **Day 2** | T32.4 + T32.5 + T32.6 + T32.7 (integration, state, styles, cleanup) | Carousel replaces instruction list, old styles removed |
+| **Day 3** | T32.9 (build verification + Vercel deploy + testing) | Sprint 32 complete |
+
+---
+
+**Sprint 32 Status**: 📋 PLANNED — Ready to start (no dependencies)
+
+---
+
+## Sprint 33: "Navigation Restructure" (F41 — Cards+Caps Merge & Transactions Tab)
+
+**Duration**: 0.5 weeks (2-3 working days)
+**Sprint Goal**: Merge "My Cards" and "Cap Status" tabs into one enriched "My Cards" tab, and promote Transaction History to a dedicated "Transactions" tab. Reduces navigation redundancy and surfaces high-frequency features at top level.
+**Epic**: E20 — Navigation Restructure
+**PRD Features**: F41 (P1 — Navigation Restructure — Cards+Caps Merge & Transactions Tab)
+**Phase**: v2.8 — Navigation Polish
+**Predecessor**: None — no hard dependencies; can be scheduled at any time
+**Files Modified**: `caps.tsx`, `cards.tsx`, `_layout.tsx`, `card/[id].tsx`, `profile.tsx`
+
+---
+
+### Sprint 33 — Definition of Ready (DoR) Checklist
+
+- [x] Cap Status screen exists and shows card list with progress bars (`caps.tsx`)
+- [x] My Cards screen exists as separate tab (`cards.tsx`)
+- [x] Tab layout defined in `_layout.tsx` with 5 visible tabs
+- [x] Transaction History screen exists at `app/transactions.tsx` (content to be reused)
+- [x] Card Detail screen exists at `app/card/[id].tsx`
+- [x] Profile screen has Transaction History menu item
+
+### Sprint 33 — Definition of Done (DoD) Checklist
+
+- [ ] My Cards tab shows cap status view (merged from old Caps tab)
+- [ ] Tapping a card in My Cards navigates to Card Detail (`/card/${id}`)
+- [ ] My Cards tab has "Add Card" button in header
+- [ ] Transactions tab shows global transaction history grouped by month
+- [ ] Card Detail screen has "See Transactions" button linking to card-specific transactions
+- [ ] Profile no longer shows Transaction History menu item
+- [ ] Cap badge (red dot) appears on My Cards tab when any cap >= 80%
+- [ ] Tab order: My Cards, Transactions, Recommend, Log, Miles
+- [ ] `npx expo export --platform web` builds successfully
+
+---
+
+### Sprint 33 — Stories
+
+| ID | Story | Priority | Size | Points | Owner |
+|----|-------|----------|------|--------|-------|
+| **S33.1** | As a user, I want the My Cards tab to show my card list with cap progress bars so I can see card health at a glance without switching tabs | P0 | S | 2 | Developer |
+| **S33.2** | As a user, I want a dedicated Transactions tab so I can view my transaction history without navigating through Profile | P0 | S | 2 | Developer |
+| **S33.3** | As a user, I want the tab bar to show My Cards first with a cap badge, then Transactions with a receipt icon, so navigation is clear | P0 | XS | 1 | Developer |
+| **S33.4** | As a user, I want a "See Transactions" button on the Card Detail screen so I can quickly view transactions for a specific card | P1 | XS | 1 | Developer |
+| **S33.5** | As a user, I want the Transaction History removed from Profile so there's no redundant navigation path | P1 | XS | 2 | Developer |
+| **Total** | | | | **8** | |
+
+---
+
+### Sprint 33 — User Story Details
+
+#### S33.1: Merge Caps into My Cards Tab
+
+**As a** user viewing my card portfolio,
+**I want** to see cap progress bars alongside my cards in one tab,
+**So that** I don't need to switch between two tabs showing the same cards.
+
+**Priority**: P0
+**T-Shirt Size**: S
+**Feature**: F41
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I am on the My Cards tab | The screen loads | I see my cards with cap progress bars (the old Cap Status view) |
+| AC2 | I tap on a card | Card is pressed | I navigate to Card Detail (`/card/${id}`), not card-transactions |
+| AC3 | I have no cards | The screen loads | I see an empty state encouraging me to add cards |
+| AC4 | The screen has a header | I look at the top | I see "My Cards" title with an "Add Card" (+) button |
+
+**Files Modified**: `maximile-app/app/(tabs)/caps.tsx`
+
+---
+
+#### S33.2: Transactions Tab
+
+**As a** user wanting to review my transaction history,
+**I want** a dedicated Transactions tab in the main navigation,
+**So that** I can access my transactions in one tap instead of navigating through Profile.
+
+**Priority**: P0
+**T-Shirt Size**: S
+**Feature**: F41
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I tap the Transactions tab | The screen loads | I see my transaction history grouped by month |
+| AC2 | I have no transactions | The screen loads | I see an empty state directing me to the Log tab |
+| AC3 | I pull down to refresh | Refresh gesture triggered | Transaction list reloads from the database |
+
+**Files Modified**: `maximile-app/app/(tabs)/cards.tsx`
+
+---
+
+#### S33.3: Tab Bar Restructure
+
+**As a** user navigating the app,
+**I want** the tab bar to show My Cards (with cap badge) first, then Transactions,
+**So that** the navigation reflects the merged card+caps experience.
+
+**Priority**: P0
+**T-Shirt Size**: XS
+**Feature**: F41
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I view the tab bar | I look at the bottom | I see 5 tabs: My Cards (card icon), Transactions (receipt icon), Recommend (center logo), Log, Miles |
+| AC2 | Any card has cap >= 80% | I view the tab bar | My Cards tab shows a red dot badge |
+| AC3 | No card has high cap usage | I view the tab bar | No badge on any tab |
+
+**Files Modified**: `maximile-app/app/(tabs)/_layout.tsx`
+
+---
+
+#### S33.4: See Transactions Button on Card Detail
+
+**As a** user viewing a card's details,
+**I want** a "See Transactions" button,
+**So that** I can quickly view transactions logged against this specific card.
+
+**Priority**: P1
+**T-Shirt Size**: XS
+**Feature**: F41
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I am on the Card Detail screen | I scroll past Monthly Caps | I see a "See Transactions" tappable row |
+| AC2 | I tap "See Transactions" | Button is pressed | I navigate to `/card-transactions/${id}` showing card-specific transactions |
+
+**Files Modified**: `maximile-app/app/card/[id].tsx`
+
+---
+
+#### S33.5: Remove Transaction History from Profile
+
+**As a** user viewing Profile,
+**I want** the Transaction History menu item removed,
+**So that** there's no confusing duplicate path to transactions (now in main tab).
+
+**Priority**: P1
+**T-Shirt Size**: XS
+**Feature**: F41
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | I open the Profile screen | The Activity section loads | I see "Auto-Capture" but NOT "Transaction History" |
+
+**Files Modified**: `maximile-app/app/(tabs)/profile.tsx`
+
+---
+
+### Sprint 33 — Dependencies Map
+
+```
+No external dependencies.
+All stories are independent and can be implemented in parallel.
+
+S33.3 (_layout.tsx) should be applied after S33.1 (caps.tsx) and S33.2 (cards.tsx)
+for coherent testing, but there are no code-level dependencies.
+```
+
+---
+
+### Sprint 33 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| Users confused by merged tab | Low | Medium | Cap progress bars provide visual context; "Add Card" button maintains discoverability |
+| Transaction History removed from Profile disrupts muscle memory | Low | Low | Transactions tab is more prominent; Profile still shows Auto-Capture |
+
+---
+
+### Sprint 33 — Schedule
+
+| Day | Focus | Exit Criteria |
+|-----|-------|---------------|
+| **Day 1** | S33.1 (caps.tsx) + S33.2 (cards.tsx) + S33.5 (profile.tsx) | Caps screen navigates to card detail, cards screen shows transactions, Profile cleaned up |
+| **Day 2** | S33.3 (_layout.tsx) + S33.4 (card/[id].tsx) + build verification | Tab bar restructured, See Transactions button added, build passes |
+
+---
+
+**Sprint 33 Status**: ✅ COMPLETED — Navigation restructure implemented (Cards+Caps merged, Transactions tab promoted, pending push to GitHub)

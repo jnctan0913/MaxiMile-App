@@ -3,6 +3,8 @@ import {
   View,
   Text,
   ScrollView,
+  FlatList,
+  Dimensions,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,

@@ -15,7 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { CATEGORY_MAP } from '../../constants/categories';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Typography, BorderRadius } from '../../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../../constants/theme';
 import CapProgressBar from '../../components/CapProgressBar';
 import CapAlert from '../../components/CapAlert';
 import EmptyState from '../../components/EmptyState';
@@ -251,7 +251,7 @@ export default function CapsScreen() {
   );
 
   const handleCardPress = (card: Card) => {
-    router.push(`/card-transactions/${card.id}?cardName=${encodeURIComponent(card.name)}`);
+    router.push(`/card/${card.id}`);
   };
 
   const handleRefresh = () => {
@@ -274,7 +274,7 @@ export default function CapsScreen() {
       >
         <SafeAreaView style={styles.safeArea} edges={['bottom']}>
           <View style={styles.emptyContainer}>
-            <Text style={styles.screenTitle}>Cap Status</Text>
+            <Text style={styles.screenTitle}>My Cards</Text>
             <EmptyState
               icon="analytics-outline"
               title="No bonus caps to track"
@@ -298,7 +298,7 @@ export default function CapsScreen() {
       >
         <SafeAreaView style={styles.safeArea} edges={['bottom']}>
           <View style={styles.emptyContainer}>
-            <Text style={styles.screenTitle}>Cap Status</Text>
+            <Text style={styles.screenTitle}>My Cards</Text>
             <Text style={styles.screenSubtitle}>{monthLabel}</Text>
             <EmptyState
               icon="shield-checkmark-outline"
@@ -327,8 +327,19 @@ export default function CapsScreen() {
           }
         >
           {/* Header */}
-          <Text style={styles.screenTitle}>Cap Status</Text>
-          <Text style={styles.screenSubtitle}>Track your monthly bonus cap usage</Text>
+          <View style={styles.headerRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.screenTitle}>My Cards</Text>
+              <Text style={styles.screenSubtitle}>Track your monthly bonus cap usage</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.addButtonCircle}
+              onPress={() => router.push('/onboarding?from=cards')}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="add" size={22} color={Colors.brandGold} />
+            </TouchableOpacity>
+          </View>
 
           {visibleAlerts.length > 0 && (
             <View style={styles.alertsContainer}>
@@ -386,6 +397,18 @@ export default function CapsScreen() {
                     </View>
                     <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
                   </View>
+                  <TouchableOpacity
+                    style={styles.seeTransactionsRow}
+                    activeOpacity={0.7}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      router.push(`/card-transactions/${group.card.id}?cardName=${encodeURIComponent(group.card.name)}`);
+                    }}
+                  >
+                    <Ionicons name="receipt-outline" size={16} color={Colors.brandGold} />
+                    <Text style={styles.seeTransactionsText}>See Transactions</Text>
+                    <Ionicons name="chevron-forward" size={14} color={Colors.textTertiary} />
+                  </TouchableOpacity>
                 </TouchableOpacity>
               );
             }
@@ -476,6 +499,18 @@ export default function CapsScreen() {
                     </View>
                   );
                 })}
+                <TouchableOpacity
+                  style={styles.seeTransactionsRow}
+                  activeOpacity={0.7}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    router.push(`/card-transactions/${group.card.id}?cardName=${encodeURIComponent(group.card.name)}`);
+                  }}
+                >
+                  <Ionicons name="receipt-outline" size={16} color={Colors.brandGold} />
+                  <Text style={styles.seeTransactionsText}>See Transactions</Text>
+                  <Ionicons name="chevron-forward" size={14} color={Colors.textTertiary} />
+                </TouchableOpacity>
               </TouchableOpacity>
             );
           })}
@@ -507,6 +542,23 @@ const styles = StyleSheet.create({
   },
 
   // Header
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.xs,
+  },
+  addButtonCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(197, 165, 90, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.sm,
+  },
   emptyContainer: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
@@ -611,6 +663,23 @@ const styles = StyleSheet.create({
   },
   remainingAmount: {
     ...Typography.bodyBold,
+  },
+
+  // See Transactions link row
+  seeTransactionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: Spacing.md,
+    marginTop: Spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(197, 165, 90, 0.12)',
+    gap: Spacing.xs,
+  },
+  seeTransactionsText: {
+    flex: 1,
+    ...Typography.caption,
+    fontWeight: '600',
+    color: Colors.brandGold,
   },
 
   // Card with no caps
