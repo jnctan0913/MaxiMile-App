@@ -12,6 +12,9 @@ Thumbs.db
 .claude/state/
 .claude/handover/
 
+# Assignment files (private)
+docs/marketing/PITCH_DECK_IS622.md
+
 # App dependencies & build artifacts (handled by maximile-app/.gitignore)
 maximile-app/node_modules/
 maximile-app/.expo/
