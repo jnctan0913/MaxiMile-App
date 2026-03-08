@@ -3,9 +3,9 @@
 **Version**: 17.0
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
-**Source**: PRD v2.9, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0, AUDIT_MILELION_VS_RANKINGS v1.0
-**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprint 21 ✅ COMPLETED (F30 + F32 Condition Transparency), Sprint 22 ✅ COMPLETED (Min Spend Enforcement), Sprints 23-24 ✅ COMPLETED (Card Expansion 22→29 + UOB Lady's Solitaire UX), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01), Sprint 29 ✅ COMPLETED (Earn Rate Refresh — MileLion March 2026 Audit Phase 5), Sprint 30 Planned (DBS yuu Card Integration), Sprint 31 Planned (SC Smart Card Bonus Tiers), Sprint 32 Planned (Auto-Capture Setup Carousel), Sprint 33 ✅ COMPLETED (Navigation Restructure)
-**Change Log**: v17.0 — Added Sprint 33 "Navigation Restructure" (F41, Epic E20). Merges My Cards + Cap Status tabs into single "My Cards" tab, promotes Transaction History to dedicated "Transactions" tab, adds "See Transactions" button to Card Detail, removes Transaction History from Profile. 5 stories, 8 SP, 0.5 weeks. v16.0 — Added Sprint 30 "DBS yuu Card Integration" (F37, Epic E18) and Sprint 31 "SC Smart Card Bonus Tiers" (F38, Epic E19). Sprint 30: 8 stories, 18 SP, 2 weeks — adds DBS yuu AMEX + DBS yuu Visa as cards #30-31, 10 mpd grocery/food delivery bonus rules, caps, AMEX acceptance warning, rankings update. Sprint 31: 7 stories, 16 SP, 2 weeks — models SC Smart Card tiered cashback-to-miles equivalence (5.6/7.42/9.28 mpd), requires policy decision on cashback-to-miles conversion, recommend() logic update for tiered earn rates. v15.0 — Added Sprint 29 "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5) and Epic E17 (Earn Rate Accuracy). 8 stories, 14 SP, 1 week. Corrects 7 earn rate/cap discrepancies: DBS Altitude travel bonus removed (4.0→1.2 mpd), HSBC Revolution cap $1,000→$1,500, DBS Woman's World cap $2,000→$1,000, UOB Lady's Card added to groceries, HSBC Revolution added to travel, KrisFlyer UOB transport 2.0→2.4 mpd, UOB PP transport verified. DBS yuu Card and SC Smart Card bonus tiers deferred to Sprint 30+. Source: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`. v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
+**Source**: PRD v2.10, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0, AUDIT_MILELION_VS_RANKINGS v1.0
+**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprint 21 ✅ COMPLETED (F30 + F32 Condition Transparency), Sprint 22 ✅ COMPLETED (Min Spend Enforcement), Sprints 23-24 ✅ COMPLETED (Card Expansion 22→29 + UOB Lady's Solitaire UX), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01), Sprint 29 ✅ COMPLETED (Earn Rate Refresh — MileLion March 2026 Audit Phase 5), Sprint 30 Planned (DBS yuu Card Integration), Sprint 31 Planned (SC Smart Card Bonus Tiers), Sprint 32 Planned (Auto-Capture Setup Carousel), Sprint 33 ✅ COMPLETED (Navigation Restructure), Sprint 34 Planned (Merchant Search)
+**Change Log**: v18.0 — Added Sprint 34 "Merchant Search" (F42, Epic E21). 6 stories, 20 SP, 2 weeks. Client-side merchant search on Recommend home screen with ~200 curated Singapore merchants, fuzzy prefix/substring ranking, 120ms debounce, Bills subcategory routing, merchant context on recommendation page, analytics events. Supersedes original F9 placeholder (RICE 467) with fully specified F42 (RICE 3200). New files: merchant-catalogue.ts, useMerchantSearch.ts, MerchantSearchBar.tsx, MerchantAutocomplete.tsx. Source: `docs/planning/MERCHANT_SEARCH_PLAN.md`. v17.0 — Added Sprint 33 "Navigation Restructure" (F41, Epic E20). Merges My Cards + Cap Status tabs into single "My Cards" tab, promotes Transaction History to dedicated "Transactions" tab, adds "See Transactions" button to Card Detail, removes Transaction History from Profile. 5 stories, 8 SP, 0.5 weeks. v16.0 — Added Sprint 30 "DBS yuu Card Integration" (F37, Epic E18) and Sprint 31 "SC Smart Card Bonus Tiers" (F38, Epic E19). Sprint 30: 8 stories, 18 SP, 2 weeks — adds DBS yuu AMEX + DBS yuu Visa as cards #30-31, 10 mpd grocery/food delivery bonus rules, caps, AMEX acceptance warning, rankings update. Sprint 31: 7 stories, 16 SP, 2 weeks — models SC Smart Card tiered cashback-to-miles equivalence (5.6/7.42/9.28 mpd), requires policy decision on cashback-to-miles conversion, recommend() logic update for tiered earn rates. v15.0 — Added Sprint 29 "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5) and Epic E17 (Earn Rate Accuracy). 8 stories, 14 SP, 1 week. Corrects 7 earn rate/cap discrepancies: DBS Altitude travel bonus removed (4.0→1.2 mpd), HSBC Revolution cap $1,000→$1,500, DBS Woman's World cap $2,000→$1,000, UOB Lady's Card added to groceries, HSBC Revolution added to travel, KrisFlyer UOB transport 2.0→2.4 mpd, UOB PP transport verified. DBS yuu Card and SC Smart Card bonus tiers deferred to Sprint 30+. Source: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`. v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
 
@@ -111,6 +111,7 @@ All 5 agents work **simultaneously across 4 phases** with staggered starts:
 | **E18** | DBS yuu Card Integration | F37 | P0 | Sprint 30 |
 | **E19** | SC Smart Card Bonus Tiers | F38 | P0 | Sprint 31 |
 | **E20** | Navigation Restructure | F41 | P1 | Sprint 33 |
+| **E21** | Merchant-Driven Discovery | F42 | P1 | Sprint 34 |
 
 **Critical Path**: F5 (Rules DB) → F1 (Card Setup) → F2 (Recommendation) → F4 (Transaction Log) → F3 (Cap Tracker)
 
@@ -7617,3 +7618,292 @@ for coherent testing, but there are no code-level dependencies.
 ---
 
 **Sprint 33 Status**: ✅ COMPLETED — Navigation restructure implemented (Cards+Caps merged, Transactions tab promoted, pending push to GitHub)
+
+---
+
+## Sprint 34: "Merchant Search" (F42 — Merchant Search on Recommend Tab)
+
+**Duration**: 2 weeks (10 working days)
+**Sprint Goal**: Enable users to search for merchants by name on the Recommend home screen, auto-match to spend categories, and route to the correct card recommendation — eliminating the need to guess which of 8 category tiles maps to their merchant.
+**Epic**: E21 — Merchant-Driven Discovery
+**PRD Features**: F42 (P1, RICE 3200)
+**Phase**: v2.3 — Discovery UX Improvements
+**Predecessor**: None (independent)
+**Reference**: `docs/planning/MERCHANT_SEARCH_PLAN.md`, `docs/planning/PRD_MERCHANT_SEARCH.md`
+**Story Points**: 20
+
+---
+
+### Sprint 34 — Definition of Ready (DoR) Checklist
+
+Before any story enters the sprint, it must satisfy:
+
+- [ ] User story has clear "As a... I want... So that..." statement
+- [ ] Acceptance criteria defined in Given/When/Then format
+- [ ] Story point estimate agreed by team
+- [ ] `lib/merchant-mapper.ts` confirmed to have `matchMerchantLocal()` function
+- [ ] `recommend()` RPC confirmed to accept `p_category_id` and `p_subcategory` params
+- [ ] Bills subcategory routing confirmed functional (Sprint 28)
+- [ ] UI wireframes reviewed (see `docs/planning/MERCHANT_SEARCH_PLAN.md` Section 2)
+
+### Sprint 34 — Definition of Done (DoD) Checklist
+
+A story is "Done" when:
+
+- [ ] Feature works as described in all acceptance criteria
+- [ ] Works on both iOS and web (Expo Go + Vercel)
+- [ ] No TypeScript errors (`npx tsc --noEmit` passes)
+- [ ] Analytics events fire in `__DEV__` console
+- [ ] All interactive elements have `accessibilityRole` and `accessibilityLabel`
+- [ ] Edge cases handled: empty query, no results, Bills subcategory routing
+- [ ] `npx expo export --platform web` build succeeds
+- [ ] Code committed to main branch
+
+---
+
+### Sprint 34 — Stories
+
+| ID | Story | Priority | Points | Owner |
+|----|-------|----------|--------|-------|
+| **S34.1** | Merchant catalogue data (~200 curated SG merchants) | P0 | 5 | Data Engineer |
+| **S34.2** | `useMerchantSearch` hook (debounced fuzzy search) | P0 | 3 | Software Engineer |
+| **S34.3** | MerchantSearch UI component (search bar + autocomplete dropdown) | P0 | 5 | Developer |
+| **S34.4** | Integrate search into Recommend home + routing | P0 | 3 | Developer |
+| **S34.5** | Merchant context on recommendation result screen | P1 | 2 | Developer |
+| **S34.6** | Analytics events (search_initiated, merchant_selected, search_abandoned) | P1 | 2 | Developer |
+| **Total** | | | **20** | |
+
+---
+
+### Sprint 34 — User Story Details
+
+#### S34.1: Merchant Catalogue Data
+
+> **As a** developer, **I want** a curated merchant catalogue with ~200 popular Singapore merchants mapped to categories, **so that** the search has accurate data to match against.
+
+**Priority**: P0 — blocks all other stories
+**Story Points**: 5
+**Feature**: F42
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | The catalogue is loaded | I query for "grab" | Entries for Grab (transport), GrabFood (dining), GrabMart (groceries) are returned with correct category IDs |
+| AC2 | The catalogue is loaded | I query for "mcdonalds" (no apostrophe) | McDonald's is matched via alias |
+| AC3 | The catalogue is loaded | I count entries | There are ≥ 150 merchants across all 8 categories |
+| AC4 | Every entry has a categoryId | I validate against CATEGORIES constant | All categoryIds are valid |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T34.01: Create `lib/merchant-catalogue.ts` with `MerchantEntry` interface, `buildStaticCatalogue()`, `getMerchantCatalogue()` | Developer | 3h |
+| T34.02: Populate ~200 merchants across 8 categories (Dining 40+, Transport 10+, Online 20+, Groceries 15+, Petrol 5+, Bills 15+, Travel 15+, General 10+) | Data Engineer | 4h |
+| T34.03: Validate every `categoryId` against CATEGORIES constant; validate Bills merchants have correct subcategory | Data Engineer | 1h |
+
+---
+
+#### S34.2: useMerchantSearch Hook
+
+> **As a** developer, **I want** a `useMerchantSearch` hook with debounced fuzzy search, **so that** the search component has clean, testable logic decoupled from UI.
+
+**Priority**: P0 — blocks S34.3
+**Story Points**: 3
+**Feature**: F42
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Query is `""` | Results are read | Empty array returned |
+| AC2 | Query is `"grab"` | 120ms have elapsed | All merchants matching "grab" returned, ranked: exact > prefix > contains |
+| AC3 | Rapid typing (< 120ms between chars) | Results observed | Only the final stable query produces results |
+| AC4 | Component unmounts | Debounce timer pending | Timer cleaned up, no state update after unmount |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T34.04: Create `hooks/useMerchantSearch.ts` with normalisation + scoring (exact=100, prefix=80, keyword-prefix=70, contains=50, keyword-contains=40) + 120ms debounce | Software Engineer | 2h |
+| T34.05: Create `hooks/useMerchantCatalogue.ts` — thin memoised wrapper over `getMerchantCatalogue()` | Software Engineer | 0.5h |
+
+**Dependencies**: S34.1
+
+---
+
+#### S34.3: MerchantSearch UI Component
+
+> **As a** user on the Recommend tab, **I want** a search bar with an autocomplete dropdown, **so that** I can type a merchant name and see matching suggestions.
+
+**Priority**: P0 — blocks S34.4
+**Story Points**: 5
+**Feature**: F42
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Recommend tab with cards in portfolio | Screen loads | Search bar with placeholder "Search merchant, e.g. Grab, Starbucks…" visible above category tiles |
+| AC2 | User types ≥ 2 characters | Results available | Dropdown shows up to 6 merchant rows with name + category badge |
+| AC3 | User taps outside dropdown | Touch detected | Dropdown closes and search bar clears |
+| AC4 | Query with no matches | ≥ 2 chars typed | "No merchants found" message appears with category browse suggestion |
+| AC5 | User has no cards | Recommend screen renders | Search bar NOT shown (consistent with existing empty-state guard) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T34.06: Create `components/MerchantSearchBar.tsx` — TextInput with Ionicons search/clear icons, glassmorphism styling | Developer | 2h |
+| T34.07: Create `components/MerchantAutocomplete.tsx` — FlatList dropdown with result rows (merchant name, category badge, matched chars highlighted in gold) | Developer | 2h |
+| T34.08: Implement close/clear, `keyboardShouldPersistTaps`, dropdown animation (opacity + translateY, 150ms) | Developer | 1h |
+| T34.09: Add accessibility labels (`accessibilityRole="search"`, result rows read "[Name], [Category], tap to see recommendations") | Developer | 0.5h |
+
+**Dependencies**: S34.2
+
+---
+
+#### S34.4: Integrate Search into Recommend Home
+
+> **As a** user, **I want** selecting a merchant to navigate me to the card recommendation for that merchant's category, **so that** I don't have to know the category myself.
+
+**Priority**: P0
+**Story Points**: 3
+**Feature**: F42
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | "Starbucks" selected (dining) | Navigation occurs | App navigates to `/recommend/dining?merchantName=Starbucks` |
+| AC2 | "Singtel" selected (bills/telco) | Navigation occurs | App navigates to `/recommend/bills?subcategory=telco&merchantName=Singtel` |
+| AC3 | Merchant selected | Navigation occurs | Search bar cleared and dropdown dismissed |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T34.10: Update Recommend home `index.tsx`: insert MerchantSearch, implement `handleMerchantSelect` with category + subcategory routing | Developer | 1.5h |
+| T34.11: Test Bills merchant routing end-to-end (Singtel → bills/telco, SP Services → bills/utilities) | Developer | 0.5h |
+| T34.12: Ensure ScrollView wrapping doesn't break existing layout (category tiles, FAB, alerts) | Developer | 0.5h |
+
+**Dependencies**: S34.3
+
+---
+
+#### S34.5: Merchant Context on Result Screen
+
+> **As a** user who searched for a merchant, **I want** the recommendation page to show the merchant name, **so that** I know the recommendation is for the right merchant.
+
+**Priority**: P1
+**Story Points**: 2
+**Feature**: F42
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | `/recommend/dining?merchantName=Starbucks` | Screen mounts | Header title reads "Starbucks" |
+| AC2 | `/recommend/dining` (no merchantName) | Screen mounts | Header title reads "Dining" (no regression) |
+| AC3 | merchantName present | Hero section renders | Shows "Best card for Starbucks" with category context below |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T34.13: Extend `useLocalSearchParams` in `[category].tsx` to include `merchantName` | Developer | 0.5h |
+| T34.14: Update header title logic: `merchantName ?? subcategoryInfo?.label ?? categoryInfo?.name` | Developer | 0.5h |
+| T34.15: Add "Best card for [merchant]" hero label with category context badge | Developer | 1h |
+
+**Dependencies**: S34.4
+
+---
+
+#### S34.6: Analytics Events
+
+> **As the** product team, **I want** search analytics events, **so that** we can measure adoption, success rate, and abandonment.
+
+**Priority**: P1
+**Story Points**: 2
+**Feature**: F42
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | User types ≥ 2 chars (debounce settled) | Event fires | `search_initiated` with `{ query_length, results_count }` |
+| AC2 | User taps a result | Event fires | `merchant_selected` with `{ merchant_name, category_id, query }` |
+| AC3 | User clears/dismisses without selecting | Event fires | `search_abandoned` with `{ query, results_count }` |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T34.16: Add event types to analytics type union in `lib/analytics.ts` | Developer | 0.5h |
+| T34.17: Instrument `search_initiated` in useMerchantSearch hook | Developer | 0.5h |
+| T34.18: Instrument `merchant_selected` in MerchantAutocomplete component | Developer | 0.5h |
+| T34.19: Instrument `search_abandoned` with focus/blur tracking | Developer | 1h |
+
+**Dependencies**: S34.3, S34.2
+
+---
+
+### Sprint 34 — Dependencies Map
+
+```
+S34.1 (Catalogue Data)
+  └── S34.2 (Search Hook)
+        └── S34.3 (UI Component)
+              ├── S34.4 (Home Integration)
+              │     └── S34.5 (Result Screen Context)
+              └── S34.6 (Analytics)
+```
+
+**Critical Path**: S34.1 → S34.2 → S34.3 → S34.4 → S34.5
+**Parallel Track**: S34.6 can start after S34.3 (parallel with S34.4)
+
+---
+
+### Sprint 34 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|------------|
+| Wrong category mappings in seed data (e.g., GrabFood→transport instead of dining) | High | High | Validation script cross-checks every categoryId. Manual review of top-20 merchants |
+| ScrollView replacement in index.tsx breaks FAB or banner on Android | Medium | Medium | Test on Android Expo Go immediately after S34.4 |
+| Bills 0-mpd merchants (SP Services) cause confusing empty state | Medium | Medium | Show "No miles earned" note inline in dropdown for 0-mpd subcategories |
+| TypeScript route param — merchantName arrives as string \| string[] | Low | High | Normalise with Array.isArray() check at top of [category].tsx |
+| Scope creep — "recently searched" or logos added mid-sprint | Medium | Medium | Explicitly out-of-scope in kickoff. Create backlog items proactively |
+
+---
+
+### Sprint 34 — Schedule
+
+| Days | Focus | Exit Criteria |
+|------|-------|---------------|
+| **Days 1-2** | S34.1 (catalogue data) | ≥ 150 merchants, all categoryIds validated |
+| **Days 2-4** | S34.2 (search hook) | Debounced search returns ranked results, cleanup on unmount |
+| **Day 5** | S34.3 begins (UI component) | Search bar renders, dropdown appears on type |
+| **Days 6-7** | S34.3 completes + S34.4 (integration) | Merchant selection navigates to correct recommendation |
+| **Day 8** | S34.5 (result screen header) | "Best card for [Merchant]" shown when accessed via search |
+| **Day 9** | S34.6 (analytics) | All 3 events fire in __DEV__ console |
+| **Day 10** | Buffer — QA, edge cases, build verification | `npx expo export --platform web` succeeds, Vercel deploy |
+
+---
+
+### Sprint 34 — New/Modified Files
+
+**New Files**:
+- `lib/merchant-catalogue.ts` — Static MerchantEntry[] + buildStaticCatalogue()
+- `hooks/useMerchantCatalogue.ts` — Memoised catalogue loader
+- `hooks/useMerchantSearch.ts` — Debounced query → ranked results
+- `components/MerchantSearchBar.tsx` — TextInput with clear button
+- `components/MerchantAutocomplete.tsx` — FlatList dropdown
+
+**Modified Files**:
+- `app/(tabs)/index.tsx` — Add search bar + handle merchant selection
+- `app/(tabs)/recommend/[category].tsx` — Accept merchantName param, adapt header
+- `lib/analytics.ts` — Add search event types
+
+---
+
+**Sprint 34 Status**: 📋 PLANNED — Ready to start (no dependencies)
