@@ -92,5 +92,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.textPrimary,
     paddingVertical: 0,
-  },
+    outlineStyle: 'none',
+  } as any,
 });
