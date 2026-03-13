@@ -236,6 +236,210 @@ const pulseStyles = StyleSheet.create({
 });
 
 // ---------------------------------------------------------------------------
+// Setup Carousel Data
+// ---------------------------------------------------------------------------
+
+interface SetupSlide {
+  id: string;
+  stepNumber: number;
+  icon: keyof typeof Ionicons.glyphMap;
+  secondaryIcon?: keyof typeof Ionicons.glyphMap;
+  title: string;
+  description: string;
+}
+
+const SETUP_SLIDES: SetupSlide[] = [
+  {
+    id: 'step-1',
+    stepNumber: 1,
+    icon: 'download-outline',
+    secondaryIcon: 'open-outline',
+    title: 'Download & Open',
+    description: 'Tap "Add Shortcut" above, then open the downloaded file.',
+  },
+  {
+    id: 'step-2',
+    stepNumber: 2,
+    icon: 'add-circle-outline',
+    title: 'Add the Shortcut',
+    description: 'In the Shortcuts app, tap "+ Add Shortcut" to install it.',
+  },
+  {
+    id: 'step-3',
+    stepNumber: 3,
+    icon: 'git-branch-outline',
+    secondaryIcon: 'add-outline',
+    title: 'Create Automation',
+    description: 'Open the Automation tab and tap "+" to create a new one.',
+  },
+  {
+    id: 'step-4',
+    stepNumber: 4,
+    icon: 'wallet-outline',
+    secondaryIcon: 'hand-left-outline',
+    title: 'Set Trigger',
+    description: 'Choose "When I tap a Wallet Card or Pass" as the trigger.',
+  },
+  {
+    id: 'step-5',
+    stepNumber: 5,
+    icon: 'search-outline',
+    title: 'Select MaxiMile',
+    description: 'Under "My Shortcuts", find and tap "MaxiMile".',
+  },
+  {
+    id: 'step-6',
+    stepNumber: 6,
+    icon: 'flash-outline',
+    secondaryIcon: 'checkmark-circle-outline',
+    title: 'Run Immediately',
+    description: 'Set the automation to "Run Immediately", then tap "Done".',
+  },
+];
+
+// Slide width = glassCard inner width (screen - scrollContent padding - glassCard padding - glassCard border)
+const CAROUSEL_SLIDE_WIDTH =
+  Dimensions.get('window').width - 2 * Spacing.xl - 2 * Spacing.lg - 2;
+
+// ---------------------------------------------------------------------------
+// Carousel Slide
+// ---------------------------------------------------------------------------
+
+function CarouselSlide({ item }: { item: SetupSlide }) {
+  return (
+    <View style={carouselStyles.slide}>
+      {/* Step badge */}
+      <View style={carouselStyles.stepBadge}>
+        <Text style={carouselStyles.stepBadgeText}>Step {item.stepNumber}</Text>
+      </View>
+
+      {/* Icon circle with optional secondary icon */}
+      <View style={carouselStyles.iconWrapper}>
+        <View style={carouselStyles.iconCircle}>
+          <Ionicons name={item.icon} size={36} color={Colors.brandGold} />
+        </View>
+        {item.secondaryIcon && (
+          <View style={carouselStyles.secondaryIconBadge}>
+            <Ionicons name={item.secondaryIcon} size={16} color={Colors.brandGold} />
+          </View>
+        )}
+      </View>
+
+      {/* Title */}
+      <Text style={carouselStyles.slideTitle}>{item.title}</Text>
+
+      {/* Description */}
+      <Text style={carouselStyles.slideDescription}>{item.description}</Text>
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Carousel Pagination
+// ---------------------------------------------------------------------------
+
+function CarouselPagination({ activeIndex, total }: { activeIndex: number; total: number }) {
+  return (
+    <View style={carouselStyles.paginationRow}>
+      {Array.from({ length: total }).map((_, i) => (
+        <View
+          key={i}
+          style={[
+            carouselStyles.paginationDot,
+            i === activeIndex
+              ? carouselStyles.paginationDotActive
+              : carouselStyles.paginationDotInactive,
+          ]}
+        />
+      ))}
+    </View>
+  );
+}
+
+const carouselStyles = StyleSheet.create({
+  slide: {
+    width: CAROUSEL_SLIDE_WIDTH,
+    alignItems: 'center',
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+  },
+  stepBadge: {
+    backgroundColor: Colors.brandGold,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 4,
+    marginBottom: Spacing.lg,
+  },
+  stepBadgeText: {
+    ...Typography.captionBold,
+    color: Colors.brandCharcoal,
+    fontSize: 12,
+  },
+  iconWrapper: {
+    width: 72,
+    height: 72,
+    marginBottom: Spacing.lg,
+  },
+  iconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(197, 165, 90, 0.12)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(197, 165, 90, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryIconBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(197, 165, 90, 0.18)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(197, 165, 90, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  slideTitle: {
+    ...Typography.bodyBold,
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
+    fontSize: 17,
+  },
+  slideDescription: {
+    ...Typography.body,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    paddingHorizontal: Spacing.sm,
+  },
+  paginationRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  paginationDot: {},
+  paginationDotActive: {
+    width: 20,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: Colors.brandGold,
+  },
+  paginationDotInactive: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: Colors.border,
+  },
+});
+
+// ---------------------------------------------------------------------------
 // Main Screen
 // ---------------------------------------------------------------------------
 
@@ -244,6 +448,18 @@ export default function AutoCaptureSetupScreen() {
   const router = useRouter();
   const { skipIntro, cardIds } = useLocalSearchParams<{ skipIntro?: string; cardIds?: string }>();
   const [step, setStep] = useState(0);
+
+  // Carousel state
+  const [activeSlide, setActiveSlide] = useState(0);
+  const flatListRef = useRef<FlatList<SetupSlide>>(null);
+  const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
+      if (viewableItems.length > 0 && viewableItems[0].index != null) {
+        setActiveSlide(viewableItems[0].index);
+      }
+    },
+  ).current;
 
   // Step 2 state
   const [shortcutAdded, setShortcutAdded] = useState(false);
@@ -388,24 +604,26 @@ export default function AutoCaptureSetupScreen() {
         </LinearGradient>
       </TouchableOpacity>
 
-      {/* Simplified Instructions */}
+      {/* Visual Setup Carousel */}
+      <Text style={styles.carouselHeader}>Quick setup:</Text>
       <View style={styles.glassCard}>
-        <Text style={styles.instructionHeader}>Quick setup:</Text>
-        {[
-          'Tap "Add Shortcut" above → Open the downloaded file',
-          'In Shortcuts app → tap "+ Add Shortcut"',
-          'Open Automation tab → tap "+"',
-          'Choose: "When I tap a Wallet Card or Pass"',
-          'Under "My Shortcuts", tap "MaxiMile"',
-          'Set Automation to "Run Immediately" → tap "Done"',
-        ].map((text, i) => (
-          <View key={i} style={styles.instructionRow}>
-            <View style={styles.instructionNumber}>
-              <Text style={styles.instructionNumberText}>{i + 1}</Text>
-            </View>
-            <Text style={styles.instructionText}>{text}</Text>
-          </View>
-        ))}
+        <FlatList
+          ref={flatListRef}
+          data={SETUP_SLIDES}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <CarouselSlide item={item} />}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
+          getItemLayout={(_, index) => ({
+            length: CAROUSEL_SLIDE_WIDTH,
+            offset: CAROUSEL_SLIDE_WIDTH * index,
+            index,
+          })}
+        />
+        <CarouselPagination activeIndex={activeSlide} total={SETUP_SLIDES.length} />
       </View>
 
       <View style={styles.requirementBadge}>
@@ -680,36 +898,13 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
 
-  // Instructions
-  instructionHeader: {
+  // Carousel header
+  carouselHeader: {
     ...Typography.captionBold,
     color: Colors.textTertiary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: Spacing.md,
-  },
-  instructionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    marginBottom: Spacing.md,
-  },
-  instructionNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(197, 165, 90, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  instructionNumberText: {
-    ...Typography.captionBold,
-    color: Colors.brandGold,
-  },
-  instructionText: {
-    ...Typography.body,
-    color: Colors.textPrimary,
-    flex: 1,
   },
 
   // Outline button
