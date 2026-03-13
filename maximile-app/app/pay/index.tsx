@@ -80,10 +80,22 @@ interface SuccessData {
 export default function PayScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const params = useLocalSearchParams<{ source?: string; category?: string }>();
+  const params = useLocalSearchParams<{
+    source?: string;
+    category?: string;
+    merchantName?: string;
+    subcategory?: string;
+    cardId?: string;
+    cardName?: string;
+  }>();
+
+  // When merchant is already known (from recommend search), skip detection
+  const knownMerchant = params.merchantName
+    ? (Array.isArray(params.merchantName) ? params.merchantName[0] : params.merchantName)
+    : undefined;
 
   // State machine
-  const [state, setState] = useState<PayState>('detecting');
+  const [state, setState] = useState<PayState>(knownMerchant ? 'confirming' : 'detecting');
   const [error, setError] = useState<string | null>(null);
 
   // Location
@@ -140,10 +152,57 @@ export default function PayScreen() {
   }, []);
 
   // -------------------------------------------------------------------------
+  // Known merchant: seed state from params, fetch recommendation (no detection)
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    if (!knownMerchant) return;
+
+    // Seed merchant state from params
+    setMerchant({
+      name: knownMerchant,
+      category: params.category ?? 'general',
+      categoryName: CATEGORY_MAP[params.category ?? 'general']?.name ?? 'General',
+      confidence: 'high' as const,
+      placeId: '',
+      address: '',
+      types: [],
+    });
+
+    // Fetch recommendation for the known category
+    const categoryToRecommend = params.category ?? 'general';
+    const fetchRec = async () => {
+      try {
+        const rpcParams: { p_category_id: string; p_subcategory?: string } = {
+          p_category_id: categoryToRecommend,
+        };
+        if (params.subcategory) {
+          rpcParams.p_subcategory = params.subcategory;
+        }
+        const { data, error: rpcError } = await supabase.rpc('recommend', rpcParams);
+
+        if (!rpcError && data && (data as RecommendResult[]).length > 0) {
+          const results = data as RecommendResult[];
+          // If a specific card was passed from recommend screen, prefer it
+          const topPick = params.cardId
+            ? results.find((r) => r.card_id === params.cardId) ?? results.find((r) => r.is_recommended) ?? results[0]
+            : results.find((r) => r.is_recommended) ?? results[0];
+          setRecommendation(topPick);
+          setAlternatives(results.filter((r) => r.card_id !== topPick.card_id));
+        }
+      } catch {
+        // Non-blocking
+      }
+    };
+
+    fetchRec();
+  }, []); // Run once on mount
+
+  // -------------------------------------------------------------------------
   // State 1: Detect location
   // -------------------------------------------------------------------------
   useEffect(() => {
     if (state !== 'detecting') return;
+    if (knownMerchant) return; // Skip detection when merchant is already known
 
     let cancelled = false;
     const detect = async () => {
@@ -194,6 +253,7 @@ export default function PayScreen() {
   // -------------------------------------------------------------------------
   useEffect(() => {
     if (state !== 'identifying' || !location) return;
+    if (knownMerchant) return; // Skip identification when merchant is already known
 
     let cancelled = false;
     const identify = async () => {
@@ -826,7 +886,7 @@ export default function PayScreen() {
             {/* ============================================================= */}
             {!error && (state === 'confirming' || state === 'result') && merchant ? (
               <View>
-                <Text style={styles.overlineLabel}>DETECTED MERCHANT</Text>
+                <Text style={styles.overlineLabel}>{knownMerchant ? 'MERCHANT' : 'DETECTED MERCHANT'}</Text>
                 <MerchantCard
                   merchantName={merchant.name}
                   category={CATEGORY_MAP[selectedCategoryId ?? 'general']?.name ?? 'General'}

@@ -81,7 +81,12 @@ function getDefaultCategory(): string {
 export default function LogScreen() {
   const { user } = useAuth();
   const router = useRouter();
-  const params = useLocalSearchParams<{ category?: string; card?: string }>();
+  const params = useLocalSearchParams<{ category?: string; card?: string; merchantName?: string }>();
+
+  // Merchant name from recommend search flow
+  const merchantName = params.merchantName
+    ? (Array.isArray(params.merchantName) ? params.merchantName[0] : params.merchantName)
+    : undefined;
 
   // Form state
   const [amountStr, setAmountStr] = useState('');
@@ -246,6 +251,7 @@ export default function LogScreen() {
       amount: parsedAmount,
       transaction_date: today,
       notes: null,
+      merchant_name: merchantName ?? null,
     });
 
     if (error) {
@@ -380,6 +386,14 @@ export default function LogScreen() {
     >
       <SafeAreaView style={styles.safeArea} edges={[]}>
         <View style={styles.content}>
+          {/* Merchant banner when navigated from recommendation search */}
+          {merchantName ? (
+            <View style={styles.merchantBanner}>
+              <Ionicons name="storefront-outline" size={16} color={Colors.brandGold} />
+              <Text style={styles.merchantBannerText}>{merchantName}</Text>
+            </View>
+          ) : null}
+
           {/* Amount Display */}
           <View style={styles.amountDisplay}>
             <Text style={styles.sectionLabel}>AMOUNT</Text>
@@ -640,6 +654,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
     paddingBottom: Platform.OS === 'ios' ? 116 : 96,
+  },
+
+  // Merchant banner (from recommendation search)
+  merchantBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    backgroundColor: 'rgba(197, 165, 90, 0.1)',
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(197, 165, 90, 0.2)',
+  },
+  merchantBannerText: {
+    ...Typography.bodyBold,
+    color: Colors.brandGold,
   },
 
   // Section labels

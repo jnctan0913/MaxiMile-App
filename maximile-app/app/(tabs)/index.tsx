@@ -266,7 +266,7 @@ export default function RecommendScreen() {
           {/* Screen title */}
           <Text style={styles.screenTitle}>What are you spending on?</Text>
           <Text style={styles.screenSubtitle}>
-            Tap a category to find your best card
+            Search a merchant or tap a category
           </Text>
 
           {/* Merchant search bar (Sprint 34 — F42) */}

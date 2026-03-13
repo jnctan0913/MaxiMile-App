@@ -383,12 +383,12 @@ export default function RecommendResultScreen() {
       via: 'recommendations',
     });
 
-    // Navigate to log transaction screen with pre-filled category + card
-    if (topCard) {
-      router.push(`/(tabs)/log?category=${category}&card=${topCard.card_id}`);
-    } else {
-      router.push(`/(tabs)/log?category=${category}`);
-    }
+    // Navigate to log transaction screen with pre-filled category + card + merchant
+    const logParams = new URLSearchParams();
+    logParams.set('category', category);
+    if (topCard) logParams.set('card', topCard.card_id);
+    if (resolvedMerchantName) logParams.set('merchantName', resolvedMerchantName);
+    router.push(`/(tabs)/log?${logParams.toString()}`);
   };
 
   const handleSmartPay = () => {
@@ -400,7 +400,17 @@ export default function RecommendResultScreen() {
       action_type: 'smart_pay',
       via: 'recommendations',
     });
-    router.push(`/pay?source=recommend_cta&category=${category}`);
+
+    const payParams = new URLSearchParams();
+    payParams.set('source', 'recommend_cta');
+    payParams.set('category', category);
+    if (resolvedMerchantName) payParams.set('merchantName', resolvedMerchantName);
+    if (subcategory) payParams.set('subcategory', subcategory);
+    if (topCard) {
+      payParams.set('cardId', topCard.card_id);
+      payParams.set('cardName', topCard.card_name);
+    }
+    router.push(`/pay?${payParams.toString()}`);
   };
 
   // -----------------------------------------------------------------------
