@@ -117,6 +117,8 @@ export type AnalyticsEvent =
   | 'account_deleted'
   | 'search_initiated'
   | 'merchant_selected'
+  | 'auto_capture_handoff'
+  | 'auto_capture_manual_fallback'
   | 'search_abandoned';
 
 export interface AnalyticsPayload {

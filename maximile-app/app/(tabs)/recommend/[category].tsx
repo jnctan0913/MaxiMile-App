@@ -10,6 +10,8 @@ import {
   Easing,
   Image,
   ImageSourcePropType,
+  AppState,
+  AppStateStatus,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
@@ -28,8 +30,10 @@ import { Ionicons } from '@expo/vector-icons';
 import GlassCard from '../../../components/GlassCard';
 import CapProgressBar from '../../../components/CapProgressBar';
 import EmptyState from '../../../components/EmptyState';
-import { logRecommendationAction } from '../../../lib/analytics';
+import { logRecommendationAction, track } from '../../../lib/analytics';
 import { getCardImage } from '../../../constants/cardImages';
+import { openWallet, showWalletFallback } from '../../../lib/wallet';
+import { isDemoMode, getMockTransaction } from '../../../lib/demo-transaction-data';
 
 // ---------------------------------------------------------------------------
 // HealthHub-eligible cards (static map — no DB changes needed)
@@ -391,7 +395,11 @@ export default function RecommendResultScreen() {
     router.push(`/(tabs)/log?${logParams.toString()}`);
   };
 
-  const handleSmartPay = () => {
+  // Wallet-direct state (merchant search → Smart Pay skips pay screen)
+  const [walletOpen, setWalletOpen] = useState(false);
+  const walletOpenTime = useRef<number>(0);
+
+  const handleSmartPay = async () => {
     const topCard = results.find((r) => r.is_recommended) ?? results[0];
     logRecommendationAction({
       category: category,
@@ -401,10 +409,28 @@ export default function RecommendResultScreen() {
       via: 'recommendations',
     });
 
+    // When merchant is known from search, skip pay screen → open wallet directly
+    if (resolvedMerchantName) {
+      walletOpenTime.current = Date.now();
+      setWalletOpen(true);
+
+      const result = await openWallet();
+      track('wallet_opened', {
+        platform: result.platform,
+        success: result.success,
+        source: 'recommend_direct',
+      }, user?.id);
+
+      if (!result.success) {
+        showWalletFallback(topCard?.card_name);
+      }
+      return;
+    }
+
+    // No merchant — go to pay screen for location detection
     const payParams = new URLSearchParams();
     payParams.set('source', 'recommend_cta');
     payParams.set('category', category);
-    if (resolvedMerchantName) payParams.set('merchantName', resolvedMerchantName);
     if (subcategory) payParams.set('subcategory', subcategory);
     if (topCard) {
       payParams.set('cardId', topCard.card_id);
@@ -412,6 +438,65 @@ export default function RecommendResultScreen() {
     }
     router.push(`/pay?${payParams.toString()}`);
   };
+
+  // -----------------------------------------------------------------------
+  // Wallet return → auto-capture (merchant search direct flow)
+  // -----------------------------------------------------------------------
+  useEffect(() => {
+    if (!walletOpen) return;
+
+    const handleAppState = (nextState: AppStateStatus) => {
+      if (nextState === 'active' && walletOpenTime.current > 0) {
+        const elapsed = Date.now() - walletOpenTime.current;
+        if (elapsed < 60_000) {
+          const topCard = results.find((r) => r.is_recommended) ?? results[0];
+
+          if (isDemoMode()) {
+            const mockData = getMockTransaction(category || undefined);
+            const merchantForCapture = resolvedMerchantName || mockData.merchant;
+
+            track('auto_capture_handoff', {
+              source: 'demo_recommend_direct',
+              amount: mockData.amount,
+              merchant: merchantForCapture,
+              category: category,
+              demo_mode: true,
+            }, user?.id);
+
+            router.push({
+              pathname: '/auto-capture',
+              params: {
+                amount: mockData.amount,
+                merchant: merchantForCapture,
+                card: topCard
+                  ? `${topCard.bank} ${topCard.card_name}`
+                  : mockData.card,
+                ...(topCard ? { cardId: topCard.card_id } : {}),
+                source: 'shortcut',
+              },
+            });
+          } else {
+            // Production: navigate to pay screen in logging mode for auto-capture listening
+            const payParams = new URLSearchParams();
+            payParams.set('source', 'recommend_cta');
+            payParams.set('category', category);
+            if (resolvedMerchantName) payParams.set('merchantName', resolvedMerchantName);
+            if (subcategory) payParams.set('subcategory', subcategory);
+            if (topCard) {
+              payParams.set('cardId', topCard.card_id);
+              payParams.set('cardName', topCard.card_name);
+            }
+            router.push(`/pay?${payParams.toString()}`);
+          }
+        }
+        walletOpenTime.current = 0;
+        setWalletOpen(false);
+      }
+    };
+
+    const sub = AppState.addEventListener('change', handleAppState);
+    return () => sub.remove();
+  }, [walletOpen, results, category, subcategory, resolvedMerchantName, user, router]);
 
   // -----------------------------------------------------------------------
   // Loading state: skeleton screen
