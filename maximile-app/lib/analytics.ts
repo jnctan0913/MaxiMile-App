@@ -114,7 +114,10 @@ export type AnalyticsEvent =
   | 'onboarding_auto_capture_cta_tapped'
   | 'onboarding_auto_capture_skipped'
   | 'cap_breached'
-  | 'account_deleted';
+  | 'account_deleted'
+  | 'search_initiated'
+  | 'merchant_selected'
+  | 'search_abandoned';
 
 export interface AnalyticsPayload {
   event: AnalyticsEvent;

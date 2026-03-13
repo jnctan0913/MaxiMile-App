@@ -219,7 +219,8 @@ const skeletonStyles = StyleSheet.create({
  * - Edge case: all caps exhausted
  */
 export default function RecommendResultScreen() {
-  const { category, subcategory } = useLocalSearchParams<{ category: string; subcategory?: string }>();
+  const { category, subcategory, merchantName } = useLocalSearchParams<{ category: string; subcategory?: string; merchantName?: string }>();
+  const resolvedMerchantName = Array.isArray(merchantName) ? merchantName[0] : merchantName;
   const { user } = useAuth();
   const router = useRouter();
 
@@ -586,8 +587,8 @@ export default function RecommendResultScreen() {
     <>
       <Stack.Screen
         options={{
-          // Sprint 28: when a subcategory is selected, title shows the subcategory name
-          title: subcategoryInfo?.label ?? categoryInfo?.name ?? category,
+          // Sprint 34: merchantName takes priority, then subcategory, then category
+          title: resolvedMerchantName ?? subcategoryInfo?.label ?? categoryInfo?.name ?? category,
           headerBackTitle: subcategory ? 'Bills' : 'Back',
         }}
       />
@@ -663,6 +664,13 @@ export default function RecommendResultScreen() {
                     Some cards earn 4 mpd on hospital bills when paid via the HealthHub app (MCC changes from 8062 to 8099). Eligible cards: Citi Rewards, DBS Woman's World Card, HSBC Revolution.
                   </Text>
                 </View>
+              )}
+
+              {/* Sprint 34 — merchant name label when navigated from search */}
+              {resolvedMerchantName && (
+                <Text style={styles.merchantLabel}>
+                  Best card for {resolvedMerchantName}
+                </Text>
               )}
 
               {/* "USE THIS CARD" overline label */}
@@ -889,6 +897,15 @@ const styles = StyleSheet.create({
   listContent: {
     padding: Spacing.xl,
     paddingBottom: Spacing.xxxl + 40,
+  },
+
+  // Sprint 34 — merchant name label (from search)
+  merchantLabel: {
+    ...Typography.subheading,
+    color: Colors.brandGold,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
+    fontSize: 18,
   },
 
   // Overline labels

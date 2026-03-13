@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Platform,
   TouchableOpacity,
+  Keyboard,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,11 +19,15 @@ import { Colors, Spacing, Typography, BorderRadius } from '../../constants/theme
 import CategoryTile from '../../components/CategoryTile';
 import EmptyState from '../../components/EmptyState';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import MerchantSearchBar from '../../components/MerchantSearchBar';
+import MerchantAutocomplete from '../../components/MerchantAutocomplete';
+import { useMerchantSearch } from '../../hooks/useMerchantSearch';
 import { showNetworkErrorAlert } from '../../lib/error-handler';
 import { track } from '../../lib/analytics';
 import RateChangeBanner from '../../components/RateChangeBanner';
 import type { RateAlert } from '../../components/RateChangeBanner';
 import type { UserCard, UserRateChangeResult } from '../../lib/supabase-types';
+import type { MerchantEntry } from '../../lib/merchant-catalogue';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -55,6 +61,12 @@ export default function RecommendScreen() {
   const [userCards, setUserCards] = useState<UserCard[]>([]);
   const [rateAlerts, setRateAlerts] = useState<RateAlert[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Merchant search state (Sprint 34 — F42)
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const { results: searchResults, isSearching } = useMerchantSearch(searchQuery);
+  const prevResultsLengthRef = useRef(0);
 
   const suggestedCategory = useMemo(() => getSuggestedCategory(), []);
 
@@ -114,6 +126,57 @@ export default function RecommendScreen() {
     };
     fetchAlerts();
   }, [user]);
+
+  // -----------------------------------------------------------------------
+  // Merchant search analytics (Sprint 34 — F42)
+  // -----------------------------------------------------------------------
+  useEffect(() => {
+    if (searchResults.length > 0 && prevResultsLengthRef.current === 0) {
+      track('search_initiated', { query: searchQuery.trim() }, user?.id);
+    }
+    prevResultsLengthRef.current = searchResults.length;
+  }, [searchResults, searchQuery, user?.id]);
+
+  const handleMerchantSelect = useCallback(
+    (merchant: MerchantEntry) => {
+      track('merchant_selected', {
+        merchant_name: merchant.name,
+        category: merchant.categoryId,
+        subcategory: merchant.subcategory ?? '',
+      }, user?.id);
+
+      // Clear search and dismiss keyboard
+      setSearchQuery('');
+      setIsSearchFocused(false);
+      Keyboard.dismiss();
+
+      // Route based on category and subcategory
+      if (merchant.categoryId === 'bills' && merchant.subcategory) {
+        router.push(
+          `/recommend/${merchant.categoryId}?subcategory=${merchant.subcategory}&merchantName=${encodeURIComponent(merchant.name)}`
+        );
+      } else if (merchant.categoryId === 'bills') {
+        router.push('/(tabs)/bills-subcategory');
+      } else {
+        router.push(
+          `/recommend/${merchant.categoryId}?merchantName=${encodeURIComponent(merchant.name)}`
+        );
+      }
+    },
+    [router, user?.id]
+  );
+
+  const handleSearchClear = useCallback(() => {
+    if (searchQuery.trim().length >= 2) {
+      track('search_abandoned', { query: searchQuery.trim() }, user?.id);
+    }
+    setSearchQuery('');
+  }, [searchQuery, user?.id]);
+
+  const handleSearchBlur = useCallback(() => {
+    // Delay hiding autocomplete so onSelect has time to fire
+    setTimeout(() => setIsSearchFocused(false), 150);
+  }, []);
 
   // -----------------------------------------------------------------------
   // Navigation
@@ -186,6 +249,8 @@ export default function RecommendScreen() {
   // -----------------------------------------------------------------------
   // Render
   // -----------------------------------------------------------------------
+  const showAutocomplete = isSearchFocused && (searchResults.length > 0 || searchQuery.trim().length >= 2);
+
   return (
     <ImageBackground
       source={require('../../assets/background.png')}
@@ -193,12 +258,33 @@ export default function RecommendScreen() {
       imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
     >
       <SafeAreaView style={styles.safeArea} edges={[]}>
-        <View style={styles.content}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
           {/* Screen title */}
           <Text style={styles.screenTitle}>What are you spending on?</Text>
           <Text style={styles.screenSubtitle}>
             Tap a category to find your best card
           </Text>
+
+          {/* Merchant search bar (Sprint 34 — F42) */}
+          <MerchantSearchBar
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={handleSearchBlur}
+            onClear={handleSearchClear}
+          />
+
+          {/* Autocomplete dropdown */}
+          <MerchantAutocomplete
+            results={searchResults}
+            visible={showAutocomplete}
+            onSelect={handleMerchantSelect}
+            query={searchQuery}
+          />
 
           {/* 2-column grid for all 8 categories */}
           <View style={styles.categoryGrid}>
@@ -227,7 +313,7 @@ export default function RecommendScreen() {
               <Text style={styles.fabText}>Smart Pay</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </ImageBackground>
   );
@@ -246,8 +332,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
     paddingBottom: Platform.OS === 'ios' ? 88 : 72,
