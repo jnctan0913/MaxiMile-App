@@ -9,7 +9,8 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import { Stack, SplashScreen, useRouter } from 'expo-router';
+import { Stack, SplashScreen, useRouter, useSegments } from 'expo-router';
+import { trackEvent } from '../lib/analytics';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -151,6 +152,8 @@ function RootContent() {
     return () => shimmer.stop();
   }, []);
 
+  const segments = useSegments();
+
   // Fade out the loading overlay once auth resolves + flush buffered analytics
   useEffect(() => {
     if (!loading) {
@@ -164,6 +167,17 @@ function RootContent() {
       }).start();
     }
   }, [loading]);
+
+  // Track screen views
+  useEffect(() => {
+    const routeName = segments.join('/');
+    if (routeName) {
+      if (__DEV__) {
+        console.log(`[Analytics] screen_view: ${routeName}`);
+      }
+      trackEvent('screen_view', { screen_name: routeName });
+    }
+  }, [segments]);
 
   // Deep link handler — route maximile://log URLs to auto-capture screen
   useEffect(() => {
