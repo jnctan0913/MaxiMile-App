@@ -11,6 +11,7 @@ import {
   Alert,
   TouchableOpacity,
   Animated,
+  ActionSheetIOS,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -241,7 +242,7 @@ export default function TransactionsScreen() {
         user.id,
       );
 
-      if (error) throw new Error(error);
+      if (error) throw new Error(error); // sheet stays open and shows error
 
       // Track changed fields for analytics
       const changedFields: string[] = [];
@@ -256,8 +257,38 @@ export default function TransactionsScreen() {
         card_changed: update.card_id !== oldTx.card_id,
       }, user.id);
 
+      // Close sheet immediately
       setEditTarget(null);
-      await fetchTransactions();
+
+      // Optimistic update — re-apply changes to local state so the list
+      // reflects the edit instantly without waiting for the network round-trip.
+      // Re-sorts and re-groups so date changes move rows to the correct section.
+      setSections((prev) => {
+        const allTx = prev.flatMap((s) => s.data);
+        const updatedTx = allTx.map((t) => {
+          if (t.id !== id) return t;
+          return {
+            ...t,
+            amount: update.amount,
+            transaction_date: update.transaction_date,
+            category_id: update.category_id,
+            card_id: update.card_id,
+            // Resolve category name from local map; fall back to old value
+            categories: { name: CATEGORY_MAP[update.category_id]?.name ?? t.categories?.name ?? '' },
+            // Keep existing card name if card unchanged; re-fetch will correct it if changed
+            cards: update.card_id === t.card_id ? t.cards : t.cards,
+          };
+        });
+        // Re-sort descending by date then logged_at (mirrors the Supabase query order)
+        updatedTx.sort((a, b) => {
+          const dateCmp = b.transaction_date.localeCompare(a.transaction_date);
+          return dateCmp !== 0 ? dateCmp : b.logged_at.localeCompare(a.logged_at);
+        });
+        return groupByMonth(updatedTx);
+      });
+
+      // Background re-fetch to sync card names and any server-side changes
+      fetchTransactions();
     },
     [user, fetchTransactions],
   );
@@ -329,6 +360,42 @@ export default function TransactionsScreen() {
       }
     },
     [user, showUndo],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Long-press handler (alternative to swipe)
+  // ---------------------------------------------------------------------------
+
+  const handleLongPress = useCallback(
+    (item: TransactionRow) => {
+      openSwipeableRef.current?.close();
+      openSwipeableRef.current = null;
+
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            options: ['Edit', 'Delete', 'Cancel'],
+            destructiveButtonIndex: 1,
+            cancelButtonIndex: 2,
+          },
+          (buttonIndex) => {
+            if (buttonIndex === 0) handleEditOpen(item);
+            if (buttonIndex === 1) handleDeleteConfirm(item);
+          },
+        );
+      } else {
+        Alert.alert(
+          'Transaction',
+          undefined,
+          [
+            { text: 'Edit', onPress: () => handleEditOpen(item) },
+            { text: 'Delete', style: 'destructive', onPress: () => handleDeleteConfirm(item) },
+            { text: 'Cancel', style: 'cancel' },
+          ],
+        );
+      }
+    },
+    [handleEditOpen, handleDeleteConfirm],
   );
 
   // ---------------------------------------------------------------------------
@@ -442,7 +509,7 @@ export default function TransactionsScreen() {
                     {totalCount} transaction{totalCount !== 1 ? 's' : ''}
                   </Text>
                   <Text style={styles.swipeHint}>
-                    Swipe left to edit or delete
+                    Long-press or swipe left to edit or delete
                   </Text>
                 </View>
               }
@@ -459,7 +526,12 @@ export default function TransactionsScreen() {
                 const gradient = ICON_PALETTES[item.category_id] ?? DEFAULT_GRADIENT;
 
                 const rowContent = (
-                  <View style={styles.transactionRow}>
+                  <TouchableOpacity
+                    style={styles.transactionRow}
+                    onLongPress={() => handleLongPress(item)}
+                    activeOpacity={0.8}
+                    delayLongPress={400}
+                  >
                     <View style={styles.rowLeft}>
                       <LinearGradient
                         colors={gradient}
@@ -488,7 +560,7 @@ export default function TransactionsScreen() {
                         {formatDate(item.transaction_date)}
                       </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 );
 
                 return (
