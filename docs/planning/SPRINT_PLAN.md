@@ -8351,3 +8351,81 @@ Day 4–5:  QA (iOS + Android) + bug fixes
 ---
 
 **Sprint 36 Status**: 📋 PLANNED — Requires Sprint 34 (MerchantSearchBar in DOM) to be complete (already ✅ COMPLETED)
+
+---
+
+## Sprint 37: "Polish Pass" (F45 — Heuristic Usability Fixes)
+
+**Epic**: E24 — Usability Polish (Heuristic Evaluation)
+**Sprint Goal**: Address 7 usability issues from Nielsen heuristic evaluation + add inline password requirements on signup.
+**Duration**: 1 week (10 SP)
+**Source**: `maximile-app/testing/HEURISTIC_EVALUATION.md`
+
+### Sprint 37 — Stories
+
+| ID | Story | SP | Priority | Heuristic |
+|----|-------|----|----------|-----------|
+| S37.1 | **Help & FAQ screen** — Create `app/help.tsx` with "How It Works" 4-step summary + 6-section accordion FAQ (Getting Started, MPD, Caps, Recommendations, Flash Pay, Transactions). Link from Profile under new "Support" section. | 3 | P0 | H10 (F10.1) |
+| S37.2 | **Onboarding step indicator** — Create `OnboardingStepIndicator` component (step dots + "Step X of 3" label). Add to `onboarding.tsx` (1/3), `onboarding-auto-capture.tsx` (2/3), `onboarding-miles.tsx` (3/3). Skip indicator when accessed from "Add More Cards". | 1 | P1 | H1 (F1.1) |
+| S37.3 | **$0 transaction validation hint** — Show "Please enter a transaction amount" hint text in `log.tsx` when amount is 0 but category and card are selected. Button already disabled via `canSubmit`. | 0.5 | P1 | H5 (F5.1) |
+| S37.4 | **Long-press context menu** — Add `onLongPress` to transaction rows in `transactions.tsx` and `(tabs)/cards.tsx`. iOS: `ActionSheetIOS` with Edit/Delete/Cancel. Android/Web: `Alert` with same options. Update hint text to "Long-press or swipe left to edit or delete". | 1.5 | P1 | H6 (F6.1) |
+| S37.5 | **Info tooltips on complex UI** — Create `InfoTooltip` component (info-circle icon → modal with title, message, "Got it" button). Add to: mpd rate + cap progress bar in `recommend/[category].tsx`, Miles Saved stat in `earning-insights.tsx`. | 1.5 | P1 | H10 (F10.2) |
+| S37.6 | **Flash Pay back navigation** — Add "Change merchant or category" link below Log Transaction in `pay/index.tsx` result state. Resets state to `confirming`, clears recommendation/alternatives. | 0.5 | P1 | H3 (F3.2) |
+| S37.7 | **Flash Pay naming unification** — Replace all user-facing "Smart Pay" references with "Flash Pay" in `help.tsx` FAQ content. Internal analytics event names unchanged. | 0.5 | P1 | H2 (F2.2) |
+| S37.8 | **Signup password requirements** — Add inline real-time password requirements checklist below password field in `signup.tsx`. Shows checkmark/cross for: min 6 characters, passwords match. Updates live as user types. | 1.5 | P1 | H5 (new) |
+
+**Total**: 10 SP
+
+### Sprint 37 — Dependencies Map
+
+```
+S37.5 (InfoTooltip) ─── no deps (new component)
+S37.2 (StepIndicator) ── no deps (new component)
+S37.1 (Help screen) ──── S37.7 (naming must be unified before FAQ content is finalized)
+S37.3 (validation) ───── no deps
+S37.4 (long-press) ───── no deps
+S37.6 (back nav) ─────── no deps
+S37.8 (password) ─────── no deps
+```
+
+### Sprint 37 — Schedule
+
+```
+Day 1:  S37.2 (step indicator) + S37.3 (validation) + S37.7 (naming)
+Day 2:  S37.5 (tooltips) + S37.6 (back nav)
+Day 3:  S37.4 (long-press) + S37.8 (password requirements)
+Day 4:  S37.1 (Help/FAQ screen)
+Day 5:  QA + bug fixes
+```
+
+### Sprint 37 — New/Modified Files
+
+**New Files**:
+- `components/OnboardingStepIndicator.tsx` — Step progress bar with "Step X of N" label
+- `components/InfoTooltip.tsx` — Reusable info icon → modal tooltip
+- `app/help.tsx` — Help & FAQ screen with accordion sections
+
+**Modified Files**:
+- `app/(tabs)/log.tsx` — Validation hint text
+- `app/onboarding.tsx` — Step indicator (1/3)
+- `app/onboarding-auto-capture.tsx` — Step indicator (2/3)
+- `app/onboarding-miles.tsx` — Step indicator (3/3)
+- `app/transactions.tsx` — Long-press handler + hint text update
+- `app/(tabs)/cards.tsx` — Long-press handler + hint text update
+- `app/(tabs)/profile.tsx` — Help & FAQ menu link
+- `app/(tabs)/recommend/[category].tsx` — InfoTooltips on mpd + cap
+- `app/earning-insights.tsx` — InfoTooltip on Miles Saved
+- `app/pay/index.tsx` — Back nav button + naming fix
+- `app/(auth)/signup.tsx` — Inline password requirements checklist
+
+### Sprint 37 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|------------|
+| ActionSheetIOS not available on web | Low | Low | Web falls back to Alert-based menu (already handled) |
+| InfoTooltip modal conflicts with other modals | Low | Medium | Uses separate Modal instance, tested against EditTransactionSheet |
+| Supabase password rules stricter than displayed | Low | Medium | Current Supabase config only requires 6 chars; update requirements if config changes |
+
+---
+
+**Sprint 37 Status**: 🚧 IN PROGRESS — S37.1–S37.7 implemented, S37.8 pending

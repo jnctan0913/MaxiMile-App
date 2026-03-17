@@ -20,6 +20,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Colors, Spacing, Typography, BorderRadius, WebInputStyle } from '../constants/theme';
 import LoadingSpinner from '../components/LoadingSpinner';
+import OnboardingStepIndicator from '../components/OnboardingStepIndicator';
 import { showNetworkErrorAlert, handleSupabaseError } from '../lib/error-handler';
 import { track } from '../lib/analytics';
 
@@ -273,6 +274,7 @@ export default function OnboardingMilesScreen() {
       imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
     >
       <SafeAreaView style={styles.safeArea}>
+        <OnboardingStepIndicator currentStep={3} totalSteps={3} />
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}

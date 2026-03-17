@@ -112,6 +112,17 @@ export default function ProfileScreen() {
           />
         </View>
 
+        {/* Help */}
+        <Text style={styles.sectionLabel}>Support</Text>
+        <View style={styles.menuSection}>
+          <MenuItem
+            icon="help-circle-outline"
+            label="Help & FAQ"
+            onPress={() => router.push('/help')}
+            isLast
+          />
+        </View>
+
         {/* Community */}
         <Text style={styles.sectionLabel}>Community</Text>
         <View style={styles.menuSection}>
