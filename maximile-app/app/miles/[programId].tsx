@@ -18,7 +18,7 @@ import { Stack, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Colors, Typography, Spacing, BorderRadius } from '../../constants/theme';
+import { Colors, Typography, Spacing, BorderRadius, WebInputStyle } from '../../constants/theme';
 import GlassCard from '../../components/GlassCard';
 import BalanceBreakdown from '../../components/BalanceBreakdown';
 import BottomSheet from '../../components/BottomSheet';
@@ -1188,10 +1188,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
     textAlign: 'right',
+    ...WebInputStyle,
   },
   textInputField: {
     ...Typography.body,
     color: Colors.textPrimary,
+    ...WebInputStyle,
   },
   helperText: {
     ...Typography.caption,

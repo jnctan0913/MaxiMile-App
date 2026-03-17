@@ -257,7 +257,7 @@ export default function TransactionsScreen() {
       }, user.id);
 
       setEditTarget(null);
-      fetchTransactions();
+      await fetchTransactions();
     },
     [user, fetchTransactions],
   );
@@ -688,24 +688,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: Spacing.sm,
+    gap: Spacing.xs,
   },
   editAction: {
-    width: 72,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.brandGold,
-    alignSelf: 'stretch',
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
   },
   deleteAction: {
-    width: 72,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#E53E3E',
-    alignSelf: 'stretch',
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
   },
 
   // Undo snackbar

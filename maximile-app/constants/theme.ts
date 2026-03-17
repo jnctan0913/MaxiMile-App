@@ -169,6 +169,9 @@ export const Glass = {
   // NOT on: data lists, inputs, alternative cards, onboarding list
 } as const;
 
+/** Web-only: remove the browser focus outline ring from TextInputs */
+export const WebInputStyle = { outlineStyle: 'none' } as any;
+
 const Theme = {
   Colors,
   Spacing,

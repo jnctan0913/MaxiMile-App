@@ -12,7 +12,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { Colors, Spacing, BorderRadius, Shadows, WebInputStyle } from '../constants/theme';
 
 interface MerchantSearchBarProps {
   value: string;
@@ -92,6 +92,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.textPrimary,
     paddingVertical: 0,
-    outlineStyle: 'none',
-  } as any,
+    ...WebInputStyle,
+  },
 });

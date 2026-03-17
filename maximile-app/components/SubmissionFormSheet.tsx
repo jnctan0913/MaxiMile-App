@@ -20,6 +20,7 @@ import {
   Spacing,
   Typography,
   BorderRadius,
+  WebInputStyle,
 } from '../constants/theme';
 
 // ---------------------------------------------------------------------------
@@ -377,6 +378,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textPrimary,
     height: 44,
+    ...WebInputStyle,
   },
 
   // Text area — multiline
@@ -390,6 +392,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textPrimary,
     minHeight: 80,
+    ...WebInputStyle,
   },
 
   // Submit — gold button

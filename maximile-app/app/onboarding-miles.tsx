@@ -18,7 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, WebInputStyle } from '../constants/theme';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { showNetworkErrorAlert, handleSupabaseError } from '../lib/error-handler';
 import { track } from '../lib/analytics';
@@ -450,6 +450,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     padding: 0,
     height: 36,
+    ...WebInputStyle,
   },
   separator: {
     height: 1,

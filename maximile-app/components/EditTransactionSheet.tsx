@@ -24,7 +24,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import { CATEGORIES } from '../constants/categories';
 import { getCardImage } from '../constants/cardImages';
-import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, Shadows, WebInputStyle } from '../constants/theme';
 import type { TransactionUpdate } from '../lib/transactions';
 import { Image } from 'react-native';
 
@@ -472,6 +472,7 @@ const styles = StyleSheet.create({
     ...Typography.bodyBold,
     color: Colors.textPrimary,
     padding: 0,
+    ...WebInputStyle,
   },
 
   // Category chips
@@ -603,6 +604,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     ...Typography.caption,
     color: Colors.textPrimary,
+    ...WebInputStyle,
   },
 
   // Error

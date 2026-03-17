@@ -16,7 +16,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Colors, Spacing, Typography, BorderRadius } from '../../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, WebInputStyle } from '../../constants/theme';
 import MilesHeroSection from '../../components/MilesHeroSection';
 import MilesProgramCard from '../../components/MilesProgramCard';
 import SegmentedControl from '../../components/SegmentedControl';
@@ -943,6 +943,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
     textAlign: 'right',
+    ...WebInputStyle,
   },
   helperText: {
     ...Typography.caption,
