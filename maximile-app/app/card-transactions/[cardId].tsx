@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,14 @@ import {
   ImageBackground,
   Platform,
   RefreshControl,
+  Alert,
+  TouchableOpacity,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { CATEGORY_MAP } from '../../constants/categories';
@@ -20,6 +24,9 @@ import { Colors, Spacing, Typography, BorderRadius } from '../../constants/theme
 import EmptyState from '../../components/EmptyState';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { showNetworkErrorAlert } from '../../lib/error-handler';
+import EditTransactionSheet, { type EditableTransaction } from '../../components/EditTransactionSheet';
+import { updateTransaction, deleteTransaction, reinsertTransaction, type TransactionUpdate } from '../../lib/transactions';
+import { track } from '../../lib/analytics';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -39,6 +46,15 @@ interface TransactionRow {
 interface TransactionSection {
   title: string;
   data: TransactionRow[];
+}
+
+interface UndoState {
+  user_id: string;
+  card_id: string;
+  category_id: string;
+  amount: number;
+  transaction_date: string;
+  cardName: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -104,6 +120,17 @@ export default function CardTransactionsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Edit sheet
+  const [editTarget, setEditTarget] = useState<EditableTransaction | null>(null);
+
+  // Undo snackbar
+  const [undoData, setUndoData] = useState<UndoState | null>(null);
+  const undoAnim = useRef(new Animated.Value(0)).current;
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Track the currently open swipeable
+  const openSwipeableRef = useRef<Swipeable | null>(null);
+
   const displayName = cardName ? decodeURIComponent(cardName) : 'Card Transactions';
 
   const fetchTransactions = useCallback(async () => {
@@ -142,6 +169,200 @@ export default function CardTransactionsScreen() {
     fetchTransactions();
   };
 
+  // ---------------------------------------------------------------------------
+  // Undo snackbar helpers
+  // ---------------------------------------------------------------------------
+
+  const showUndo = useCallback((data: UndoState) => {
+    setUndoData(data);
+    Animated.spring(undoAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 80,
+      friction: 10,
+    }).start();
+
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    undoTimer.current = setTimeout(() => {
+      dismissUndo();
+    }, 5000);
+  }, [undoAnim]);
+
+  const dismissUndo = useCallback(() => {
+    Animated.timing(undoAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => setUndoData(null));
+    if (undoTimer.current) {
+      clearTimeout(undoTimer.current);
+      undoTimer.current = null;
+    }
+  }, [undoAnim]);
+
+  const handleUndo = useCallback(async () => {
+    if (!undoData) return;
+    dismissUndo();
+    const { error } = await reinsertTransaction(undoData);
+    if (!error) {
+      fetchTransactions();
+    }
+  }, [undoData, dismissUndo, fetchTransactions]);
+
+  useEffect(() => {
+    return () => {
+      if (undoTimer.current) clearTimeout(undoTimer.current);
+    };
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Edit handler
+  // ---------------------------------------------------------------------------
+
+  const handleEditOpen = useCallback((item: TransactionRow) => {
+    openSwipeableRef.current?.close();
+    openSwipeableRef.current = null;
+    setEditTarget({
+      id: item.id,
+      card_id: item.card_id,
+      category_id: item.category_id,
+      amount: item.amount,
+      transaction_date: item.transaction_date,
+      cards: item.cards,
+    });
+  }, []);
+
+  const handleSaveEdit = useCallback(
+    async (id: string, oldTx: EditableTransaction, update: TransactionUpdate) => {
+      if (!user) return;
+
+      const { error } = await updateTransaction(
+        id,
+        { card_id: oldTx.card_id, category_id: oldTx.category_id, transaction_date: oldTx.transaction_date },
+        update,
+        user.id,
+      );
+
+      if (error) throw new Error(error);
+
+      // Track changed fields for analytics
+      const changedFields: string[] = [];
+      if (update.amount !== oldTx.amount) changedFields.push('amount');
+      if (update.category_id !== oldTx.category_id) changedFields.push('category');
+      if (update.card_id !== oldTx.card_id) changedFields.push('card');
+      if (update.transaction_date !== oldTx.transaction_date) changedFields.push('date');
+
+      track('transaction_edited', {
+        changed_fields: changedFields.join(','),
+        category_changed: update.category_id !== oldTx.category_id,
+        card_changed: update.card_id !== oldTx.card_id,
+      }, user.id);
+
+      setEditTarget(null);
+      fetchTransactions();
+    },
+    [user, fetchTransactions],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Delete handler
+  // ---------------------------------------------------------------------------
+
+  const handleDeleteConfirm = useCallback(
+    (item: TransactionRow) => {
+      openSwipeableRef.current?.close();
+      openSwipeableRef.current = null;
+
+      const cardLabel = item.cards?.name ?? 'Unknown card';
+
+      const doDelete = async () => {
+        if (!user) return;
+
+        const { error } = await deleteTransaction(
+          item.id,
+          { card_id: item.card_id, category_id: item.category_id, transaction_date: item.transaction_date },
+          user.id,
+        );
+
+        if (error) {
+          if (Platform.OS === 'web') {
+            window.alert('Could not delete transaction. Please try again.');
+          } else {
+            Alert.alert('Error', 'Could not delete transaction. Please try again.');
+          }
+          return;
+        }
+
+        track('transaction_deleted', { had_undo: true }, user.id);
+
+        // Remove from local state immediately for instant feedback
+        setSections((prev) =>
+          prev
+            .map((section) => ({
+              ...section,
+              data: section.data.filter((t) => t.id !== item.id),
+            }))
+            .filter((section) => section.data.length > 0),
+        );
+
+        showUndo({
+          user_id: user.id,
+          card_id: item.card_id,
+          category_id: item.category_id,
+          amount: item.amount,
+          transaction_date: item.transaction_date,
+          cardName: cardLabel,
+        });
+      };
+
+      if (Platform.OS === 'web') {
+        if (window.confirm(`Delete Transaction?\n\nThis will adjust your cap tracking for ${cardLabel}.`)) {
+          doDelete();
+        }
+      } else {
+        Alert.alert(
+          'Delete Transaction?',
+          `This will adjust your cap tracking for ${cardLabel}.`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Delete', style: 'destructive', onPress: doDelete },
+          ],
+        );
+      }
+    },
+    [user, showUndo],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Swipe action renderer
+  // ---------------------------------------------------------------------------
+
+  const renderRightActions = useCallback(
+    (item: TransactionRow, _progress: Animated.AnimatedInterpolation<number>) => (
+      <View style={styles.swipeActions}>
+        <TouchableOpacity
+          style={styles.editAction}
+          onPress={() => handleEditOpen(item)}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="pencil" size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteAction}
+          onPress={() => handleDeleteConfirm(item)}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="trash" size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+    ),
+    [handleEditOpen, handleDeleteConfirm],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Loading state
+  // ---------------------------------------------------------------------------
+
   if (loading) {
     return (
       <>
@@ -166,6 +387,12 @@ export default function CardTransactionsScreen() {
   }
 
   const totalCount = sections.reduce((sum, s) => sum + s.data.length, 0);
+
+  // Undo snackbar slide translation
+  const undoTranslateY = undoAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [80, 0],
+  });
 
   return (
     <>
@@ -215,6 +442,9 @@ export default function CardTransactionsScreen() {
                   <Text style={styles.screenSubtitle}>
                     {totalCount} transaction{totalCount !== 1 ? 's' : ''}
                   </Text>
+                  <Text style={styles.swipeHint}>
+                    Swipe left to edit or delete
+                  </Text>
                 </View>
               }
               renderSectionHeader={({ section }) => (
@@ -229,7 +459,7 @@ export default function CardTransactionsScreen() {
                 const cardLabel = item.cards?.name ?? 'Unknown card';
                 const gradient = ICON_PALETTES[item.category_id] ?? DEFAULT_GRADIENT;
 
-                return (
+                const rowContent = (
                   <View style={styles.transactionRow}>
                     <View style={styles.rowLeft}>
                       <LinearGradient
@@ -261,12 +491,63 @@ export default function CardTransactionsScreen() {
                     </View>
                   </View>
                 );
+
+                return (
+                  <Swipeable
+                    ref={(ref) => {
+                      // No-op: we only track the currently open one via onSwipeableOpen
+                    }}
+                    renderRightActions={(progress) => renderRightActions(item, progress)}
+                    onSwipeableOpen={(direction) => {
+                      if (direction === 'right') {
+                        // Another row was already open — close it
+                        // (handled via ref below)
+                      }
+                    }}
+                    onSwipeableWillOpen={() => {
+                      // Close any previously open swipeable
+                      if (openSwipeableRef.current) {
+                        openSwipeableRef.current.close();
+                      }
+                    }}
+                    friction={2}
+                    rightThreshold={40}
+                    containerStyle={styles.swipeableContainer}
+                    childrenContainerStyle={styles.swipeableChildContainer}
+                  >
+                    {rowContent}
+                  </Swipeable>
+                );
               }}
               ItemSeparatorComponent={() => <View style={styles.separator} />}
             />
           )}
+
+          {/* Undo snackbar */}
+          {undoData && (
+            <Animated.View
+              style={[
+                styles.undoSnackbar,
+                { transform: [{ translateY: undoTranslateY }], opacity: undoAnim },
+              ]}
+            >
+              <Text style={styles.undoText}>Transaction deleted.</Text>
+              <TouchableOpacity onPress={handleUndo} activeOpacity={0.7}>
+                <Text style={styles.undoButton}>Undo</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
         </SafeAreaView>
       </ImageBackground>
+
+      {/* Edit sheet */}
+      <EditTransactionSheet
+        visible={editTarget !== null}
+        transaction={editTarget}
+        userId={user?.id ?? ''}
+        onSave={handleSaveEdit}
+        onDismiss={() => setEditTarget(null)}
+      />
     </>
   );
 }
@@ -309,6 +590,11 @@ const styles = StyleSheet.create({
     ...Typography.body,
     fontSize: 15,
     color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  swipeHint: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
     marginBottom: Spacing.sm,
   },
 
@@ -322,6 +608,15 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+
+  // Swipeable wrapper — must not clip the row shadow
+  swipeableContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  swipeableChildContainer: {
+    borderRadius: 16,
   },
 
   // Transaction rows — glass card style
@@ -387,5 +682,62 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: Spacing.sm,
+  },
+
+  // Swipe action buttons
+  swipeActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: Spacing.sm,
+  },
+  editAction: {
+    width: 72,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.brandGold,
+    alignSelf: 'stretch',
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+  },
+  deleteAction: {
+    width: 72,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E53E3E',
+    alignSelf: 'stretch',
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+
+  // Undo snackbar
+  undoSnackbar: {
+    position: 'absolute',
+    bottom: Spacing.lg,
+    left: Spacing.xl,
+    right: Spacing.xl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.brandCharcoal,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: { elevation: 6 },
+    }),
+  },
+  undoText: {
+    ...Typography.caption,
+    color: Colors.textInverse,
+  },
+  undoButton: {
+    ...Typography.captionBold,
+    color: Colors.brandGold,
   },
 });

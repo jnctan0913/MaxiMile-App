@@ -442,7 +442,7 @@ export default function TransactionsScreen() {
                     {totalCount} transaction{totalCount !== 1 ? 's' : ''}
                   </Text>
                   <Text style={styles.swipeHint}>
-                    {Platform.OS === 'web' ? 'Tap the icons to edit or delete' : 'Swipe left to edit or delete'}
+                    Swipe left to edit or delete
                   </Text>
                 </View>
               }
@@ -488,31 +488,8 @@ export default function TransactionsScreen() {
                         {formatDate(item.transaction_date)}
                       </Text>
                     </View>
-                    {Platform.OS === 'web' && (
-                      <View style={styles.webActions}>
-                        <TouchableOpacity
-                          style={styles.webEditBtn}
-                          onPress={() => handleEditOpen(item)}
-                          activeOpacity={0.7}
-                        >
-                          <Ionicons name="pencil" size={16} color={Colors.brandGold} />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={styles.webDeleteBtn}
-                          onPress={() => handleDeleteConfirm(item)}
-                          activeOpacity={0.7}
-                        >
-                          <Ionicons name="trash" size={16} color="#E53E3E" />
-                        </TouchableOpacity>
-                      </View>
-                    )}
                   </View>
                 );
-
-                // On web, Swipeable doesn't work — render row directly with inline buttons
-                if (Platform.OS === 'web') {
-                  return rowContent;
-                }
 
                 return (
                   <Swipeable
@@ -729,30 +706,6 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
-  },
-
-  // Web inline action buttons (replaces swipe on web)
-  webActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: Spacing.md,
-    gap: Spacing.sm,
-  },
-  webEditBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(197, 165, 90, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  webDeleteBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(229, 62, 62, 0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   // Undo snackbar
