@@ -4,7 +4,6 @@ import {
   Text,
   ImageBackground,
   StyleSheet,
-  Platform,
   TouchableOpacity,
   Keyboard,
   ScrollView,
@@ -12,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { CATEGORIES } from '../../constants/categories';
@@ -60,6 +60,7 @@ function getSuggestedCategory(): string | null {
 export default function RecommendScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const tabBarHeight = useBottomTabBarHeight();
   const [userCards, setUserCards] = useState<UserCard[]>([]);
   const [rateAlerts, setRateAlerts] = useState<RateAlert[]>([]);
   const [loading, setLoading] = useState(true);
@@ -274,7 +275,7 @@ export default function RecommendScreen() {
         <ScrollView
           ref={scrollViewRef}
           style={styles.scrollView}
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + Spacing.md }]}
           keyboardShouldPersistTaps="handled"
         >
           {/* Screen title */}
@@ -363,7 +364,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
-    paddingBottom: Platform.OS === 'ios' ? 88 : 72,
   },
   screenTitle: {
     ...Typography.heading,
