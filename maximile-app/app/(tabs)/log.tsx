@@ -83,10 +83,21 @@ export default function LogScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ category?: string; card?: string; merchantName?: string }>();
 
-  // Merchant name from recommend search flow
-  const merchantName = params.merchantName
-    ? (Array.isArray(params.merchantName) ? params.merchantName[0] : params.merchantName)
-    : undefined;
+  // Merchant name from recommend search flow — stored in local state so it
+  // can be cleared after logging or cancelling without affecting the URL.
+  const [merchantName, setMerchantName] = useState<string | undefined>(() =>
+    params.merchantName
+      ? (Array.isArray(params.merchantName) ? params.merchantName[0] : params.merchantName)
+      : undefined
+  );
+
+  // Clear URL params immediately after reading so returning to the tab
+  // doesn't re-show the merchant banner.
+  useEffect(() => {
+    if (params.merchantName) {
+      router.setParams({ merchantName: undefined });
+    }
+  }, [params.merchantName]);
 
   // Form state
   const [amountStr, setAmountStr] = useState('');
@@ -356,6 +367,7 @@ export default function LogScreen() {
     setPostTxnAlert(null);
     if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
     setAmountStr('');
+    setMerchantName(undefined);
   };
 
   // -------------------------------------------------------------------------
