@@ -75,7 +75,7 @@ export default function PrivacyPolicyContent() {
         <SectionHeading>3. How We Use Your Information</SectionHeading>
         <Bullet text="Provide personalised card recommendations" />
         <Bullet text="Track spending against monthly bonus caps" />
-        <Bullet text="Power the Smart Pay location-based suggestions" />
+        <Bullet text="Power the Flash Pay location-based suggestions" />
         <Bullet text="Improve app performance and fix bugs" />
         <Bullet text="Send important service updates (email, only when necessary)" />
       </View>
@@ -102,7 +102,7 @@ export default function PrivacyPolicyContent() {
         <BodyText>We use:</BodyText>
         <Bullet text="Supabase (database, authentication, hosting)" />
         <Bullet text="Expo / React Native (app framework and push notifications)" />
-        <Bullet text="Google Places API (merchant look-ups in Smart Pay)" />
+        <Bullet text="Google Places API (merchant look-ups in Flash Pay)" />
         <BodyText>
           These providers have their own privacy policies; we encourage you to
           review them.

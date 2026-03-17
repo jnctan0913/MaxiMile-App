@@ -808,7 +808,7 @@ export default function PayScreen() {
       <Stack.Screen
         options={{
           headerShown: true,
-          headerTitle: 'Smart Pay',
+          headerTitle: 'Flash Pay',
           headerBackTitle: 'Back',
           headerTintColor: Colors.brandGold,
           headerStyle: { backgroundColor: Colors.background },
@@ -949,7 +949,7 @@ export default function PayScreen() {
                       activeOpacity={0.8}
                     >
                       <Ionicons name="flash" size={20} color={Colors.brandCharcoal} />
-                      <Text style={styles.walletButtonText}>Smart Pay</Text>
+                      <Text style={styles.walletButtonText}>Flash Pay</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity

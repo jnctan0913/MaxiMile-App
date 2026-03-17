@@ -803,12 +803,6 @@ export default function RecommendResultScreen() {
                     <Text style={styles.topCardRate}>
                       {topPick.earn_rate_mpd.toFixed(1)} mpd
                     </Text>
-                    {topPick.conditions_note && (
-                      <View style={styles.conditionsRow}>
-                        <Ionicons name="information-circle-outline" size={14} color={Colors.textSecondary} />
-                        <Text style={styles.conditionsText}>{topPick.conditions_note}</Text>
-                      </View>
-                    )}
                     {topPick.min_spend_met === false && topPick.min_spend_threshold != null && (
                       <View style={styles.minSpendNudge}>
                         <Ionicons name="alert-circle" size={14} color="#F59E0B" />
@@ -882,7 +876,7 @@ export default function RecommendResultScreen() {
                 activeOpacity={0.8}
               >
                 <Ionicons name="flash" size={18} color={Colors.brandGold} />
-                <Text style={styles.smartPayCtaText}>Smart Pay</Text>
+                <Text style={styles.smartPayCtaText}>Flash Pay</Text>
               </TouchableOpacity>
 
               {/* Alternatives header */}
@@ -919,9 +913,6 @@ export default function RecommendResultScreen() {
                 <View style={styles.altInfo}>
                   <Text style={styles.altCardName}>{item.card_name}</Text>
                   <Text style={styles.altBank}>{item.bank}</Text>
-                  {item.conditions_note && (
-                    <Text style={styles.altConditions} numberOfLines={1}>{item.conditions_note}</Text>
-                  )}
                   {item.min_spend_met === false && item.min_spend_threshold != null && (
                     <Text style={styles.altMinSpendWarning} numberOfLines={1}>
                       Min spend ${item.min_spend_threshold.toLocaleString()}/mo not met
