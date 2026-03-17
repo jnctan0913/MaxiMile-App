@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     fontSize: 15,
     color: Colors.textSecondary,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   // 2-column grid
   categoryGrid: {
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
   categoryTileWrapper: {
     width: '50%',
     paddingHorizontal: Spacing.xs,
-    marginBottom: Spacing.sm,
+    marginBottom: 4,
   },
   // Empty state wrapper
   emptyContainer: {
