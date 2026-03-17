@@ -13,7 +13,41 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Platform,
 } from 'react-native';
+
+// ---------------------------------------------------------------------------
+// Cross-platform confirm helper
+// ---------------------------------------------------------------------------
+// Alert.alert with multiple buttons doesn't work on web — falls back to
+// window.confirm so demo controls work in Expo Web / Vercel previews.
+// ---------------------------------------------------------------------------
+
+function crossPlatformConfirm(
+  title: string,
+  message: string,
+  onConfirm: () => void,
+  destructive = false,
+) {
+  if (Platform.OS === 'web') {
+    if (window.confirm(`${title}\n\n${message}`)) {
+      onConfirm();
+    }
+  } else {
+    Alert.alert(title, message, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: destructive ? 'Reset' : 'Play', style: destructive ? 'destructive' : 'default', onPress: onConfirm },
+    ]);
+  }
+}
+
+function crossPlatformAlert(title: string, message: string) {
+  if (Platform.OS === 'web') {
+    window.alert(`${title}\n\n${message}`);
+  } else {
+    Alert.alert(title, message);
+  }
+}
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -70,50 +104,38 @@ export default function DemoControlsScreen() {
     sequence: typeof FEATURE_SHOWCASE_SEQUENCE,
     name: string
   ) => {
-    Alert.alert(
+    crossPlatformConfirm(
       'Play Demo Sequence',
       `This will show ${sequence.length} notifications over ${sequence[sequence.length - 1].delay / 1000} seconds.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Play',
-          onPress: () => {
-            playNotificationSequence(sequence, (notification) => {
-              showDemoNotification({
-                type: notification.type,
-                title: notification.title,
-                body: notification.body,
-              });
-            });
-
-            Alert.alert('Sequence Started', `${name} sequence is now playing.`);
-          },
-        },
-      ]
+      () => {
+        playNotificationSequence(sequence, (notification) => {
+          showDemoNotification({
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+          });
+        });
+        crossPlatformAlert('Sequence Started', `${name} sequence is now playing.`);
+      },
     );
   };
 
-  const handleResetDemoState = async () => {
-    Alert.alert(
+  const handleResetDemoState = () => {
+    crossPlatformConfirm(
       'Reset Demo State',
       'This will clear all demo-related AsyncStorage flags (notification shown flags, etc.). The app will behave as if it\'s a fresh install.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await AsyncStorage.removeItem('demo_notification_shown');
-              await AsyncStorage.removeItem('demo_auto_capture_onboarding_shown');
-              await AsyncStorage.removeItem('auto_capture_shortcut_setup_complete');
-              Alert.alert('Success', 'Demo state has been reset.');
-            } catch (err) {
-              Alert.alert('Error', 'Failed to reset demo state.');
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await AsyncStorage.removeItem('demo_notification_shown');
+          await AsyncStorage.removeItem('demo_auto_capture_onboarding_shown');
+          await AsyncStorage.removeItem('auto_capture_shortcut_setup_complete');
+          await AsyncStorage.removeItem('@maximile_recommend_coach_mark_done');
+          crossPlatformAlert('Success', 'Demo state has been reset.');
+        } catch (err) {
+          crossPlatformAlert('Error', 'Failed to reset demo state.');
+        }
+      },
+      true,
     );
   };
 
@@ -286,6 +308,32 @@ export default function DemoControlsScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Section: Coach Mark */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Coach Mark Tour</Text>
+          <Text style={styles.sectionDescription}>
+            Reset the Recommend tab coach mark to replay on next visit
+          </Text>
+
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={async () => {
+              await AsyncStorage.removeItem('@maximile_recommend_coach_mark_done');
+              crossPlatformAlert('Coach Mark Reset', 'The Recommend tab coach mark tour will show again on your next visit.');
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={styles.controlButtonContent}>
+              <Text style={styles.controlButtonIcon}>💡</Text>
+              <View style={styles.controlButtonText}>
+                <Text style={styles.controlButtonTitle}>Reset Coach Mark</Text>
+                <Text style={styles.controlButtonSubtitle}>Replay the 3-step Recommend tab tour</Text>
+              </View>
+            </View>
+            <Ionicons name="refresh-outline" size={24} color={Colors.brandGold} />
+          </TouchableOpacity>
+        </View>
+
         {/* Section: Reset Demo State */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Demo State</Text>
@@ -305,7 +353,7 @@ export default function DemoControlsScreen() {
                   Reset Demo State
                 </Text>
                 <Text style={styles.controlButtonSubtitle}>
-                  Clear all demo AsyncStorage flags
+                  Clear all demo AsyncStorage flags (incl. coach mark)
                 </Text>
               </View>
             </View>

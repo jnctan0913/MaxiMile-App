@@ -273,52 +273,60 @@ export default function TransactionsScreen() {
 
       const cardName = item.cards?.name ?? 'Unknown card';
 
-      Alert.alert(
-        'Delete Transaction?',
-        `This will adjust your cap tracking for ${cardName}.`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: async () => {
-              if (!user) return;
+      const doDelete = async () => {
+        if (!user) return;
 
-              const { error } = await deleteTransaction(
-                item.id,
-                { card_id: item.card_id, category_id: item.category_id, transaction_date: item.transaction_date },
-                user.id,
-              );
+        const { error } = await deleteTransaction(
+          item.id,
+          { card_id: item.card_id, category_id: item.category_id, transaction_date: item.transaction_date },
+          user.id,
+        );
 
-              if (error) {
-                Alert.alert('Error', 'Could not delete transaction. Please try again.');
-                return;
-              }
+        if (error) {
+          if (Platform.OS === 'web') {
+            window.alert('Could not delete transaction. Please try again.');
+          } else {
+            Alert.alert('Error', 'Could not delete transaction. Please try again.');
+          }
+          return;
+        }
 
-              track('transaction_deleted', { had_undo: true }, user.id);
+        track('transaction_deleted', { had_undo: true }, user.id);
 
-              // Remove from local state immediately for instant feedback
-              setSections((prev) =>
-                prev
-                  .map((section) => ({
-                    ...section,
-                    data: section.data.filter((t) => t.id !== item.id),
-                  }))
-                  .filter((section) => section.data.length > 0),
-              );
+        // Remove from local state immediately for instant feedback
+        setSections((prev) =>
+          prev
+            .map((section) => ({
+              ...section,
+              data: section.data.filter((t) => t.id !== item.id),
+            }))
+            .filter((section) => section.data.length > 0),
+        );
 
-              showUndo({
-                user_id: user.id,
-                card_id: item.card_id,
-                category_id: item.category_id,
-                amount: item.amount,
-                transaction_date: item.transaction_date,
-                cardName,
-              });
-            },
-          },
-        ],
-      );
+        showUndo({
+          user_id: user.id,
+          card_id: item.card_id,
+          category_id: item.category_id,
+          amount: item.amount,
+          transaction_date: item.transaction_date,
+          cardName,
+        });
+      };
+
+      if (Platform.OS === 'web') {
+        if (window.confirm(`Delete Transaction?\n\nThis will adjust your cap tracking for ${cardName}.`)) {
+          doDelete();
+        }
+      } else {
+        Alert.alert(
+          'Delete Transaction?',
+          `This will adjust your cap tracking for ${cardName}.`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Delete', style: 'destructive', onPress: doDelete },
+          ],
+        );
+      }
     },
     [user, showUndo],
   );
@@ -433,7 +441,9 @@ export default function TransactionsScreen() {
                   <Text style={styles.screenSubtitle}>
                     {totalCount} transaction{totalCount !== 1 ? 's' : ''}
                   </Text>
-                  <Text style={styles.swipeHint}>Swipe left to edit or delete</Text>
+                  <Text style={styles.swipeHint}>
+                    {Platform.OS === 'web' ? 'Tap the icons to edit or delete' : 'Swipe left to edit or delete'}
+                  </Text>
                 </View>
               }
               renderSectionHeader={({ section }) => (
@@ -447,6 +457,62 @@ export default function TransactionsScreen() {
                 const categoryName = item.categories?.name ?? categoryInfo?.name ?? item.category_id;
                 const cardLabel = item.cards?.name ?? 'Unknown card';
                 const gradient = ICON_PALETTES[item.category_id] ?? DEFAULT_GRADIENT;
+
+                const rowContent = (
+                  <View style={styles.transactionRow}>
+                    <View style={styles.rowLeft}>
+                      <LinearGradient
+                        colors={gradient}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.rowIconCircle}
+                      >
+                        <Ionicons
+                          name={iconName as keyof typeof Ionicons.glyphMap}
+                          size={18}
+                          color="#FFFFFF"
+                        />
+                      </LinearGradient>
+                      <View style={styles.rowDetails}>
+                        <Text style={styles.rowCategory}>{categoryName}</Text>
+                        <Text style={styles.rowCard} numberOfLines={1}>
+                          {cardLabel}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.rowRight}>
+                      <Text style={styles.rowAmount}>
+                        ${item.amount.toFixed(2)}
+                      </Text>
+                      <Text style={styles.rowDate}>
+                        {formatDate(item.transaction_date)}
+                      </Text>
+                    </View>
+                    {Platform.OS === 'web' && (
+                      <View style={styles.webActions}>
+                        <TouchableOpacity
+                          style={styles.webEditBtn}
+                          onPress={() => handleEditOpen(item)}
+                          activeOpacity={0.7}
+                        >
+                          <Ionicons name="pencil" size={16} color={Colors.brandGold} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.webDeleteBtn}
+                          onPress={() => handleDeleteConfirm(item)}
+                          activeOpacity={0.7}
+                        >
+                          <Ionicons name="trash" size={16} color="#E53E3E" />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                );
+
+                // On web, Swipeable doesn't work — render row directly with inline buttons
+                if (Platform.OS === 'web') {
+                  return rowContent;
+                }
 
                 return (
                   <Swipeable
@@ -471,36 +537,7 @@ export default function TransactionsScreen() {
                     containerStyle={styles.swipeableContainer}
                     childrenContainerStyle={styles.swipeableChildContainer}
                   >
-                    <View style={styles.transactionRow}>
-                      <View style={styles.rowLeft}>
-                        <LinearGradient
-                          colors={gradient}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 1 }}
-                          style={styles.rowIconCircle}
-                        >
-                          <Ionicons
-                            name={iconName as keyof typeof Ionicons.glyphMap}
-                            size={18}
-                            color="#FFFFFF"
-                          />
-                        </LinearGradient>
-                        <View style={styles.rowDetails}>
-                          <Text style={styles.rowCategory}>{categoryName}</Text>
-                          <Text style={styles.rowCard} numberOfLines={1}>
-                            {cardLabel}
-                          </Text>
-                        </View>
-                      </View>
-                      <View style={styles.rowRight}>
-                        <Text style={styles.rowAmount}>
-                          ${item.amount.toFixed(2)}
-                        </Text>
-                        <Text style={styles.rowDate}>
-                          {formatDate(item.transaction_date)}
-                        </Text>
-                      </View>
-                    </View>
+                    {rowContent}
                   </Swipeable>
                 );
               }}
@@ -692,6 +729,30 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
+  },
+
+  // Web inline action buttons (replaces swipe on web)
+  webActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: Spacing.md,
+    gap: Spacing.sm,
+  },
+  webEditBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(197, 165, 90, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  webDeleteBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(229, 62, 62, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Undo snackbar
