@@ -39,11 +39,14 @@ export default function CoachMarkOverlay({ step, spotRect, onNext, onSkip }: Coa
     }).start();
   }, [step]);
 
-  const isBottomHalf = spotRect.y > screenHeight / 2;
+  const MARGIN = PAD + 16;
+  const spaceBelow = screenHeight - (spotRect.y + spotRect.height + MARGIN);
+  const spaceAbove = spotRect.y - MARGIN;
+  const showAbove = spaceAbove > spaceBelow;
 
-  const tooltipPosition = isBottomHalf
-    ? { bottom: screenHeight - spotRect.y + PAD + 16, left: 16, right: 16 }
-    : { top: spotRect.y + spotRect.height + PAD + 16, left: 16, right: 16 };
+  const tooltipPosition = showAbove
+    ? { bottom: screenHeight - spotRect.y + MARGIN, left: 16, right: 16, maxHeight: spaceAbove - 8 }
+    : { top: spotRect.y + spotRect.height + MARGIN, left: 16, right: 16, maxHeight: Math.max(spaceBelow - 8, 120) };
 
   const currentStep = STEPS[step];
 
@@ -133,7 +136,7 @@ export default function CoachMarkOverlay({ step, spotRect, onNext, onSkip }: Coa
           <Text style={styles.tooltipTitle}>{currentStep.title}</Text>
           <Text style={styles.tooltipDescription}>{currentStep.description}</Text>
           <View style={styles.tooltipFooter}>
-            <TouchableOpacity onPress={onSkip} activeOpacity={0.7}>
+            <TouchableOpacity onPress={onSkip} activeOpacity={0.7} style={{ outline: 'none' } as any}>
               <Text style={styles.skipText}>Skip</Text>
             </TouchableOpacity>
             <TouchableOpacity
