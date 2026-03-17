@@ -490,6 +490,11 @@ export default function LogScreen() {
             })}
           </ScrollView>
 
+          {/* Validation hint */}
+          {parsedAmount === 0 && selectedCategory !== null && selectedCardId !== null && (
+            <Text style={styles.validationHint}>Please enter a transaction amount</Text>
+          )}
+
           {/* Date + Confirm row */}
           <View style={styles.dateConfirmRow}>
             <View style={styles.dateRow}>
@@ -799,6 +804,14 @@ const styles = StyleSheet.create({
   },
   cardChipNameActive: {
     color: Colors.brandCharcoal,
+  },
+
+  // Validation hint
+  validationHint: {
+    ...Typography.caption,
+    color: Colors.brandGold,
+    textAlign: 'center',
+    marginBottom: Spacing.xs,
   },
 
   // Date + Confirm row

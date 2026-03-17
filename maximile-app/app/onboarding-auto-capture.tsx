@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
 import { track } from '../lib/analytics';
 import { useAuth } from '../contexts/AuthContext';
+import OnboardingStepIndicator from '../components/OnboardingStepIndicator';
 
 // ---------------------------------------------------------------------------
 // Detect actual device OS on web via user-agent
@@ -147,6 +148,7 @@ export default function OnboardingAutoCaptureScreen() {
       imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
     >
       <SafeAreaView style={styles.safeArea}>
+        <OnboardingStepIndicator currentStep={2} totalSteps={3} />
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Log Without Typing</Text>

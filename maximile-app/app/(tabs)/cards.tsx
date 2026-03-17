@@ -10,6 +10,7 @@ import {
   Alert,
   TouchableOpacity,
   Animated,
+  ActionSheetIOS,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -335,6 +336,42 @@ export default function TransactionsTabScreen() {
   );
 
   // ---------------------------------------------------------------------------
+  // Long-press handler (alternative to swipe)
+  // ---------------------------------------------------------------------------
+
+  const handleLongPress = useCallback(
+    (item: TransactionRow) => {
+      openSwipeableRef.current?.close();
+      openSwipeableRef.current = null;
+
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            options: ['Edit', 'Delete', 'Cancel'],
+            destructiveButtonIndex: 1,
+            cancelButtonIndex: 2,
+          },
+          (buttonIndex) => {
+            if (buttonIndex === 0) handleEditOpen(item);
+            if (buttonIndex === 1) handleDeleteConfirm(item);
+          },
+        );
+      } else {
+        Alert.alert(
+          'Transaction',
+          undefined,
+          [
+            { text: 'Edit', onPress: () => handleEditOpen(item) },
+            { text: 'Delete', style: 'destructive', onPress: () => handleDeleteConfirm(item) },
+            { text: 'Cancel', style: 'cancel' },
+          ],
+        );
+      }
+    },
+    [handleEditOpen, handleDeleteConfirm],
+  );
+
+  // ---------------------------------------------------------------------------
   // Swipe action renderer
   // ---------------------------------------------------------------------------
 
@@ -406,7 +443,7 @@ export default function TransactionsTabScreen() {
                   {totalCount} transaction{totalCount !== 1 ? 's' : ''}
                 </Text>
                 <Text style={styles.swipeHint}>
-                  Swipe left to edit or delete
+                  Long-press or swipe left to edit or delete
                 </Text>
               </View>
             }
@@ -423,7 +460,12 @@ export default function TransactionsTabScreen() {
               const gradient = ICON_PALETTES[item.category_id] ?? DEFAULT_GRADIENT;
 
               const rowContent = (
-                <View style={styles.transactionRow}>
+                <TouchableOpacity
+                  style={styles.transactionRow}
+                  onLongPress={() => handleLongPress(item)}
+                  activeOpacity={0.8}
+                  delayLongPress={400}
+                >
                   <View style={styles.rowLeft}>
                     <LinearGradient
                       colors={gradient}
@@ -452,7 +494,7 @@ export default function TransactionsTabScreen() {
                       {formatDate(item.transaction_date)}
                     </Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
 
               return (
