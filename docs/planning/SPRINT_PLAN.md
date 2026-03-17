@@ -1,11 +1,11 @@
 # Sprint Plan: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 17.0
+**Version**: 20.0
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
-**Source**: PRD v2.10, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0, AUDIT_MILELION_VS_RANKINGS v1.0
-**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprint 21 ✅ COMPLETED (F30 + F32 Condition Transparency), Sprint 22 ✅ COMPLETED (Min Spend Enforcement), Sprints 23-24 ✅ COMPLETED (Card Expansion 22→29 + UOB Lady's Solitaire UX), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01), Sprint 29 ✅ COMPLETED (Earn Rate Refresh — MileLion March 2026 Audit Phase 5), Sprint 30 Planned (DBS yuu Card Integration), Sprint 31 Planned (SC Smart Card Bonus Tiers), Sprint 32 Planned (Auto-Capture Setup Carousel), Sprint 33 ✅ COMPLETED (Navigation Restructure), Sprint 34 Planned (Merchant Search)
-**Change Log**: v18.0 — Added Sprint 34 "Merchant Search" (F42, Epic E21). 6 stories, 20 SP, 2 weeks. Client-side merchant search on Recommend home screen with ~200 curated Singapore merchants, fuzzy prefix/substring ranking, 120ms debounce, Bills subcategory routing, merchant context on recommendation page, analytics events. Supersedes original F9 placeholder (RICE 467) with fully specified F42 (RICE 3200). New files: merchant-catalogue.ts, useMerchantSearch.ts, MerchantSearchBar.tsx, MerchantAutocomplete.tsx. Source: `docs/planning/MERCHANT_SEARCH_PLAN.md`. v17.0 — Added Sprint 33 "Navigation Restructure" (F41, Epic E20). Merges My Cards + Cap Status tabs into single "My Cards" tab, promotes Transaction History to dedicated "Transactions" tab, adds "See Transactions" button to Card Detail, removes Transaction History from Profile. 5 stories, 8 SP, 0.5 weeks. v16.0 — Added Sprint 30 "DBS yuu Card Integration" (F37, Epic E18) and Sprint 31 "SC Smart Card Bonus Tiers" (F38, Epic E19). Sprint 30: 8 stories, 18 SP, 2 weeks — adds DBS yuu AMEX + DBS yuu Visa as cards #30-31, 10 mpd grocery/food delivery bonus rules, caps, AMEX acceptance warning, rankings update. Sprint 31: 7 stories, 16 SP, 2 weeks — models SC Smart Card tiered cashback-to-miles equivalence (5.6/7.42/9.28 mpd), requires policy decision on cashback-to-miles conversion, recommend() logic update for tiered earn rates. v15.0 — Added Sprint 29 "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5) and Epic E17 (Earn Rate Accuracy). 8 stories, 14 SP, 1 week. Corrects 7 earn rate/cap discrepancies: DBS Altitude travel bonus removed (4.0→1.2 mpd), HSBC Revolution cap $1,000→$1,500, DBS Woman's World cap $2,000→$1,000, UOB Lady's Card added to groceries, HSBC Revolution added to travel, KrisFlyer UOB transport 2.0→2.4 mpd, UOB PP transport verified. DBS yuu Card and SC Smart Card bonus tiers deferred to Sprint 30+. Source: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`. v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
+**Source**: PRD v2.13, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0, AUDIT_MILELION_VS_RANKINGS v1.0
+**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprint 21 ✅ COMPLETED (F30 + F32 Condition Transparency), Sprint 22 ✅ COMPLETED (Min Spend Enforcement), Sprints 23-24 ✅ COMPLETED (Card Expansion 22→29 + UOB Lady's Solitaire UX), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01), Sprint 29 ✅ COMPLETED (Earn Rate Refresh — MileLion March 2026 Audit Phase 5), Sprint 30 Planned (DBS yuu Card Integration), Sprint 31 Planned (SC Smart Card Bonus Tiers), Sprint 32 Planned (Auto-Capture Setup Carousel), Sprint 33 ✅ COMPLETED (Navigation Restructure), Sprint 34 ✅ COMPLETED (Merchant Search + Real Logos), Sprint 35 Planned (Transaction Entry Correction)
+**Change Log**: v20.0 — Sprint 34 marked COMPLETED. All 6 stories shipped (merchant catalogue, search hook, autocomplete UI, routing integration, merchant context header, analytics). Added merchant logo assets: 162 real brand logos (64×64 PNG) replace placeholders in `assets/merchants/` — 152 downloaded via Google Favicon API, 10 sourced manually. New files added: `constants/merchantImages.ts` (static require map). Source: PRD v2.13. v19.0 — Added Sprint 35 "Transaction Entry Correction" (F43, Epic E22). 5 stories, 14 SP, 1.5 weeks. Swipe-to-reveal Edit and Delete actions on transaction rows; Edit bottom sheet reuses Log form components with pre-filled fields (amount, category, card, date); Supabase UPDATE + spending_state recalculation on save; Delete with confirmation alert and optional 5-second undo snackbar; Supabase DELETE + spending_state decrement; analytics events transaction_edited and transaction_deleted. Addresses permanent data entry errors that silently corrupt cap tracking. Modified files: transactions.tsx (swipe gesture + actions), log.tsx or new EditTransactionSheet.tsx (bottom sheet), analytics.ts. v18.0 — Added Sprint 34 "Merchant Search" (F42, Epic E21). 6 stories, 20 SP, 2 weeks. Client-side merchant search on Recommend home screen with ~200 curated Singapore merchants, fuzzy prefix/substring ranking, 120ms debounce, Bills subcategory routing, merchant context on recommendation page, analytics events. Supersedes original F9 placeholder (RICE 467) with fully specified F42 (RICE 3200). New files: merchant-catalogue.ts, useMerchantSearch.ts, MerchantSearchBar.tsx, MerchantAutocomplete.tsx. Source: `docs/planning/MERCHANT_SEARCH_PLAN.md`. v17.0 — Added Sprint 33 "Navigation Restructure" (F41, Epic E20). Merges My Cards + Cap Status tabs into single "My Cards" tab, promotes Transaction History to dedicated "Transactions" tab, adds "See Transactions" button to Card Detail, removes Transaction History from Profile. 5 stories, 8 SP, 0.5 weeks. v16.0 — Added Sprint 30 "DBS yuu Card Integration" (F37, Epic E18) and Sprint 31 "SC Smart Card Bonus Tiers" (F38, Epic E19). Sprint 30: 8 stories, 18 SP, 2 weeks — adds DBS yuu AMEX + DBS yuu Visa as cards #30-31, 10 mpd grocery/food delivery bonus rules, caps, AMEX acceptance warning, rankings update. Sprint 31: 7 stories, 16 SP, 2 weeks — models SC Smart Card tiered cashback-to-miles equivalence (5.6/7.42/9.28 mpd), requires policy decision on cashback-to-miles conversion, recommend() logic update for tiered earn rates. v15.0 — Added Sprint 29 "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5) and Epic E17 (Earn Rate Accuracy). 8 stories, 14 SP, 1 week. Corrects 7 earn rate/cap discrepancies: DBS Altitude travel bonus removed (4.0→1.2 mpd), HSBC Revolution cap $1,000→$1,500, DBS Woman's World cap $2,000→$1,000, UOB Lady's Card added to groceries, HSBC Revolution added to travel, KrisFlyer UOB transport 2.0→2.4 mpd, UOB PP transport verified. DBS yuu Card and SC Smart Card bonus tiers deferred to Sprint 30+. Source: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`. v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
 
@@ -112,6 +112,7 @@ All 5 agents work **simultaneously across 4 phases** with staggered starts:
 | **E19** | SC Smart Card Bonus Tiers | F38 | P0 | Sprint 31 |
 | **E20** | Navigation Restructure | F41 | P1 | Sprint 33 |
 | **E21** | Merchant-Driven Discovery | F42 | P1 | Sprint 34 |
+| **E22** | Transaction Data Integrity | F43 | P1 | Sprint 35 |
 
 **Critical Path**: F5 (Rules DB) → F1 (Card Setup) → F2 (Recommendation) → F4 (Transaction Log) → F3 (Cap Tracker)
 
@@ -7897,13 +7898,456 @@ S34.1 (Catalogue Data)
 - `hooks/useMerchantCatalogue.ts` — Memoised catalogue loader
 - `hooks/useMerchantSearch.ts` — Debounced query → ranked results
 - `components/MerchantSearchBar.tsx` — TextInput with clear button
-- `components/MerchantAutocomplete.tsx` — FlatList dropdown
+- `components/MerchantAutocomplete.tsx` — FlatList dropdown with merchant logos
+- `constants/merchantImages.ts` — Static `require()` map for 162 merchant logo PNGs
 
 **Modified Files**:
 - `app/(tabs)/index.tsx` — Add search bar + handle merchant selection
 - `app/(tabs)/recommend/[category].tsx` — Accept merchantName param, adapt header
 - `lib/analytics.ts` — Add search event types
 
+**Asset Files**:
+- `assets/merchants/*.png` — 162 real merchant logos (64×64 PNG), replacing placeholder images. 152 sourced via Google Favicon API (128px downloaded, resized to 64×64 with PIL LANCZOS), 10 sourced manually (Jollibean, Collin's, Stuff'd, LiHO, EZ-Link, BlueSG, Qoo10, Mustafa Centre, Meidi-Ya, Sinopec)
+
 ---
 
-**Sprint 34 Status**: 📋 PLANNED — Ready to start (no dependencies)
+**Sprint 34 Status**: ✅ COMPLETED — All 6 stories shipped. Merchant search bar with autocomplete on Recommend tab, category routing, Bills subcategory routing, "Best card for [Merchant]" header, analytics events. 162 real merchant logos (64×64 PNG) replace placeholders in `assets/merchants/` — 152 downloaded via Google Favicon API, 10 sourced manually.
+
+---
+
+## Sprint 35: "Transaction Correction" (F43 — Transaction Entry Correction)
+
+**Duration**: 1.5 weeks (7–8 working days)
+**Sprint Goal**: Enable users to edit or delete a wrongly logged transaction from the Transactions tab, with immediate recalculation of cap tracking so that data accuracy is self-healing.
+**Epic**: E22 — Transaction Data Integrity
+**PRD Features**: F43 (P1, RICE 1012)
+**Phase**: v2.4 — Data Quality & Trust
+**Predecessor**: Sprint 33 (F41 Navigation Restructure — Transactions tab must exist as a promoted tab)
+**Story Points**: 14
+
+---
+
+### Sprint 35 — Definition of Ready (DoR) Checklist
+
+Before any story enters the sprint, it must satisfy:
+
+- [ ] User story has clear "As a... I want... So that..." statement
+- [ ] Acceptance criteria defined in Given/When/Then format
+- [ ] Story point estimate agreed by team
+- [ ] `transactions` table schema and `spending_state` recalculation logic confirmed with Data Engineer
+- [ ] Supabase RLS policies confirmed: users can only UPDATE/DELETE their own rows
+- [ ] Log tab form components (amount input, category picker, card picker, date picker) confirmed reusable as a bottom sheet
+- [ ] UI swipe-gesture library availability confirmed (React Native Gesture Handler already installed via Expo)
+
+### Sprint 35 — Definition of Done (DoD) Checklist
+
+A story is "Done" when:
+
+- [ ] Feature works as described in all acceptance criteria
+- [ ] Works on both iOS and web (Expo Go + Vercel)
+- [ ] No TypeScript errors (`npx tsc --noEmit` passes)
+- [ ] Supabase RLS verified: UPDATE/DELETE blocked for non-owner rows
+- [ ] spending_state totals recalculate correctly after edit and delete
+- [ ] Analytics events fire in `__DEV__` console
+- [ ] Destructive actions (delete) guarded by confirmation dialog
+- [ ] `npx expo export --platform web` build succeeds
+- [ ] Code committed to main branch
+
+---
+
+### Sprint 35 — Stories
+
+| ID | Story | Priority | Points | Owner |
+|----|-------|----------|--------|-------|
+| **S35.1** | Swipe-to-reveal Edit and Delete actions on transaction rows | P0 | 3 | Developer |
+| **S35.2** | Edit transaction bottom sheet (pre-filled form, all fields editable) | P0 | 5 | Developer |
+| **S35.3** | Backend: UPDATE transaction + recalculate spending_state | P0 | 3 | Software Engineer |
+| **S35.4** | Delete transaction with confirmation + spending_state adjustment | P0 | 2 | Developer |
+| **S35.5** | Analytics events (transaction_edited, transaction_deleted) | P1 | 1 | Developer |
+| **Total** | | | **14** | |
+
+---
+
+### Sprint 35 — User Story Details
+
+#### S35.1: Swipe-to-Reveal Actions on Transaction Rows
+
+> **As a** user who made a logging error, **I want** to swipe left on a transaction to reveal Edit and Delete options, **so that** I can fix or remove incorrect entries without leaving the Transactions screen.
+
+**Priority**: P0 — entry point for the entire feature
+**Story Points**: 3
+**Feature**: F43
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Transactions tab with logged entries | User swipes left on any transaction row | A gold "Edit" button (pencil icon) and a red "Delete" button (trash icon) are revealed on the right side of the row |
+| AC2 | Swipe actions are revealed | User swipes right or taps elsewhere | Actions are dismissed and the row returns to its resting position |
+| AC3 | Transactions tab is empty | Screen renders | No gesture handler interference; empty state renders normally |
+| AC4 | User swipes left on a row | Actions revealed | Row width, icon, amount, and date layout remain undistorted |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T35.01: Wrap `transactionRow` in `Swipeable` (React Native Gesture Handler) with `renderRightActions` returning gold Edit + red Delete buttons | Developer | 2h |
+| T35.02: Style action buttons (gold `#C5A55A` for Edit, `#E53E3E` for Delete, each 72px wide, full row height, centered icon) | Developer | 1h |
+| T35.03: Ensure swipe does not conflict with `SectionList` vertical scroll on iOS and Android | Developer | 0.5h |
+
+---
+
+#### S35.2: Edit Transaction Bottom Sheet
+
+> **As a** user who logged the wrong card, category, amount, or date, **I want** to open a pre-filled edit form by tapping the Edit action, **so that** I can correct any field and save the updated entry without re-entering all data.
+
+**Priority**: P0 — core edit flow
+**Story Points**: 5
+**Feature**: F43
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Edit action tapped | Bottom sheet opens | All four fields pre-populated: amount (existing), category (existing), card (existing), date (existing) |
+| AC2 | User changes any field | "Save Changes" tapped | Form shows loading state while Supabase call is in-flight |
+| AC3 | Save succeeds | Response received | Bottom sheet closes, transaction list refreshes with updated values |
+| AC4 | Save fails (network error) | Response received | Error message shown inline; bottom sheet stays open; user can retry |
+| AC5 | User taps outside or pulls down | Bottom sheet dismisses | No changes are saved; original entry unchanged |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T35.04: Create `components/EditTransactionSheet.tsx` — Modal bottom sheet wrapping amount TextInput, category picker (7 categories), card picker (user's portfolio), date picker | Developer | 3h |
+| T35.05: Pre-populate all fields from the selected `TransactionRow` props on mount | Developer | 0.5h |
+| T35.06: Wire "Save Changes" button to S35.3 update handler; show ActivityIndicator during in-flight call | Developer | 1h |
+| T35.07: Handle error state with inline error message (red text below Save button) | Developer | 0.5h |
+
+**Dependencies**: S35.1, S35.3
+
+---
+
+#### S35.3: Backend — UPDATE Transaction + Recalculate spending_state
+
+> **As a** developer, **I want** a function that atomically updates a transaction and recalculates the affected `spending_state` record, **so that** cap tracking reflects corrections immediately.
+
+**Priority**: P0 — blocks S35.2 and S35.4
+**Story Points**: 3
+**Feature**: F43
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Transaction row exists | UPDATE called with new amount/card/category/date | Supabase `transactions` row reflects new values |
+| AC2 | Card or category changed | UPDATE applied | Old `spending_state` total decremented by old amount; new `spending_state` total incremented by new amount |
+| AC3 | Amount changed only | UPDATE applied | Same card + category `spending_state` total adjusted by the delta (new amount − old amount) |
+| AC4 | UPDATE attempted by non-owner | RLS policy enforced | 403 returned; no data changed |
+| AC5 | Month boundary change (date changed across months) | UPDATE applied | `spending_state` for old month decremented; `spending_state` for new month incremented |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T35.08: Create `lib/transactions.ts` function `updateTransaction(id, oldTx, newTx)` — calls Supabase UPDATE then calls `recalculateSpendingState()` | Software Engineer | 2h |
+| T35.09: Implement `recalculateSpendingState(userId, cardId, categoryId, month)` — re-sums all transactions for that user/card/category/month and upserts to `spending_state` | Software Engineer | 1h |
+| T35.10: Verify Supabase RLS policy: `UPDATE ON transactions WHERE user_id = auth.uid()` | Software Engineer | 0.5h |
+
+---
+
+#### S35.4: Delete Transaction with Confirmation + spending_state Adjustment
+
+> **As a** user who logged a transaction that shouldn't exist (duplicate or entirely wrong), **I want** to delete it after confirming, with a brief undo window, **so that** I can clean up my history without worrying about accidental taps.
+
+**Priority**: P0
+**Story Points**: 2
+**Feature**: F43
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | Delete action tapped | Alert shown | Confirmation alert reads "Delete Transaction?" with body "This will adjust your cap tracking for [card name]." and buttons "Cancel" (safe) / "Delete" (destructive, red) |
+| AC2 | User taps "Delete" | Supabase DELETE called | Transaction removed from list; `spending_state` total for the transaction's card/category/month decremented by the transaction amount |
+| AC3 | Delete succeeds | Operation complete | 5-second undo snackbar appears at bottom of screen: "Transaction deleted. Undo?" |
+| AC4 | User taps "Undo" within 5 seconds | Undo triggered | Transaction re-inserted to Supabase; `spending_state` re-incremented; snackbar dismissed |
+| AC5 | DELETE attempted by non-owner | RLS policy enforced | 403 returned; no data changed |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T35.11: Wire Delete swipe action to `Alert.alert()` with destructive confirm | Developer | 0.5h |
+| T35.12: Create `lib/transactions.ts` function `deleteTransaction(id, tx)` — Supabase DELETE + `recalculateSpendingState()` | Developer | 0.5h |
+| T35.13: Implement 5-second undo snackbar using `Animated` (slide-up, auto-dismiss); on "Undo" tap, call `insertTransaction(tx)` and re-increment spending_state | Developer | 1h |
+
+**Dependencies**: S35.1, S35.3
+
+---
+
+#### S35.5: Analytics Events
+
+> **As the** product team, **I want** analytics events for edit and delete actions, **so that** we can measure how often users correct data and which fields are most commonly changed.
+
+**Priority**: P1
+**Story Points**: 1
+**Feature**: F43
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC1 | User saves a corrected transaction | Event fires | `transaction_edited` with `{ changed_fields: string[], category_changed: boolean, card_changed: boolean }` |
+| AC2 | User confirms deletion | Event fires | `transaction_deleted` with `{ had_undo: boolean }` (true if undo was available; false if they confirmed and undo expired) |
+
+**Task Breakdown**:
+
+| Task | Owner | Est. |
+|------|-------|------|
+| T35.14: Add `transaction_edited` and `transaction_deleted` event types to analytics type union in `lib/analytics.ts` | Developer | 0.5h |
+| T35.15: Instrument events in `EditTransactionSheet.tsx` on save and in delete handler | Developer | 0.5h |
+
+**Dependencies**: S35.2, S35.4
+
+---
+
+### Sprint 35 — Dependencies Map
+
+```
+S35.3 (Backend: UPDATE + spending_state recalc)
+  └── S35.1 (Swipe-to-reveal actions)
+        ├── S35.2 (Edit bottom sheet) ─── depends on S35.3
+        │     └── S35.5 (Analytics)
+        └── S35.4 (Delete + undo) ──────── depends on S35.3
+              └── S35.5 (Analytics)
+```
+
+**Critical Path**: S35.3 → S35.1 → S35.2 → [done]
+**Parallel Track**: S35.4 can be built in parallel with S35.2 (both depend on S35.1 and S35.3)
+
+---
+
+### Sprint 35 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|------------|
+| spending_state recalculation misses edge case: transaction date change crosses month boundary | Medium | High | AC5 in S35.3 explicitly covers this; write a test case that moves a transaction from Jan→Feb and validates both months' spending_state |
+| Swipe gesture conflicts with SectionList vertical scroll on Android | Medium | Medium | Use `Swipeable` from `react-native-gesture-handler` (already available via Expo); test on Android Expo Go on Day 1 |
+| User deletes a transaction and cannot undo (snackbar dismissed before realising) | Low | Medium | 5-second window is standard iOS/Android pattern; if feedback warrants it, post-sprint consideration to extend to 10 seconds |
+| Bottom sheet reuse of Log form: category picker or card picker breaks in sheet context | Low | Medium | Extract pickers into reusable components early (T35.04); test sheet open/close on both platforms before wiring up save |
+| RLS not enforced on UPDATE/DELETE | Low | High | T35.10 explicitly verifies this; Supabase dashboard review before ship |
+
+---
+
+### Sprint 35 — Schedule
+
+| Days | Focus | Exit Criteria |
+|------|-------|---------------|
+| **Day 1** | S35.3 (backend logic + RLS verification) | `updateTransaction()` and `deleteTransaction()` tested with `spending_state` validation |
+| **Days 2-3** | S35.1 (swipe gesture on both platforms) | Gold Edit and red Delete buttons revealed on left-swipe; no scroll conflict |
+| **Days 4-5** | S35.2 (edit bottom sheet) | Pre-filled form opens, all fields editable, save triggers update and closes sheet |
+| **Day 6** | S35.4 (delete with confirmation + undo snackbar) | Confirm alert + delete + undo flow works end-to-end; cap totals correct after each |
+| **Day 7** | S35.5 (analytics) + QA + build | Events fire in `__DEV__`; `npx expo export --platform web` succeeds |
+| **Day 8 (buffer)** | Edge cases, regression testing | No regressions on transaction log, cap tracker, or recommendation engine |
+
+---
+
+### Sprint 35 — New/Modified Files
+
+**New Files**:
+- `components/EditTransactionSheet.tsx` — Pre-filled edit form as a modal bottom sheet
+
+**Modified Files**:
+- `app/(tabs)/cards.tsx` (transactions.tsx) — Add `Swipeable` wrapper with Edit/Delete actions; wire to EditTransactionSheet and delete handler
+- `lib/transactions.ts` — Add `updateTransaction()`, `deleteTransaction()`, `recalculateSpendingState()` functions
+- `lib/analytics.ts` — Add `transaction_edited` and `transaction_deleted` event types
+
+---
+
+**Sprint 35 Status**: 📋 PLANNED — Requires Sprint 33 (Transactions tab) to be complete (already ✅ COMPLETED)
+
+---
+
+## Sprint 36: "First Impression" (F44 — Recommend Tab Coach Mark Tour)
+
+> Introduce new users to the three transaction entry paths (Merchant Search, Category Tiles, FAB) via a one-time 3-step coach mark overlay on the Recommend tab. Renames the Recommend tab FAB from "Smart Pay" to "Quick Pick". Renames the Smart Pay screen to "Flash Pay" (e-wallet trigger with location-based card detection).
+
+**Sprint Goal**: New users completing onboarding see a sequential coach mark tour on their first Recommend tab visit. Tour shows exactly once, is fully skippable, and fires the correct analytics events for each transition.
+
+**Duration**: 1 week | **Story Points**: 10 | **Priority**: P1.5 — Onboarding UX
+
+### Sprint 36 — Stories
+
+| ID | Story | Priority | Size | SP | Assignee |
+|----|-------|----------|------|----|----------|
+| **S36.1** | Coach mark hook + AsyncStorage gate | M | S | 2 | Developer |
+| **S36.2** | CoachMarkOverlay component (spotlight + tooltip bubble) | M | M | 3 | Developer + Designer |
+| **S36.3** | Wire coach mark into `index.tsx` (refs, trigger, render) | M | S | 2 | Developer |
+| **S36.4** | Label renames: FAB "Smart Pay" → "Quick Pick"; screen "Smart Pay" → "Flash Pay" | M | XS | 1 | Developer |
+| **S36.5** | Analytics events + QA (iOS + Android) | M | S | 2 | Developer + Tester |
+
+### Sprint 36 — Story Details
+
+#### S36.1: Coach Mark Hook + AsyncStorage Gate
+
+> **As a** developer, **I want** a `useCoachMark` hook that reads/writes AsyncStorage to determine whether the tour should be shown, **so that** the overlay fires exactly once per device install.
+
+**Files**: `hooks/useCoachMark.ts` (new)
+
+| AC | Given | When | Then |
+|----|-------|------|------|
+| AC1 | Fresh install, key absent | Recommend tab focuses | `coachMarkVisible = true` after cards load |
+| AC2 | Tour previously dismissed | Recommend tab focuses | `coachMarkVisible = false`, no overlay |
+| AC3 | User has 0 cards | Recommend tab focuses | `coachMarkVisible = false` (nothing to recommend yet) |
+| AC4 | User taps Got it on step 3 | Step 3 displayed | AsyncStorage key `@maximile_recommend_coach_mark_done` written as `'true'` |
+| AC5 | User taps Skip at any step | Any step displayed | AsyncStorage key written immediately; overlay dismissed |
+
+**Tasks**:
+| ID | Task | Assignee | Est |
+|----|------|----------|-----|
+| T36.01 | Create `hooks/useCoachMark.ts` with AsyncStorage read/write, in-memory `hasChecked` flag, step state, and `measureStep` using `ref.current.measureInWindow()` | Developer | 3h |
+| T36.02 | Add 100ms settle delay and width=0 guard before showing overlay | Developer | 0.5h |
+| T36.03 | Unit test: key absent → show; key present → hide; 0 cards → hide | Tester | 1h |
+
+#### S36.2: CoachMarkOverlay Component
+
+> **As a** new user, **I want** a clear visual spotlight highlighting each feature with a concise explanation, **so that** I understand what each entry path does without reading a manual.
+
+**Files**: `components/CoachMarkOverlay.tsx` (new)
+
+**Step content**:
+| Step | Target | Title | Description |
+|------|--------|-------|-------------|
+| 1 | Merchant Search bar | "Know where you're spending?" | "Type a merchant like 'Starbucks' or 'Grab' — we find the right card instantly." |
+| 2 | Category tile grid | "Spending by category?" | "Tap Dining, Transport, Shopping and more to see your best card for each type." |
+| 3 | FAB button | "At the checkout?" | "Tap [FAB name] — we detect where you are and open your best card automatically." |
+
+**Spotlight technique**: 4 `View` rects (top / left / right / bottom) with `rgba(0,0,0,0.72)` background surrounding the target bounding box. Gold `borderWidth: 2` ring overlay on cutout. Tooltip above spotlight if target is in bottom half of screen (handles FAB edge case).
+
+**Rendering**: Transparent `Modal` with `statusBarTranslucent={true}` and `animationType="none"` (manual Animated.timing fade, matching `BottomSheet.tsx` pattern).
+
+| AC | Given | When | Then |
+|----|-------|------|------|
+| AC1 | Step 1 active | Overlay renders | Merchant search bar area is spotlit with gold border; tooltip below |
+| AC2 | Step 2 active | Overlay renders | Category grid area is spotlit; tooltip below |
+| AC3 | Step 3 active | Overlay renders | FAB button spotlit; tooltip **above** (bottom-half of screen) |
+| AC4 | Any step | User taps outside tooltip | Nothing (overlay is not dismissible by background tap — prevents accidental dismiss) |
+| AC5 | Step 1 or 2 | User taps Next | Overlay advances to next step; scroll + re-measure fires |
+| AC6 | Step 3 | User taps Got it | Overlay fades out and is unmounted |
+
+**Tasks**:
+| ID | Task | Assignee | Est |
+|----|------|----------|-----|
+| T36.04 | Design tooltip bubble — step dots, title, body, Next/Got it button, Skip link (follow brand gold + `Colors`, `Typography`, `BorderRadius` from `constants/theme.ts`) | Designer | 2h |
+| T36.05 | Implement 4-rect spotlight cutout with gold border ring | Developer | 2h |
+| T36.06 | Implement tooltip bubble with above/below positioning logic | Developer | 1.5h |
+| T36.07 | Wire `onRequestClose` → dismiss for Android back button | Developer | 0.5h |
+| T36.08 | Manual test spotlight positioning on iPhone SE (small) and iPhone 15 Pro Max (large) | Tester | 1h |
+
+#### S36.3: Wire into `index.tsx`
+
+> **As a** developer, **I want** the coach mark trigger wired into the Recommend screen with `useFocusEffect`, **so that** the overlay fires at the correct moment and refs correctly point to the three target elements.
+
+**Files**: `app/(tabs)/index.tsx` (modified)
+
+| AC | Given | When | Then |
+|----|-------|------|------|
+| AC1 | First focus after onboarding | Cards loaded | Coach mark fires; step 1 spotlight on search bar |
+| AC2 | Subsequent tab focuses | Any state | No overlay shown |
+| AC3 | User navigates to step 3 | FAB may be off-screen | `scrollViewRef.current.scrollToEnd()` called before measuring |
+
+**Tasks**:
+| ID | Task | Assignee | Est |
+|----|------|----------|-----|
+| T36.09 | Add `scrollViewRef`, `searchBarRef`, `categoryGridRef`, `fabRef` declarations | Developer | 0.5h |
+| T36.10 | Wrap `<MerchantSearchBar>` in `<View ref={searchBarRef}>`, add `ref={categoryGridRef}` to categoryGrid View, add `ref={fabRef}` to fabRow View | Developer | 0.5h |
+| T36.11 | Call `useCoachMark` and add `useFocusEffect` trigger after `fetchUserCards` resolves | Developer | 1h |
+| T36.12 | Render `<CoachMarkOverlay>` conditionally at bottom of return JSX | Developer | 0.5h |
+
+#### S36.4: FAB Label Rename
+
+> **As a** user at the point of payment, **I want** the FAB button label to immediately convey that the app auto-selects the best card for me, **so that** I know to use it without prior explanation.
+
+**Files**: `app/(tabs)/index.tsx`, `app/pay/index.tsx`, `lib/analytics.ts` (string update only)
+
+| AC | Given | When | Then |
+|----|-------|------|------|
+| AC1 | Any user | Views Recommend tab | FAB shows "Quick Pick" (not "Smart Pay") |
+| AC2 | Any user | Views Flash Pay screen header | Header title shows "Flash Pay" |
+| AC3 | Analytics | FAB tapped | `smart_pay_opened` event retained (or updated per analytics decision) |
+
+**Tasks**:
+| ID | Task | Assignee | Est |
+|----|------|----------|-----|
+| T36.13 | Replace all "Smart Pay" strings with confirmed new label in `index.tsx` and `pay/index.tsx` | Developer | 0.5h |
+| T36.14 | Update coach mark step 3 tooltip copy to reference new label | Developer | 0.25h |
+
+#### S36.5: Analytics + QA
+
+**Tasks**:
+| ID | Task | Assignee | Est |
+|----|------|----------|-----|
+| T36.15 | Add `track('coach_mark_shown', { step })`, `track('coach_mark_advanced', { from_step })`, `track('coach_mark_skipped', { at_step })`, `track('coach_mark_completed')` calls | Developer | 1h |
+| T36.16 | E2E test — fresh install → onboard → Recommend tab → coach mark shows step 1→2→3→dismiss → subsequent visit: no overlay | Tester | 1h |
+| T36.17 | E2E test — skip path: coach mark shows → skip at step 1 → subsequent visit: no overlay | Tester | 0.5h |
+| T36.18 | Test on Android (Expo Go) — spotlight positions correct, tab bar covered by Modal | Tester | 0.5h |
+
+### Sprint 36 — Definition of Ready (DoR)
+
+- [ ] F44 spec approved (this document)
+- [ ] FAB label name confirmed (naming decision made before T36.13)
+- [ ] Coach mark step copy reviewed and signed off
+- [ ] Sprint 34 complete (MerchantSearchBar in DOM — required for ref attachment)
+
+### Sprint 36 — Definition of Done (DoD)
+
+- [ ] Coach mark shows on first Recommend tab visit post-onboarding
+- [ ] Coach mark never shows again after dismiss or skip
+- [ ] All 3 spotlight positions visually correct on iOS and Android
+- [ ] FAB label updated across all surfaces
+- [ ] All 4 analytics events fire correctly
+- [ ] 0 regressions on Recommend tab (tiles, search, FAB all functional during and after tour)
+
+### Sprint 36 — Dependencies Map
+
+```
+S36.1 (hook) ──────────────────────────► S36.3 (wire into index.tsx)
+S36.2 (component) ─────────────────────► S36.3
+S36.4 (FAB rename) ─────────────────────► S36.3 (tooltip copy references new label)
+S36.3 + S36.4 ──────────────────────────► S36.5 (QA)
+Sprint 34 (MerchantSearchBar) ──────────► S36.3 (ref attachment to search bar)
+```
+
+### Sprint 36 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|------------|
+| `measureInWindow` returns zeros on first render | Medium | High | 100ms settle delay + width=0 guard → fail silently (no overlay) rather than broken spotlight |
+| Spotlight mispositioned on Android due to status bar height difference | Medium | Medium | Use `statusBarTranslucent={true}` on Modal; test on Android emulator before ship |
+| Tab bar not covered by overlay | Low | High | Transparent Modal renders above native tab bar; confirmed pattern from BottomSheet.tsx |
+| FAB scroll position: off-screen when step 3 activates | Medium | Medium | `scrollToEnd()` before measuring step 3; 300ms animation wait before `measureInWindow` |
+
+### Sprint 36 — Schedule
+
+```
+Day 1–2:  S36.1 (hook) + S36.4 (rename)
+Day 2–3:  S36.2 (component design + implementation)
+Day 3–4:  S36.3 (wire into index.tsx) + S36.5 (analytics)
+Day 4–5:  QA (iOS + Android) + bug fixes
+```
+
+### Sprint 36 — New/Modified Files
+
+**New Files**:
+- `components/CoachMarkOverlay.tsx` — Spotlight overlay with 4-rect dim, gold border ring, tooltip bubble
+- `hooks/useCoachMark.ts` — AsyncStorage gate, step state, `measureInWindow` measurement logic
+
+**Modified Files**:
+- `app/(tabs)/index.tsx` — Add 4 refs, `useCoachMark` call, `useFocusEffect` trigger, ref attachments to 3 targets, `<CoachMarkOverlay>` render
+- `app/pay/index.tsx` — Update screen title / header string from "Smart Pay" to new label
+- `lib/analytics.ts` — Add coach mark event types
+
+---
+
+**Sprint 36 Status**: 📋 PLANNED — Requires Sprint 34 (MerchantSearchBar in DOM) to be complete (already ✅ COMPLETED)

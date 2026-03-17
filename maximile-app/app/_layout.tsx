@@ -208,7 +208,7 @@ function RootContent() {
           name="pay/index"
           options={{
             headerShown: true,
-            headerTitle: 'Smart Pay',
+            headerTitle: 'Flash Pay',
             headerBackTitle: 'Back',
             headerTintColor: Colors.brandGold,
             headerStyle: { backgroundColor: Colors.background },

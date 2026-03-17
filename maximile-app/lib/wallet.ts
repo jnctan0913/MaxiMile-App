@@ -137,7 +137,7 @@ export async function openWallet(): Promise<WalletOpenResult> {
     return {
       success: false,
       platform,
-      error: 'Open MaxiMile on your phone to use Smart Pay.',
+      error: 'Open MaxiMile on your phone to use Flash Pay.',
     };
   }
 

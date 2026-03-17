@@ -9,12 +9,14 @@ import React from 'react';
 import {
   View,
   Text,
+  Image,
   FlatList,
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
 import { Colors, Spacing, BorderRadius, Shadows, Typography } from '../constants/theme';
 import { CATEGORY_MAP } from '../constants/categories';
+import { getMerchantImage } from '../constants/merchantImages';
 import type { MerchantEntry } from '../lib/merchant-catalogue';
 
 interface MerchantAutocompleteProps {
@@ -51,12 +53,22 @@ export default function MerchantAutocomplete({
           scrollEnabled={false}
           renderItem={({ item }) => {
             const category = CATEGORY_MAP[item.categoryId];
+            const logoSource = item.logo ? getMerchantImage(item.logo) : undefined;
             return (
               <TouchableOpacity
                 style={styles.row}
                 onPress={() => onSelect(item)}
                 activeOpacity={0.7}
               >
+                {logoSource ? (
+                  <Image source={logoSource} style={styles.logo} />
+                ) : (
+                  <View style={styles.logoFallback}>
+                    <Text style={styles.logoFallbackText}>
+                      {item.name.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                )}
                 <Text style={styles.merchantName} numberOfLines={1}>
                   {item.name}
                 </Text>
@@ -76,6 +88,8 @@ export default function MerchantAutocomplete({
   );
 }
 
+const LOGO_SIZE = 32;
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -93,6 +107,28 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Colors.borderLight,
+  },
+  logo: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+    borderRadius: LOGO_SIZE / 2,
+    marginRight: Spacing.sm,
+    backgroundColor: Colors.borderLight,
+  },
+  logoFallback: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+    borderRadius: LOGO_SIZE / 2,
+    marginRight: Spacing.sm,
+    backgroundColor: 'rgba(197, 165, 90, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoFallbackText: {
+    ...Typography.label,
+    color: Colors.brandGold,
+    fontSize: 14,
+    fontWeight: '600',
   },
   merchantName: {
     ...Typography.body,

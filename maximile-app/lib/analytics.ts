@@ -119,7 +119,9 @@ export type AnalyticsEvent =
   | 'merchant_selected'
   | 'auto_capture_handoff'
   | 'auto_capture_manual_fallback'
-  | 'search_abandoned';
+  | 'search_abandoned'
+  | 'transaction_edited'
+  | 'transaction_deleted';
 
 export interface AnalyticsPayload {
   event: AnalyticsEvent;
