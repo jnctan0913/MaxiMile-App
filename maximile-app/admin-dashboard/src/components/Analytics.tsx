@@ -102,7 +102,7 @@ export default function Analytics() {
   const [retentionCohorts, setRetentionCohorts] = useState<RetentionCohort[]>([]);
   const [featureAdoption, setFeatureAdoption] = useState<FeatureAdoption[]>([]);
   const [categorySpending, setCategorySpending] = useState<CategorySpending[]>([]);
-  const [errorSummary, setErrorSummary] = useState<ErrorSummary[]>([]);
+  const [_errorSummary, setErrorSummary] = useState<ErrorSummary[]>([]);
 
   // Computed metrics
   const [metrics, setMetrics] = useState({
