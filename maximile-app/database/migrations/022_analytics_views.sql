@@ -118,13 +118,17 @@ COMMENT ON VIEW v_notification_funnel
 
 
 -- #############################################################################
--- ADDITIONAL INDEX: Composite index for date-range + event queries
+-- GRANTS: Allow PostgREST API access to views
 -- #############################################################################
--- The admin dashboard filters by date range and groups by event type.
--- This index speeds up the most common dashboard query pattern.
+-- The admin dashboard queries these views via Supabase's auto-generated REST API
+-- (PostgREST). Views must have SELECT grants for the relevant roles.
 
-CREATE INDEX IF NOT EXISTS idx_analytics_events_date_event
-  ON analytics_events (created_at::date, event);
+GRANT SELECT ON v_active_users TO anon, authenticated, service_role;
+GRANT SELECT ON v_event_daily TO anon, authenticated, service_role;
+GRANT SELECT ON v_onboarding_funnel TO anon, authenticated, service_role;
+GRANT SELECT ON v_smart_pay_funnel TO anon, authenticated, service_role;
+GRANT SELECT ON v_notification_funnel TO anon, authenticated, service_role;
+GRANT SELECT ON maru_monthly TO anon, authenticated, service_role;
 
 
 COMMIT;
