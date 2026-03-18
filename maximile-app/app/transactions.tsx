@@ -19,7 +19,7 @@ import { Stack } from 'expo-router';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { CATEGORY_MAP } from '../constants/categories';
+import { CATEGORY_MAP, BILLS_SUBCATEGORIES } from '../constants/categories';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
 import EmptyState from '../components/EmptyState';
@@ -37,6 +37,7 @@ interface TransactionRow {
   id: string;
   card_id: string;
   category_id: string;
+  subcategory?: string | null;
   amount: number;
   transaction_date: string;
   logged_at: string;
@@ -101,6 +102,12 @@ function groupByMonth(transactions: TransactionRow[]): TransactionSection[] {
   }));
 }
 
+function getBillsDisplayName(subcategory: string | null | undefined): string {
+  if (!subcategory) return 'Bills';
+  const sub = BILLS_SUBCATEGORIES.find((s) => s.id === subcategory);
+  return sub ? `Bills - ${sub.label}` : 'Bills';
+}
+
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-SG', {
@@ -141,7 +148,7 @@ export default function TransactionsScreen() {
     try {
       const { data, error } = await supabase
         .from('transactions')
-        .select('id, card_id, category_id, amount, transaction_date, logged_at, cards(bank, name), categories(name)')
+        .select('id, card_id, category_id, subcategory, amount, transaction_date, logged_at, cards(bank, name), categories(name)')
         .eq('user_id', user.id)
         .order('transaction_date', { ascending: false })
         .order('logged_at', { ascending: false })
@@ -225,6 +232,7 @@ export default function TransactionsScreen() {
       id: item.id,
       card_id: item.card_id,
       category_id: item.category_id,
+      subcategory: item.subcategory ?? null,
       amount: item.amount,
       transaction_date: item.transaction_date,
       cards: item.cards,
@@ -273,6 +281,7 @@ export default function TransactionsScreen() {
             transaction_date: update.transaction_date,
             category_id: update.category_id,
             card_id: update.card_id,
+            subcategory: update.subcategory ?? null,
             // Resolve category name from local map; fall back to old value
             categories: { name: CATEGORY_MAP[update.category_id]?.name ?? t.categories?.name ?? '' },
             // Keep existing card name if card unchanged; re-fetch will correct it if changed
@@ -521,7 +530,9 @@ export default function TransactionsScreen() {
               renderItem={({ item }) => {
                 const categoryInfo = CATEGORY_MAP[item.category_id];
                 const iconName = categoryInfo?.icon ?? 'wallet-outline';
-                const categoryName = item.categories?.name ?? categoryInfo?.name ?? item.category_id;
+                const categoryName = item.category_id === 'bills' && item.subcategory
+                  ? getBillsDisplayName(item.subcategory)
+                  : (item.categories?.name ?? categoryInfo?.name ?? item.category_id);
                 const cardLabel = item.cards?.name ?? 'Unknown card';
                 const gradient = ICON_PALETTES[item.category_id] ?? DEFAULT_GRADIENT;
 
@@ -566,20 +577,16 @@ export default function TransactionsScreen() {
                 return (
                   <Swipeable
                     ref={(ref) => {
-                      // No-op: we only track the currently open one via onSwipeableOpen
+                      // Store ref so we can programmatically close this row later
+                      (item as any)._swipeableRef = ref;
                     }}
                     renderRightActions={(progress) => renderRightActions(item, progress)}
-                    onSwipeableOpen={(direction) => {
-                      if (direction === 'right') {
-                        // Another row was already open — close it
-                        // (handled via ref below)
-                      }
-                    }}
                     onSwipeableWillOpen={() => {
                       // Close any previously open swipeable
-                      if (openSwipeableRef.current) {
+                      if (openSwipeableRef.current && openSwipeableRef.current !== (item as any)._swipeableRef) {
                         openSwipeableRef.current.close();
                       }
+                      openSwipeableRef.current = (item as any)._swipeableRef;
                     }}
                     friction={2}
                     rightThreshold={40}

@@ -500,20 +500,14 @@ export default function TransactionsTabScreen() {
               return (
                 <Swipeable
                   ref={(ref) => {
-                    // No-op: we only track the currently open one via onSwipeableOpen
+                    (item as any)._swipeableRef = ref;
                   }}
                   renderRightActions={(progress) => renderRightActions(item, progress)}
-                  onSwipeableOpen={(direction) => {
-                    if (direction === 'right') {
-                      // Another row was already open — close it
-                      // (handled via ref below)
-                    }
-                  }}
                   onSwipeableWillOpen={() => {
-                    // Close any previously open swipeable
-                    if (openSwipeableRef.current) {
+                    if (openSwipeableRef.current && openSwipeableRef.current !== (item as any)._swipeableRef) {
                       openSwipeableRef.current.close();
                     }
+                    openSwipeableRef.current = (item as any)._swipeableRef;
                   }}
                   friction={2}
                   rightThreshold={40}

@@ -20,7 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { CATEGORIES, CATEGORY_MAP } from '../../constants/categories';
+import { CATEGORIES, CATEGORY_MAP, BILLS_SUBCATEGORIES } from '../../constants/categories';
 import {
   Colors,
   Spacing,
@@ -81,7 +81,7 @@ function getDefaultCategory(): string {
 export default function LogScreen() {
   const { user } = useAuth();
   const router = useRouter();
-  const params = useLocalSearchParams<{ category?: string; card?: string; merchantName?: string }>();
+  const params = useLocalSearchParams<{ category?: string; card?: string; merchantName?: string; subcategory?: string }>();
 
   // Merchant name from recommend search flow — stored in local state so it
   // can be cleared after logging or cancelling without affecting the URL.
@@ -102,6 +102,7 @@ export default function LogScreen() {
   // Form state
   const [amountStr, setAmountStr] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   // Data
@@ -160,6 +161,20 @@ export default function LogScreen() {
       setSelectedCategory(getDefaultCategory());
     }
   }, [params.category]);
+
+  // Pre-fill subcategory from route params (e.g. recommendation context)
+  useEffect(() => {
+    if (params.category === 'bills' && params.subcategory) {
+      setSelectedSubcategory(params.subcategory);
+    }
+  }, [params.category, params.subcategory]);
+
+  // Clear subcategory when switching away from bills
+  useEffect(() => {
+    if (selectedCategory !== 'bills') {
+      setSelectedSubcategory(null);
+    }
+  }, [selectedCategory]);
 
   useEffect(() => {
     if (params.card && cards.length > 0) {
@@ -243,7 +258,8 @@ export default function LogScreen() {
   // -------------------------------------------------------------------------
   // Confirm button enabled
   // -------------------------------------------------------------------------
-  const canSubmit = parsedAmount > 0 && selectedCategory !== null && selectedCardId !== null;
+  const canSubmit = parsedAmount > 0 && selectedCategory !== null && selectedCardId !== null
+    && (selectedCategory !== 'bills' || selectedSubcategory !== null);
 
   // -------------------------------------------------------------------------
   // Submit transaction
@@ -259,6 +275,7 @@ export default function LogScreen() {
       user_id: user.id,
       card_id: selectedCardId!,
       category_id: selectedCategory!,
+      subcategory: selectedCategory === 'bills' ? selectedSubcategory : null,
       amount: parsedAmount,
       transaction_date: today,
       notes: null,
@@ -367,6 +384,7 @@ export default function LogScreen() {
     setPostTxnAlert(null);
     if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
     setAmountStr('');
+    setSelectedSubcategory(null);
     setMerchantName(undefined);
   };
 
@@ -444,6 +462,37 @@ export default function LogScreen() {
               );
             })}
           </View>
+
+          {/* Bills Subcategory Picker */}
+          {selectedCategory === 'bills' && (
+            <>
+              <Text style={styles.sectionLabel}>Bill Type</Text>
+              <View style={styles.chipWrap}>
+                {BILLS_SUBCATEGORIES.map((sub) => {
+                  const isActive = selectedSubcategory === sub.id;
+                  return (
+                    <TouchableOpacity
+                      key={sub.id}
+                      style={[styles.categoryChip, isActive && styles.categoryChipActive, isCompact && styles.categoryChipCompact]}
+                      onPress={() => setSelectedSubcategory(sub.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={{ fontSize: isCompact ? 12 : 14 }}>{sub.emoji}</Text>
+                      <Text
+                        style={[
+                          styles.categoryChipText,
+                          isActive && styles.categoryChipTextActive,
+                          isCompact && styles.categoryChipTextCompact,
+                        ]}
+                      >
+                        {sub.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </>
+          )}
 
           {/* Card Selector — Horizontal scroll, selected always first */}
           <Text style={styles.sectionLabel}>Card</Text>

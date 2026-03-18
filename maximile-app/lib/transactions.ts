@@ -14,6 +14,7 @@ export interface TransactionUpdate {
   category_id: string;
   amount: number;
   transaction_date: string; // YYYY-MM-DD
+  subcategory?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -96,14 +97,20 @@ export async function updateTransaction(
   newTx: TransactionUpdate,
   userId: string,
 ): Promise<{ error: string | null }> {
+  const updatePayload: Record<string, unknown> = {
+    card_id: newTx.card_id,
+    category_id: newTx.category_id,
+    amount: newTx.amount,
+    transaction_date: newTx.transaction_date,
+  };
+  // Only include subcategory when it is explicitly provided (including null to clear it)
+  if ('subcategory' in newTx) {
+    updatePayload.subcategory = newTx.subcategory ?? null;
+  }
+
   const { error } = await supabase
     .from('transactions')
-    .update({
-      card_id: newTx.card_id,
-      category_id: newTx.category_id,
-      amount: newTx.amount,
-      transaction_date: newTx.transaction_date,
-    })
+    .update(updatePayload)
     .eq('id', id)
     .eq('user_id', userId);
 

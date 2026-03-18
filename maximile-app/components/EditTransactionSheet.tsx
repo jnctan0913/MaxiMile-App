@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
-import { CATEGORIES } from '../constants/categories';
+import { CATEGORIES, BILLS_SUBCATEGORIES } from '../constants/categories';
 import { getCardImage } from '../constants/cardImages';
 import { Colors, Spacing, Typography, BorderRadius, Shadows, WebInputStyle } from '../constants/theme';
 import type { TransactionUpdate } from '../lib/transactions';
@@ -50,6 +50,7 @@ export interface EditableTransaction {
   id: string;
   card_id: string;
   category_id: string;
+  subcategory?: string | null;
   amount: number;
   transaction_date: string; // YYYY-MM-DD
   cards: { bank: string; name: string } | null;
@@ -88,6 +89,7 @@ export default function EditTransactionSheet({
   // Form state
   const [amountStr, setAmountStr] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [subcategory, setSubcategory] = useState<string | null>(null);
   const [cardId, setCardId] = useState('');
   const [txDate, setTxDate] = useState(new Date());
 
@@ -112,6 +114,7 @@ export default function EditTransactionSheet({
     if (transaction && visible) {
       setAmountStr(transaction.amount.toFixed(2));
       setCategoryId(transaction.category_id);
+      setSubcategory(transaction.subcategory ?? null);
       setCardId(transaction.card_id);
       const d = new Date(transaction.transaction_date);
       setTxDate(d);
@@ -149,6 +152,11 @@ export default function EditTransactionSheet({
       });
   }, [visible, userId]);
 
+  const handleCategoryChange = useCallback((id: string) => {
+    setCategoryId(id);
+    if (id !== 'bills') setSubcategory(null);
+  }, []);
+
   const parsedAmount = parseFloat(amountStr);
   const canSave =
     !saving &&
@@ -176,13 +184,14 @@ export default function EditTransactionSheet({
         category_id: categoryId,
         amount: parsedAmount,
         transaction_date: resolvedDate,
+        subcategory: categoryId === 'bills' ? subcategory : null,
       });
     } catch {
       setErrorMsg('Failed to save. Please try again.');
     } finally {
       setSaving(false);
     }
-  }, [transaction, canSave, cardId, categoryId, parsedAmount, txDate, dateText, onSave]);
+  }, [transaction, canSave, cardId, categoryId, subcategory, parsedAmount, txDate, dateText, onSave]);
 
   const handleDateChange = (_: unknown, selected?: Date) => {
     if (Platform.OS === 'android') setShowDatePicker(false);
@@ -253,7 +262,7 @@ export default function EditTransactionSheet({
                 <TouchableOpacity
                   key={cat.id}
                   style={[styles.chip, isActive && styles.chipActive]}
-                  onPress={() => setCategoryId(cat.id)}
+                  onPress={() => handleCategoryChange(cat.id)}
                   activeOpacity={0.7}
                 >
                   <Ionicons
@@ -270,6 +279,35 @@ export default function EditTransactionSheet({
               );
             })}
           </View>
+
+          {/* Subcategory (bills only) */}
+          {categoryId === 'bills' && (
+            <>
+              <Text style={styles.fieldLabel}>SUBCATEGORY</Text>
+              <View style={styles.chipWrap}>
+                {BILLS_SUBCATEGORIES.map((sub) => {
+                  const isActive = subcategory === sub.id;
+                  return (
+                    <TouchableOpacity
+                      key={sub.id}
+                      style={[styles.chip, isActive && styles.chipActive]}
+                      onPress={() => setSubcategory(isActive ? null : sub.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name={(sub.icon) as keyof typeof Ionicons.glyphMap}
+                        size={14}
+                        color={isActive ? Colors.brandGold : Colors.textSecondary}
+                      />
+                      <Text style={[styles.chipText, isActive && styles.chipTextActive]}>
+                        {sub.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </>
+          )}
 
           {/* Card */}
           <Text style={styles.fieldLabel}>CARD</Text>
