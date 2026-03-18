@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
-    "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
+    "start": "EXPO_DEV_SERVER_CORS_ORIGINS=https://clarity.microsoft.com expo start",
+    "android": "EXPO_DEV_SERVER_CORS_ORIGINS=https://clarity.microsoft.com expo run:android",
+    "ios": "EXPO_DEV_SERVER_CORS_ORIGINS=https://clarity.microsoft.com expo run:ios",
+    "web": "EXPO_DEV_SERVER_CORS_ORIGINS=https://clarity.microsoft.com expo start --web",
+    "tunnel": "ngrok http 8081",
     "lint": "expo lint",
     "test": "jest",
     "seed": "node database/seed.mjs",
@@ -55,6 +56,7 @@
     "@types/react": "~19.1.10",
     "jest": "^29.7.0",
     "jest-expo": "~54.0.17",
+    "ngrok": "^5.0.0-beta.2",
     "pg": "^8.18.0",
     "typescript": "~5.9.2"
   },
