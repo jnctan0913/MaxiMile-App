@@ -55,6 +55,38 @@ interface FunnelStep {
   users: number;
 }
 
+interface RetentionCohort {
+  signup_week: string;
+  cohort_size: number;
+  week_1: number;
+  week_2: number;
+  week_3: number;
+  week_4: number;
+}
+
+interface FeatureAdoption {
+  feature: string;
+  unique_users: number;
+}
+
+interface CategorySpending {
+  category_id: string;
+  transaction_count: number;
+  total_amount: number;
+}
+
+interface ErrorSummary {
+  day: string;
+  error_type: string;
+  error_count: number;
+}
+
+interface TransactionFunnelStep {
+  step_order: number;
+  step: string;
+  users: number;
+}
+
 export default function Analytics() {
   const [selectedRange, setSelectedRange] = useState<DateRange>(DATE_RANGES[1]); // Default 30d
   const [loading, setLoading] = useState(true);
@@ -66,6 +98,11 @@ export default function Analytics() {
   const [onboardingFunnel, setOnboardingFunnel] = useState<FunnelStep[]>([]);
   const [smartPayFunnel, setSmartPayFunnel] = useState<FunnelStep[]>([]);
   const [notificationFunnel, setNotificationFunnel] = useState<FunnelStep[]>([]);
+  const [transactionFunnel, setTransactionFunnel] = useState<TransactionFunnelStep[]>([]);
+  const [retentionCohorts, setRetentionCohorts] = useState<RetentionCohort[]>([]);
+  const [featureAdoption, setFeatureAdoption] = useState<FeatureAdoption[]>([]);
+  const [categorySpending, setCategorySpending] = useState<CategorySpending[]>([]);
+  const [errorSummary, setErrorSummary] = useState<ErrorSummary[]>([]);
 
   // Computed metrics
   const [metrics, setMetrics] = useState({
@@ -81,6 +118,8 @@ export default function Analytics() {
     churnPrev: 0,
     capBreaches: 0,
     capBreachesPrev: 0,
+    errors: 0,
+    errorsPrev: 0,
   });
 
   const fetchData = useCallback(async () => {
@@ -95,13 +134,18 @@ export default function Analytics() {
     const prevStartStr = prevStartDate.toISOString().split('T')[0];
 
     try {
-      const [maruRes, eventRes, activeRes, onboardRes, payRes, notifRes] = await Promise.all([
+      const [maruRes, eventRes, activeRes, onboardRes, payRes, notifRes, retentionRes, featureRes, categoryRes, errorRes, txFunnelRes] = await Promise.all([
         supabase.from('maru_monthly').select('*').order('month', { ascending: false }).limit(12),
         supabase.from('v_event_daily').select('*').gte('day', prevStartStr),
         supabase.from('v_active_users').select('*').gte('day', prevStartStr),
         supabase.from('v_onboarding_funnel').select('*'),
         supabase.from('v_smart_pay_funnel').select('*'),
         supabase.from('v_notification_funnel').select('*'),
+        supabase.from('v_retention_cohorts').select('*').limit(8),
+        supabase.from('v_feature_adoption').select('*'),
+        supabase.from('v_category_spending').select('*'),
+        supabase.from('v_error_summary').select('*').gte('day', startStr).limit(100),
+        supabase.from('v_transaction_funnel').select('*'),
       ]);
 
       if (maruRes.data) setMaruData(maruRes.data as MaruMonthly[]);
@@ -110,6 +154,11 @@ export default function Analytics() {
       if (onboardRes.data) setOnboardingFunnel(onboardRes.data as FunnelStep[]);
       if (payRes.data) setSmartPayFunnel(payRes.data as FunnelStep[]);
       if (notifRes.data) setNotificationFunnel(notifRes.data as FunnelStep[]);
+      if (retentionRes.data) setRetentionCohorts(retentionRes.data as RetentionCohort[]);
+      if (featureRes.data) setFeatureAdoption(featureRes.data as FeatureAdoption[]);
+      if (categoryRes.data) setCategorySpending(categoryRes.data as CategorySpending[]);
+      if (errorRes.data) setErrorSummary(errorRes.data as ErrorSummary[]);
+      if (txFunnelRes.data) setTransactionFunnel(txFunnelRes.data as TransactionFunnelStep[]);
 
       // Calculate metrics from fetched data
       const currentEvents = (eventRes.data || []).filter((e: EventDaily) => e.day >= startStr);
@@ -128,6 +177,11 @@ export default function Analytics() {
       const uniqueUsersInPeriod = (days: ActiveUserDay[]) =>
         days.reduce((sum, d) => sum + d.dau, 0); // Approximation since we can't deduplicate across days from this view
 
+      // Calculate error counts from error summary
+      const currentErrors = (errorRes.data || []).filter((e: ErrorSummary) => e.day >= startStr);
+      const prevErrors = (errorRes.data || []).filter((e: ErrorSummary) => e.day >= prevStartStr && e.day < startStr);
+      const sumErrors = (errors: ErrorSummary[]) => errors.reduce((sum, e) => sum + e.error_count, 0);
+
       setMetrics({
         maru: maruRes.data?.[0]?.total_recommendations ?? 0,
         maruPrev: maruRes.data?.[1]?.total_recommendations ?? 0,
@@ -141,6 +195,8 @@ export default function Analytics() {
         churnPrev: sumEvents(prevEvents, 'account_deleted'),
         capBreaches: sumEvents(currentEvents, 'cap_breached'),
         capBreachesPrev: sumEvents(prevEvents, 'cap_breached'),
+        errors: sumErrors(currentErrors),
+        errorsPrev: sumErrors(prevErrors),
       });
 
     } catch (err) {
@@ -206,6 +262,7 @@ export default function Analytics() {
           <MetricCard label="Transactions" value={metrics.transactions} previousValue={metrics.transactionsPrev} />
           <MetricCard label="Churn" value={metrics.churn} previousValue={metrics.churnPrev} invertTrend />
           <MetricCard label="Cap Breaches" value={metrics.capBreaches} previousValue={metrics.capBreachesPrev} invertTrend />
+          <MetricCard label="Errors" value={metrics.errors} previousValue={metrics.errorsPrev} invertTrend />
         </div>
       </div>
 
@@ -214,7 +271,7 @@ export default function Analytics() {
         <h3 className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-3">
           Conversion Funnels
         </h3>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <FunnelChart
             title="Onboarding"
             steps={onboardingFunnel.map(s => ({ label: s.step.replace(/_/g, ' '), value: s.users }))}
@@ -227,6 +284,88 @@ export default function Analytics() {
             title="Notification Opt-in"
             steps={notificationFunnel.map(s => ({ label: s.step.replace(/_/g, ' '), value: s.users }))}
           />
+          <FunnelChart
+            title="Transaction"
+            steps={transactionFunnel.map(s => ({ label: s.step.replace(/_/g, ' '), value: s.users }))}
+          />
+        </div>
+      </div>
+
+      {/* Feature Adoption */}
+      <div className="px-6 mb-6">
+        <h3 className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-3">
+          Feature Adoption (30d)
+        </h3>
+        <div className="bg-white border border-gold-tint rounded-xl shadow-sm p-4 space-y-3">
+          {featureAdoption.map(f => {
+            const maxUsers = Math.max(...featureAdoption.map(x => x.unique_users), 1);
+            const pct = (f.unique_users / maxUsers) * 100;
+            return (
+              <div key={f.feature} className="flex items-center gap-3">
+                <span className="text-xs text-text-secondary w-40 truncate">{f.feature.replace(/_/g, ' ')}</span>
+                <div className="flex-1 bg-surface-bg rounded-full h-5 overflow-hidden">
+                  <div className="h-full bg-brand-gold/30 rounded-full" style={{ width: `${pct}%` }} />
+                </div>
+                <span className="text-xs font-semibold text-text-primary w-12 text-right">{f.unique_users}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Retention Cohorts */}
+      <div className="px-6 mb-6">
+        <h3 className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-3">
+          Retention Cohorts
+        </h3>
+        <div className="bg-white border border-gold-tint rounded-xl shadow-sm overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-gold-tint">
+                <th className="px-4 py-2 text-left text-text-secondary font-semibold">Signup Week</th>
+                <th className="px-4 py-2 text-right text-text-secondary font-semibold">Cohort</th>
+                <th className="px-4 py-2 text-right text-text-secondary font-semibold">Week 1</th>
+                <th className="px-4 py-2 text-right text-text-secondary font-semibold">Week 2</th>
+                <th className="px-4 py-2 text-right text-text-secondary font-semibold">Week 3</th>
+                <th className="px-4 py-2 text-right text-text-secondary font-semibold">Week 4</th>
+              </tr>
+            </thead>
+            <tbody>
+              {retentionCohorts.map(c => (
+                <tr key={c.signup_week} className="border-b border-gold-tint/50">
+                  <td className="px-4 py-2 text-text-primary">{c.signup_week}</td>
+                  <td className="px-4 py-2 text-right font-semibold">{c.cohort_size}</td>
+                  <td className="px-4 py-2 text-right">{c.cohort_size > 0 ? Math.round((c.week_1 / c.cohort_size) * 100) : 0}%</td>
+                  <td className="px-4 py-2 text-right">{c.cohort_size > 0 ? Math.round((c.week_2 / c.cohort_size) * 100) : 0}%</td>
+                  <td className="px-4 py-2 text-right">{c.cohort_size > 0 ? Math.round((c.week_3 / c.cohort_size) * 100) : 0}%</td>
+                  <td className="px-4 py-2 text-right">{c.cohort_size > 0 ? Math.round((c.week_4 / c.cohort_size) * 100) : 0}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Category Spending */}
+      <div className="px-6 mb-6">
+        <h3 className="text-[12px] font-semibold text-text-secondary uppercase tracking-wider mb-3">
+          Category Spending (This Month)
+        </h3>
+        <div className="bg-white border border-gold-tint rounded-xl shadow-sm p-4 space-y-3">
+          {categorySpending.map(c => {
+            const maxAmount = Math.max(...categorySpending.map(x => x.total_amount), 1);
+            const pct = (c.total_amount / maxAmount) * 100;
+            return (
+              <div key={c.category_id} className="flex items-center gap-3">
+                <span className="text-xs text-text-secondary w-24 capitalize">{c.category_id}</span>
+                <div className="flex-1 bg-surface-bg rounded-full h-5 overflow-hidden">
+                  <div className="h-full bg-brand-gold/30 rounded-full" style={{ width: `${pct}%` }} />
+                </div>
+                <span className="text-xs font-semibold text-text-primary w-20 text-right">${Number(c.total_amount).toLocaleString()}</span>
+                <span className="text-xs text-text-tertiary w-16 text-right">{c.transaction_count} txns</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

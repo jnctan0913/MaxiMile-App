@@ -7,6 +7,7 @@
 
 import { Alert, Platform } from 'react-native';
 import { AuthError, PostgrestError } from '@supabase/supabase-js';
+import { logError as logErrorToSupabase } from './error-tracking';
 
 // ---------------------------------------------------------------------------
 // Error classification
@@ -299,5 +300,9 @@ function logError(category: ErrorCategory, technicalMessage: string): void {
   if (__DEV__) {
     console.error(`[MaxiMile Error] [${category}] ${technicalMessage}`);
   }
-  // In production, this could send to Sentry, Crashlytics, etc.
+  // Log to Supabase error_events table (fire-and-forget)
+  logErrorToSupabase({
+    error_type: category,
+    message: technicalMessage,
+  });
 }

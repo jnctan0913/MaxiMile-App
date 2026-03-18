@@ -8,6 +8,7 @@ import {
   Platform,
   TouchableOpacity,
   Text,
+  AppState,
 } from 'react-native';
 import { Stack, SplashScreen, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -164,6 +165,16 @@ function RootContent() {
       }).start();
     }
   }, [loading]);
+
+  // Flush analytics buffer when app returns to foreground
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        flushBufferedEvents();
+      }
+    });
+    return () => subscription.remove();
+  }, []);
 
   // Deep link handler — route maximile://log URLs to auto-capture screen
   useEffect(() => {
