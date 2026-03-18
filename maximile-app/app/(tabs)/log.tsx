@@ -13,6 +13,7 @@ import {
   ImageBackground,
   useWindowDimensions,
   Animated,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -104,6 +105,8 @@ export default function LogScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [showBillsModal, setShowBillsModal] = useState(false);
+  const billsSlideAnim = useRef(new Animated.Value(300)).current;
 
   // Data
   const [cards, setCards] = useState<UserCardWithDetails[]>([]);
@@ -441,7 +444,15 @@ export default function LogScreen() {
                 <TouchableOpacity
                   key={cat.id}
                   style={[styles.categoryChip, isActive && styles.categoryChipActive, isCompact && styles.categoryChipCompact]}
-                  onPress={() => setSelectedCategory(cat.id)}
+                  onPress={() => {
+                    if (cat.id === 'bills') {
+                      setSelectedCategory('bills');
+                      setShowBillsModal(true);
+                      Animated.spring(billsSlideAnim, { toValue: 0, useNativeDriver: true, tension: 65, friction: 11 }).start();
+                    } else {
+                      setSelectedCategory(cat.id);
+                    }
+                  }}
                   activeOpacity={0.7}
                 >
                   <Ionicons
@@ -456,43 +467,14 @@ export default function LogScreen() {
                       isCompact && styles.categoryChipTextCompact,
                     ]}
                   >
-                    {cat.name}
+                    {cat.id === 'bills' && selectedSubcategory
+                      ? `${cat.name} - ${BILLS_SUBCATEGORIES.find(s => s.id === selectedSubcategory)?.label ?? ''}`
+                      : cat.name}
                   </Text>
                 </TouchableOpacity>
               );
             })}
           </View>
-
-          {/* Bills Subcategory Picker */}
-          {selectedCategory === 'bills' && (
-            <>
-              <Text style={styles.sectionLabel}>Bill Type</Text>
-              <View style={styles.chipWrap}>
-                {BILLS_SUBCATEGORIES.map((sub) => {
-                  const isActive = selectedSubcategory === sub.id;
-                  return (
-                    <TouchableOpacity
-                      key={sub.id}
-                      style={[styles.categoryChip, isActive && styles.categoryChipActive, isCompact && styles.categoryChipCompact]}
-                      onPress={() => setSelectedSubcategory(sub.id)}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={{ fontSize: isCompact ? 12 : 14 }}>{sub.emoji}</Text>
-                      <Text
-                        style={[
-                          styles.categoryChipText,
-                          isActive && styles.categoryChipTextActive,
-                          isCompact && styles.categoryChipTextCompact,
-                        ]}
-                      >
-                        {sub.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </>
-          )}
 
           {/* Card Selector — Horizontal scroll, selected always first */}
           <Text style={styles.sectionLabel}>Card</Text>
@@ -697,7 +679,44 @@ export default function LogScreen() {
             </View>
           </View>
         </Modal>
-      </SafeAreaView>
+        {/* Bills Subcategory Bottom Sheet */}
+      <Modal visible={showBillsModal} transparent animationType="none" onRequestClose={() => setShowBillsModal(false)}>
+        <TouchableWithoutFeedback onPress={() => { setShowBillsModal(false); billsSlideAnim.setValue(300); }}>
+          <View style={billsStyles.backdrop} />
+        </TouchableWithoutFeedback>
+        <Animated.View style={[billsStyles.sheet, { transform: [{ translateY: billsSlideAnim }] }]}>
+          <View style={billsStyles.handle} />
+          <Text style={billsStyles.title}>Select Bill Type</Text>
+          <View style={billsStyles.grid}>
+            {BILLS_SUBCATEGORIES.map((sub) => {
+              const isActive = selectedSubcategory === sub.id;
+              return (
+                <TouchableOpacity
+                  key={sub.id}
+                  style={[billsStyles.tile, isActive && billsStyles.tileActive]}
+                  onPress={() => {
+                    setSelectedSubcategory(sub.id);
+                    setShowBillsModal(false);
+                    billsSlideAnim.setValue(300);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={sub.icon as keyof typeof Ionicons.glyphMap}
+                    size={24}
+                    color={isActive ? Colors.brandGold : Colors.textSecondary}
+                  />
+                  <Text style={[billsStyles.tileLabel, isActive && billsStyles.tileLabelActive]}>
+                    {sub.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </Animated.View>
+      </Modal>
+
+    </SafeAreaView>
     </ImageBackground>
   );
 }
@@ -1029,5 +1048,68 @@ const styles = StyleSheet.create({
   doneButtonText: {
     ...Typography.bodyBold,
     color: Colors.brandCharcoal,
+  },
+});
+
+// Bills subcategory bottom sheet styles
+const billsStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  sheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: Spacing.sm,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Platform.OS === 'ios' ? 36 : Spacing.xl,
+    ...Shadows.glass,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
+    alignSelf: 'center',
+    marginBottom: Spacing.md,
+  },
+  title: {
+    ...Typography.subheading,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.lg,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    paddingBottom: Spacing.md,
+  },
+  tile: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(197, 165, 90, 0.2)',
+    paddingVertical: Spacing.md,
+    flexBasis: '30%',
+    flexGrow: 1,
+    gap: Spacing.xs,
+  },
+  tileActive: {
+    borderColor: Colors.brandGold,
+    backgroundColor: 'rgba(197, 165, 90, 0.1)',
+  },
+  tileLabel: {
+    ...Typography.captionBold,
+    color: Colors.textSecondary,
+  },
+  tileLabelActive: {
+    color: Colors.brandGold,
   },
 });
