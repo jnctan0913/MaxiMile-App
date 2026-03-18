@@ -1,9 +1,10 @@
 # PRD: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 2.13
-**Last Updated**: 2026-03-17
+**Version**: 2.15
+**Last Updated**: 2026-03-18
 **Author**: PM Agent
 **Status**: Draft
+**Changelog (v2.15)**: Added F46 (Admin Analytics Dashboard) — adds Analytics tab to existing admin dashboard with MARU trend, DAU/MAU/WAU, onboarding funnel, Smart Pay funnel, notification opt-in funnel, feature adoption rates, cap breach tracking, churn rate, and event heatmap. Queries Supabase analytics_events via service_role. Zero new dependencies — extends existing admin-dashboard with Recharts. Platform evaluation: chose Supabase-powered admin tab over Mixpanel (overkill, can't JOIN business data), Clarity (web-only, no custom events), PostHog (future upgrade path). Added Epic E25 and Sprint 38.
 **Changelog (v2.14)**: Added F45 (Heuristic Usability Fixes) — 7 usability issues from Nielsen heuristic evaluation. P0: Help & FAQ screen. P1: onboarding step indicator, $0 transaction validation hint, long-press context menu for transactions, info tooltips on caps/mpd/Miles Saved, Flash Pay back navigation, Flash Pay naming unification. Plus inline password requirements on signup form. Added Epic E24 and Sprint 37.
 **Changelog (v2.13)**: Merchant logo asset replacement — replaced 162 placeholder PNGs in `assets/merchants/` with real merchant logos. 152 downloaded programmatically via Google Favicon API (128px → resized to 64x64 with PIL LANCZOS), 10 sourced manually (Jollibean, Collin's, Stuff'd, LiHO, EZ-Link, BlueSG, Qoo10, Mustafa Centre, Meidi-Ya, Sinopec). Merchant search autocomplete and recommendation screens now display recognisable brand logos instead of grey placeholders. No code changes — TypeScript files (`merchantImages.ts`, `MerchantAutocomplete.tsx`, `merchant-catalogue.ts`) unchanged; only PNG assets swapped. Part of Sprint 34 (F42) polish.
 **Changelog (v2.12)**: Added F44 (Recommend Tab Coach Mark Tour) — first-session walkthrough that introduces the three transaction entry paths (Merchant Search, Category Tiles, Quick Pick FAB) to new users via a 3-step coach mark overlay. Shown exactly once after onboarding completes, triggered on first Recommend tab focus. Zero-dependency implementation (4 dim rects + gold spotlight ring using plain RN Views inside a transparent Modal). AsyncStorage gate (`@maximile_recommend_coach_mark_done`) prevents repeat display. Also renames the Recommend tab FAB from "Smart Pay" to "Quick Pick" and the Flash Pay screen (formerly "Smart Pay") to "Flash Pay". Added to P1.5 Onboarding UX Improvements, Epic E23, Sprint 36.
@@ -637,6 +638,72 @@ Enable miles-focused users to consistently use the optimal credit card for every
 - As a user being onboarded, I want to skip the tour at any point, so that I'm not blocked if I already understand the interface (F44-S2)
 - As the product team, I want to track coach mark completion and skip rates per step, so that we can identify which explanation has the lowest comprehension and iterate on copy (F44-S3)
 
+### Epic 25: Product Analytics & Insights (F46)
+- As the product team, I want to view MARU trend over time on a dedicated Analytics tab in the admin dashboard, so that I can track the north star metric without logging into Firebase Console (F46-S1)
+- As the product team, I want to see DAU/WAU/MAU counts on a toggleable line chart, so that I can monitor user engagement at different time horizons (F46-S2)
+- As the product team, I want to visualize the onboarding funnel (sign_up → card_added → onboarding_completed → first transaction_logged), so that I can identify where new users drop off (F46-S3)
+- As the product team, I want to visualize the Smart Pay funnel (pay_flow_started → merchant_detected → recommendation_used → pay_transaction_logged), so that I can measure conversion through the core value loop (F46-S4)
+- As the product team, I want to visualize the notification opt-in funnel (notification_primer_shown → primer_accepted → permission_granted), so that I can optimize the permission priming flow (F46-S5)
+- As the product team, I want to see feature adoption rates (% of users who used Smart Pay, Auto-Capture, Goals, Notifications, Miles Redemption), so that I can identify under-adopted features and prioritize improvements (F46-S6)
+- As the product team, I want to see cap breach rate and churn rate over time, so that I can detect negative trends early and respond (F46-S7)
+- As the product team, I want a GitHub-style event frequency heatmap showing daily event volume, so that I can spot usage patterns and anomalies at a glance (F46-S8)
+
+#### F46 — Admin Analytics Dashboard (P1, Sprint 38)
+
+**Problem**: The product team has no dedicated analytics dashboard. Firebase Console provides marketing-focused metrics (MAU/DAU, session duration) but cannot join analytics events with business data (cards, transactions, users). There's no way to visualize MARU trends, identify funnel drop-offs, or track feature adoption without manual SQL queries.
+
+**Solution**: Add a 4th "Analytics" tab to the existing admin dashboard (React + Vite) that queries the Supabase `analytics_events` table directly via service_role. Zero new third-party dependencies — extends the existing admin-dashboard with Recharts for visualization.
+
+**Platform Evaluation Decision**:
+| Platform | Cost | Effort | Data Depth | Verdict |
+|----------|------|--------|------------|---------|
+| **Admin Tab (Supabase)** | Free | 1.5 weeks | Deepest (JOINs with business data) | **Chosen** |
+| Mixpanel | Free–$28/mo | 1–2 days | High (no JOINs) | Overkill for current scale |
+| Microsoft Clarity | Free | Web-only | Low (session replay only) | No custom events, no funnels |
+| PostHog | Free–$$ | 1–2 days | High | Future upgrade path |
+| Firebase Console | Free | Already done | Medium | Keep as-is (backup) |
+
+**Rationale**: Supabase-powered admin tab wins because (1) data already flows there via dual-write, (2) can JOIN analytics with cards/transactions/users for deeper insights no external tool can provide, (3) zero additional cost, (4) existing admin dashboard shell ready to extend.
+
+**Key Metrics to Visualize**:
+1. **MARU trend** (north star) — monthly line chart from `maru_monthly` view
+2. **DAU / WAU / MAU** — active user counts from `v_active_users` view
+3. **Onboarding funnel** — sign_up → card_added → onboarding_completed → first transaction_logged
+4. **Smart Pay funnel** — pay_flow_started → merchant_detected → recommendation_used → pay_transaction_logged
+5. **Notification opt-in funnel** — notification_primer_shown → primer_accepted → permission_granted
+6. **Feature adoption rates** — % of users who used Smart Pay, Auto-Capture, Goals, Notifications, Miles Redemption
+7. **Cap breach rate** — cap_breached events over time
+8. **Churn rate** — account_deleted events over time
+9. **Event frequency heatmap** — GitHub-style calendar heatmap showing daily event volume
+
+**SQL Views Required** (new migration `005_analytics_views.sql`):
+- `v_active_users` — daily unique users from analytics_events
+- `v_event_daily` — daily event counts grouped by event type
+- `v_onboarding_funnel` — 4-step onboarding conversion
+- `v_smart_pay_funnel` — 4-step Smart Pay conversion
+- `v_notification_funnel` — 3-step notification opt-in conversion
+
+**Admin Dashboard Components**:
+- `Analytics.tsx` — main tab with date range picker (7d / 30d / 90d / custom)
+- `NorthStarCard.tsx` — MARU big number with sparkline
+- `ActiveUsersChart.tsx` — DAU/WAU/MAU line chart (toggleable)
+- `FunnelChart.tsx` — reusable horizontal funnel with drop-off highlighting
+- `EventHeatmap.tsx` — calendar-style event density heatmap
+- `MetricCard.tsx` — reusable KPI card (value + trend vs previous period)
+
+**Dependencies**:
+- Existing admin-dashboard shell (React + Vite)
+- Supabase `analytics_events` table (migration 004)
+- `recharts` library (to be added to admin-dashboard)
+
+**RICE Score**: Reach 5 (internal team) × Impact 3 (enables data-driven decisions) × Confidence 90% ÷ Effort 1.5 = **900**
+
+**Success Criteria**:
+- Team can view MARU trend without Firebase Console
+- Funnel drop-offs visible at a glance (color-coded: >30% drop = amber, >50% = red)
+- Feature adoption rates visible for all major features
+- All data stays in Supabase (privacy preserved)
+
 ---
 
 ## 10. Assumptions & Hypotheses
@@ -1253,3 +1320,4 @@ See PRD Section 4 for full competitive matrix, SWOT, and Porter's Five Forces an
 | **P1** | **F31/S22.3: Monthly Spend Estimate (spending-settings UI)** | **Sub-feature** | **Deferred — hidden from demo** | **Post-demo** |
 | **P0.5** | **F34: Bills Subcategory Selection (subcategory picker + 0 mpd data corrections + HealthHub tip)** | **Feature** | **✅ Shipped Sprint 28** | **Sprint 28** |
 | **P1** | **F45: Heuristic Usability Fixes (Help/FAQ, onboarding steps, long-press, tooltips, Flash Pay back nav, naming unification, password requirements)** | **Feature** | **In Progress** | **Sprint 37** |
+| **P1** | **F46: Admin Analytics Dashboard (MARU trend, funnels, DAU/MAU, feature adoption, cap breach, churn)** | **Feature** | **Planned** | **Sprint 38** |

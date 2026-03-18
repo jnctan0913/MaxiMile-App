@@ -1,11 +1,11 @@
 # Sprint Plan: MaxiMile — Credit Card Miles Optimizer
 
-**Version**: 20.0
+**Version**: 21.0
 **Created**: 2026-02-19
 **Author**: Scrum Master Agent
 **Source**: PRD v2.13, EPICS_AND_USER_STORIES v1.7, MAXIMILE_VS_MILELION_ANALYSIS v1.0, CARD_DATA_VERIFICATION v1.0, AUDIT_MILELION_VS_RANKINGS v1.0
-**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprint 21 ✅ COMPLETED (F30 + F32 Condition Transparency), Sprint 22 ✅ COMPLETED (Min Spend Enforcement), Sprints 23-24 ✅ COMPLETED (Card Expansion 22→29 + UOB Lady's Solitaire UX), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01), Sprint 29 ✅ COMPLETED (Earn Rate Refresh — MileLion March 2026 Audit Phase 5), Sprint 30 Planned (DBS yuu Card Integration), Sprint 31 Planned (SC Smart Card Bonus Tiers), Sprint 32 Planned (Auto-Capture Setup Carousel), Sprint 33 ✅ COMPLETED (Navigation Restructure), Sprint 34 ✅ COMPLETED (Merchant Search + Real Logos), Sprint 35 Planned (Transaction Entry Correction)
-**Change Log**: v20.0 — Sprint 34 marked COMPLETED. All 6 stories shipped (merchant catalogue, search hook, autocomplete UI, routing integration, merchant context header, analytics). Added merchant logo assets: 162 real brand logos (64×64 PNG) replace placeholders in `assets/merchants/` — 152 downloaded via Google Favicon API, 10 sourced manually. New files added: `constants/merchantImages.ts` (static require map). Source: PRD v2.13. v19.0 — Added Sprint 35 "Transaction Entry Correction" (F43, Epic E22). 5 stories, 14 SP, 1.5 weeks. Swipe-to-reveal Edit and Delete actions on transaction rows; Edit bottom sheet reuses Log form components with pre-filled fields (amount, category, card, date); Supabase UPDATE + spending_state recalculation on save; Delete with confirmation alert and optional 5-second undo snackbar; Supabase DELETE + spending_state decrement; analytics events transaction_edited and transaction_deleted. Addresses permanent data entry errors that silently corrupt cap tracking. Modified files: transactions.tsx (swipe gesture + actions), log.tsx or new EditTransactionSheet.tsx (bottom sheet), analytics.ts. v18.0 — Added Sprint 34 "Merchant Search" (F42, Epic E21). 6 stories, 20 SP, 2 weeks. Client-side merchant search on Recommend home screen with ~200 curated Singapore merchants, fuzzy prefix/substring ranking, 120ms debounce, Bills subcategory routing, merchant context on recommendation page, analytics events. Supersedes original F9 placeholder (RICE 467) with fully specified F42 (RICE 3200). New files: merchant-catalogue.ts, useMerchantSearch.ts, MerchantSearchBar.tsx, MerchantAutocomplete.tsx. Source: `docs/planning/MERCHANT_SEARCH_PLAN.md`. v17.0 — Added Sprint 33 "Navigation Restructure" (F41, Epic E20). Merges My Cards + Cap Status tabs into single "My Cards" tab, promotes Transaction History to dedicated "Transactions" tab, adds "See Transactions" button to Card Detail, removes Transaction History from Profile. 5 stories, 8 SP, 0.5 weeks. v16.0 — Added Sprint 30 "DBS yuu Card Integration" (F37, Epic E18) and Sprint 31 "SC Smart Card Bonus Tiers" (F38, Epic E19). Sprint 30: 8 stories, 18 SP, 2 weeks — adds DBS yuu AMEX + DBS yuu Visa as cards #30-31, 10 mpd grocery/food delivery bonus rules, caps, AMEX acceptance warning, rankings update. Sprint 31: 7 stories, 16 SP, 2 weeks — models SC Smart Card tiered cashback-to-miles equivalence (5.6/7.42/9.28 mpd), requires policy decision on cashback-to-miles conversion, recommend() logic update for tiered earn rates. v15.0 — Added Sprint 29 "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5) and Epic E17 (Earn Rate Accuracy). 8 stories, 14 SP, 1 week. Corrects 7 earn rate/cap discrepancies: DBS Altitude travel bonus removed (4.0→1.2 mpd), HSBC Revolution cap $1,000→$1,500, DBS Woman's World cap $2,000→$1,000, UOB Lady's Card added to groceries, HSBC Revolution added to travel, KrisFlyer UOB transport 2.0→2.4 mpd, UOB PP transport verified. DBS yuu Card and SC Smart Card bonus tiers deferred to Sprint 30+. Source: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`. v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
+**Status**: In Progress — Sprint 20 Active, Sprint 16b ✅ COMPLETED (T&C Focus Refactor), Sprint 16c ✅ COMPLETED (MileLion Detection Pivot), Sprint 21 ✅ COMPLETED (F30 + F32 Condition Transparency), Sprint 22 ✅ COMPLETED (Min Spend Enforcement), Sprints 23-24 ✅ COMPLETED (Card Expansion 22→29 + UOB Lady's Solitaire UX), Sprints 25-28 ✅ COMPLETED (MileLion Gap Analysis Data Corrections + Bills Subcategory — v1.4.0–v1.7.0 applied 2026-03-01), Sprint 29 ✅ COMPLETED (Earn Rate Refresh — MileLion March 2026 Audit Phase 5), Sprint 30 Planned (DBS yuu Card Integration), Sprint 31 Planned (SC Smart Card Bonus Tiers), Sprint 32 Planned (Auto-Capture Setup Carousel), Sprint 33 ✅ COMPLETED (Navigation Restructure), Sprint 34 ✅ COMPLETED (Merchant Search + Real Logos), Sprint 35 Planned (Transaction Entry Correction), Sprint 38 Planned (Admin Analytics Dashboard)
+**Change Log**: v21.0 — Added Sprint 38 "Product Analytics" (F46, Epic E25). 6 stories, 16 SP, 1.5 weeks. Analytics tab for admin dashboard: 5 SQL analytics views (v_active_users, v_event_daily, v_onboarding_funnel, v_smart_pay_funnel, v_notification_funnel), Analytics tab shell with date range picker, North Star MARU card + 6 KPI cards, 3 funnel visualizations with drop-off highlighting, feature adoption chart + event heatmap, active users chart with Recharts. Source: PRD v2.15, F46. v20.0 — Sprint 34 marked COMPLETED. All 6 stories shipped (merchant catalogue, search hook, autocomplete UI, routing integration, merchant context header, analytics). Added merchant logo assets: 162 real brand logos (64×64 PNG) replace placeholders in `assets/merchants/` — 152 downloaded via Google Favicon API, 10 sourced manually. New files added: `constants/merchantImages.ts` (static require map). Source: PRD v2.13. v19.0 — Added Sprint 35 "Transaction Entry Correction" (F43, Epic E22). 5 stories, 14 SP, 1.5 weeks. Swipe-to-reveal Edit and Delete actions on transaction rows; Edit bottom sheet reuses Log form components with pre-filled fields (amount, category, card, date); Supabase UPDATE + spending_state recalculation on save; Delete with confirmation alert and optional 5-second undo snackbar; Supabase DELETE + spending_state decrement; analytics events transaction_edited and transaction_deleted. Addresses permanent data entry errors that silently corrupt cap tracking. Modified files: transactions.tsx (swipe gesture + actions), log.tsx or new EditTransactionSheet.tsx (bottom sheet), analytics.ts. v18.0 — Added Sprint 34 "Merchant Search" (F42, Epic E21). 6 stories, 20 SP, 2 weeks. Client-side merchant search on Recommend home screen with ~200 curated Singapore merchants, fuzzy prefix/substring ranking, 120ms debounce, Bills subcategory routing, merchant context on recommendation page, analytics events. Supersedes original F9 placeholder (RICE 467) with fully specified F42 (RICE 3200). New files: merchant-catalogue.ts, useMerchantSearch.ts, MerchantSearchBar.tsx, MerchantAutocomplete.tsx. Source: `docs/planning/MERCHANT_SEARCH_PLAN.md`. v17.0 — Added Sprint 33 "Navigation Restructure" (F41, Epic E20). Merges My Cards + Cap Status tabs into single "My Cards" tab, promotes Transaction History to dedicated "Transactions" tab, adds "See Transactions" button to Card Detail, removes Transaction History from Profile. 5 stories, 8 SP, 0.5 weeks. v16.0 — Added Sprint 30 "DBS yuu Card Integration" (F37, Epic E18) and Sprint 31 "SC Smart Card Bonus Tiers" (F38, Epic E19). Sprint 30: 8 stories, 18 SP, 2 weeks — adds DBS yuu AMEX + DBS yuu Visa as cards #30-31, 10 mpd grocery/food delivery bonus rules, caps, AMEX acceptance warning, rankings update. Sprint 31: 7 stories, 16 SP, 2 weeks — models SC Smart Card tiered cashback-to-miles equivalence (5.6/7.42/9.28 mpd), requires policy decision on cashback-to-miles conversion, recommend() logic update for tiered earn rates. v15.0 — Added Sprint 29 "Earn Rate Refresh" (MileLion March 2026 Audit — Phase 5) and Epic E17 (Earn Rate Accuracy). 8 stories, 14 SP, 1 week. Corrects 7 earn rate/cap discrepancies: DBS Altitude travel bonus removed (4.0→1.2 mpd), HSBC Revolution cap $1,000→$1,500, DBS Woman's World cap $2,000→$1,000, UOB Lady's Card added to groceries, HSBC Revolution added to travel, KrisFlyer UOB transport 2.0→2.4 mpd, UOB PP transport verified. DBS yuu Card and SC Smart Card bonus tiers deferred to Sprint 30+. Source: `docs/technical/AUDIT_MILELION_VS_RANKINGS.md`. v14.0 — Added Sprints 25-28 and Epics E15/E16 based on MileLion 2026 gap analysis. Sprint 25 "Earn Rate Hotfix" (Phase 1 — P0 data corrections: 5 verified wrong earn rates across 29 cards causing incorrect recommendations). Sprint 26 "Telco Bonus Rules" (Phase 2 — 4 mpd telco one-off rules for Cards 6/10/18/20). Sprint 27 "Bills Subcategory Data" (Phase 3 — MCC expansion + per-subcategory earn rules). Sprint 28 "Bills Subcategory UI" (Phase 4 — subcategory picker + HealthHub tip). Source: `docs/technical/DATA_CORRECTION_PLAN.md`. v13.0 — Added Sprint 23 "More Cards" (F33 Part 1 — 6 straightforward cards) and Sprint 24 "Smart Categories" (F33 Part 2 — UOB Lady's Solitaire category selection UX). Card Expansion 20→22 (Maybank World MC + UOB Visa Signature) marked COMPLETE. SC Smart Card DEFERRED (P3, cashback card). Slug mismatch `maybank-world-mc` fixed. v12.0 — Added Sprint 21 "Data Fix" (F30 Petrol/Bills Resolution + F32 Condition Transparency) and Sprint 22 "Smart Scoring" (F31 Min Spend Condition Enforcement). Based on MileLion competitive analysis identifying recommendation accuracy gaps. See `docs/technical/MAXIMILE_VS_MILELION_ANALYSIS.md`. v11.0 — REVISED Push Notifications Plan (Sprints 19-20): Sprint 19 Foundation COMPLETE ✅. Consolidated original Sprints 20-22 into single NEW Sprint 20 "Complete System + Demo Mode" (13 SP, 2 weeks). Removed gradual user rollout (beta → expand → full launch). New focus: Build complete production-ready system (all severities, batching, granular controls) + beautiful demo mode for stakeholder presentations. Total: 2 sprints (19-20), 19 SP, 4 weeks instead of original 8 weeks. No user launch—demo readiness only. v10.0 — Added Sprints 19-22 ("Proactive Alerts": Push Notifications Implementation) with 4-phase rollout (Foundation → Beta → Expand → Full Launch). 22 story points total across 4+ sprints for rate change push alerts with granular user controls, smart batching, and F6 cap alert integration. Addresses critical visibility gap in current in-app-only notification system. See `docs/PUSH_NOTIFICATIONS_EVALUATION.md` for full analysis. v9.0 — Added Sprint 18 ("Demo Mode": F28 — Environment-Controlled Mock Data) enabling product demonstrations without real Apple Pay transactions. Lightweight 14-point sprint with 5 stories covering environment configuration, mock transaction generator, deep link integration, EAS demo build profile, and comprehensive documentation. Fully implemented and shipped with `eas build --profile demo` support. v8.0 — Added 3 new stories to Sprint 16 from DRD v1.1 design decisions: S16.7 (Onboarding Step 1.5 — auto-capture setup integrated into onboarding flow, platform-adaptive, skippable), S16.8 (Recommendation Match Indicator — green "best card" banner or blue "tip" nudge on confirmation screen), S16.9 (Smart Pay → Auto-Capture Handoff — 60-second listener that skips manual entry when auto-capture fires after Wallet return). Sprint 16 total points updated from 36 to 50. Added iOS Shortcut platform constraint note to S16.4. v7.0 — Added Sprint 16 ("Smart Logging: iOS": F26 Apple Pay Shortcuts Auto-Capture) and Sprint 17 ("Smart Logging: Android": F27 Android Notification Auto-Capture). Addresses the #1 product risk (manual logging fatigue) with platform-native auto-capture. See `docs/NOTIFICATION_CAPTURE_FEASIBILITY.md` for full technical analysis. v6.0 — Added Sprint 13 ("Crowdsourced Accuracy": F24 Community Rate Change Submissions), Sprint 14 ("Detection Foundation": F25 Part 1 — scraper + hashing), and Sprint 15 ("Always Up to Date": F25 Part 2 — AI classification + pipeline health). Closes the Layer 1 detection gap with $0/month infrastructure. v5.0 — Added Sprint 11 ("Every Card": F22 Card Coverage Expansion 20→29) and Sprint 12 ("Every Change": F23 Rate Change Monitoring & Alerts). v4.0 — Added Sprint 9–10 (Miles Ecosystem). v3.0 — Added Sprint 7–8 (Miles Portfolio). v2.0 — Compressed to 2-week plan. v2.1 — Restored full 20-card coverage.
 
 ---
 
@@ -8429,3 +8429,262 @@ Day 5:  QA + bug fixes
 ---
 
 **Sprint 37 Status**: 🚧 IN PROGRESS — S37.1–S37.7 implemented, S37.8 pending
+
+---
+
+## Sprint 38: "Product Analytics" (F46 — Admin Analytics Dashboard)
+
+| Field | Value |
+|-------|-------|
+| **Sprint Goal** | Add an Analytics tab to the admin dashboard providing MARU trends, user activity metrics, conversion funnels, and feature adoption tracking — all powered by Supabase analytics_events data |
+| **Duration** | 1.5 weeks (8 working days) |
+| **Story Points** | 16 SP |
+| **Feature** | F46: Admin Analytics Dashboard |
+| **Epic** | E25: Product Analytics & Insights |
+| **Depends On** | Supabase analytics_events table (migration 004 — already deployed), existing admin-dashboard shell |
+
+### Sprint 38 — Definition of Ready (DoR) Checklist
+
+- [x] PRD F46 section complete (v2.15)
+- [x] Analytics events already flowing to Supabase (51+ event types, dual-write active)
+- [x] Supabase analytics_events table deployed (migration 004)
+- [x] maru_monthly SQL view exists (migration 004)
+- [x] Admin dashboard shell exists with tab navigation pattern (App.tsx)
+- [x] Supabase service_role client configured in admin-dashboard
+- [ ] Recharts library evaluated and approved for admin-dashboard
+
+### Sprint 38 — Definition of Done (DoD) Checklist
+
+- [ ] All 5 SQL views created and returning correct data
+- [ ] Analytics tab visible in admin dashboard navigation
+- [ ] Date range picker filters all dashboard data (7d / 30d / 90d)
+- [ ] MARU north star card displays current month value + trend sparkline
+- [ ] All 6 KPI cards (MARU, DAU, MAU, transactions, churn, cap breaches) render correctly
+- [ ] 3 funnels (onboarding, Smart Pay, notification) display with accurate conversion rates
+- [ ] Drop-off highlighting works (>30% = amber, >50% = red)
+- [ ] Feature adoption bar chart shows rates for 5 major features
+- [ ] Event heatmap renders daily event density
+- [ ] Active users chart (DAU/WAU/MAU) toggleable and responsive
+- [ ] Gold/charcoal theme consistent with existing admin dashboard
+- [ ] No regressions in existing admin dashboard tabs
+
+### Sprint 38 — Stories
+
+| Story ID | Story | Size | Points |
+|----------|-------|------|--------|
+| S38.1 | SQL Analytics Views | M | 3 |
+| S38.2 | Analytics Tab Shell + Navigation | S | 2 |
+| S38.3 | North Star & KPI Cards | M | 3 |
+| S38.4 | Funnel Visualizations | M | 3 |
+| S38.5 | Feature Adoption & Event Heatmap | M | 3 |
+| S38.6 | Active Users Chart + Recharts Integration | S | 2 |
+
+### Sprint 38 — User Story Details
+
+---
+
+#### S38.1: SQL Analytics Views (3 SP)
+
+**As a** product team member,
+**I want** pre-computed SQL views over the analytics_events table,
+**So that** the admin dashboard can query aggregated metrics efficiently without complex client-side logic.
+
+**Acceptance Criteria:**
+1. `v_active_users` view returns daily unique user count from analytics_events
+2. `v_event_daily` view returns daily event counts grouped by event type
+3. `v_onboarding_funnel` view returns distinct user counts for each step: sign_up → card_added → onboarding_completed → transaction_logged
+4. `v_smart_pay_funnel` view returns distinct user counts for: pay_flow_started → merchant_detected → recommendation_used → pay_transaction_logged
+5. `v_notification_funnel` view returns distinct user counts for: notification_primer_shown → notification_primer_accepted → notification_permission_granted
+6. All views execute in <500ms on 100K+ events
+7. Migration file: `database/migrations/005_analytics_views.sql`
+
+**Tasks:**
+- [ ] Create migration file `005_analytics_views.sql`
+- [ ] Implement `v_active_users` view with daily grouping
+- [ ] Implement `v_event_daily` view with event + date grouping
+- [ ] Implement `v_onboarding_funnel` view with 4-step UNION
+- [ ] Implement `v_smart_pay_funnel` view with 4-step UNION
+- [ ] Implement `v_notification_funnel` view with 3-step UNION
+- [ ] Add performance indexes if needed
+- [ ] Test all views return expected data shapes
+
+---
+
+#### S38.2: Analytics Tab Shell + Navigation (2 SP)
+
+**As a** product team member,
+**I want** an Analytics tab in the admin dashboard,
+**So that** I can access product metrics from the same interface I use for community and pipeline management.
+
+**Acceptance Criteria:**
+1. 4th "Analytics" tab appears in admin dashboard tab navigation with chart icon
+2. Tab follows existing navigation pattern (gold underline for active, icon + label)
+3. Analytics.tsx component renders with date range picker (7d / 30d / 90d / custom)
+4. Date range selection filters data passed to child components
+5. Loading and empty states handled gracefully
+6. Supabase service_role client fetches from analytics views
+
+**Tasks:**
+- [ ] Add 'analytics' to Tab type union in App.tsx
+- [ ] Add Analytics tab config to TAB_CONFIG array
+- [ ] Create `Analytics.tsx` main component
+- [ ] Implement `DateRangePicker.tsx` component (7d / 30d / 90d presets + custom)
+- [ ] Wire up Supabase service_role queries to new views
+- [ ] Add loading skeleton and empty state
+
+---
+
+#### S38.3: North Star & KPI Cards (3 SP)
+
+**As a** product team member,
+**I want** to see MARU and key product metrics at a glance,
+**So that** I can quickly assess product health without querying databases.
+
+**Acceptance Criteria:**
+1. `NorthStarCard.tsx` shows current month MARU count as large number with sparkline trend
+2. `MetricCard.tsx` is a reusable KPI card showing: metric name, current value, trend arrow (↑/↓/→), percentage change vs previous period
+3. Dashboard displays 6 KPI cards: MARU, DAU, MAU, transaction count, churn count, cap breach count
+4. Trend comparison period matches selected date range
+5. Cards are responsive (2×3 grid on desktop, stacked on mobile)
+6. Gold accent for positive trends, red for negative
+
+**Tasks:**
+- [ ] Create `NorthStarCard.tsx` with sparkline (Recharts)
+- [ ] Create `MetricCard.tsx` reusable component
+- [ ] Query `maru_monthly` view for MARU data
+- [ ] Query `v_active_users` for DAU/MAU
+- [ ] Query `v_event_daily` for transaction, churn, cap breach counts
+- [ ] Calculate trend vs previous period
+- [ ] Responsive grid layout
+
+---
+
+#### S38.4: Funnel Visualizations (3 SP)
+
+**As a** product team member,
+**I want** to see conversion funnels for key user journeys,
+**So that** I can identify where users drop off and prioritize improvements.
+
+**Acceptance Criteria:**
+1. `FunnelChart.tsx` is a reusable horizontal funnel bar component
+2. Each step shows: step label, user count, conversion rate (% of step 1)
+3. Color-coded drop-off: >30% drop between steps = amber highlight, >50% = red highlight
+4. 3 funnels rendered: Onboarding (4 steps), Smart Pay (4 steps), Notification opt-in (3 steps)
+5. Hover/click on a step shows tooltip with exact counts
+6. Funnel data sourced from `v_onboarding_funnel`, `v_smart_pay_funnel`, `v_notification_funnel`
+
+**Tasks:**
+- [ ] Create `FunnelChart.tsx` reusable component
+- [ ] Implement step-to-step drop-off calculation
+- [ ] Add color-coded highlighting logic (amber >30%, red >50%)
+- [ ] Render Onboarding funnel from `v_onboarding_funnel`
+- [ ] Render Smart Pay funnel from `v_smart_pay_funnel`
+- [ ] Render Notification funnel from `v_notification_funnel`
+- [ ] Add tooltips with exact counts
+
+---
+
+#### S38.5: Feature Adoption & Event Heatmap (3 SP)
+
+**As a** product team member,
+**I want** to see which features users adopt and daily activity patterns,
+**So that** I can understand feature engagement and identify usage trends.
+
+**Acceptance Criteria:**
+1. Horizontal bar chart shows adoption rate (% of total users) for 5 features: Smart Pay, Auto-Capture, Goals, Notifications, Miles Redemption
+2. Adoption = distinct users who triggered feature's key event / total distinct users
+3. `EventHeatmap.tsx` shows calendar-style grid (GitHub contribution graph style) with daily event volume
+4. Heatmap color intensity scales with event count (light gold → dark gold → charcoal)
+5. Hover on a day shows date + event count
+6. Both charts responsive
+
+**Tasks:**
+- [ ] Create feature adoption bar chart component
+- [ ] Calculate adoption rates from `v_event_daily` (map events to features)
+- [ ] Create `EventHeatmap.tsx` calendar grid component
+- [ ] Query `v_event_daily` for daily totals
+- [ ] Implement color scale (gold gradient)
+- [ ] Add hover tooltips
+
+---
+
+#### S38.6: Active Users Chart + Recharts Integration (2 SP)
+
+**As a** product team member,
+**I want** to see DAU/WAU/MAU trends over time,
+**So that** I can track user engagement growth and identify anomalies.
+
+**Acceptance Criteria:**
+1. `recharts` installed in admin-dashboard package.json
+2. `ActiveUsersChart.tsx` renders a line chart with 3 toggleable series: DAU, WAU, MAU
+3. WAU = 7-day rolling unique users, MAU = 30-day rolling unique users
+4. Chart is responsive and matches gold/charcoal admin dashboard theme
+5. X-axis shows dates, Y-axis shows user count
+6. Toggle buttons to show/hide each series
+
+**Tasks:**
+- [ ] Install `recharts` in admin-dashboard
+- [ ] Create `ActiveUsersChart.tsx` component
+- [ ] Query `v_active_users` for DAU data
+- [ ] Calculate WAU (7-day rolling) and MAU (30-day rolling) from DAU data
+- [ ] Implement series toggle (DAU/WAU/MAU)
+- [ ] Style chart with admin dashboard theme colors
+- [ ] Responsive container
+
+### Sprint 38 — Dependencies Map
+
+```
+S38.1 (SQL Views) ──────────┐
+                              ├──► S38.3 (KPI Cards)
+S38.2 (Tab Shell) ──────────┤
+                              ├──► S38.4 (Funnels)
+S38.6 (Recharts install) ───┤
+                              ├──► S38.5 (Adoption + Heatmap)
+                              │
+                              └──► S38.6 (Active Users Chart)
+
+External dependencies:
+- analytics_events table (migration 004) ✅ Already deployed
+- maru_monthly view (migration 004) ✅ Already deployed
+- Admin dashboard shell (App.tsx) ✅ Already exists
+```
+
+### Sprint 38 — Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|-----------|--------|------------|
+| Analytics events table has low volume (pre-launch) | High | Medium | Seed with demo data; views work correctly regardless of volume |
+| Recharts bundle size bloats admin dashboard | Low | Low | Recharts is ~40KB gzipped; admin dashboard is internal tool, performance less critical |
+| SQL views slow on large datasets | Low | Medium | Views use indexed columns (event, created_at); add composite indexes in migration if needed |
+| Funnel conversion rates misleading without cohort filtering | Medium | Medium | V1 shows all-time funnels; add date-range filtering (already in S38.2) |
+| Admin dashboard not behind auth | Medium | High | Already uses Supabase service_role; document that Cloudflare Access or similar should protect the deployment |
+
+### Sprint 38 — Schedule
+
+| Day | Focus | Stories |
+|-----|-------|---------|
+| D1 | SQL views + Recharts setup | S38.1 + S38.6 (install only) |
+| D2 | SQL views testing + Tab shell | S38.1 (complete) + S38.2 |
+| D3 | North Star + KPI cards | S38.3 |
+| D4 | KPI cards complete + Funnel start | S38.3 (complete) + S38.4 |
+| D5 | Funnel visualizations | S38.4 (complete) |
+| D6 | Feature adoption + Heatmap | S38.5 |
+| D7 | Active users chart + polish | S38.6 + S38.5 (complete) |
+| D8 | Integration testing + theme polish | All stories — verification |
+
+### Sprint 38 — New/Modified Files
+
+| File | Action | Story |
+|------|--------|-------|
+| `database/migrations/005_analytics_views.sql` | **New** | S38.1 |
+| `admin-dashboard/package.json` | **Modified** (add recharts) | S38.6 |
+| `admin-dashboard/src/App.tsx` | **Modified** (add Analytics tab) | S38.2 |
+| `admin-dashboard/src/components/Analytics.tsx` | **New** | S38.2 |
+| `admin-dashboard/src/components/analytics/DateRangePicker.tsx` | **New** | S38.2 |
+| `admin-dashboard/src/components/analytics/NorthStarCard.tsx` | **New** | S38.3 |
+| `admin-dashboard/src/components/analytics/MetricCard.tsx` | **New** | S38.3 |
+| `admin-dashboard/src/components/analytics/FunnelChart.tsx` | **New** | S38.4 |
+| `admin-dashboard/src/components/analytics/EventHeatmap.tsx` | **New** | S38.5 |
+| `admin-dashboard/src/components/analytics/ActiveUsersChart.tsx` | **New** | S38.6 |
+
+---
