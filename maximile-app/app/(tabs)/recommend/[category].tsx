@@ -29,6 +29,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import GlassCard from '../../../components/GlassCard';
 import CapProgressBar from '../../../components/CapProgressBar';
+import InfoTooltip from '../../../components/InfoTooltip';
 import EmptyState from '../../../components/EmptyState';
 import { logRecommendationAction, track } from '../../../lib/analytics';
 import { getCardImage } from '../../../constants/cardImages';
@@ -800,15 +801,15 @@ export default function RecommendResultScreen() {
                   <View style={styles.topCardDetails}>
                     <Text style={styles.topCardBank}>{topPick.bank}</Text>
                     <Text style={styles.topCardName}>{topPick.card_name}</Text>
-                    <Text style={styles.topCardRate}>
-                      {topPick.earn_rate_mpd.toFixed(1)} mpd
-                    </Text>
-                    {topPick.conditions_note && (
-                      <View style={styles.conditionsRow}>
-                        <Ionicons name="information-circle-outline" size={14} color={Colors.textSecondary} />
-                        <Text style={styles.conditionsText}>{topPick.conditions_note}</Text>
-                      </View>
-                    )}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={styles.topCardRate}>
+                        {topPick.earn_rate_mpd.toFixed(1)} mpd
+                      </Text>
+                      <InfoTooltip
+                        title="Miles Per Dollar"
+                        message="Miles per dollar (mpd) is how many airline miles you earn for every $1 spent. Higher mpd means you earn miles faster. This card's bonus rate applies to this spending category."
+                      />
+                    </View>
                     {topPick.min_spend_met === false && topPick.min_spend_threshold != null && (
                       <View style={styles.minSpendNudge}>
                         <Ionicons name="alert-circle" size={14} color="#F59E0B" />
@@ -851,7 +852,13 @@ export default function RecommendResultScreen() {
                     )}
                     {hasTopCap ? (
                       <View style={styles.topCapSection}>
-                        <Text style={styles.topCapLabel}>Remaining Cap</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Text style={styles.topCapLabel}>Remaining Cap</Text>
+                          <InfoTooltip
+                            title="Spending Cap"
+                            message="This is the monthly spending limit for earning bonus miles. Once you reach the cap, this card drops to its base rate for this category. The bar shows how much of the cap you have used this month. Caps reset on the 1st of each month."
+                          />
+                        </View>
                         <CapProgressBar
                           spent={topCapSpent}
                           cap={topCapTotal}
@@ -875,14 +882,14 @@ export default function RecommendResultScreen() {
                 <Text style={styles.logCtaText}>Log Transaction</Text>
               </TouchableOpacity>
 
-              {/* Smart Pay CTA */}
+              {/* Flash Pay CTA */}
               <TouchableOpacity
                 style={styles.smartPayCta}
                 onPress={handleSmartPay}
                 activeOpacity={0.8}
               >
                 <Ionicons name="flash" size={18} color={Colors.brandGold} />
-                <Text style={styles.smartPayCtaText}>Smart Pay</Text>
+                <Text style={styles.smartPayCtaText}>Flash Pay</Text>
               </TouchableOpacity>
 
               {/* Alternatives header */}
@@ -919,9 +926,6 @@ export default function RecommendResultScreen() {
                 <View style={styles.altInfo}>
                   <Text style={styles.altCardName}>{item.card_name}</Text>
                   <Text style={styles.altBank}>{item.bank}</Text>
-                  {item.conditions_note && (
-                    <Text style={styles.altConditions} numberOfLines={1}>{item.conditions_note}</Text>
-                  )}
                   {item.min_spend_met === false && item.min_spend_threshold != null && (
                     <Text style={styles.altMinSpendWarning} numberOfLines={1}>
                       Min spend ${item.min_spend_threshold.toLocaleString()}/mo not met

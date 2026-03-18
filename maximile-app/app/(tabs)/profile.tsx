@@ -112,6 +112,17 @@ export default function ProfileScreen() {
           />
         </View>
 
+        {/* Help */}
+        <Text style={styles.sectionLabel}>Support</Text>
+        <View style={styles.menuSection}>
+          <MenuItem
+            icon="help-circle-outline"
+            label="Help & FAQ"
+            onPress={() => router.push('/help')}
+            isLast
+          />
+        </View>
+
         {/* Community */}
         <Text style={styles.sectionLabel}>Community</Text>
         <View style={styles.menuSection}>
@@ -271,7 +282,7 @@ export default function ProfileScreen() {
                   <Ionicons name="flash-outline" size={18} color="#FFFFFF" />
                 </LinearGradient>
                 <View style={styles.modalFeatureText}>
-                  <Text style={styles.modalFeatureTitle}>Smart Pay</Text>
+                  <Text style={styles.modalFeatureTitle}>Flash Pay</Text>
                   <Text style={styles.modalFeatureDesc}>Location-based card suggestions</Text>
                 </View>
               </View>

@@ -69,6 +69,7 @@ CREATE TABLE public.transactions (
   user_id          UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   card_id          UUID          NOT NULL REFERENCES public.cards(id) ON DELETE RESTRICT,
   category_id      TEXT          NOT NULL REFERENCES public.categories(id) ON DELETE RESTRICT,
+  subcategory      TEXT,                               -- Bills subcategory (utilities, telco, education, hospital, pharmacy)
   amount           DECIMAL(10,2) NOT NULL,
   currency         TEXT          NOT NULL DEFAULT 'SGD',
   merchant_name    TEXT,                               -- Optional: user or auto-detected
@@ -82,7 +83,8 @@ CREATE TABLE public.transactions (
   CONSTRAINT transactions_amount_positive CHECK (amount > 0),
   CONSTRAINT transactions_currency_format CHECK (currency ~ '^[A-Z]{3}$'),
   CONSTRAINT transactions_date_not_future CHECK (transaction_date <= CURRENT_DATE + INTERVAL '1 day'),
-  CONSTRAINT transactions_merchant_name_length CHECK (merchant_name IS NULL OR char_length(merchant_name) <= 200)
+  CONSTRAINT transactions_merchant_name_length CHECK (merchant_name IS NULL OR char_length(merchant_name) <= 200),
+  CONSTRAINT transactions_subcategory_bills_only CHECK (subcategory IS NULL OR category_id = 'bills')
 );
 
 COMMENT ON TABLE  public.transactions IS 'User-logged credit card transactions for spend tracking and cap monitoring.';
@@ -90,6 +92,7 @@ COMMENT ON COLUMN public.transactions.amount IS 'Transaction amount in the speci
 COMMENT ON COLUMN public.transactions.currency IS 'ISO 4217 currency code, defaults to SGD.';
 COMMENT ON COLUMN public.transactions.merchant_mcc IS 'Merchant Category Code if known; used for category auto-detection in future.';
 COMMENT ON COLUMN public.transactions.logged_at IS 'When the user logged this transaction (may differ from transaction_date).';
+COMMENT ON COLUMN public.transactions.subcategory IS 'Bills subcategory (utilities, telco, education, hospital, pharmacy). Only valid when category_id = ''bills''.';
 
 CREATE TRIGGER transactions_updated_at
   BEFORE UPDATE ON public.transactions
@@ -101,6 +104,7 @@ CREATE INDEX idx_transactions_user_date     ON public.transactions (user_id, tra
 CREATE INDEX idx_transactions_user_card     ON public.transactions (user_id, card_id);
 CREATE INDEX idx_transactions_user_month    ON public.transactions (user_id, card_id, category_id, transaction_date);
 CREATE INDEX idx_transactions_logged_at     ON public.transactions (logged_at DESC);
+CREATE INDEX idx_transactions_category_subcategory ON public.transactions (category_id, subcategory);
 
 -- RLS
 ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;

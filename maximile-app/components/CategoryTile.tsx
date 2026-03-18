@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   contentWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: Spacing.lg,
+    paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
   },
   contentWrapFullWidth: {
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   // Icon outer (for shadow positioning)
   iconOuter: {
     position: 'relative',
-    marginBottom: Spacing.sm,
+    marginBottom: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },

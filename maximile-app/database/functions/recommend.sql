@@ -231,6 +231,7 @@ BEGIN
     FROM transactions t
     WHERE t.user_id = v_user_id
       AND t.category_id = p_category_id
+      AND (p_subcategory IS NULL OR t.subcategory = p_subcategory)
       AND t.transaction_date >= (date_trunc('month', CURRENT_DATE))::date
       AND t.transaction_date < (date_trunc('month', CURRENT_DATE) + INTERVAL '1 month')::date
     GROUP BY t.card_id

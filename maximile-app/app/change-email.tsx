@@ -13,7 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
-import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, WebInputStyle } from '../constants/theme';
 import GlassCard from '../components/GlassCard';
 import { handleAuthError } from '../lib/error-handler';
 import { supabaseAuth } from '../lib/supabase';
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     ...Typography.body,
     color: Colors.textPrimary,
-    ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}),
+    ...WebInputStyle,
   },
   inputFocused: {
     borderColor: Colors.brandGold,

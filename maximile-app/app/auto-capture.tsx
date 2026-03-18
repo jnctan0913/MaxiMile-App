@@ -30,6 +30,7 @@ import {
   Typography,
   BorderRadius,
   Shadows,
+  WebInputStyle,
 } from '../constants/theme';
 import { matchMerchant, saveMerchantOverride } from '../lib/merchant-mapper';
 import { matchCard, saveCardMapping } from '../lib/card-matcher';
@@ -716,6 +717,7 @@ const styles = StyleSheet.create({
     color: Colors.brandGold,
     paddingVertical: 0,
     marginLeft: Spacing.xs,
+    ...WebInputStyle,
   },
 
   // Merchant
@@ -732,6 +734,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     borderBottomWidth: 1.5,
     borderBottomColor: Colors.brandGold,
+    ...WebInputStyle,
   },
 
   // Category chips

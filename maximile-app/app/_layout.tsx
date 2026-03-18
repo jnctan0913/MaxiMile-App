@@ -8,6 +8,7 @@ import {
   Platform,
   TouchableOpacity,
   Text,
+  AppState,
 } from 'react-native';
 import { Stack, SplashScreen, useRouter, useSegments } from 'expo-router';
 import { trackEvent } from '../lib/analytics';
@@ -179,6 +180,16 @@ function RootContent() {
     }
   }, [segments]);
 
+  // Flush analytics buffer when app returns to foreground
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        flushBufferedEvents();
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
   // Deep link handler — route maximile://log URLs to auto-capture screen
   useEffect(() => {
     const handleUrl = ({ url }: { url: string }) => {
@@ -222,7 +233,7 @@ function RootContent() {
           name="pay/index"
           options={{
             headerShown: true,
-            headerTitle: 'Smart Pay',
+            headerTitle: 'Flash Pay',
             headerBackTitle: 'Back',
             headerTintColor: Colors.brandGold,
             headerStyle: { backgroundColor: Colors.background },

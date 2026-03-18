@@ -4,7 +4,6 @@ import {
   Text,
   ImageBackground,
   StyleSheet,
-  Platform,
   TouchableOpacity,
   Keyboard,
   ScrollView,
@@ -12,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { CATEGORIES } from '../../constants/categories';
@@ -22,6 +22,8 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import MerchantSearchBar from '../../components/MerchantSearchBar';
 import MerchantAutocomplete from '../../components/MerchantAutocomplete';
 import { useMerchantSearch } from '../../hooks/useMerchantSearch';
+import CoachMarkOverlay from '../../components/CoachMarkOverlay';
+import { useCoachMark } from '../../hooks/useCoachMark';
 import { showNetworkErrorAlert } from '../../lib/error-handler';
 import { track } from '../../lib/analytics';
 import RateChangeBanner from '../../components/RateChangeBanner';
@@ -58,6 +60,7 @@ function getSuggestedCategory(): string | null {
 export default function RecommendScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const tabBarHeight = useBottomTabBarHeight();
   const [userCards, setUserCards] = useState<UserCard[]>([]);
   const [rateAlerts, setRateAlerts] = useState<RateAlert[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,8 +70,19 @@ export default function RecommendScreen() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { results: searchResults, isSearching } = useMerchantSearch(searchQuery);
   const prevResultsLengthRef = useRef(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const searchBarRef = useRef<View>(null);
+  const categoryGridRef = useRef<View>(null);
+  const fabRef = useRef<View>(null);
 
   const suggestedCategory = useMemo(() => getSuggestedCategory(), []);
+
+  const { coachMarkVisible, currentStep, spotRect, advance, dismiss } = useCoachMark({
+    enabled: !loading && userCards.length > 0,
+    refs: [searchBarRef, categoryGridRef, fabRef],
+    scrollViewRef,
+    scrollOffsets: [0, 0, 99999],
+  });
 
   // -----------------------------------------------------------------------
   // Fetch user cards on every screen focus (so new cards appear immediately)
@@ -259,8 +273,9 @@ export default function RecommendScreen() {
     >
       <SafeAreaView style={styles.safeArea} edges={[]}>
         <ScrollView
+          ref={scrollViewRef}
           style={styles.scrollView}
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + Spacing.md }]}
           keyboardShouldPersistTaps="handled"
         >
           {/* Screen title */}
@@ -270,13 +285,15 @@ export default function RecommendScreen() {
           </Text>
 
           {/* Merchant search bar (Sprint 34 — F42) */}
-          <MerchantSearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={handleSearchBlur}
-            onClear={handleSearchClear}
-          />
+          <View ref={searchBarRef}>
+            <MerchantSearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={handleSearchBlur}
+              onClear={handleSearchClear}
+            />
+          </View>
 
           {/* Autocomplete dropdown */}
           <MerchantAutocomplete
@@ -287,7 +304,7 @@ export default function RecommendScreen() {
           />
 
           {/* 2-column grid for all 8 categories */}
-          <View style={styles.categoryGrid}>
+          <View ref={categoryGridRef} style={styles.categoryGrid}>
             {CATEGORIES.map((category) => (
               <View key={category.id} style={styles.categoryTileWrapper}>
                 <CategoryTile
@@ -302,19 +319,27 @@ export default function RecommendScreen() {
             ))}
           </View>
 
-          {/* Smart Pay */}
-          <View style={styles.fabRow}>
+          {/* Quick Pick */}
+          <View ref={fabRef} style={styles.fabRow}>
             <TouchableOpacity
               style={styles.fab}
               onPress={() => router.push('/pay?source=fab')}
               activeOpacity={0.85}
             >
               <Ionicons name="flash" size={24} color={Colors.brandCharcoal} />
-              <Text style={styles.fabText}>Smart Pay</Text>
+              <Text style={styles.fabText}>Quick Pick</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </SafeAreaView>
+      {coachMarkVisible && spotRect && (
+        <CoachMarkOverlay
+          step={currentStep}
+          spotRect={spotRect}
+          onNext={advance}
+          onSkip={dismiss}
+        />
+      )}
     </ImageBackground>
   );
 }
@@ -339,7 +364,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
-    paddingBottom: Platform.OS === 'ios' ? 88 : 72,
   },
   screenTitle: {
     ...Typography.heading,
@@ -351,7 +375,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     fontSize: 15,
     color: Colors.textSecondary,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   // 2-column grid
   categoryGrid: {
@@ -362,7 +386,7 @@ const styles = StyleSheet.create({
   categoryTileWrapper: {
     width: '50%',
     paddingHorizontal: Spacing.xs,
-    marginBottom: Spacing.sm,
+    marginBottom: 4,
   },
   // Empty state wrapper
   emptyContainer: {

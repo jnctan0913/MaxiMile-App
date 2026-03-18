@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,18 +8,26 @@ import {
   ImageBackground,
   Platform,
   RefreshControl,
+  Alert,
+  TouchableOpacity,
+  Animated,
+  ActionSheetIOS,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack } from 'expo-router';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { CATEGORY_MAP } from '../constants/categories';
+import { CATEGORY_MAP, BILLS_SUBCATEGORIES } from '../constants/categories';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
 import EmptyState from '../components/EmptyState';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { showNetworkErrorAlert } from '../lib/error-handler';
+import EditTransactionSheet, { type EditableTransaction } from '../components/EditTransactionSheet';
+import { updateTransaction, deleteTransaction, reinsertTransaction, type TransactionUpdate } from '../lib/transactions';
+import { track } from '../lib/analytics';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,6 +37,7 @@ interface TransactionRow {
   id: string;
   card_id: string;
   category_id: string;
+  subcategory?: string | null;
   amount: number;
   transaction_date: string;
   logged_at: string;
@@ -39,6 +48,15 @@ interface TransactionRow {
 interface TransactionSection {
   title: string; // e.g. "February 2026"
   data: TransactionRow[];
+}
+
+interface UndoState {
+  user_id: string;
+  card_id: string;
+  category_id: string;
+  amount: number;
+  transaction_date: string;
+  cardName: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -84,6 +102,12 @@ function groupByMonth(transactions: TransactionRow[]): TransactionSection[] {
   }));
 }
 
+function getBillsDisplayName(subcategory: string | null | undefined): string {
+  if (!subcategory) return 'Bills';
+  const sub = BILLS_SUBCATEGORIES.find((s) => s.id === subcategory);
+  return sub ? `Bills - ${sub.label}` : 'Bills';
+}
+
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-SG', {
@@ -103,13 +127,28 @@ export default function TransactionsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Edit sheet
+  const [editTarget, setEditTarget] = useState<EditableTransaction | null>(null);
+
+  // Undo snackbar
+  const [undoData, setUndoData] = useState<UndoState | null>(null);
+  const undoAnim = useRef(new Animated.Value(0)).current;
+  const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Track the currently open swipeable so we can close it when another opens
+  const openSwipeableRef = useRef<Swipeable | null>(null);
+
+  // ---------------------------------------------------------------------------
+  // Fetch
+  // ---------------------------------------------------------------------------
+
   const fetchTransactions = useCallback(async () => {
     if (!user) return;
 
     try {
       const { data, error } = await supabase
         .from('transactions')
-        .select('id, card_id, category_id, amount, transaction_date, logged_at, cards(bank, name), categories(name)')
+        .select('id, card_id, category_id, subcategory, amount, transaction_date, logged_at, cards(bank, name), categories(name)')
         .eq('user_id', user.id)
         .order('transaction_date', { ascending: false })
         .order('logged_at', { ascending: false })
@@ -136,6 +175,268 @@ export default function TransactionsScreen() {
     fetchTransactions();
   };
 
+  // ---------------------------------------------------------------------------
+  // Undo snackbar helpers
+  // ---------------------------------------------------------------------------
+
+  const showUndo = useCallback((data: UndoState) => {
+    setUndoData(data);
+    Animated.spring(undoAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 80,
+      friction: 10,
+    }).start();
+
+    if (undoTimer.current) clearTimeout(undoTimer.current);
+    undoTimer.current = setTimeout(() => {
+      dismissUndo();
+    }, 5000);
+  }, [undoAnim]);
+
+  const dismissUndo = useCallback(() => {
+    Animated.timing(undoAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => setUndoData(null));
+    if (undoTimer.current) {
+      clearTimeout(undoTimer.current);
+      undoTimer.current = null;
+    }
+  }, [undoAnim]);
+
+  const handleUndo = useCallback(async () => {
+    if (!undoData) return;
+    dismissUndo();
+    const { error } = await reinsertTransaction(undoData);
+    if (!error) {
+      fetchTransactions();
+    }
+  }, [undoData, dismissUndo, fetchTransactions]);
+
+  useEffect(() => {
+    return () => {
+      if (undoTimer.current) clearTimeout(undoTimer.current);
+    };
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Edit handler
+  // ---------------------------------------------------------------------------
+
+  const handleEditOpen = useCallback((item: TransactionRow) => {
+    openSwipeableRef.current?.close();
+    openSwipeableRef.current = null;
+    setEditTarget({
+      id: item.id,
+      card_id: item.card_id,
+      category_id: item.category_id,
+      subcategory: item.subcategory ?? null,
+      amount: item.amount,
+      transaction_date: item.transaction_date,
+      cards: item.cards,
+    });
+  }, []);
+
+  const handleSaveEdit = useCallback(
+    async (id: string, oldTx: EditableTransaction, update: TransactionUpdate) => {
+      if (!user) return;
+
+      const { error } = await updateTransaction(
+        id,
+        { card_id: oldTx.card_id, category_id: oldTx.category_id, transaction_date: oldTx.transaction_date },
+        update,
+        user.id,
+      );
+
+      if (error) throw new Error(error); // sheet stays open and shows error
+
+      // Track changed fields for analytics
+      const changedFields: string[] = [];
+      if (update.amount !== oldTx.amount) changedFields.push('amount');
+      if (update.category_id !== oldTx.category_id) changedFields.push('category');
+      if (update.card_id !== oldTx.card_id) changedFields.push('card');
+      if (update.transaction_date !== oldTx.transaction_date) changedFields.push('date');
+
+      track('transaction_edited', {
+        changed_fields: changedFields.join(','),
+        category_changed: update.category_id !== oldTx.category_id,
+        card_changed: update.card_id !== oldTx.card_id,
+      }, user.id);
+
+      // Close sheet immediately
+      setEditTarget(null);
+
+      // Optimistic update — re-apply changes to local state so the list
+      // reflects the edit instantly without waiting for the network round-trip.
+      // Re-sorts and re-groups so date changes move rows to the correct section.
+      setSections((prev) => {
+        const allTx = prev.flatMap((s) => s.data);
+        const updatedTx = allTx.map((t) => {
+          if (t.id !== id) return t;
+          return {
+            ...t,
+            amount: update.amount,
+            transaction_date: update.transaction_date,
+            category_id: update.category_id,
+            card_id: update.card_id,
+            subcategory: update.subcategory ?? null,
+            // Resolve category name from local map; fall back to old value
+            categories: { name: CATEGORY_MAP[update.category_id]?.name ?? t.categories?.name ?? '' },
+            // Keep existing card name if card unchanged; re-fetch will correct it if changed
+            cards: update.card_id === t.card_id ? t.cards : t.cards,
+          };
+        });
+        // Re-sort descending by date then logged_at (mirrors the Supabase query order)
+        updatedTx.sort((a, b) => {
+          const dateCmp = b.transaction_date.localeCompare(a.transaction_date);
+          return dateCmp !== 0 ? dateCmp : b.logged_at.localeCompare(a.logged_at);
+        });
+        return groupByMonth(updatedTx);
+      });
+
+      // Background re-fetch to sync card names and any server-side changes
+      fetchTransactions();
+    },
+    [user, fetchTransactions],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Delete handler
+  // ---------------------------------------------------------------------------
+
+  const handleDeleteConfirm = useCallback(
+    (item: TransactionRow) => {
+      openSwipeableRef.current?.close();
+      openSwipeableRef.current = null;
+
+      const cardName = item.cards?.name ?? 'Unknown card';
+
+      const doDelete = async () => {
+        if (!user) return;
+
+        const { error } = await deleteTransaction(
+          item.id,
+          { card_id: item.card_id, category_id: item.category_id, transaction_date: item.transaction_date },
+          user.id,
+        );
+
+        if (error) {
+          if (Platform.OS === 'web') {
+            window.alert('Could not delete transaction. Please try again.');
+          } else {
+            Alert.alert('Error', 'Could not delete transaction. Please try again.');
+          }
+          return;
+        }
+
+        track('transaction_deleted', { had_undo: true }, user.id);
+
+        // Remove from local state immediately for instant feedback
+        setSections((prev) =>
+          prev
+            .map((section) => ({
+              ...section,
+              data: section.data.filter((t) => t.id !== item.id),
+            }))
+            .filter((section) => section.data.length > 0),
+        );
+
+        showUndo({
+          user_id: user.id,
+          card_id: item.card_id,
+          category_id: item.category_id,
+          amount: item.amount,
+          transaction_date: item.transaction_date,
+          cardName,
+        });
+      };
+
+      if (Platform.OS === 'web') {
+        if (window.confirm(`Delete Transaction?\n\nThis will adjust your cap tracking for ${cardName}.`)) {
+          doDelete();
+        }
+      } else {
+        Alert.alert(
+          'Delete Transaction?',
+          `This will adjust your cap tracking for ${cardName}.`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Delete', style: 'destructive', onPress: doDelete },
+          ],
+        );
+      }
+    },
+    [user, showUndo],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Long-press handler (alternative to swipe)
+  // ---------------------------------------------------------------------------
+
+  const handleLongPress = useCallback(
+    (item: TransactionRow) => {
+      openSwipeableRef.current?.close();
+      openSwipeableRef.current = null;
+
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            options: ['Edit', 'Delete', 'Cancel'],
+            destructiveButtonIndex: 1,
+            cancelButtonIndex: 2,
+          },
+          (buttonIndex) => {
+            if (buttonIndex === 0) handleEditOpen(item);
+            if (buttonIndex === 1) handleDeleteConfirm(item);
+          },
+        );
+      } else {
+        Alert.alert(
+          'Transaction',
+          undefined,
+          [
+            { text: 'Edit', onPress: () => handleEditOpen(item) },
+            { text: 'Delete', style: 'destructive', onPress: () => handleDeleteConfirm(item) },
+            { text: 'Cancel', style: 'cancel' },
+          ],
+        );
+      }
+    },
+    [handleEditOpen, handleDeleteConfirm],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Swipe action renderer
+  // ---------------------------------------------------------------------------
+
+  const renderRightActions = useCallback(
+    (item: TransactionRow, _progress: Animated.AnimatedInterpolation<number>) => (
+      <View style={styles.swipeActions}>
+        <TouchableOpacity
+          style={styles.editAction}
+          onPress={() => handleEditOpen(item)}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="pencil" size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteAction}
+          onPress={() => handleDeleteConfirm(item)}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="trash" size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+    ),
+    [handleEditOpen, handleDeleteConfirm],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Loading state
+  // ---------------------------------------------------------------------------
+
   if (loading) {
     return (
       <>
@@ -161,6 +462,12 @@ export default function TransactionsScreen() {
 
   // Count total transactions
   const totalCount = sections.reduce((sum, s) => sum + s.data.length, 0);
+
+  // Undo snackbar slide translation
+  const undoTranslateY = undoAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [80, 0],
+  });
 
   return (
     <>
@@ -210,6 +517,9 @@ export default function TransactionsScreen() {
                   <Text style={styles.screenSubtitle}>
                     {totalCount} transaction{totalCount !== 1 ? 's' : ''}
                   </Text>
+                  <Text style={styles.swipeHint}>
+                    Long-press or swipe left to edit or delete
+                  </Text>
                 </View>
               }
               renderSectionHeader={({ section }) => (
@@ -220,12 +530,19 @@ export default function TransactionsScreen() {
               renderItem={({ item }) => {
                 const categoryInfo = CATEGORY_MAP[item.category_id];
                 const iconName = categoryInfo?.icon ?? 'wallet-outline';
-                const categoryName = item.categories?.name ?? categoryInfo?.name ?? item.category_id;
+                const categoryName = item.category_id === 'bills' && item.subcategory
+                  ? getBillsDisplayName(item.subcategory)
+                  : (item.categories?.name ?? categoryInfo?.name ?? item.category_id);
                 const cardLabel = item.cards?.name ?? 'Unknown card';
                 const gradient = ICON_PALETTES[item.category_id] ?? DEFAULT_GRADIENT;
 
-                return (
-                  <View style={styles.transactionRow}>
+                const rowContent = (
+                  <TouchableOpacity
+                    style={styles.transactionRow}
+                    onLongPress={() => handleLongPress(item)}
+                    activeOpacity={0.8}
+                    delayLongPress={400}
+                  >
                     <View style={styles.rowLeft}>
                       <LinearGradient
                         colors={gradient}
@@ -254,14 +571,61 @@ export default function TransactionsScreen() {
                         {formatDate(item.transaction_date)}
                       </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
+                );
+
+                return (
+                  <Swipeable
+                    ref={(ref) => {
+                      // Store ref so we can programmatically close this row later
+                      (item as any)._swipeableRef = ref;
+                    }}
+                    renderRightActions={(progress) => renderRightActions(item, progress)}
+                    onSwipeableWillOpen={() => {
+                      // Close any previously open swipeable
+                      if (openSwipeableRef.current && openSwipeableRef.current !== (item as any)._swipeableRef) {
+                        openSwipeableRef.current.close();
+                      }
+                      openSwipeableRef.current = (item as any)._swipeableRef;
+                    }}
+                    friction={2}
+                    rightThreshold={40}
+                    containerStyle={styles.swipeableContainer}
+                    childrenContainerStyle={styles.swipeableChildContainer}
+                  >
+                    {rowContent}
+                  </Swipeable>
                 );
               }}
               ItemSeparatorComponent={() => <View style={styles.separator} />}
             />
           )}
+
+          {/* Undo snackbar */}
+          {undoData && (
+            <Animated.View
+              style={[
+                styles.undoSnackbar,
+                { transform: [{ translateY: undoTranslateY }], opacity: undoAnim },
+              ]}
+            >
+              <Text style={styles.undoText}>Transaction deleted.</Text>
+              <TouchableOpacity onPress={handleUndo} activeOpacity={0.7}>
+                <Text style={styles.undoButton}>Undo</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
         </SafeAreaView>
       </ImageBackground>
+
+      {/* Edit sheet */}
+      <EditTransactionSheet
+        visible={editTarget !== null}
+        transaction={editTarget}
+        userId={user?.id ?? ''}
+        onSave={handleSaveEdit}
+        onDismiss={() => setEditTarget(null)}
+      />
     </>
   );
 }
@@ -304,6 +668,11 @@ const styles = StyleSheet.create({
     ...Typography.body,
     fontSize: 15,
     color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+  swipeHint: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
     marginBottom: Spacing.sm,
   },
 
@@ -317,6 +686,15 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+
+  // Swipeable wrapper — must not clip the row shadow
+  swipeableContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  swipeableChildContainer: {
+    borderRadius: 16,
   },
 
   // Transaction rows — glass card style
@@ -382,5 +760,61 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: Spacing.sm,
+  },
+
+  // Swipe action buttons
+  swipeActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: Spacing.sm,
+    gap: Spacing.xs,
+  },
+  editAction: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.brandGold,
+  },
+  deleteAction: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#E53E3E',
+  },
+
+  // Undo snackbar
+  undoSnackbar: {
+    position: 'absolute',
+    bottom: Spacing.lg,
+    left: Spacing.xl,
+    right: Spacing.xl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.brandCharcoal,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: { elevation: 6 },
+    }),
+  },
+  undoText: {
+    ...Typography.caption,
+    color: Colors.textInverse,
+  },
+  undoButton: {
+    ...Typography.captionBold,
+    color: Colors.brandGold,
   },
 });

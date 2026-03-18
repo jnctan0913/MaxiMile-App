@@ -13,6 +13,7 @@ import {
   ImageBackground,
   useWindowDimensions,
   Animated,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -20,7 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { CATEGORIES, CATEGORY_MAP } from '../../constants/categories';
+import { CATEGORIES, CATEGORY_MAP, BILLS_SUBCATEGORIES } from '../../constants/categories';
 import {
   Colors,
   Spacing,
@@ -81,17 +82,31 @@ function getDefaultCategory(): string {
 export default function LogScreen() {
   const { user } = useAuth();
   const router = useRouter();
-  const params = useLocalSearchParams<{ category?: string; card?: string; merchantName?: string }>();
+  const params = useLocalSearchParams<{ category?: string; card?: string; merchantName?: string; subcategory?: string }>();
 
-  // Merchant name from recommend search flow
-  const merchantName = params.merchantName
-    ? (Array.isArray(params.merchantName) ? params.merchantName[0] : params.merchantName)
-    : undefined;
+  // Merchant name from recommend search flow — stored in local state so it
+  // can be cleared after logging or cancelling without affecting the URL.
+  const [merchantName, setMerchantName] = useState<string | undefined>(() =>
+    params.merchantName
+      ? (Array.isArray(params.merchantName) ? params.merchantName[0] : params.merchantName)
+      : undefined
+  );
+
+  // Clear URL params immediately after reading so returning to the tab
+  // doesn't re-show the merchant banner.
+  useEffect(() => {
+    if (params.merchantName) {
+      router.setParams({ merchantName: undefined });
+    }
+  }, [params.merchantName]);
 
   // Form state
   const [amountStr, setAmountStr] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [showBillsModal, setShowBillsModal] = useState(false);
+  const billsSlideAnim = useRef(new Animated.Value(300)).current;
 
   // Data
   const [cards, setCards] = useState<UserCardWithDetails[]>([]);
@@ -149,6 +164,20 @@ export default function LogScreen() {
       setSelectedCategory(getDefaultCategory());
     }
   }, [params.category]);
+
+  // Pre-fill subcategory from route params (e.g. recommendation context)
+  useEffect(() => {
+    if (params.category === 'bills' && params.subcategory) {
+      setSelectedSubcategory(params.subcategory);
+    }
+  }, [params.category, params.subcategory]);
+
+  // Clear subcategory when switching away from bills
+  useEffect(() => {
+    if (selectedCategory !== 'bills') {
+      setSelectedSubcategory(null);
+    }
+  }, [selectedCategory]);
 
   useEffect(() => {
     if (params.card && cards.length > 0) {
@@ -232,7 +261,8 @@ export default function LogScreen() {
   // -------------------------------------------------------------------------
   // Confirm button enabled
   // -------------------------------------------------------------------------
-  const canSubmit = parsedAmount > 0 && selectedCategory !== null && selectedCardId !== null;
+  const canSubmit = parsedAmount > 0 && selectedCategory !== null && selectedCardId !== null
+    && (selectedCategory !== 'bills' || selectedSubcategory !== null);
 
   // -------------------------------------------------------------------------
   // Submit transaction
@@ -248,6 +278,7 @@ export default function LogScreen() {
       user_id: user.id,
       card_id: selectedCardId!,
       category_id: selectedCategory!,
+      subcategory: selectedCategory === 'bills' ? selectedSubcategory : null,
       amount: parsedAmount,
       transaction_date: today,
       notes: null,
@@ -356,6 +387,8 @@ export default function LogScreen() {
     setPostTxnAlert(null);
     if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
     setAmountStr('');
+    setSelectedSubcategory(null);
+    setMerchantName(undefined);
   };
 
   // -------------------------------------------------------------------------
@@ -411,7 +444,15 @@ export default function LogScreen() {
                 <TouchableOpacity
                   key={cat.id}
                   style={[styles.categoryChip, isActive && styles.categoryChipActive, isCompact && styles.categoryChipCompact]}
-                  onPress={() => setSelectedCategory(cat.id)}
+                  onPress={() => {
+                    if (cat.id === 'bills') {
+                      setSelectedCategory('bills');
+                      setShowBillsModal(true);
+                      Animated.spring(billsSlideAnim, { toValue: 0, useNativeDriver: true, tension: 65, friction: 11 }).start();
+                    } else {
+                      setSelectedCategory(cat.id);
+                    }
+                  }}
                   activeOpacity={0.7}
                 >
                   <Ionicons
@@ -426,7 +467,9 @@ export default function LogScreen() {
                       isCompact && styles.categoryChipTextCompact,
                     ]}
                   >
-                    {cat.name}
+                    {cat.id === 'bills' && selectedSubcategory
+                      ? `${cat.name} - ${BILLS_SUBCATEGORIES.find(s => s.id === selectedSubcategory)?.label ?? ''}`
+                      : cat.name}
                   </Text>
                 </TouchableOpacity>
               );
@@ -489,6 +532,11 @@ export default function LogScreen() {
               );
             })}
           </ScrollView>
+
+          {/* Validation hint */}
+          {parsedAmount === 0 && selectedCategory !== null && selectedCardId !== null && (
+            <Text style={styles.validationHint}>Please enter a transaction amount</Text>
+          )}
 
           {/* Date + Confirm row */}
           <View style={styles.dateConfirmRow}>
@@ -631,7 +679,44 @@ export default function LogScreen() {
             </View>
           </View>
         </Modal>
-      </SafeAreaView>
+        {/* Bills Subcategory Bottom Sheet */}
+      <Modal visible={showBillsModal} transparent animationType="none" onRequestClose={() => setShowBillsModal(false)}>
+        <TouchableWithoutFeedback onPress={() => { setShowBillsModal(false); billsSlideAnim.setValue(300); }}>
+          <View style={billsStyles.backdrop} />
+        </TouchableWithoutFeedback>
+        <Animated.View style={[billsStyles.sheet, { transform: [{ translateY: billsSlideAnim }] }]}>
+          <View style={billsStyles.handle} />
+          <Text style={billsStyles.title}>Select Bill Type</Text>
+          <View style={billsStyles.grid}>
+            {BILLS_SUBCATEGORIES.map((sub) => {
+              const isActive = selectedSubcategory === sub.id;
+              return (
+                <TouchableOpacity
+                  key={sub.id}
+                  style={[billsStyles.tile, isActive && billsStyles.tileActive]}
+                  onPress={() => {
+                    setSelectedSubcategory(sub.id);
+                    setShowBillsModal(false);
+                    billsSlideAnim.setValue(300);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={sub.icon as keyof typeof Ionicons.glyphMap}
+                    size={24}
+                    color={isActive ? Colors.brandGold : Colors.textSecondary}
+                  />
+                  <Text style={[billsStyles.tileLabel, isActive && billsStyles.tileLabelActive]}>
+                    {sub.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </Animated.View>
+      </Modal>
+
+    </SafeAreaView>
     </ImageBackground>
   );
 }
@@ -801,6 +886,14 @@ const styles = StyleSheet.create({
     color: Colors.brandCharcoal,
   },
 
+  // Validation hint
+  validationHint: {
+    ...Typography.caption,
+    color: Colors.brandGold,
+    textAlign: 'center',
+    marginBottom: Spacing.xs,
+  },
+
   // Date + Confirm row
   dateConfirmRow: {
     flexDirection: 'row',
@@ -955,5 +1048,68 @@ const styles = StyleSheet.create({
   doneButtonText: {
     ...Typography.bodyBold,
     color: Colors.brandCharcoal,
+  },
+});
+
+// Bills subcategory bottom sheet styles
+const billsStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  sheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: Spacing.sm,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Platform.OS === 'ios' ? 36 : Spacing.xl,
+    ...Shadows.glass,
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
+    alignSelf: 'center',
+    marginBottom: Spacing.md,
+  },
+  title: {
+    ...Typography.subheading,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.lg,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    paddingBottom: Spacing.md,
+  },
+  tile: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(197, 165, 90, 0.2)',
+    paddingVertical: Spacing.md,
+    flexBasis: '30%',
+    flexGrow: 1,
+    gap: Spacing.xs,
+  },
+  tileActive: {
+    borderColor: Colors.brandGold,
+    backgroundColor: 'rgba(197, 165, 90, 0.1)',
+  },
+  tileLabel: {
+    ...Typography.captionBold,
+    color: Colors.textSecondary,
+  },
+  tileLabelActive: {
+    color: Colors.brandGold,
   },
 });

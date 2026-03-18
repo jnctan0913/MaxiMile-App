@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
-import { Colors, Spacing, Typography, BorderRadius } from '../../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, WebInputStyle } from '../../constants/theme';
 import GlassCard from '../../components/GlassCard';
 import Logo from '../../components/Logo';
 import BrandedLoading from '../../components/BrandedLoading';
@@ -39,6 +39,7 @@ export default function SignupScreen() {
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmFocused, setConfirmFocused] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [signUpSuccess, setSignUpSuccess] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
@@ -243,7 +244,7 @@ export default function SignupScreen() {
               placeholderTextColor={Colors.textTertiary}
               value={password}
               onChangeText={handlePasswordChange}
-              onFocus={() => setPasswordFocused(true)}
+              onFocus={() => { setPasswordFocused(true); setPasswordTouched(true); }}
               onBlur={() => setPasswordFocused(false)}
               secureTextEntry={!showPassword}
               textContentType="newPassword"
@@ -260,6 +261,50 @@ export default function SignupScreen() {
               />
             </TouchableOpacity>
           </View>
+
+          {/* Password requirements checklist */}
+          {passwordTouched && (
+            <View style={styles.reqList}>
+              <View style={styles.reqRow}>
+                <Ionicons
+                  name={password.length >= 6 ? 'checkmark-circle' : 'close-circle'}
+                  size={16}
+                  color={password.length >= 6 ? Colors.success : Colors.textTertiary}
+                />
+                <Text style={[styles.reqText, password.length >= 6 && styles.reqTextMet]}>
+                  At least 6 characters
+                </Text>
+              </View>
+              <View style={styles.reqRow}>
+                <Ionicons
+                  name={
+                    confirmPassword.length === 0
+                      ? 'ellipse-outline'
+                      : password === confirmPassword
+                        ? 'checkmark-circle'
+                        : 'close-circle'
+                  }
+                  size={16}
+                  color={
+                    confirmPassword.length === 0
+                      ? Colors.textTertiary
+                      : password === confirmPassword
+                        ? Colors.success
+                        : Colors.danger
+                  }
+                />
+                <Text
+                  style={[
+                    styles.reqText,
+                    confirmPassword.length > 0 && password === confirmPassword && styles.reqTextMet,
+                    confirmPassword.length > 0 && password !== confirmPassword && styles.reqTextFail,
+                  ]}
+                >
+                  Passwords match
+                </Text>
+              </View>
+            </View>
+          )}
 
           <Text style={styles.inputLabel}>Confirm Password</Text>
           <View style={[styles.passwordContainer, confirmFocused && styles.inputFocused]}>
@@ -379,7 +424,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     ...Typography.body,
     color: Colors.textPrimary,
-    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+    ...WebInputStyle,
   },
   inputFocused: {
     borderColor: Colors.brandGold,
@@ -400,8 +445,29 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textPrimary,
     paddingVertical: Platform.OS === 'android' ? Spacing.md : 0,
-    ...(Platform.OS === 'web' && { outlineStyle: 'none' as 'solid' }),
+    ...WebInputStyle,
   },
+  // Password requirements
+  reqList: {
+    marginTop: Spacing.sm,
+    gap: 4,
+  },
+  reqRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  reqText: {
+    ...Typography.caption,
+    color: Colors.textTertiary,
+  },
+  reqTextMet: {
+    color: Colors.success,
+  },
+  reqTextFail: {
+    color: Colors.danger,
+  },
+
   // Error states
   errorBanner: {
     flexDirection: 'row',

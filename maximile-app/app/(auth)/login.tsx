@@ -13,7 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
-import { Colors, Spacing, Typography, BorderRadius } from '../../constants/theme';
+import { Colors, Spacing, Typography, BorderRadius, WebInputStyle } from '../../constants/theme';
 import GlassCard from '../../components/GlassCard';
 import Logo from '../../components/Logo';
 import BrandedLoading from '../../components/BrandedLoading';
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     ...Typography.body,
     color: Colors.textPrimary,
-    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+    ...WebInputStyle,
   },
   inputFocused: {
     borderColor: Colors.brandGold,
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textPrimary,
     paddingVertical: Platform.OS === 'android' ? Spacing.md : 0,
-    ...(Platform.OS === 'web' && { outlineStyle: 'none' as 'solid' }),
+    ...WebInputStyle,
   },
   // Error states
   errorBanner: {

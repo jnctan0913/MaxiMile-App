@@ -21,6 +21,7 @@ import { track } from '../lib/analytics';
 import type { Card } from '../lib/supabase-types';
 import EligibilityBadge from '../components/EligibilityBadge';
 import CategorySelectionSheet from '../components/CategorySelectionSheet';
+import OnboardingStepIndicator from '../components/OnboardingStepIndicator';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -214,6 +215,7 @@ export default function OnboardingScreen() {
       imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
     >
       <SafeAreaView style={styles.safeArea}>
+        {!isFromCards && <OnboardingStepIndicator currentStep={1} totalSteps={3} />}
         {/* Header */}
         <View style={styles.header}>
           {isFromCards && (

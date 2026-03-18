@@ -23,6 +23,7 @@ import {
   Spacing,
   Typography,
   BorderRadius,
+  WebInputStyle,
 } from '../constants/theme';
 
 // ---------------------------------------------------------------------------
@@ -306,6 +307,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
     padding: 0,
+    ...WebInputStyle,
   },
   inputLoader: {
     flex: 1,

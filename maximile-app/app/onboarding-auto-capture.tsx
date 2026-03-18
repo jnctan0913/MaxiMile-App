@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, Typography, BorderRadius } from '../constants/theme';
 import { track } from '../lib/analytics';
 import { useAuth } from '../contexts/AuthContext';
+import OnboardingStepIndicator from '../components/OnboardingStepIndicator';
+
+// ---------------------------------------------------------------------------
+// Detect actual device OS on web via user-agent
+// ---------------------------------------------------------------------------
+function getDeviceOS(): 'ios' | 'android' | 'other' {
+  if (Platform.OS === 'ios') return 'ios';
+  if (Platform.OS === 'android') return 'android';
+  if (Platform.OS === 'web' && typeof navigator !== 'undefined') {
+    const ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/.test(ua)) return 'ios';
+    if (/Android/i.test(ua)) return 'android';
+  }
+  return 'other';
+}
 
 // ---------------------------------------------------------------------------
 // Step Icon Component (condensed version)
@@ -75,35 +90,45 @@ export default function OnboardingAutoCaptureScreen() {
   const router = useRouter();
   const { cardIds } = useLocalSearchParams<{ cardIds?: string }>();
   const { user } = useAuth();
+  const deviceOS = getDeviceOS();
+  const hasAutoSkipped = useRef(false);
+
+  // Android web users: nothing to set up (notification listener requires native app)
+  // Auto-skip to miles entry
+  useEffect(() => {
+    if (Platform.OS === 'web' && deviceOS === 'android' && !hasAutoSkipped.current) {
+      hasAutoSkipped.current = true;
+      if (user) {
+        track('onboarding_auto_capture_skipped', { platform: 'web', device_os: 'android', reason: 'no_web_setup' }, user.id);
+      }
+      router.replace({
+        pathname: '/onboarding-miles',
+        params: { cardIds: cardIds || JSON.stringify([]) },
+      });
+    }
+  }, [deviceOS]);
 
   const handleSetUp = () => {
     if (user) {
-      track('onboarding_auto_capture_cta_tapped', { platform: Platform.OS }, user.id);
+      track('onboarding_auto_capture_cta_tapped', { platform: Platform.OS, device_os: deviceOS }, user.id);
     }
 
-    if (Platform.OS === 'ios' || Platform.OS === 'web') {
-      // iOS native or web PWA (Safari on iOS): Route to Shortcuts-based setup
-      // The shortcut download works on web via direct file download
+    if (deviceOS === 'ios') {
+      // iOS native or iOS web (Safari): Route to Shortcuts-based setup
       router.replace({ pathname: '/auto-capture-setup', params: { skipIntro: '1', cardIds: cardIds || JSON.stringify([]) } });
     } else if (Platform.OS === 'android') {
-      // Android: Route to notification-based auto-capture setup (Sprint 17)
+      // Android native: Route to notification-based auto-capture setup
       router.replace('/android-auto-capture-setup');
     } else {
-      // Fallback for other platforms
+      // Fallback (desktop web, other platforms)
       handleSkip();
     }
   };
 
   const handleSkip = async () => {
     if (user) {
-      track('onboarding_auto_capture_skipped', { platform: Platform.OS }, user.id);
+      track('onboarding_auto_capture_skipped', { platform: Platform.OS, device_os: deviceOS }, user.id);
     }
-
-    // Check if we should show notification primer before miles entry
-    // Import at top of file: import { shouldShowNotificationPrimer } from './onboarding-notification-primer';
-    // For now, proceed directly to onboarding-miles
-    // In production, we'd check: const showPrimer = await shouldShowNotificationPrimer(null);
-    // if (showPrimer) { router.push('/onboarding-notification-primer'); return; }
 
     // Proceed to onboarding-miles with cardIds
     router.replace({
@@ -112,7 +137,7 @@ export default function OnboardingAutoCaptureScreen() {
     });
   };
 
-  const subtitle = Platform.OS === 'android'
+  const subtitle = deviceOS === 'android'
     ? 'MaxiMile reads your banking notifications to log transactions automatically.'
     : 'Pay with Apple Pay, and MaxiMile logs it for you.';
 
@@ -123,6 +148,7 @@ export default function OnboardingAutoCaptureScreen() {
       imageStyle={{ width: '100%', height: '100%', resizeMode: 'stretch' }}
     >
       <SafeAreaView style={styles.safeArea}>
+        <OnboardingStepIndicator currentStep={2} totalSteps={3} />
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Log Without Typing</Text>

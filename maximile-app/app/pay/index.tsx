@@ -808,7 +808,7 @@ export default function PayScreen() {
       <Stack.Screen
         options={{
           headerShown: true,
-          headerTitle: 'Smart Pay',
+          headerTitle: 'Flash Pay',
           headerBackTitle: 'Back',
           headerTintColor: Colors.brandGold,
           headerStyle: { backgroundColor: Colors.background },
@@ -942,14 +942,14 @@ export default function PayScreen() {
                       </View>
                     </GlassCard>
 
-                    {/* Smart Pay + Log actions */}
+                    {/* Flash Pay + Log actions */}
                     <TouchableOpacity
                       style={styles.walletButton}
                       onPress={handleOpenWallet}
                       activeOpacity={0.8}
                     >
                       <Ionicons name="flash" size={20} color={Colors.brandCharcoal} />
-                      <Text style={styles.walletButtonText}>Smart Pay</Text>
+                      <Text style={styles.walletButtonText}>Flash Pay</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -959,6 +959,22 @@ export default function PayScreen() {
                     >
                       <Text style={styles.skipWalletText}>Log Transaction</Text>
                     </TouchableOpacity>
+
+                    {/* Back to confirming — change merchant/category */}
+                    {state === 'result' && (
+                      <TouchableOpacity
+                        style={styles.changeButton}
+                        onPress={() => {
+                          setState('confirming');
+                          setRecommendation(null);
+                          setAlternatives([]);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="arrow-back" size={16} color={Colors.textSecondary} />
+                        <Text style={styles.changeButtonText}>Change merchant or category</Text>
+                      </TouchableOpacity>
+                    )}
 
                     {/* Alternatives */}
                     {alternatives.length > 0 ? (
@@ -1488,6 +1504,18 @@ const styles = StyleSheet.create({
   skipWalletText: {
     ...Typography.captionBold,
     color: Colors.textLink,
+  },
+  changeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    paddingVertical: Spacing.sm,
+    marginTop: Spacing.xs,
+  },
+  changeButtonText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
   },
 
   // Alternatives

@@ -25,6 +25,7 @@ import {
   Spacing,
   Typography,
   BorderRadius,
+  WebInputStyle,
 } from '../constants/theme';
 
 // ---------------------------------------------------------------------------
@@ -329,6 +330,7 @@ const styles = StyleSheet.create({
     ...Typography.body,
     color: Colors.textPrimary,
     minHeight: 140,
+    ...WebInputStyle,
   },
   charCount: {
     ...Typography.caption,

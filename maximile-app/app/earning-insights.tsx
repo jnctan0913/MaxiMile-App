@@ -15,6 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../constants/theme';
 import GlassCard from '../components/GlassCard';
+import InfoTooltip from '../components/InfoTooltip';
 import EmptyState from '../components/EmptyState';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { showNetworkErrorAlert } from '../lib/error-handler';
@@ -412,7 +413,15 @@ export default function EarningInsightsScreen() {
             </GlassCard>
 
             <GlassCard style={styles.statCard}>
-              <Ionicons name="trending-up" size={22} color={Colors.success} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Ionicons name="trending-up" size={22} color={Colors.success} />
+                <InfoTooltip
+                  title="Miles Saved"
+                  message="Miles Saved compares your actual earnings to the Singapore average of 1.4 miles per dollar. This shows how many extra miles you earned by using the right card for each purchase."
+                  size={14}
+                  color={Colors.textTertiary}
+                />
+              </View>
               <Text style={[styles.statValue, { color: Colors.success }]}>
                 +{data.milesSaved.toLocaleString()}
               </Text>
