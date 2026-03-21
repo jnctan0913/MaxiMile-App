@@ -12,7 +12,7 @@ Built for Singapore credit card holders juggling multiple miles cards.
 
 | | URL |
 |---|---|
-| **Web App (Prototype)** | https://jnctan0913.github.io/MaxiMile-App/ |
+| **Web App (Prototype)** | https://maximile-app.vercel.app/ |
 | **Landing Page** | https://jnctan0913.github.io/MaxiMile-App/ |
 | **Admin Dashboard** | https://jnctan0913.github.io/MaxiMile-App/admin/ |
 
@@ -111,8 +111,22 @@ npx expo start
 
 ## Tech Stack
 
+### Mobile App
 - **Framework**: React Native with [Expo](https://expo.dev/) (SDK 54)
 - **Routing**: [Expo Router](https://docs.expo.dev/router/introduction/) v6 (file-based)
-- **Backend**: [Supabase](https://supabase.com/) (PostgreSQL + Auth + Edge Functions)
 - **Language**: TypeScript
+- **Key Libraries**: Gesture Handler, Reanimated, Expo Location, Expo Notifications
+
+### Backend
+- **Platform**: [Supabase](https://supabase.com/) (PostgreSQL + Auth + Edge Functions)
+- **Push Notifications**: Firebase Cloud Messaging (FCM)
+
+### Admin Dashboard
+- **Framework**: React + [Vite](https://vitejs.dev/)
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+
+### Infrastructure
+- **Hosting**: GitHub Pages (landing page + admin dashboard)
 - **Testing**: Jest + React Native Testing Library
+- **CI/CD**: GitHub Actions
