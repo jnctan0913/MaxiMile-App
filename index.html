@@ -428,8 +428,14 @@
     /* =============================================
        HOW IT WORKS
     ============================================= */
-    #how { background: rgba(248,249,250,0.5); padding: 110px 0; }
-    .how-head { text-align: center; margin-bottom: var(--s7); }
+    #how {
+      background: rgba(248,249,250,0.5);
+      min-height: 100vh;
+      padding: 80px 0 48px;
+      display: flex; flex-direction: column; justify-content: center;
+      box-sizing: border-box;
+    }
+    .how-head { text-align: center; margin-bottom: var(--s5); }
     .how-sub { font-size: 16px; color: var(--text-2); white-space: nowrap; margin: var(--s2) auto 0; }
 
     .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--s5); }
@@ -499,22 +505,26 @@
     }
     .ss-cap span { font-size: 11px; color: var(--text-2); font-weight: 500; letter-spacing: .3px; }
     .ss-demo-wrap {
-      display: flex; justify-content: center; align-items: flex-start;
+      display: flex; justify-content: center; align-items: center;
       gap: var(--s8);
     }
     .ss-phone-frame {
-      position: relative; width: 260px; flex-shrink: 0;
+      position: relative; flex-shrink: 0;
+      /* Height fills remaining viewport after nav + heading */
+      height: calc(100vh - 220px);
+      max-height: 560px;
+      width: auto;
       border-radius: 44px; overflow: hidden;
       border: 6px solid rgba(10,10,18,.9);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 40px 88px rgba(0,0,0,.28);
     }
     .ss-phone-frame video {
-      width: 100%; display: block;
-      aspect-ratio: 9/19.5; object-fit: cover;
+      height: 100%; width: auto; display: block;
+      object-fit: cover;
     }
     .ss-steps {
-      display: flex; flex-direction: column; gap: var(--s5);
-      padding-top: var(--s5); max-width: 300px;
+      display: flex; flex-direction: column; gap: var(--s4);
+      padding-top: 0; max-width: 300px;
     }
     .ss-step {
       display: flex; align-items: flex-start; gap: var(--s4);
