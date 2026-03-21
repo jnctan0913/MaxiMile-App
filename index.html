@@ -550,7 +550,8 @@
        KEY BENEFITS
     ============================================= */
     #benefits { background: transparent; padding: 110px 0; }
-    .ben-head { text-align: center; margin-bottom: var(--s7); }
+    .ben-head { text-align: center; margin-bottom: var(--s3); }
+    .ben-subhead { font-size: 17px; color: var(--text-2); margin: var(--s3) auto var(--s7); max-width: 500px; line-height: 1.6; }
 
     .ben-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: var(--s5); }
     .ben-card {
@@ -558,17 +559,33 @@
       background: rgba(255,255,255,.72);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border-glass);
+      border-top: 3px solid transparent;
       box-shadow: var(--sh-glass);
       position: relative; overflow: hidden;
       transition: transform .28s var(--ease), box-shadow .28s, border-color .28s;
     }
-    .ben-card:hover { transform: translateY(-4px); box-shadow: var(--sh-gold); border-color: rgba(197,165,90,.4); }
+    .ben-card:nth-child(1) { border-top-color: var(--gold); }
+    .ben-card:nth-child(2) { border-top-color: #5BAD7A; }
+    .ben-card:nth-child(3) { border-top-color: #A78BDA; }
+    .ben-card:nth-child(4) { border-top-color: #3D7A8B; }
+    .ben-card:hover { transform: translateY(-4px); box-shadow: var(--sh-gold); }
 
+    /* Decorative background number */
+    .ben-number {
+      position: absolute; top: -8px; right: 14px;
+      font-family: var(--font-display);
+      font-size: 96px; font-weight: 800; line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1.5px rgba(197,165,90,0.13);
+      pointer-events: none; user-select: none; letter-spacing: -4px;
+    }
+
+    /* Card top: icon + tags */
+    .ben-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--s5); }
     .ben-icon {
       width: 50px; height: 50px; border-radius: var(--r3);
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: var(--s5);
-      box-shadow: var(--sh-md);
+      box-shadow: var(--sh-md); flex-shrink: 0;
     }
     .ben-icon svg { width: 24px; height: 24px; fill: #fff; flex-shrink: 0; }
     .ben-card:nth-child(1) .ben-icon { background: var(--grad-dining); }
@@ -576,8 +593,78 @@
     .ben-card:nth-child(3) .ben-icon { background: var(--grad-bills); }
     .ben-card:nth-child(4) .ben-icon { background: var(--grad-travel); }
 
+    /* Feature tags */
+    .ben-tags { display: flex; gap: var(--s1); flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; padding-top: 4px; }
+    .ben-tag {
+      font-size: 10px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase;
+      padding: 3px 8px; border-radius: var(--r5);
+      background: rgba(197,165,90,.1); color: var(--gold);
+      border: 1px solid rgba(197,165,90,.25);
+    }
+    .ben-tag-live {
+      background: rgba(52,168,83,.1); color: var(--green);
+      border-color: rgba(52,168,83,.25);
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .ben-pulse {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+      display: inline-block; flex-shrink: 0;
+      animation: pulse-dot 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(1.35); }
+    }
+
     .ben-title { font-size: 19px; font-weight: 700; color: var(--text-1); margin-bottom: var(--s2); }
     .ben-desc { font-size: 15px; color: var(--text-2); line-height: 1.65; }
+
+    /* Metric callout */
+    .ben-metric {
+      display: inline-flex; align-items: baseline; gap: 6px;
+      margin-top: var(--s4);
+      background: rgba(197,165,90,.08);
+      border: 1px solid rgba(197,165,90,.2);
+      border-radius: var(--r3);
+      padding: var(--s2) var(--s3);
+    }
+    .ben-metric-val { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--gold); }
+    .ben-metric-sub { font-size: 12px; color: var(--text-2); }
+
+    /* Expand button */
+    .ben-expand-btn {
+      display: inline-flex; align-items: center; gap: var(--s1);
+      margin-top: var(--s4);
+      font-size: 13px; font-weight: 600; color: var(--blue);
+      letter-spacing: .3px; background: none; border: none; cursor: pointer;
+      padding: 0; font-family: inherit;
+      transition: color .2s, gap .2s;
+    }
+    .ben-expand-btn svg { transition: transform .25s var(--ease); }
+    .ben-expand-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+    .ben-expand-btn:hover { color: var(--blue-dark); gap: var(--s2); }
+
+    /* Expandable detail */
+    .ben-detail {
+      overflow: hidden; max-height: 0;
+      transition: max-height .38s var(--ease), opacity .38s var(--ease);
+      opacity: 0;
+    }
+    .ben-detail.open { max-height: 220px; opacity: 1; }
+    .ben-detail ul {
+      margin-top: var(--s4); padding: var(--s4);
+      background: rgba(255,255,255,.55);
+      border-radius: var(--r3); border: 1px solid var(--border-glass);
+      list-style: none; display: flex; flex-direction: column; gap: var(--s2);
+    }
+    .ben-detail ul li {
+      font-size: 14px; color: var(--text-2);
+      padding-left: var(--s4); position: relative; line-height: 1.5;
+    }
+    .ben-detail ul li::before {
+      content: ''; position: absolute; left: 0; top: 7px;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+    }
 
     @media (max-width: 620px) { .ben-grid { grid-template-columns: 1fr; } }
 
@@ -626,18 +713,24 @@
        SOCIAL PROOF
     ============================================= */
     #social { background: transparent; padding: 90px 0; }
-    .social-inner { text-align: center; }
-    .stats { display: flex; justify-content: center; gap: var(--s8); flex-wrap: wrap; margin: var(--s7) 0; }
-    .stat-num {
-      font-family: var(--font-display);
-      font-size: clamp(48px, 6vw, 68px);
-      font-weight: 800; color: var(--gold); line-height: 1;
-      margin-bottom: var(--s2);
+    .social-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--s8); align-items: start;
     }
-    .stat-lbl { font-size: 14px; color: var(--text-2); max-width: 160px; line-height: 1.5; }
-
+    .stats-col { display: flex; flex-direction: column; gap: var(--s5); margin-top: var(--s6); }
+    .stat-row { display: flex; align-items: center; gap: var(--s4); }
+    .stat-row .stat-num {
+      font-family: var(--font-display);
+      font-size: clamp(40px, 4.5vw, 58px);
+      font-weight: 800; color: var(--gold); line-height: 1;
+      flex-shrink: 0; min-width: 96px;
+    }
+    .stat-row .stat-lbl { font-size: 14px; color: var(--text-2); max-width: 220px; line-height: 1.55; }
+    .social-right {
+      display: flex; flex-direction: column; gap: var(--s5);
+      padding-top: var(--s7);
+    }
     .social-bq {
-      max-width: 580px; margin: 0 auto;
       font-family: var(--font-body);
       font-size: clamp(17px, 2.2vw, 21px);
       font-style: italic; color: var(--text-2); line-height: 1.75;
@@ -657,8 +750,12 @@
     }
     .founder-note {
       font-size: 14px; color: var(--text-2);
-      margin-top: var(--s5); text-align: center;
+      margin-top: 0; text-align: left;
       font-style: italic;
+    }
+    @media (max-width: 768px) {
+      .social-grid { grid-template-columns: 1fr; }
+      .social-right { padding-top: 0; }
     }
 
     /* =============================================
@@ -821,7 +918,7 @@
         <a href="#how">How it works</a>
         <a href="#benefits">Features</a>
         <a href="#faq">FAQ</a>
-        <a href="#cta" class="nav-dl">Download</a>
+        <a href="https://maximile-app.vercel.app/" class="nav-dl">Download</a>
       </div>
       <button class="nav-burger" aria-label="Open menu" aria-expanded="false" onclick="toggleMobileNav(this)">
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect y="4" width="22" height="2" rx="1" fill="currentColor"/><rect y="10" width="22" height="2" rx="1" fill="currentColor"/><rect y="16" width="22" height="2" rx="1" fill="currentColor"/></svg>
@@ -831,7 +928,7 @@
       <a href="#how" onclick="closeMobileNav()">How it works</a>
       <a href="#benefits" onclick="closeMobileNav()">Features</a>
       <a href="#faq" onclick="closeMobileNav()">FAQ</a>
-      <a href="#cta" class="nav-dl" onclick="closeMobileNav()">Download</a>
+      <a href="https://maximile-app.vercel.app/" class="nav-dl" onclick="closeMobileNav()">Download</a>
     </div>
   </div>
 </nav>
@@ -860,8 +957,8 @@
             MaxiMile tells you exactly which credit card to tap at checkout — in under a second. Personalized to your cards. Aware of your caps. Zero guesswork.
           </p>
           <div class="store-row r d3">
-            <a href="#cta"><img src="./maximile-app/assets/badge-appstore.png" alt="Download on the App Store" class="store-badge"></a>
-            <a href="#cta"><img src="./maximile-app/assets/badge-googleplay.png" alt="Get it on Google Play" class="store-badge"></a>
+            <a href="https://maximile-app.vercel.app/"><img src="./maximile-app/assets/badge-appstore.png" alt="Download on the App Store" class="store-badge"></a>
+            <a href="https://maximile-app.vercel.app/"><img src="./maximile-app/assets/badge-googleplay.png" alt="Get it on Google Play" class="store-badge"></a>
           </div>
           <div class="trust-strip r d4">
             <span class="trust-item">
@@ -1009,24 +1106,24 @@
   </div>
   <div class="ss-track" id="ssTrack">
     <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/login.png" alt="Sign in">
-      <div class="ss-cap"><span>Get started</span></div>
+      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/recommend-home.png" alt="Spending categories">
+      <div class="ss-cap"><span>All your spending, covered</span></div>
     </div>
     <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/01-login.png" alt="Onboarding">
-      <div class="ss-cap"><span>Guided first run</span></div>
+      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/merchant-search-starbucks.png" alt="Merchant search">
+      <div class="ss-cap"><span>200+ Singapore merchants</span></div>
     </div>
     <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/03-flashpay-bills.png" alt="Bills categories">
-      <div class="ss-cap"><span>Bills covered too</span></div>
+      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/04-flashpay-recommendation.png" alt="Spending cap">
+      <div class="ss-cap"><span>Your spending cap, live</span></div>
     </div>
     <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/03-flashpay-recommendation.png" alt="Card recommendation with cap">
-      <div class="ss-cap"><span>See your cap, pick smart</span></div>
+      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/transactions-list.png" alt="Transaction history">
+      <div class="ss-cap"><span>Every transaction, logged</span></div>
     </div>
     <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/05-transactions.png" alt="Transaction history">
-      <div class="ss-cap"><span>Every spend, tracked</span></div>
+      <img class="ss-img" src="./maximile-app/screenshots/screenshot_iteration/06-miles.png" alt="Miles portfolio">
+      <div class="ss-cap"><span>Watch your miles grow</span></div>
     </div>
   </div>
 </section>
@@ -1041,27 +1138,125 @@
       <span class="label">What you get</span>
       <h2 class="sh">The miles co-pilot<br><span class="accent">your wallet deserves</span></h2>
     </div>
+    <p class="ben-subhead r">Four ways MaxiMile puts more miles in your account — automatically, every time you pay.</p>
     <div class="ben-grid">
+
+      <!-- Card 1 -->
       <div class="ben-card r d1">
-        <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-12c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></div>
+        <div class="ben-number" aria-hidden="true">01</div>
+        <div class="ben-card-top">
+          <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-12c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></div>
+          <div class="ben-tags">
+            <span class="ben-tag ben-tag-live"><span class="ben-pulse"></span>Live</span>
+            <span class="ben-tag">Personalised</span>
+          </div>
+        </div>
         <h3 class="ben-title">The right card, right now</h3>
         <p class="ben-desc">Real-time recommendations that know your live cap balance — not last month's blog post, not your memory.</p>
+        <div class="ben-metric">
+          <span class="ben-metric-val">+340</span>
+          <span class="ben-metric-sub">avg extra miles earned per month</span>
+        </div>
+        <button class="ben-expand-btn" aria-expanded="false">
+          See how it works
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="ben-detail">
+          <ul>
+            <li>Personalised to your exact card portfolio — not generic advice</li>
+            <li>Updates live as you approach earning caps across all cards</li>
+            <li>Works offline — no data connection needed at checkout</li>
+          </ul>
+        </div>
       </div>
+
+      <!-- Card 2 -->
       <div class="ben-card r d2">
-        <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg></div>
+        <div class="ben-number" aria-hidden="true">02</div>
+        <div class="ben-card-top">
+          <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg></div>
+          <div class="ben-tags">
+            <span class="ben-tag">Cap-aware</span>
+            <span class="ben-tag">Auto-track</span>
+          </div>
+        </div>
         <h3 class="ben-title">Never breach a cap again</h3>
         <p class="ben-desc">Every transaction updates your spending state automatically. MaxiMile warns you before you waste a bonus.</p>
+        <div class="ben-metric">
+          <span class="ben-metric-val">0</span>
+          <span class="ben-metric-sub">wasted bonuses when you stay on track</span>
+        </div>
+        <button class="ben-expand-btn" aria-expanded="false">
+          See how it works
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="ben-detail">
+          <ul>
+            <li>Tracks spending across all your bonus categories simultaneously</li>
+            <li>Warns you before the next transaction would breach a cap</li>
+            <li>Automatically routes spending to your next-best card when caps fill</li>
+          </ul>
+        </div>
       </div>
+
+      <!-- Card 3 -->
       <div class="ben-card r d3">
-        <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div>
+        <div class="ben-number" aria-hidden="true">03</div>
+        <div class="ben-card-top">
+          <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div>
+          <div class="ben-tags">
+            <span class="ben-tag">Push alerts</span>
+            <span class="ben-tag">Always current</span>
+          </div>
+        </div>
         <h3 class="ben-title">Stay ahead of rate changes</h3>
         <p class="ben-desc">When DBS, OCBC, or Citi changes their earn rates, you get a push alert — not 3 months later when you check a blog.</p>
+        <div class="ben-metric">
+          <span class="ben-metric-val">29</span>
+          <span class="ben-metric-sub">cards monitored for rate changes in real time</span>
+        </div>
+        <button class="ben-expand-btn" aria-expanded="false">
+          See how it works
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="ben-detail">
+          <ul>
+            <li>Earn rates and caps sourced directly from official bank T&Cs</li>
+            <li>Push notification the moment any card's terms change</li>
+            <li>Every recommendation shows its reasoning — fully transparent</li>
+          </ul>
+        </div>
       </div>
+
+      <!-- Card 4 -->
       <div class="ben-card r d4">
-        <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg></div>
-        <h3 class="ben-title">200+ Singapore merchants</h3>
+        <div class="ben-number" aria-hidden="true">04</div>
+        <div class="ben-card-top">
+          <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg></div>
+          <div class="ben-tags">
+            <span class="ben-tag">MCC-aware</span>
+            <span class="ben-tag">200+ merchants</span>
+          </div>
+        </div>
+        <h3 class="ben-title">Find your exact merchant</h3>
         <p class="ben-desc">MCC-aware fuzzy search from Grab to Meidi-Ya. Find your exact merchant, get the exact earn rate for where you're paying.</p>
+        <div class="ben-metric">
+          <span class="ben-metric-val">200+</span>
+          <span class="ben-metric-sub">Singapore merchants with verified MCC codes</span>
+        </div>
+        <button class="ben-expand-btn" aria-expanded="false">
+          See how it works
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="ben-detail">
+          <ul>
+            <li>Fuzzy search finds merchants even with typos or partial names</li>
+            <li>MCC codes verified — so online vs in-store rates are correct</li>
+            <li>New merchants added regularly based on community requests</li>
+          </ul>
+        </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -1279,8 +1474,8 @@
         Add your cards. Open the app. Tap your way to the miles you've been leaving on the table.
       </p>
       <div class="cta-btns r d3">
-        <a href="#cta"><img src="./maximile-app/assets/badge-appstore.png" alt="Download on the App Store" class="store-badge"></a>
-        <a href="#cta"><img src="./maximile-app/assets/badge-googleplay.png" alt="Get it on Google Play" class="store-badge"></a>
+        <a href="https://maximile-app.vercel.app/"><img src="./maximile-app/assets/badge-appstore.png" alt="Download on the App Store" class="store-badge"></a>
+        <a href="https://maximile-app.vercel.app/"><img src="./maximile-app/assets/badge-googleplay.png" alt="Get it on Google Play" class="store-badge"></a>
       </div>
       <div class="waitlist-block r d4">
         <p class="waitlist-note">Not available yet in your region? Join the waitlist.</p>
