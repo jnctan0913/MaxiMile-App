@@ -515,7 +515,8 @@
       border: 6px solid rgba(10,10,18,.9);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 40px 88px rgba(0,0,0,.28);
     }
-    .ss-phone-frame iframe {
+    .ss-phone-frame iframe,
+    .ss-phone-frame #demoVideo {
       height: 100%; width: 100%; display: block;
       border: none;
     }
@@ -1109,12 +1110,7 @@
     <div class="ss-demo-wrap r">
       <!-- Phone frame with demo video -->
       <div class="ss-phone-frame">
-        <iframe
-          id="demoVideo"
-          src="https://www.youtube.com/embed/WzpXv4bpTK8?autoplay=1&mute=1&loop=1&playlist=WzpXv4bpTK8&controls=0&playsinline=1&rel=0&modestbranding=1"
-          allow="autoplay; encrypted-media"
-          allowfullscreen
-        ></iframe>
+        <div id="demoVideo"></div>
       </div>
 
       <!-- Step annotations -->
@@ -1493,18 +1489,42 @@
   }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
   revEls.forEach(el => io.observe(el));
 
-  /* ── Demo video: auto-cycle step highlights (YouTube iframe, no timeupdate) ── */
+  /* ── Demo video: YouTube IFrame API — poll getCurrentTime() to sync steps ── */
   const ssStepEls = document.querySelectorAll('#ssSteps .ss-step');
-  if (ssStepEls.length) {
-    let stepIdx = 0;
-    const stepDurations = [8, 8, 8]; // approximate seconds per step
-    const cycleStep = () => {
-      ssStepEls.forEach((el, i) => el.classList.toggle('active', i === stepIdx));
-      stepIdx = (stepIdx + 1) % ssStepEls.length;
-      setTimeout(cycleStep, (stepDurations[stepIdx] || 8) * 1000);
-    };
-    cycleStep();
+  const stepStarts = Array.from(ssStepEls).map(el => parseFloat(el.dataset.start || 0));
+
+  function syncSteps(t) {
+    let active = 0;
+    stepStarts.forEach((start, i) => { if (t >= start) active = i; });
+    ssStepEls.forEach((el, i) => el.classList.toggle('active', i === active));
   }
+
+  // Load YouTube IFrame API
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+
+  let ytPlayer;
+  window.onYouTubeIframeAPIReady = function () {
+    ytPlayer = new YT.Player('demoVideo', {
+      videoId: 'WzpXv4bpTK8',
+      playerVars: {
+        autoplay: 1, mute: 1, loop: 1, playlist: 'WzpXv4bpTK8',
+        controls: 0, playsinline: 1, rel: 0, modestbranding: 1
+      },
+      events: {
+        onReady: function (e) {
+          e.target.playVideo();
+          // Poll currentTime at ~10fps to replicate timeupdate
+          setInterval(() => {
+            if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+              syncSteps(ytPlayer.getCurrentTime());
+            }
+          }, 100);
+        }
+      }
+    });
+  };
 
   /* ── Screenshot drag scroll ── */
   const track = document.getElementById('ssTrack');
