@@ -386,6 +386,7 @@ export default function RecommendResultScreen() {
       top_card: topCard?.card_name,
       action_type: 'log_transaction',
       via: 'recommendations',
+      earn_rate_mpd: topCard?.earn_rate_mpd,
     });
 
     // Navigate to log transaction screen with pre-filled category + card + merchant
@@ -408,6 +409,7 @@ export default function RecommendResultScreen() {
       top_card: topCard?.card_name,
       action_type: 'smart_pay',
       via: 'recommendations',
+      earn_rate_mpd: topCard?.earn_rate_mpd,
     });
 
     // When merchant is known from search, skip pay screen → open wallet directly
