@@ -24,7 +24,7 @@ Built for Singapore credit card holders juggling multiple miles cards.
 Sign up for a free account at the landing page to access the prototype. Registration takes under a minute — just an email and password, no payment required.
 
 **Key flows to evaluate:**
-1. **Merchant Search** — type "Starbucks" in the search bar → instant card recommendation
+1. **Merchant Search** — type any merchant name (e.g. a café or supermarket) in the search bar → instant card recommendation
 2. **Category Tap** — tap "Dining" or "Bills" → see best card with cap remaining
 3. **⚡ Quick Pick** — tap the gold FAB button for a GPS-based merchant detection
 4. **My Cards** tab — see cap usage bars per card (alerts when >80% spent)
@@ -49,7 +49,7 @@ The prototype runs as a web app (PWA). Behaviour differs slightly between platfo
 | Feature | iOS Safari | Android Chrome |
 |---|---|---|
 | Install to home screen | Share → Add to Home Screen | Menu → Install App |
-| Swipe to edit/delete transactions | Use **long-press** instead | Swipe left works natively |
+| Swipe to edit/delete transactions | Swipe left works natively | Swipe left works natively |
 | Input zoom on focus | Fixed (font size ≥ 16px) | Not affected |
 | Push notifications | Requires iOS 16.4+ + home screen install | Works natively |
 
