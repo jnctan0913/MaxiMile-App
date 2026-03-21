@@ -515,9 +515,9 @@
       border: 6px solid rgba(10,10,18,.9);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 40px 88px rgba(0,0,0,.28);
     }
-    .ss-phone-frame video {
-      height: 100%; width: auto; display: block;
-      object-fit: cover;
+    .ss-phone-frame iframe {
+      height: 100%; width: 100%; display: block;
+      border: none;
     }
     .ss-steps {
       display: flex; flex-direction: column; gap: var(--s4);
@@ -1109,11 +1109,12 @@
     <div class="ss-demo-wrap r">
       <!-- Phone frame with demo video -->
       <div class="ss-phone-frame">
-        <video
-          src="./maximile-app/assets/demo.mp4"
-          loop muted playsinline
+        <iframe
           id="demoVideo"
-        ></video>
+          src="https://www.youtube.com/embed/WzpXv4bpTK8?autoplay=1&mute=1&loop=1&playlist=WzpXv4bpTK8&controls=0&playsinline=1&rel=0&modestbranding=1"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+        ></iframe>
       </div>
 
       <!-- Step annotations -->
@@ -1492,28 +1493,17 @@
   }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
   revEls.forEach(el => io.observe(el));
 
-  /* ── Demo video: play/pause on visibility, never restart ── */
-  const demoVideo = document.getElementById('demoVideo');
+  /* ── Demo video: auto-cycle step highlights (YouTube iframe, no timeupdate) ── */
   const ssStepEls = document.querySelectorAll('#ssSteps .ss-step');
-  if (demoVideo) {
-    /* Play when in view, pause when out — currentTime is never reset */
-    const videoIO = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) { demoVideo.play(); }
-        else { demoVideo.pause(); }
-      });
-    }, { threshold: 0.25 });
-    videoIO.observe(demoVideo);
-
-    /* Sync step highlights to playhead */
-    demoVideo.addEventListener('timeupdate', () => {
-      const t = demoVideo.currentTime;
-      let active = 0;
-      ssStepEls.forEach((el, i) => {
-        if (t >= parseFloat(el.dataset.start || 0)) active = i;
-      });
-      ssStepEls.forEach((el, i) => el.classList.toggle('active', i === active));
-    });
+  if (ssStepEls.length) {
+    let stepIdx = 0;
+    const stepDurations = [8, 8, 8]; // approximate seconds per step
+    const cycleStep = () => {
+      ssStepEls.forEach((el, i) => el.classList.toggle('active', i === stepIdx));
+      stepIdx = (stepIdx + 1) % ssStepEls.length;
+      setTimeout(cycleStep, (stepDurations[stepIdx] || 8) * 1000);
+    };
+    cycleStep();
   }
 
   /* ── Screenshot drag scroll ── */
