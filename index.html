@@ -471,8 +471,33 @@
     /* =============================================
        SCREENSHOTS
     ============================================= */
-    #screenshots { background: transparent; padding: 90px 0; overflow: hidden; }
+    #screenshots { background: transparent; padding: 90px 0 0; overflow: hidden; }
     .ss-head { text-align: center; margin-bottom: var(--s7); }
+    .ss-track {
+      display: flex; gap: var(--s4);
+      overflow-x: auto; padding: var(--s4) var(--s5) var(--s7);
+      scrollbar-width: none; cursor: grab;
+      -ms-overflow-style: none;
+    }
+    .ss-track::-webkit-scrollbar { display: none; }
+    .ss-track.grabbing { cursor: grabbing; user-select: none; }
+    .ss-card {
+      flex: 0 0 auto; width: 210px;
+      border-radius: var(--r4); overflow: hidden;
+      background: rgba(255,255,255,.8);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--sh-gold);
+      transition: transform .3s var(--ease);
+    }
+    .ss-card:hover { transform: translateY(-6px) scale(1.01); }
+    .ss-img { width: 100%; aspect-ratio: 9/19.5; object-fit: cover; object-position: top center; }
+    .ss-cap {
+      padding: 9px 10px; text-align: center;
+      background: rgba(255,255,255,.5);
+      border-top: 1px solid var(--border-glass);
+    }
+    .ss-cap span { font-size: 11px; color: var(--text-2); font-weight: 500; letter-spacing: .3px; }
     .ss-demo-wrap {
       display: flex; justify-content: center; align-items: flex-start;
       gap: var(--s8);
@@ -926,33 +951,57 @@
   <div class="wrap">
     <div class="how-head r">
       <span class="label">Simple by design</span>
-      <h2 class="sh">Three taps. <span class="accent">That's it.</span></h2>
+      <h2 class="sh">See it in action</h2>
       <p class="how-sub">No spreadsheets. No blog-reading at checkout. No mental math.</p>
     </div>
-    <div class="steps">
-      <div class="step r d1">
-        <div class="step-num">1</div>
-        <div class="step-phone">
-          <img src="./maximile-app/screenshots/26-onboarding.png" alt="Add your cards">
-        </div>
-        <h3 class="step-title">Add your cards once</h3>
-        <p class="step-desc">Tell MaxiMile which miles cards you carry. Takes 2 minutes. Do it once.</p>
+    <div class="ss-demo-wrap r">
+      <!-- Phone frame with demo video -->
+      <div class="ss-phone-frame">
+        <video
+          src="./maximile-app/assets/demo.mp4"
+          autoplay loop muted playsinline
+          id="demoVideo"
+        ></video>
+        <div class="ss-phone-chrome"></div>
       </div>
-      <div class="step r d2">
-        <div class="step-num">2</div>
-        <div class="step-phone">
-          <img src="./maximile-app/screenshots/10-recommend-home.png" alt="Category tiles">
+
+      <!-- Step annotations -->
+      <div class="ss-steps" id="ssSteps">
+        <div class="ss-step active" data-start="0">
+          <div class="ss-step-num">1</div>
+          <div class="ss-step-text">
+            <div class="ss-step-title">Recommend page</div>
+            <div class="ss-step-desc">Your cards ranked by earn rate for every category, instantly.</div>
+          </div>
         </div>
-        <h3 class="step-title">Tap your category at checkout</h3>
-        <p class="step-desc">Open the app. Tap Dining, Transport, Online — whatever you're paying for.</p>
-      </div>
-      <div class="step r d3">
-        <div class="step-num">3</div>
-        <div class="step-phone">
-          <img src="./maximile-app/screenshots/17-recommend-dining.png" alt="Card recommendation">
+        <div class="ss-step" data-start="4">
+          <div class="ss-step-num">2</div>
+          <div class="ss-step-text">
+            <div class="ss-step-title">Search a merchant</div>
+            <div class="ss-step-desc">Type "Grab" or "Meidi-Ya" — results appear before you finish typing.</div>
+          </div>
         </div>
-        <h3 class="step-title">See which card to use — and why</h3>
-        <p class="step-desc">Your best card, remaining cap, earn rate. Tap it. Done.</p>
+        <div class="ss-step" data-start="9">
+          <div class="ss-step-num">3</div>
+          <div class="ss-step-text">
+            <div class="ss-step-title">Merchant detail</div>
+            <div class="ss-step-desc">See exactly which card earns the most mpd at that merchant right now.</div>
+          </div>
+        </div>
+        <div class="ss-step" data-start="14">
+          <div class="ss-step-num">4</div>
+          <div class="ss-step-text">
+            <div class="ss-step-title">Flash Pay</div>
+            <div class="ss-step-desc">One tap shows your best card with a live cap status check.</div>
+          </div>
+        </div>
+        <div class="ss-step" data-start="19">
+          <div class="ss-step-num">5</div>
+          <div class="ss-step-text">
+            <div class="ss-step-title">Wallet overview</div>
+            <div class="ss-step-desc">All your cards, caps, and miles in one place.</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -965,56 +1014,44 @@
 <section id="screenshots">
   <div class="ss-head wrap r">
     <span class="label">The app</span>
-    <h2 class="sh">See it in action</h2>
+    <h2 class="sh">Every screen. <span class="accent">Built for miles.</span></h2>
   </div>
-  <div class="ss-demo-wrap wrap r">
-    <!-- Phone frame with demo video -->
-    <div class="ss-phone-frame">
-      <video
-        src="./maximile-app/assets/demo.mp4"
-        autoplay loop muted playsinline
-        id="demoVideo"
-      ></video>
-      <div class="ss-phone-chrome"></div>
+  <div class="ss-track" id="ssTrack">
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/10-recommend-home-full.png" alt="Home">
+      <div class="ss-cap"><span>Category tiles</span></div>
     </div>
-
-    <!-- Step annotations -->
-    <div class="ss-steps" id="ssSteps">
-      <div class="ss-step active" data-start="0">
-        <div class="ss-step-num">1</div>
-        <div class="ss-step-text">
-          <div class="ss-step-title">Recommend page</div>
-          <div class="ss-step-desc">Your cards ranked by earn rate for every category, instantly.</div>
-        </div>
-      </div>
-      <div class="ss-step" data-start="4">
-        <div class="ss-step-num">2</div>
-        <div class="ss-step-text">
-          <div class="ss-step-title">Search a merchant</div>
-          <div class="ss-step-desc">Type "Grab" or "Meidi-Ya" — results appear before you finish typing.</div>
-        </div>
-      </div>
-      <div class="ss-step" data-start="9">
-        <div class="ss-step-num">3</div>
-        <div class="ss-step-text">
-          <div class="ss-step-title">Merchant detail</div>
-          <div class="ss-step-desc">See exactly which card earns the most mpd at that merchant right now.</div>
-        </div>
-      </div>
-      <div class="ss-step" data-start="14">
-        <div class="ss-step-num">4</div>
-        <div class="ss-step-text">
-          <div class="ss-step-title">Flash Pay</div>
-          <div class="ss-step-desc">One tap shows your best card with a live cap status check.</div>
-        </div>
-      </div>
-      <div class="ss-step" data-start="19">
-        <div class="ss-step-num">5</div>
-        <div class="ss-step-text">
-          <div class="ss-step-title">Wallet overview</div>
-          <div class="ss-step-desc">All your cards, caps, and miles in one place.</div>
-        </div>
-      </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/16-smart-pay.png" alt="Flash Pay">
+      <div class="ss-cap"><span>Instant recommendation</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/17-recommend-dining.png" alt="Dining">
+      <div class="ss-cap"><span>Dining earn rates</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/18-recommend-transport.png" alt="Transport">
+      <div class="ss-cap"><span>Transport earn rates</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/11-my-cards.png" alt="My Cards">
+      <div class="ss-cap"><span>Cap tracking</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/14-miles-full.png" alt="Miles">
+      <div class="ss-cap"><span>Miles portfolio</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/24-earning-insights.png" alt="Earning insights">
+      <div class="ss-cap"><span>Earning insights</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/12-transactions-tab.png" alt="Transactions">
+      <div class="ss-cap"><span>Transaction history</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/26-onboarding.png" alt="Onboarding">
+      <div class="ss-cap"><span>Easy setup</span></div>
     </div>
   </div>
 </section>
@@ -1334,6 +1371,20 @@
         if (t >= start) active = i;
       });
       ssStepEls.forEach((el, i) => el.classList.toggle('active', i === active));
+    });
+  }
+
+  /* ── Screenshot drag scroll ── */
+  const track = document.getElementById('ssTrack');
+  if (track) {
+    let down = false, sx, sl;
+    track.addEventListener('mousedown',  e => { down = true; sx = e.pageX - track.offsetLeft; sl = track.scrollLeft; track.classList.add('grabbing'); });
+    track.addEventListener('mouseleave', () => { down = false; track.classList.remove('grabbing'); });
+    track.addEventListener('mouseup',    () => { down = false; track.classList.remove('grabbing'); });
+    track.addEventListener('mousemove',  e => {
+      if (!down) return;
+      e.preventDefault();
+      track.scrollLeft = sl - (e.pageX - track.offsetLeft - sx) * 1.6;
     });
   }
 
