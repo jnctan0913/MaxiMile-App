@@ -471,33 +471,63 @@
     /* =============================================
        SCREENSHOTS
     ============================================= */
-    #screenshots { background: transparent; padding: 90px 0 0; overflow: hidden; }
+    #screenshots { background: transparent; padding: 90px 0; overflow: hidden; }
     .ss-head { text-align: center; margin-bottom: var(--s7); }
-    .ss-track {
-      display: flex; gap: var(--s4);
-      overflow-x: auto; padding: var(--s4) var(--s5) var(--s7);
-      scrollbar-width: none; cursor: grab;
-      -ms-overflow-style: none;
+    .ss-demo-wrap {
+      display: flex; justify-content: center; align-items: flex-start;
+      gap: var(--s8);
     }
-    .ss-track::-webkit-scrollbar { display: none; }
-    .ss-track.grabbing { cursor: grabbing; user-select: none; }
-    .ss-card {
-      flex: 0 0 auto; width: 210px;
-      border-radius: var(--r4); overflow: hidden;
-      background: rgba(255,255,255,.8);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border-glass);
-      box-shadow: var(--sh-gold);
-      transition: transform .3s var(--ease);
+    .ss-phone-frame {
+      position: relative; width: 260px; flex-shrink: 0;
+      border-radius: 44px; overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 40px 88px rgba(0,0,0,.28);
     }
-    .ss-card:hover { transform: translateY(-6px) scale(1.01); }
-    .ss-img { width: 100%; aspect-ratio: 9/19.5; object-fit: cover; object-position: top center; }
-    .ss-cap {
-      padding: 9px 10px; text-align: center;
-      background: rgba(255,255,255,.5);
-      border-top: 1px solid var(--border-glass);
+    .ss-phone-frame video {
+      width: 100%; display: block;
+      aspect-ratio: 9/19.5; object-fit: cover;
+      border-radius: 38px;
     }
-    .ss-cap span { font-size: 11px; color: var(--text-2); font-weight: 500; letter-spacing: .3px; }
+    .ss-phone-chrome {
+      position: absolute; inset: 0; z-index: 5; pointer-events: none;
+      border-radius: 44px;
+      border: 6px solid rgba(10,10,18,.9);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.1);
+    }
+    .ss-phone-chrome::before {
+      content: '';
+      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+      width: 96px; height: 30px;
+      background: rgba(8,8,14,1); border-radius: 20px;
+    }
+    .ss-phone-chrome::after {
+      content: '';
+      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+      width: 110px; height: 4px;
+      background: rgba(255,255,255,.55); border-radius: 2px;
+    }
+    .ss-steps {
+      display: flex; flex-direction: column; gap: var(--s5);
+      padding-top: var(--s5); max-width: 300px;
+    }
+    .ss-step {
+      display: flex; align-items: flex-start; gap: var(--s4);
+      opacity: .45; transition: opacity .3s;
+    }
+    .ss-step.active { opacity: 1; }
+    .ss-step-num {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(197,165,90,.12); border: 1px solid var(--border-glass);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--gold);
+    }
+    .ss-step.active .ss-step-num { background: var(--gold); color: #fff; border-color: var(--gold); }
+    .ss-step-text { padding-top: 4px; }
+    .ss-step-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text-1); margin-bottom: 2px; }
+    .ss-step-desc { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+    @media (max-width: 680px) {
+      .ss-demo-wrap { flex-direction: column; align-items: center; }
+      .ss-steps { padding-top: 0; max-width: 260px; }
+    }
 
     /* =============================================
        KEY BENEFITS
@@ -937,42 +967,54 @@
     <span class="label">The app</span>
     <h2 class="sh">See it in action</h2>
   </div>
-  <div class="ss-track" id="ssTrack">
-    <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/10-recommend-home-full.png" alt="Home">
-      <div class="ss-cap"><span>Category tiles</span></div>
+  <div class="ss-demo-wrap wrap r">
+    <!-- Phone frame with demo video -->
+    <div class="ss-phone-frame">
+      <video
+        src="./maximile-app/assets/demo.mp4"
+        autoplay loop muted playsinline
+        id="demoVideo"
+      ></video>
+      <div class="ss-phone-chrome"></div>
     </div>
-    <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/16-smart-pay.png" alt="Flash Pay">
-      <div class="ss-cap"><span>Instant recommendation</span></div>
-    </div>
-    <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/17-recommend-dining.png" alt="Dining">
-      <div class="ss-cap"><span>Dining earn rates</span></div>
-    </div>
-    <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/18-recommend-transport.png" alt="Transport">
-      <div class="ss-cap"><span>Transport earn rates</span></div>
-    </div>
-    <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/11-my-cards.png" alt="My Cards">
-      <div class="ss-cap"><span>Cap tracking</span></div>
-    </div>
-    <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/14-miles-full.png" alt="Miles">
-      <div class="ss-cap"><span>Miles portfolio</span></div>
-    </div>
-    <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/24-earning-insights.png" alt="Earning insights">
-      <div class="ss-cap"><span>Earning insights</span></div>
-    </div>
-    <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/12-transactions-tab.png" alt="Transactions">
-      <div class="ss-cap"><span>Transaction history</span></div>
-    </div>
-    <div class="ss-card">
-      <img class="ss-img" src="./maximile-app/screenshots/26-onboarding.png" alt="Onboarding">
-      <div class="ss-cap"><span>Easy setup</span></div>
+
+    <!-- Step annotations -->
+    <div class="ss-steps" id="ssSteps">
+      <div class="ss-step active" data-start="0">
+        <div class="ss-step-num">1</div>
+        <div class="ss-step-text">
+          <div class="ss-step-title">Recommend page</div>
+          <div class="ss-step-desc">Your cards ranked by earn rate for every category, instantly.</div>
+        </div>
+      </div>
+      <div class="ss-step" data-start="4">
+        <div class="ss-step-num">2</div>
+        <div class="ss-step-text">
+          <div class="ss-step-title">Search a merchant</div>
+          <div class="ss-step-desc">Type "Grab" or "Meidi-Ya" — results appear before you finish typing.</div>
+        </div>
+      </div>
+      <div class="ss-step" data-start="9">
+        <div class="ss-step-num">3</div>
+        <div class="ss-step-text">
+          <div class="ss-step-title">Merchant detail</div>
+          <div class="ss-step-desc">See exactly which card earns the most mpd at that merchant right now.</div>
+        </div>
+      </div>
+      <div class="ss-step" data-start="14">
+        <div class="ss-step-num">4</div>
+        <div class="ss-step-text">
+          <div class="ss-step-title">Flash Pay</div>
+          <div class="ss-step-desc">One tap shows your best card with a live cap status check.</div>
+        </div>
+      </div>
+      <div class="ss-step" data-start="19">
+        <div class="ss-step-num">5</div>
+        <div class="ss-step-text">
+          <div class="ss-step-title">Wallet overview</div>
+          <div class="ss-step-desc">All your cards, caps, and miles in one place.</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -1280,17 +1322,20 @@
   }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
   revEls.forEach(el => io.observe(el));
 
-  /* ── Screenshot drag scroll ── */
-  const track = document.getElementById('ssTrack');
-  let down = false, sx, sl;
-  track.addEventListener('mousedown',  e => { down = true; sx = e.pageX - track.offsetLeft; sl = track.scrollLeft; track.classList.add('grabbing'); });
-  track.addEventListener('mouseleave', () => { down = false; track.classList.remove('grabbing'); });
-  track.addEventListener('mouseup',    () => { down = false; track.classList.remove('grabbing'); });
-  track.addEventListener('mousemove',  e => {
-    if (!down) return;
-    e.preventDefault();
-    track.scrollLeft = sl - (e.pageX - track.offsetLeft - sx) * 1.6;
-  });
+  /* ── Demo video step sync ── */
+  const demoVideo = document.getElementById('demoVideo');
+  const ssStepEls = document.querySelectorAll('#ssSteps .ss-step');
+  if (demoVideo) {
+    demoVideo.addEventListener('timeupdate', () => {
+      const t = demoVideo.currentTime;
+      let active = 0;
+      ssStepEls.forEach((el, i) => {
+        const start = parseFloat(el.dataset.start || 0);
+        if (t >= start) active = i;
+      });
+      ssStepEls.forEach((el, i) => el.classList.toggle('active', i === active));
+    });
+  }
 
   /* ── FAQ accordion ── */
   function faqToggle(btn) {
