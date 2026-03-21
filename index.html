@@ -478,9 +478,10 @@
     .ben-icon {
       width: 50px; height: 50px; border-radius: var(--r3);
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px; margin-bottom: var(--s5);
+      margin-bottom: var(--s5);
       box-shadow: var(--sh-md);
     }
+    .ben-icon svg { width: 24px; height: 24px; fill: #fff; flex-shrink: 0; }
     .ben-card:nth-child(1) .ben-icon { background: var(--grad-dining); }
     .ben-card:nth-child(2) .ben-icon { background: var(--grad-groceries); }
     .ben-card:nth-child(3) .ben-icon { background: var(--grad-bills); }
@@ -928,22 +929,22 @@
     </div>
     <div class="ben-grid">
       <div class="ben-card r d1">
-        <div class="ben-icon">🎯</div>
+        <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-12c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></div>
         <h3 class="ben-title">The right card, right now</h3>
         <p class="ben-desc">Real-time recommendations that know your live cap balance — not last month's blog post, not your memory.</p>
       </div>
       <div class="ben-card r d2">
-        <div class="ben-icon">📊</div>
+        <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg></div>
         <h3 class="ben-title">Never breach a cap again</h3>
         <p class="ben-desc">Every transaction updates your spending state automatically. MaxiMile warns you before you waste a bonus.</p>
       </div>
       <div class="ben-card r d3">
-        <div class="ben-icon">🔔</div>
+        <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div>
         <h3 class="ben-title">Stay ahead of rate changes</h3>
         <p class="ben-desc">When DBS, OCBC, or Citi changes their earn rates, you get a push alert — not 3 months later when you check a blog.</p>
       </div>
       <div class="ben-card r d4">
-        <div class="ben-icon">🗺️</div>
+        <div class="ben-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg></div>
         <h3 class="ben-title">200+ Singapore merchants</h3>
         <p class="ben-desc">MCC-aware fuzzy search from Grab to Meidi-Ya. Find your exact merchant, get the exact earn rate for where you're paying.</p>
       </div>
@@ -1195,7 +1196,7 @@
         <a href="mailto:hello@maximile.app">Contact</a>
       </div>
       <div class="foot-made">
-        Built with ❤️ in Singapore<br>
+        Built with <svg width="12" height="12" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin:0 2px" fill="#C5A55A"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> in Singapore<br>
         <span>© 2026 MaxiMile</span>
       </div>
     </div>
