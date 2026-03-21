@@ -1523,6 +1523,23 @@
               syncSteps(ytPlayer.getCurrentTime());
             }
           }, 100);
+
+          // Restart video + reset steps when scrolled back into view
+          const frameEl = document.querySelector('.ss-phone-frame');
+          if (frameEl) {
+            const replayIO = new IntersectionObserver((entries) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  ytPlayer.seekTo(0);
+                  ytPlayer.playVideo();
+                  syncSteps(0);
+                } else {
+                  ytPlayer.pauseVideo();
+                }
+              });
+            }, { threshold: 0.4 });
+            replayIO.observe(frameEl);
+          }
         }
       }
     });
