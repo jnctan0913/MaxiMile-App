@@ -413,11 +413,12 @@
     }
     .moment-claim span { color: var(--gold); }
     .moment-stat-text {
-      font-size: 16px; color: var(--text-2); line-height: 1.7;
-      border-left: 3px solid var(--border-glass);
+      font-size: clamp(18px, 2vw, 22px); color: var(--text-1); line-height: 1.6;
+      font-weight: 500;
+      border-left: 4px solid var(--gold);
       padding-left: var(--s4);
     }
-    .moment-stat-text strong { color: var(--gold); }
+    .moment-stat-text strong { color: var(--gold); font-size: 1.15em; font-weight: 800; }
 
     @media (max-width: 860px) {
       .moment-grid { grid-template-columns: 1fr; }
@@ -868,7 +869,7 @@
         <p class="moment-body">
           You're at the checkout.<br>
           <strong>Four cards in your wallet.</strong><br>
-          Not sure which gives the higher mpd —<br>
+          Not sure which gives the higher mpd<br>
           or if you've hit the spending cap.<br><br>
           You tap the safe card. <em>Again.</em>
         </p>
