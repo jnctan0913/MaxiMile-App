@@ -270,32 +270,34 @@
       position: absolute;
       border-radius: 44px; overflow: hidden;
       box-shadow:
-        0 0 0 2px rgba(26,26,46,.85),       /* phone bezel */
-        0 0 0 4px rgba(120,120,140,.25),     /* outer rim highlight */
-        0 32px 72px rgba(0,0,0,.22);
+        0 0 0 1px rgba(255,255,255,.12),   /* outer glass shimmer */
+        0 40px 88px rgba(0,0,0,.28);
     }
     .phone img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
-    /* Phone chrome overlay: dynamic island + home indicator */
+    /* Phone chrome overlay: bezel + dynamic island + home indicator */
     .phone-chrome {
       position: absolute; inset: 0; z-index: 5; pointer-events: none;
       border-radius: 44px;
+      border: 6px solid rgba(10,10,18,.9);          /* visible phone bezel */
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); /* inner rim highlight */
     }
     .phone-chrome::before {
       /* Dynamic Island pill */
       content: '';
       position: absolute;
-      top: 16px; left: 50%; transform: translateX(-50%);
-      width: 92px; height: 28px;
-      background: rgba(10,10,12,.95);
-      border-radius: 14px;
+      top: 14px; left: 50%; transform: translateX(-50%);
+      width: 96px; height: 30px;
+      background: rgba(8,8,14,1);
+      border-radius: 15px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.5);
     }
     .phone-chrome::after {
       /* Home indicator bar */
       content: '';
       position: absolute;
-      bottom: 9px; left: 50%; transform: translateX(-50%);
-      width: 112px; height: 4px;
-      background: rgba(0,0,0,.32);
+      bottom: 10px; left: 50%; transform: translateX(-50%);
+      width: 110px; height: 4px;
+      background: rgba(255,255,255,.35);
       border-radius: 2px;
     }
     .phone-main {
