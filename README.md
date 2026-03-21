@@ -116,22 +116,6 @@ npx expo start
 ```
 Then scan the QR code with **Expo Go** on your phone (or press `w` for web preview).
 
-## Product Documentation
-
-All PM deliverables are in the [`docs/`](./docs/) folder. Recommended reading order:
-
-| # | Document | What it covers |
-|---|----------|----------------|
-| 1 | [DISCOVERY.md](./docs/DISCOVERY.md) | Problem statement, user personas, jobs-to-be-done |
-| 2 | [MARKET_RESEARCH.md](./docs/MARKET_RESEARCH.md) | Market sizing, trends, opportunity analysis |
-| 3 | [COMPETITIVE_LANDSCAPE.md](./docs/COMPETITIVE_LANDSCAPE.md) | Competitor teardown & positioning |
-| 4 | [CUSTOMER_SURVEY.md](./docs/CUSTOMER_SURVEY.md) | Survey design & user research insights |
-| 5 | [PRD.md](./docs/PRD.md) | Full product requirements document |
-| 6 | [DRD_MILES_PORTFOLIO.md](./docs/DRD_MILES_PORTFOLIO.md) | UI/UX design requirements & specs |
-| 7 | [EPICS_AND_USER_STORIES.md](./docs/EPICS_AND_USER_STORIES.md) | Epics, stories, acceptance criteria |
-| 8 | [SPRINT_PLAN.md](./docs/SPRINT_PLAN.md) | Sprint planning, backlog, velocity |
-| 9 | [SPRINT_EARNING_INSIGHTS.md](./docs/SPRINT_EARNING_INSIGHTS.md) | Earning insights feature sprint |
-
 ## Tech Stack
 
 - **Framework**: React Native with [Expo](https://expo.dev/) (SDK 54)

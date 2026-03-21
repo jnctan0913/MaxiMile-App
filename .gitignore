@@ -12,8 +12,8 @@ Thumbs.db
 .claude/state/
 .claude/handover/
 
-# Assignment files (private)
-docs/marketing/PITCH_DECK_IS622.md
+# Assignment files (private — not for public repo)
+docs/
 
 # Large media files (too large for GitHub)
 maximile-app/assets/demo.mp4
