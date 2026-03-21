@@ -242,12 +242,27 @@
     }
 
     .store-row { display: flex; flex-wrap: wrap; gap: var(--s3); margin-bottom: var(--s4); align-items: center; }
-    .store-badge {
-      display: block; height: 52px; width: auto;
-      transition: transform .2s var(--ease), opacity .15s;
-      filter: drop-shadow(0 2px 8px rgba(0,0,0,.18));
+    .store-btn {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: rgba(10,10,18,.88);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 14px;
+      padding: 11px 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.08);
+      transition: transform .2s var(--ease), box-shadow .2s, background .2s;
+      text-decoration: none;
+      min-width: 160px;
     }
-    .store-badge:hover { transform: translateY(-2px); opacity: .9; }
+    .store-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.1);
+      background: rgba(18,18,28,.92);
+    }
+    .store-btn-icon { display: flex; align-items: center; flex-shrink: 0; }
+    .store-btn-label { text-align: left; line-height: 1.2; }
+    .store-btn-label .top { font-size: 10px; color: rgba(255,255,255,.5); letter-spacing: .3px; }
+    .store-btn-label .bot { font-size: 16px; font-weight: 600; color: #fff; letter-spacing: -.2px; font-family: var(--font-display); }
 
     .hero-waitlist {
       font-size: 13px; color: var(--text-3);
@@ -757,8 +772,20 @@
             MaxiMile tells you exactly which credit card to tap at checkout — in under a second. Personalized to your cards. Aware of your caps. Zero guesswork.
           </p>
           <div class="store-row r d3">
-            <a href="#cta"><img src="./maximile-app/assets/badge-appstore.png" alt="Download on the App Store" class="store-badge"></a>
-            <a href="#cta"><img src="./maximile-app/assets/badge-googleplay.png" alt="Get it on Google Play" class="store-badge"></a>
+            <a href="#cta" class="store-btn">
+              <span class="store-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" fill="white"/></svg></span>
+              <div class="store-btn-label">
+                <div class="top">Download on the</div>
+                <div class="bot">App Store</div>
+              </div>
+            </a>
+            <a href="#cta" class="store-btn">
+              <span class="store-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-1.86a1 1 0 010 1.306L15.414 14.5l-2.62-2.5 2.62-2.5 2.284 1.347zM5.864 2.658L16.8 8.99l-2.302 2.302-8.635-8.635z" fill="white"/></svg></span>
+              <div class="store-btn-label">
+                <div class="top">Get it on</div>
+                <div class="bot">Google Play</div>
+              </div>
+            </a>
           </div>
           <span class="hero-waitlist r d3">Join <strong>800+</strong> Singapore miles cardholders on the waitlist. <a href="#cta">Reserve your spot →</a></span>
           <div class="trust-strip r d4">
@@ -1163,8 +1190,20 @@
         Add your cards. Open the app. Tap your way to the miles you've been leaving on the table.
       </p>
       <div class="cta-btns r d3">
-        <a href="#cta"><img src="./maximile-app/assets/badge-appstore.png" alt="Download on the App Store" class="store-badge"></a>
-        <a href="#cta"><img src="./maximile-app/assets/badge-googleplay.png" alt="Get it on Google Play" class="store-badge"></a>
+        <a href="#cta" class="store-btn">
+          <span class="store-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" fill="white"/></svg></span>
+          <div class="store-btn-label">
+            <div class="top">Download on the</div>
+            <div class="bot">App Store</div>
+          </div>
+        </a>
+        <a href="#cta" class="store-btn">
+          <span class="store-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-1.86a1 1 0 010 1.306L15.414 14.5l-2.62-2.5 2.62-2.5 2.284 1.347zM5.864 2.658L16.8 8.99l-2.302 2.302-8.635-8.635z" fill="white"/></svg></span>
+          <div class="store-btn-label">
+            <div class="top">Get it on</div>
+            <div class="bot">Google Play</div>
+          </div>
+        </a>
       </div>
       <div class="waitlist-block r d4">
         <p class="waitlist-note">Not available yet in your region? Join the waitlist.</p>
