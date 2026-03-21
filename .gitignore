@@ -15,6 +15,10 @@ Thumbs.db
 # Assignment files (private)
 docs/marketing/PITCH_DECK_IS622.md
 
+# Large media files (too large for GitHub)
+maximile-app/assets/demo.mp4
+maximile-app/screenshots/Payment.mp4
+
 # App dependencies & build artifacts (handled by maximile-app/.gitignore)
 maximile-app/node_modules/
 maximile-app/.expo/
@@ -27,3 +31,4 @@ maximile-app/.env
 maximile-app/.env.local
 maximile-app/.env.production
 maximile-app/expo-env.d.ts
+.gstack/
