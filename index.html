@@ -233,7 +233,15 @@
       line-height: 1.05; letter-spacing: -1.5px;
       color: var(--text-1); margin-bottom: var(--s5);
     }
-    .hero-h1 em { font-style: normal; color: var(--gold); }
+    .hero-h1 em {
+      font-style: normal;
+      background: linear-gradient(100deg, #C5A55A 0%, #E8D090 45%, #C5A55A 55%, #A8893E 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3.5s linear infinite;
+    }
+    @keyframes shimmer { to { background-position: 200% center; } }
 
     .hero-sub {
       font-size: 18px; line-height: 1.75;
@@ -1305,6 +1313,17 @@
     });
   }, { threshold: 0.5 });
   document.querySelectorAll('.stat-num[data-count]').forEach(el => statObs.observe(el));
+
+  /* ── Benefit card 3D tilt ── */
+  document.querySelectorAll('.ben-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width  / 2) / (r.width  / 2);
+      const y = (e.clientY - r.top  - r.height / 2) / (r.height / 2);
+      card.style.transform = `perspective(600px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg) translateY(-4px)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
 
   /* ── Hero phone mouse parallax ── */
   const heroSection = document.getElementById('hero');
