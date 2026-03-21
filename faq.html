@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ | MaxiMile</title>
+  <meta name="description" content="Answers to common questions about MaxiMile — Singapore's miles co-pilot.">
+  <meta name="theme-color" content="#C5A55A">
+  <link rel="icon" type="image/png" href="./maximile-app/assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* =============================================
+       DESIGN TOKENS
+    ============================================= */
+    :root {
+      --blue:         #1A73E8;
+      --blue-light:   #4A90D9;
+      --blue-dark:    #1557B0;
+      --gold:         #C5A55A;
+      --gold-dim:     rgba(197,165,90,0.6);
+      --border-glass: rgba(197,165,90,0.22);
+      --green:        #34A853;
+      --bg:           #F8F9FA;
+      --surface:      #FFFFFF;
+      --text-1:       #1A1A2E;
+      --text-2:       #5F6368;
+      --text-3:       #9AA0A6;
+      --border:       #E0E0E0;
+
+      --font-display: 'Plus Jakarta Sans', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+
+      --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px;
+      --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+
+      --r1: 4px; --r2: 8px; --r3: 12px; --r4: 16px; --r5: 9999px;
+
+      --sh-sm:    0 1px 4px rgba(0,0,0,.08);
+      --sh-md:    0 4px 12px rgba(0,0,0,.1);
+      --sh-lg:    0 8px 28px rgba(0,0,0,.13);
+      --sh-glass: 0 8px 32px rgba(0,0,0,.08);
+      --sh-gold:  0 8px 32px rgba(197,165,90,.18);
+
+      --ease: cubic-bezier(.4,0,.2,1);
+    }
+
+    /* =============================================
+       RESET
+    ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+    body { font-family: var(--font-body); color: var(--text-1); background: var(--bg); overflow-x: hidden; line-height: 1.6; }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: -1;
+      background: url('./maximile-app/assets/background_slide.png') no-repeat center top / cover;
+      opacity: 1;
+      pointer-events: none;
+    }
+    img { max-width: 100%; display: block; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+    /* =============================================
+       UTILITIES
+    ============================================= */
+    .wrap { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 var(--s5); }
+
+    .r { opacity: 0; transform: translateY(22px); transition: opacity .65s var(--ease), transform .65s var(--ease); }
+    .r.in { opacity: 1; transform: none; }
+    .r.d1 { transition-delay: .1s; }
+    .r.d2 { transition-delay: .2s; }
+    .r.d3 { transition-delay: .3s; }
+
+    .label {
+      display: inline-block;
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: var(--s4);
+    }
+    .sh {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700; line-height: 1.15; margin-bottom: var(--s4);
+    }
+    .sh .accent { color: var(--gold); }
+
+    /* =============================================
+       SCROLL PROGRESS
+    ============================================= */
+    #scroll-progress {
+      position: fixed; top: 0; left: 0; z-index: 9999;
+      height: 2.5px; width: 0%;
+      background: linear-gradient(90deg, var(--gold), rgba(197,165,90,.5));
+      transition: width .1s linear;
+      pointer-events: none;
+    }
+
+    /* =============================================
+       NAV
+    ============================================= */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      padding: 10px 0;
+      transition: background .3s var(--ease), backdrop-filter .3s;
+    }
+    #nav.stuck {
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
+      box-shadow: var(--sh-gold);
+    }
+    .nav-row { display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: var(--s2); }
+    .nav-brand img { height: 44px; width: auto; }
+    .nav-links { display: flex; align-items: center; gap: var(--s6); }
+    .nav-links a { font-size: 14px; font-weight: 500; color: var(--text-2); transition: color .2s; padding: 13px 4px; }
+    .nav-links a:hover { color: var(--text-1); }
+    .nav-links a.active { color: var(--gold); }
+    .nav-dl {
+      background: var(--gold); color: #fff !important;
+      padding: 6px 40px !important; border-radius: var(--r5);
+      font-size: 13px !important; font-weight: 600 !important;
+      letter-spacing: .3px;
+      transition: background .2s, transform .15s !important;
+    }
+    .nav-dl:hover { background: #A8893E; transform: translateY(-1px); }
+    .nav-burger {
+      display: none; align-items: center; justify-content: center;
+      width: 44px; height: 44px; background: none; border: none; cursor: pointer;
+      padding: 0; color: var(--text-1);
+    }
+    @media (max-width: 720px) {
+      .nav-links { display: none; }
+      .nav-burger { display: flex; }
+    }
+    .nav-mobile {
+      display: none; flex-direction: column;
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-glass);
+      padding: var(--s4) var(--s5);
+      gap: var(--s3);
+    }
+    .nav-mobile.open { display: flex; }
+    .nav-mobile a {
+      font-family: var(--font-body); font-size: 16px; font-weight: 500;
+      color: var(--text-2); padding: var(--s3) 0;
+      border-bottom: 1px solid rgba(197,165,90,.12);
+      text-decoration: none; transition: color .2s;
+    }
+    .nav-mobile a:last-child { border-bottom: none; }
+    .nav-mobile a:hover { color: var(--text-1); }
+    .nav-mobile .nav-dl {
+      margin-top: var(--s2); text-align: center;
+      padding: 12px 18px; border-radius: var(--r5); border: none;
+    }
+
+    /* =============================================
+       PAGE HEADER
+    ============================================= */
+    #faq-hero {
+      padding: 160px 0 80px;
+      text-align: center;
+      position: relative;
+    }
+    .faq-hero-mesh {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(197,165,90,.1) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(26,115,232,.06) 0%, transparent 60%);
+    }
+    #faq-hero .wrap { position: relative; z-index: 1; }
+    .faq-hero-back {
+      display: inline-flex; align-items: center; gap: var(--s2);
+      font-size: 13px; font-weight: 500; color: var(--text-3);
+      margin-bottom: var(--s5);
+      transition: color .2s;
+    }
+    .faq-hero-back:hover { color: var(--gold); }
+    .faq-hero-back svg { width: 16px; height: 16px; }
+
+    /* =============================================
+       FAQ SECTION
+    ============================================= */
+    #faq {
+      padding: 0 0 120px;
+    }
+    .faq-inner { max-width: 700px; margin: 0 auto; }
+
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:first-of-type { border-top: 1px solid var(--border); }
+
+    .faq-q {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: var(--s5) 0; text-align: left; gap: var(--s5);
+      font-size: 16px; font-weight: 600; color: var(--text-1);
+      transition: color .2s;
+    }
+    .faq-q:hover { color: var(--gold); }
+
+    .faq-ic {
+      width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
+      background: var(--bg); border: 1px solid var(--border-glass);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; line-height: 1; color: var(--gold);
+      transition: transform .32s var(--ease), background .2s, color .2s;
+    }
+    .faq-item.open .faq-ic { transform: rotate(45deg); background: var(--gold); color: #fff; border-color: var(--gold); }
+
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height .42s var(--ease), padding .3s;
+    }
+    .faq-item.open .faq-a { max-height: 360px; padding-bottom: var(--s5); }
+    .faq-a p { font-size: 15px; color: var(--text-2); line-height: 1.75; }
+
+    .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--s3); }
+    .tag {
+      background: rgba(197,165,90,.07); border: 1px solid var(--border-glass);
+      border-radius: var(--r5); padding: 3px 10px;
+      font-size: 12px; color: var(--text-2); font-weight: 500;
+    }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    footer { background: #1A1A2E; position: relative; }
+    footer::before {
+      content: ''; display: block; height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(197,165,90,.45) 30%, rgba(197,165,90,.45) 70%, transparent 100%);
+    }
+    .foot-top {
+      padding: var(--s7) 0 var(--s6);
+      display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--s8);
+      align-items: start;
+    }
+    .foot-brand { display: flex; flex-direction: column; gap: 0; }
+    .foot-brand img { height: auto; max-height: 44px; width: auto; max-width: 220px; object-fit: contain; object-position: left center; opacity: .75; margin-bottom: var(--s3); display: block; }
+    .foot-tagline { font-size: 13px; color: rgba(255,255,255,.28); line-height: 1.6; max-width: 210px; }
+    .foot-col-head {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase;
+      color: rgba(255,255,255,.28); margin-bottom: var(--s3);
+    }
+    .foot-col-links { display: flex; flex-direction: column; gap: var(--s2); }
+    .foot-col-links a { font-size: 13px; color: rgba(255,255,255,.4); transition: color .2s; }
+    .foot-col-links a:hover { color: var(--gold); }
+    .foot-bottom {
+      border-top: 1px solid rgba(255,255,255,.05);
+      padding: var(--s4) 0;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--s3);
+    }
+    .foot-copy { font-size: 12px; color: rgba(255,255,255,.2); }
+    .foot-made { font-size: 12px; color: rgba(255,255,255,.2); display: flex; align-items: center; gap: 5px; }
+    @media (max-width: 680px) {
+      .foot-top { grid-template-columns: 1fr; gap: var(--s6); }
+      .foot-bottom { flex-direction: column; align-items: center; text-align: center; }
+    }
+
+    /* =============================================
+       CUSTOM SCROLLBAR
+    ============================================= */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(197,165,90,.4); border-radius: 3px; }
+  </style>
+</head>
+<body>
+<div id="scroll-progress"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="wrap">
+    <div class="nav-row">
+      <a href="./index.html" class="nav-brand">
+        <img src="./maximile-app/assets/web_logo.png" alt="MaxiMile">
+      </a>
+      <div class="nav-links">
+        <a href="./index.html#how">How it works</a>
+        <a href="./index.html#benefits">Features</a>
+        <a href="./faq.html" class="active">FAQ</a>
+        <a href="https://maximile-app.vercel.app/" class="nav-dl">Download</a>
+      </div>
+      <button class="nav-burger" aria-label="Open menu" aria-expanded="false" onclick="toggleMobileNav(this)">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect y="4" width="22" height="2" rx="1" fill="currentColor"/><rect y="10" width="22" height="2" rx="1" fill="currentColor"/><rect y="16" width="22" height="2" rx="1" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div class="nav-mobile" id="navMobile">
+      <a href="./index.html#how" onclick="closeMobileNav()">How it works</a>
+      <a href="./index.html#benefits" onclick="closeMobileNav()">Features</a>
+      <a href="./faq.html" onclick="closeMobileNav()">FAQ</a>
+      <a href="https://maximile-app.vercel.app/" class="nav-dl" onclick="closeMobileNav()">Download</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- PAGE HEADER -->
+<section id="faq-hero">
+  <div class="faq-hero-mesh"></div>
+  <div class="wrap">
+    <a href="./index.html" class="faq-hero-back r">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to home
+    </a>
+    <div class="r d1">
+      <span class="label">Questions</span>
+      <h1 class="sh">The ones everyone asks</h1>
+      <p style="font-size:17px;color:var(--text-2);margin:0 auto;line-height:1.7;white-space:nowrap;">Everything you need to know about MaxiMile — how it works, what it costs, and what we don't do.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="faq-inner">
+
+      <div class="faq-item r">
+        <button class="faq-q" onclick="faqToggle(this)">
+          Does MaxiMile access my bank account or card data?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>No. MaxiMile never connects to your bank. You manually tell us which cards you carry, and you log transactions yourself — or via iOS Shortcuts / Android auto-capture from payment notifications. Your financial data stays on your device.</p>
+        </div>
+      </div>
+
+      <div class="faq-item r d1">
+        <button class="faq-q" onclick="faqToggle(this)">
+          How accurate are the earn rates?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Earn rates, caps, and exclusions are sourced from official bank T&Cs for all 29 supported Singapore miles cards. When banks change their rules, MaxiMile sends you a push alert and updates the database. Every recommendation shows its reasoning — so you can always verify.</p>
+        </div>
+      </div>
+
+      <div class="faq-item r d2">
+        <button class="faq-q" onclick="faqToggle(this)">
+          Which cards are supported?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>MaxiMile supports 29 Singapore miles cards:</p>
+          <div class="tag-cloud">
+            <span class="tag">DBS Altitude Visa</span><span class="tag">DBS Vantage Infinite</span>
+            <span class="tag">DBS Woman's World</span><span class="tag">OCBC 90°N</span>
+            <span class="tag">OCBC Voyage</span><span class="tag">OCBC Titanium Rewards</span>
+            <span class="tag">Citi PremierMiles</span><span class="tag">Citi Rewards</span>
+            <span class="tag">UOB PRVI Miles</span><span class="tag">UOB Lady's Card</span>
+            <span class="tag">UOB Lady's Solitaire</span><span class="tag">UOB Preferred Platinum</span>
+            <span class="tag">UOB Visa Signature</span><span class="tag">AMEX KrisFlyer</span>
+            <span class="tag">AMEX KrisFlyer Ascend</span><span class="tag">HSBC TravelOne</span>
+            <span class="tag">HSBC Revolution</span><span class="tag">HSBC Premier MC</span>
+            <span class="tag">SC Journey Card</span><span class="tag">SC Beyond Card</span>
+            <span class="tag">SC Smart Card</span><span class="tag">SC Visa Infinite</span>
+            <span class="tag">SC X Card</span><span class="tag">KrisFlyer UOB</span>
+            <span class="tag">Maybank Horizon</span><span class="tag">Maybank World MC</span>
+            <span class="tag">Maybank FC Barcelona</span><span class="tag">Maybank XL Rewards</span>
+            <span class="tag">BOC Elite Miles</span><span class="tag">POSB Everyday Card</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item r d3">
+        <button class="faq-q" onclick="faqToggle(this)">
+          Is MaxiMile free?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes. MaxiMile is free to download and use. No subscription, no premium tier, no card referral kickbacks — which means we have zero incentive to push you toward any particular card. Every recommendation is based purely on your earn rates and cap status.</p>
+        </div>
+      </div>
+
+      <div class="faq-item r d3">
+        <button class="faq-q" onclick="faqToggle(this)">
+          I only have 2 miles cards. Is MaxiMile worth it for me?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes — especially because most 2-card holders default to one card for everything, leaving the second card's category bonuses and caps unused. MaxiMile tells you when to switch, tracks your caps, and shows exactly how many extra miles you earned each month.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <img src="./maximile-app/assets/web_logo.png" alt="MaxiMile">
+        <p class="foot-tagline">Don't just spend. Maximise.</p>
+      </div>
+      <div>
+        <p class="foot-col-head">Product</p>
+        <div class="foot-col-links">
+          <a href="./index.html#how">How it works</a>
+          <a href="./index.html#benefits">Features</a>
+          <a href="./faq.html">FAQ</a>
+        </div>
+      </div>
+      <div>
+        <p class="foot-col-head">Legal</p>
+        <div class="foot-col-links">
+          <a href="./privacy.html">Privacy Policy</a>
+          <a href="./terms.html">Terms of Use</a>
+          <a href="mailto:hello@maximile.app">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span class="foot-copy">© 2026 MaxiMile. All rights reserved.</span>
+      <span class="foot-made">
+        Built with <svg width="11" height="11" viewBox="0 0 24 24" fill="#C5A55A"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> in Singapore
+      </span>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  /* ── Scroll progress ── */
+  const bar = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    bar.style.width = pct + '%';
+  }, { passive: true });
+
+  /* ── Nav scroll state ── */
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('stuck', window.scrollY > 60);
+  }, { passive: true });
+
+  /* ── Scroll reveal ── */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.r').forEach(el => io.observe(el));
+
+  /* ── FAQ accordion ── */
+  function faqToggle(btn) {
+    const item = btn.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
+
+  /* ── Mobile nav ── */
+  function toggleMobileNav(btn) {
+    const navEl = document.getElementById('navMobile');
+    const open = navEl.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+    btn.innerHTML = open
+      ? '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><line x1="3" y1="3" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="19" y1="3" x2="3" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+      : '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect y="4" width="22" height="2" rx="1" fill="currentColor"/><rect y="10" width="22" height="2" rx="1" fill="currentColor"/><rect y="16" width="22" height="2" rx="1" fill="currentColor"/></svg>';
+  }
+  function closeMobileNav() {
+    document.getElementById('navMobile').classList.remove('open');
+  }
+</script>
+</body>
+</html>
