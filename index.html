@@ -703,9 +703,21 @@
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: rgba(197,165,90,.4); border-radius: 3px; }
+
+    /* =============================================
+       SCROLL PROGRESS BAR
+    ============================================= */
+    #scroll-progress {
+      position: fixed; top: 0; left: 0; z-index: 9999;
+      height: 2.5px; width: 0%;
+      background: linear-gradient(90deg, var(--gold), rgba(197,165,90,.5));
+      transition: width .1s linear;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
+<div id="scroll-progress"></div>
 
 <!-- ======================================================
      NAV
@@ -1039,15 +1051,15 @@
       </div>
       <div class="stats">
         <div class="r d1" style="text-align:center">
-          <div class="stat-num">97%</div>
+          <div class="stat-num" data-count="97" data-suffix="%">97%</div>
           <div class="stat-lbl">of Singapore miles users believe they aren't optimising every transaction</div>
         </div>
         <div class="r d2" style="text-align:center">
-          <div class="stat-num">948K</div>
+          <div class="stat-num" data-count="948" data-suffix="K">948K</div>
           <div class="stat-lbl">Singaporeans visit MileLion every month looking for the answer MaxiMile gives in a tap</div>
         </div>
         <div class="r d3" style="text-align:center">
-          <div class="stat-num">29</div>
+          <div class="stat-num" data-count="29" data-suffix="">29</div>
           <div class="stat-lbl">Singapore miles cards with verified earn rates, caps, and exclusions</div>
         </div>
       </div>
@@ -1261,9 +1273,55 @@
     e.preventDefault();
     const btn = e.target.querySelector('.w-btn');
     const inp = e.target.querySelector('.w-input');
-    btn.textContent = '✓ You\'re on the list';
+    btn.textContent = 'You\'re on the list';
     btn.style.background = '#34A853';
     inp.disabled = true; btn.disabled = true;
+  }
+
+  /* ── Scroll progress bar ── */
+  const progressBar = document.getElementById('scroll-progress');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    progressBar.style.width = Math.min(pct, 100) + '%';
+  }, { passive: true });
+
+  /* ── Stat counter animation ── */
+  function animateCount(el) {
+    const target = parseInt(el.dataset.count, 10);
+    const suffix = el.dataset.suffix || '';
+    const duration = 1600;
+    const start = performance.now();
+    function step(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3); // ease-out-cubic
+      el.textContent = Math.round(ease * target) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  const statObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { animateCount(e.target); statObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.stat-num[data-count]').forEach(el => statObs.observe(el));
+
+  /* ── Hero phone mouse parallax ── */
+  const heroSection = document.getElementById('hero');
+  const phoneMain  = document.querySelector('.phone-main');
+  const phoneBack  = document.querySelector('.phone-back');
+  if (heroSection && phoneMain) {
+    heroSection.addEventListener('mousemove', (e) => {
+      const rect = heroSection.getBoundingClientRect();
+      const cx = (e.clientX - rect.left - rect.width / 2) / rect.width;
+      const cy = (e.clientY - rect.top  - rect.height / 2) / rect.height;
+      phoneMain.style.transform = `translateX(calc(-50% + ${cx * 14}px)) translateY(${cy * 10}px)`;
+      if (phoneBack) phoneBack.style.transform = `rotate(-7deg) translateY(${cy * 6}px) translateX(${cx * 8}px)`;
+    });
+    heroSection.addEventListener('mouseleave', () => {
+      phoneMain.style.transform = '';
+      if (phoneBack) phoneBack.style.transform = '';
+    });
   }
 </script>
 
