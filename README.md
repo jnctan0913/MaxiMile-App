@@ -127,6 +127,6 @@ npx expo start
 - **Charts**: Recharts
 
 ### Infrastructure
-- **Hosting**: GitHub Pages (landing page + admin dashboard)
+- **Hosting**: [Vercel](https://vercel.com/) (web app) · GitHub Pages (landing page + admin dashboard)
 - **Testing**: Jest + React Native Testing Library
 - **CI/CD**: GitHub Actions
