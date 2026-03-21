@@ -370,6 +370,7 @@ export default function PayScreen() {
       category: selectedCategoryId,
       changed: selectedCategoryId !== merchant?.category,
       original_category: merchant?.category ?? 'unknown',
+      duration_ms: Date.now() - mountTime.current,
     }, user?.id);
 
     setState('recommending');
@@ -411,6 +412,7 @@ export default function PayScreen() {
       top_card: recommendation?.card_name,
       action_type: 'manual_log',
       via: 'smart_pay',
+      earn_rate_mpd: recommendation?.earn_rate_mpd,
     });
     setState('logging');
   }, [selectedCategoryId, recommendation]);
@@ -421,6 +423,7 @@ export default function PayScreen() {
       top_card: recommendation?.card_name,
       action_type: 'smart_pay_wallet',
       via: 'smart_pay',
+      earn_rate_mpd: recommendation?.earn_rate_mpd,
     });
 
     walletOpenTime.current = Date.now();
@@ -685,6 +688,7 @@ export default function PayScreen() {
       category: selectedCategoryId,
       card_id: recommendation.card_id,
       merchant_name: merchant?.name ?? 'unknown',
+      duration_ms: Date.now() - mountTime.current,
     }, user.id);
 
     setSubmitting(false);

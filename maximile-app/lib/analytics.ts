@@ -121,7 +121,8 @@ export type AnalyticsEvent =
   | 'auto_capture_manual_fallback'
   | 'search_abandoned'
   | 'transaction_edited'
-  | 'transaction_deleted';
+  | 'transaction_deleted'
+  | 'transaction_opportunity';
 
 export interface AnalyticsPayload {
   event: AnalyticsEvent;

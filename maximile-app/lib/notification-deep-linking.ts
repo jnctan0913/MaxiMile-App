@@ -104,6 +104,14 @@ export function handleNotificationDeepLink(data: NotificationData): void {
       is_test: data.isTest || false,
     });
 
+    // Fire transaction_opportunity event for location-based notifications
+    if (data.trigger === 'location') {
+      trackEvent('transaction_opportunity', {
+        source: 'notification',
+        trigger: 'location',
+      });
+    }
+
     // Clear badge when user interacts with notification
     clearBadge();
 
