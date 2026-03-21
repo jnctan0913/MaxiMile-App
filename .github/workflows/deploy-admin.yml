@@ -45,6 +45,10 @@ jobs:
           mkdir -p deployment
           # Landing page at root
           cp index.html deployment/
+          # Assets the landing page references via relative paths
+          mkdir -p deployment/maximile-app
+          cp -r maximile-app/assets deployment/maximile-app/assets
+          cp -r maximile-app/screenshots deployment/maximile-app/screenshots
           # Admin dashboard at /admin subdirectory
           mkdir -p deployment/admin
           cp -r maximile-app/admin-dashboard/dist/* deployment/admin/
