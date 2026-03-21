@@ -151,7 +151,37 @@
       transition: background .2s, transform .15s !important;
     }
     .nav-dl:hover { background: #A8893E; transform: translateY(-1px); }
-    @media (max-width: 720px) { .nav-links { display: none; } }
+    .nav-burger {
+      display: none; align-items: center; justify-content: center;
+      width: 44px; height: 44px; background: none; border: none; cursor: pointer;
+      padding: 0; color: var(--text-1);
+    }
+    @media (max-width: 720px) {
+      .nav-links { display: none; }
+      .nav-burger { display: flex; }
+    }
+    /* Mobile slide-down nav */
+    .nav-mobile {
+      display: none; flex-direction: column;
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-glass);
+      padding: var(--s4) var(--s5);
+      gap: var(--s3);
+    }
+    .nav-mobile.open { display: flex; }
+    .nav-mobile a {
+      font-family: var(--font-body); font-size: 16px; font-weight: 500;
+      color: var(--text-2); padding: var(--s3) 0;
+      border-bottom: 1px solid rgba(197,165,90,.12);
+      text-decoration: none; transition: color .2s;
+    }
+    .nav-mobile a:last-child { border-bottom: none; }
+    .nav-mobile a:hover { color: var(--text-1); }
+    .nav-mobile .nav-dl {
+      margin-top: var(--s2); text-align: center;
+      padding: 12px 18px; border-radius: var(--r5); border: none;
+    }
 
     /* =============================================
        HERO
@@ -664,6 +694,15 @@
         <a href="#faq">FAQ</a>
         <a href="#cta" class="nav-dl">Download</a>
       </div>
+      <button class="nav-burger" aria-label="Open menu" aria-expanded="false" onclick="toggleMobileNav(this)">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect y="4" width="22" height="2" rx="1" fill="currentColor"/><rect y="10" width="22" height="2" rx="1" fill="currentColor"/><rect y="16" width="22" height="2" rx="1" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div class="nav-mobile" id="navMobile">
+      <a href="#how" onclick="closeMobileNav()">How it works</a>
+      <a href="#benefits" onclick="closeMobileNav()">Features</a>
+      <a href="#faq" onclick="closeMobileNav()">FAQ</a>
+      <a href="#cta" class="nav-dl" onclick="closeMobileNav()">Download</a>
     </div>
   </div>
 </nav>
@@ -1189,6 +1228,22 @@
     const wasOpen = item.classList.contains('open');
     document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
     if (!wasOpen) item.classList.add('open');
+  }
+
+  /* ── Mobile nav ── */
+  function toggleMobileNav(btn) {
+    const nav = document.getElementById('navMobile');
+    const open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+    btn.innerHTML = open
+      ? '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><line x1="3" y1="3" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="19" y1="3" x2="3" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+      : '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect y="4" width="22" height="2" rx="1" fill="currentColor"/><rect y="10" width="22" height="2" rx="1" fill="currentColor"/><rect y="16" width="22" height="2" rx="1" fill="currentColor"/></svg>';
+  }
+  function closeMobileNav() {
+    const nav = document.getElementById('navMobile');
+    const btn = document.querySelector('.nav-burger');
+    nav.classList.remove('open');
+    if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.innerHTML = '<svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect y="4" width="22" height="2" rx="1" fill="currentColor"/><rect y="10" width="22" height="2" rx="1" fill="currentColor"/><rect y="16" width="22" height="2" rx="1" fill="currentColor"/></svg>'; }
   }
 
   /* ── Waitlist submit ── */
