@@ -1,6 +1,66 @@
-# MaxiMile — Credit Card Miles Optimizer
+# MaxiMile — Know which card to tap. Every time.
 
-A product management class project for a context-aware mobile app that helps Singapore professionals maximize airline miles from credit card spending.
+MaxiMile tells you which credit card earns the most miles for any purchase — in under 10 seconds — and tracks your monthly bonus caps so you never accidentally earn at the base rate.
+
+Built for Singapore credit card holders juggling multiple miles cards.
+
+> IS622 Digital Product Management — Group Project Prototype
+
+---
+
+## Live Links
+
+| | URL |
+|---|---|
+| **Landing Page** | https://jnctan0913.github.io/MaxiMile-App/ |
+| **Admin Dashboard** | https://jnctan0913.github.io/MaxiMile-App/admin/ |
+
+---
+
+## Evaluator Access
+
+### Web App (Prototype)
+
+Login credentials for the prototype:
+
+| Field | Value |
+|---|---|
+| Email | `jnctan0913@gmail.com` |
+| Password | `MM12345` |
+
+**Key flows to evaluate:**
+1. **Merchant Search** — type "Starbucks" in the search bar → instant card recommendation
+2. **Category Tap** — tap "Dining" or "Bills" → see best card with cap remaining
+3. **⚡ Quick Pick** — tap the gold FAB button for a GPS-based merchant detection
+4. **My Cards** tab — see cap usage bars per card (alerts when >80% spent)
+5. **Miles** tab — see loyalty program balances
+
+### Admin Dashboard
+
+URL: **https://jnctan0913.github.io/MaxiMile-App/admin/**
+
+No login required (service role access). Shows:
+- **Community** — user-submitted card rule corrections
+- **AI Detections** — auto-captured merchant MCC classifications
+- **Pipeline Health** — data freshness indicators
+- **Analytics** — MARU (North Star), funnels, feature adoption, retention cohorts
+
+---
+
+## iOS vs Android / Browser Notes
+
+The prototype runs as a web app (PWA). Behaviour differs slightly between platforms:
+
+| Feature | iOS Safari | Android Chrome |
+|---|---|---|
+| Install to home screen | Share → Add to Home Screen | Menu → Install App |
+| Swipe to edit/delete transactions | Use **long-press** instead | Swipe left works natively |
+| Input zoom on focus | Fixed (font size ≥ 16px) | Not affected |
+| Push notifications | Requires iOS 16.4+ + home screen install | Works natively |
+
+**For evaluation:** Chrome on desktop or Android gives the fullest experience. All core features work on iOS Safari; swipe-to-edit requires long-press.
+
+---
 
 ## Repository Structure
 
