@@ -61,40 +61,27 @@ The prototype runs as a web app (PWA). Behaviour differs slightly between platfo
 
 ```
 .
-├── docs/                    # Product management deliverables
-│   ├── PRD.md               # Product Requirements Document
-│   ├── DISCOVERY.md         # Problem discovery & validation
-│   ├── MARKET_RESEARCH.md   # Market analysis & sizing
-│   ├── COMPETITIVE_LANDSCAPE.md  # Competitor analysis
-│   ├── CUSTOMER_SURVEY.md   # User research & survey design
-│   ├── DRD_MILES_PORTFOLIO.md    # Design Requirements Document
-│   ├── EPICS_AND_USER_STORIES.md # Epics & user stories
-│   ├── SPRINT_PLAN.md       # Sprint planning & backlog
-│   └── SPRINT_EARNING_INSIGHTS.md # Earning insights sprint
-│
-└── maximile-app/            # React Native prototype (Expo)
-    ├── app/                 # Screen routes (Expo Router)
-    │   ├── (tabs)/          # Main tab navigation
-    │   │   ├── index.tsx    # Home — Smart Pay recommendations
-    │   │   ├── cards.tsx    # My Cards management
-    │   │   ├── miles.tsx    # Miles Portfolio tracker
-    │   │   ├── caps.tsx     # Bonus Cap tracker
-    │   │   ├── log.tsx      # Transaction log
-    │   │   └── profile.tsx  # User profile & settings
-    │   ├── (auth)/          # Auth screens (login/signup)
-    │   ├── pay/             # Smart Pay flow
-    │   ├── card/            # Card detail views
-    │   ├── recommend/       # Card recommendation screens
-    │   ├── miles/           # Miles detail views
-    │   └── earning-insights.tsx  # Earning insights dashboard
-    ├── components/          # Reusable UI components
-    ├── lib/                 # Business logic & utilities
-    ├── database/            # Supabase schema, migrations & seeds
-    ├── contexts/            # React context providers
-    ├── hooks/               # Custom React hooks
-    ├── constants/           # App constants & theme
-    ├── assets/              # Images, icons, fonts
-    └── tests/               # Test suites
+├── index.html               # Landing page (deployed to GitHub Pages root)
+├── faq.html                 # FAQ page
+├── maximile-app/
+│   ├── app/                 # Screen routes (Expo Router)
+│   │   ├── (tabs)/          # Main tab navigation
+│   │   │   ├── index.tsx    # Recommend — Flash Pay + Quick Pick
+│   │   │   ├── cards.tsx    # My Cards — cap tracking
+│   │   │   ├── miles.tsx    # Miles Portfolio
+│   │   │   ├── log.tsx      # Log Transaction
+│   │   │   └── profile.tsx  # Profile & Settings
+│   │   ├── (auth)/          # Login / Signup / Forgot Password
+│   │   ├── recommend/       # Card recommendation screens
+│   │   ├── bills-subcategory.tsx  # Bills subcategory picker
+│   │   └── earning-insights.tsx   # Earning insights
+│   ├── components/          # Reusable UI components
+│   ├── lib/                 # Business logic & Supabase client
+│   ├── hooks/               # Custom React hooks
+│   ├── assets/              # Images, icons, card artwork
+│   ├── screenshots/         # App screenshots (used in landing page)
+│   └── admin-dashboard/     # Vite + React admin dashboard
+└── .github/workflows/       # GitHub Actions — deploy to Pages
 ```
 
 ## Quick Start
