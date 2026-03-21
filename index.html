@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MaxiMile — The right card. Every time.</title>
+  <meta name="description" content="MaxiMile tells you exactly which credit card to tap at checkout — in under a second. Personalized to your cards. Aware of your caps. Zero guesswork.">
+  <meta name="theme-color" content="#1A73E8">
+  <meta property="og:title" content="MaxiMile — The right card. Every time.">
+  <meta property="og:description" content="Stop losing miles to the wrong card. MaxiMile recommends the optimal card at checkout — personalized, real-time, and cap-aware.">
+  <meta property="og:image" content="./maximile-app/assets/icon.png">
+  <link rel="icon" type="image/png" href="./maximile-app/assets/favicon.png">
+  <!-- Fonts: Cormorant Garamond (editorial display) + Outfit (clean UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =============================================
+       DESIGN TOKENS — mirrors app constants/theme
+    ============================================= */
+    :root {
+      --blue:         #1A73E8;
+      --blue-light:   #4A90D9;
+      --blue-dark:    #1557B0;
+      --gold:         #C5A55A;
+      --gold-dim:     rgba(197,165,90,0.6);
+      --baby-yellow:  #FDFD96;
+      --green:        #34A853;
+      --amber:        #FBBC04;
+      --danger:       #EA4335;
+      --bg:           #F8F9FA;
+      --surface:      #FFFFFF;
+      --text-1:       #1A1A2E;
+      --text-2:       #5F6368;
+      --text-3:       #9AA0A6;
+      --charcoal:     #2D3748;
+      --border:       #E0E0E0;
+
+      /* Dark palette (hero / moment / cards / cta / footer) */
+      --dark:         #070B17;
+      --dark-mid:     #0D1528;
+
+      /* Spacing */
+      --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px;
+      --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+
+      /* Radius */
+      --r1: 4px; --r2: 8px; --r3: 12px; --r4: 16px; --r5: 9999px;
+
+      /* Shadows */
+      --sh-sm:    0 1px 4px rgba(0,0,0,.08);
+      --sh-md:    0 4px 12px rgba(0,0,0,.1);
+      --sh-lg:    0 8px 28px rgba(0,0,0,.13);
+      --sh-glass: 0 8px 32px rgba(0,0,0,.08);
+      --sh-blue:  0 12px 36px rgba(26,115,232,.3);
+
+      --ease: cubic-bezier(.4,0,.2,1);
+    }
+
+    /* =============================================
+       RESET
+    ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Outfit', sans-serif; color: var(--text-1); background: var(--bg); overflow-x: hidden; }
+    img { max-width: 100%; display: block; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+    /* =============================================
+       UTILITIES
+    ============================================= */
+    .wrap { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 var(--s5); }
+
+    /* Scroll-reveal */
+    .r { opacity: 0; transform: translateY(22px); transition: opacity .65s var(--ease), transform .65s var(--ease); }
+    .r.in { opacity: 1; transform: none; }
+    .r.d1 { transition-delay: .1s; }
+    .r.d2 { transition-delay: .2s; }
+    .r.d3 { transition-delay: .3s; }
+    .r.d4 { transition-delay: .4s; }
+
+    /* Section label */
+    .label {
+      display: inline-block;
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: var(--s4);
+    }
+    .label-gold { color: var(--gold); }
+
+    /* Section heading */
+    .sh {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700; line-height: 1.15; margin-bottom: var(--s4);
+    }
+    .sh .accent { color: var(--blue); }
+    .sh-white { color: #fff; }
+
+    /* Glass card surfaces */
+    .glass-light {
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px);
+      border: 1px solid rgba(255,255,255,.5);
+      box-shadow: var(--sh-glass);
+    }
+    .glass-dark {
+      background: rgba(255,255,255,.07);
+      backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px);
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: 0 8px 32px rgba(0,0,0,.25);
+    }
+
+    /* =============================================
+       NAV
+    ============================================= */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      padding: var(--s4) 0;
+      transition: background .3s var(--ease), backdrop-filter .3s;
+    }
+    #nav.stuck {
+      background: rgba(7,11,23,.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .nav-row { display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: var(--s2); }
+    .nav-brand img { height: 30px; width: 30px; border-radius: var(--r2); }
+    .nav-brand span { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -.2px; }
+    .nav-links { display: flex; align-items: center; gap: var(--s6); }
+    .nav-links a { font-size: 14px; font-weight: 500; color: rgba(255,255,255,.65); transition: color .2s; }
+    .nav-links a:hover { color: #fff; }
+    .nav-dl {
+      background: var(--blue); color: #fff !important;
+      padding: 8px 18px; border-radius: var(--r5);
+      font-size: 14px !important; font-weight: 600 !important;
+      transition: background .2s, transform .15s !important;
+    }
+    .nav-dl:hover { background: var(--blue-light); transform: translateY(-1px); }
+    @media (max-width: 720px) { .nav-links { display: none; } }
+
+    /* =============================================
+       HERO
+    ============================================= */
+    #hero {
+      min-height: 100vh;
+      position: relative; overflow: hidden;
+      display: flex; align-items: center;
+      background: var(--dark);
+    }
+    .hero-mesh {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 70% at 5% 55%,  rgba(26,115,232,.22) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 55% at 95% 15%,  rgba(197,165,90,.1) 0%, transparent 55%),
+        radial-gradient(ellipse 45% 50% at 65% 88%,  rgba(21,87,176,.18) 0%, transparent 55%),
+        linear-gradient(175deg, #080C1A 0%, #0B1220 55%, #0A1630 100%);
+    }
+    .hero-grid-tex {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+    }
+    .hero-body { position: relative; z-index: 2; width: 100%; padding: 130px 0 90px; }
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--s7); align-items: center;
+    }
+
+    /* Left column */
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: var(--s2);
+      background: rgba(197,165,90,.12); border: 1px solid rgba(197,165,90,.28);
+      border-radius: var(--r5); padding: 5px 14px; margin-bottom: var(--s5);
+    }
+    .hero-pill-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+      animation: dot-pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.55;transform:scale(.8)} }
+    .hero-pill span { font-size: 12px; font-weight: 500; color: var(--gold); letter-spacing: .3px; }
+
+    .hero-h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(44px, 6.5vw, 76px);
+      font-weight: 700; font-style: italic;
+      line-height: 1.05; letter-spacing: -1.5px;
+      color: #fff; margin-bottom: var(--s5);
+    }
+    .hero-h1 em { font-style: normal; color: var(--gold); }
+
+    .hero-sub {
+      font-size: 18px; line-height: 1.75;
+      color: rgba(255,255,255,.6);
+      max-width: 460px; margin-bottom: var(--s6);
+    }
+
+    .store-row { display: flex; flex-wrap: wrap; gap: var(--s3); margin-bottom: var(--s4); }
+    .store-btn {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff; border-radius: var(--r3);
+      padding: 10px 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.25);
+      transition: transform .2s var(--ease), box-shadow .2s;
+    }
+    .store-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(0,0,0,.35); }
+    .store-btn-icon { font-size: 22px; line-height: 1; }
+    .store-btn-label { text-align: left; }
+    .store-btn-label .top { font-size: 10px; color: #666; line-height: 1.3; }
+    .store-btn-label .bot { font-size: 15px; font-weight: 700; color: #111; line-height: 1.3; }
+
+    .hero-waitlist {
+      font-size: 13px; color: rgba(255,255,255,.4);
+      display: block; margin-bottom: var(--s5);
+    }
+    .hero-waitlist a { color: rgba(255,255,255,.55); text-decoration: underline; text-underline-offset: 3px; transition: color .2s; }
+    .hero-waitlist a:hover { color: rgba(255,255,255,.85); }
+
+    .trust-strip { display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; }
+    .trust-item { font-size: 12px; color: rgba(255,255,255,.38); display: flex; align-items: center; gap: 5px; }
+    .trust-item svg { opacity: .55; }
+
+    /* Right column — phones */
+    .phones {
+      position: relative; width: 300px; height: 600px;
+      margin: 0 auto;
+    }
+    .phone {
+      position: absolute;
+      border-radius: 40px; overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 1.5px rgba(255,255,255,.1);
+    }
+    .phone img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+    .phone-main {
+      width: 250px; height: 540px;
+      left: 50%; top: 0; transform: translateX(-50%);
+      z-index: 3;
+      animation: float-a 7s ease-in-out infinite;
+    }
+    @keyframes float-a { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-12px)} }
+    .phone-back {
+      width: 206px; height: 446px;
+      left: -10px; bottom: 0; z-index: 2;
+      opacity: .65;
+      animation: float-b 7s ease-in-out infinite 1.2s;
+    }
+    @keyframes float-b { 0%,100%{transform:rotate(-7deg) translateY(0)} 50%{transform:rotate(-7deg) translateY(-8px)} }
+    .phone-glow {
+      position: absolute; width: 320px; height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,115,232,.28) 0%, transparent 70%);
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      z-index: 1; pointer-events: none;
+    }
+
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; gap: var(--s6); }
+      .hero-left { order: 2; }
+      .hero-right { order: 1; }
+      .hero-sub, .hero-pill { margin-left: auto; margin-right: auto; }
+      .store-row, .trust-strip { justify-content: center; }
+      .phones { width: 220px; height: 470px; }
+      .phone-main { width: 200px; height: 432px; }
+      .phone-back { display: none; }
+    }
+
+    /* =============================================
+       THE MOMENT
+    ============================================= */
+    #moment {
+      background: #060911;
+      padding: 110px 0;
+      position: relative; overflow: hidden;
+    }
+    .moment-glow {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(26,115,232,.07) 0%, transparent 65%);
+    }
+    .moment-inner { position: relative; z-index: 2; max-width: 800px; margin: 0 auto; text-align: center; }
+    .moment-bigquote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 180px; line-height: .8;
+      color: var(--gold); opacity: .1;
+      position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+      user-select: none; pointer-events: none;
+    }
+    .moment-body {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(22px, 3.2vw, 36px);
+      font-style: italic; font-weight: 400;
+      line-height: 1.6; color: rgba(255,255,255,.85);
+      position: relative; z-index: 1; margin-bottom: var(--s6);
+    }
+    .moment-body strong { font-style: normal; color: #fff; font-weight: 600; }
+
+    .moment-tag {
+      display: inline-flex; align-items: center; gap: var(--s3);
+      background: rgba(197,165,90,.1);
+      border: 1px solid rgba(197,165,90,.22);
+      border-radius: var(--r4);
+      padding: 14px 22px;
+    }
+    .moment-tag-icon { font-size: 20px; }
+    .moment-tag-text { font-size: 15px; color: rgba(255,255,255,.7); text-align: left; line-height: 1.5; }
+    .moment-tag-text strong { color: var(--gold); }
+
+    /* =============================================
+       HOW IT WORKS
+    ============================================= */
+    #how { background: var(--bg); padding: 110px 0; }
+    .how-head { text-align: center; margin-bottom: var(--s7); }
+    .how-sub { font-size: 16px; color: var(--text-2); max-width: 420px; margin: var(--s2) auto 0; }
+
+    .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--s5); }
+    .step { text-align: center; position: relative; }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute; top: 38px; right: -10%;
+      width: 20%; height: 2px;
+      background: linear-gradient(90deg, var(--blue-dark), rgba(26,115,232,.15));
+    }
+    .step-num {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto var(--s5);
+      box-shadow: var(--sh-blue);
+    }
+    .step-phone {
+      width: 130px; height: 268px;
+      border-radius: var(--r4); overflow: hidden;
+      margin: 0 auto var(--s5);
+      background: #1A1A2E;
+      border: 2.5px solid rgba(255,255,255,.1);
+      box-shadow: var(--sh-lg);
+    }
+    .step-phone img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+    .step-title { font-size: 17px; font-weight: 600; color: var(--text-1); margin-bottom: var(--s2); }
+    .step-desc { font-size: 14px; color: var(--text-2); line-height: 1.65; }
+
+    @media (max-width: 720px) {
+      .steps { grid-template-columns: 1fr; }
+      .step::after { display: none; }
+      .step-phone { width: 150px; height: 308px; }
+    }
+
+    /* =============================================
+       SCREENSHOTS
+    ============================================= */
+    #screenshots { background: linear-gradient(180deg, var(--bg) 0%, #E8EEFF 100%); padding: 90px 0 0; overflow: hidden; }
+    .ss-head { text-align: center; margin-bottom: var(--s7); }
+    .ss-track {
+      display: flex; gap: var(--s4);
+      overflow-x: auto; padding: var(--s4) var(--s5) var(--s7);
+      scrollbar-width: none; cursor: grab;
+      -ms-overflow-style: none;
+    }
+    .ss-track::-webkit-scrollbar { display: none; }
+    .ss-track.grabbing { cursor: grabbing; user-select: none; }
+    .ss-card {
+      flex: 0 0 auto; width: 210px;
+      border-radius: var(--r4); overflow: hidden;
+      background: #12182D;
+      border: 2px solid rgba(255,255,255,.12);
+      box-shadow: 0 18px 48px rgba(0,0,0,.18);
+      transition: transform .3s var(--ease);
+    }
+    .ss-card:hover { transform: translateY(-6px) scale(1.01); }
+    .ss-img { width: 100%; aspect-ratio: 9/19.5; object-fit: cover; object-position: top center; }
+    .ss-cap {
+      padding: 9px 10px; text-align: center;
+      background: rgba(255,255,255,.04);
+      border-top: 1px solid rgba(255,255,255,.07);
+    }
+    .ss-cap span { font-size: 11px; color: rgba(255,255,255,.55); font-weight: 500; letter-spacing: .3px; }
+
+    /* =============================================
+       KEY BENEFITS
+    ============================================= */
+    #benefits { background: #fff; padding: 110px 0; }
+    .ben-head { text-align: center; margin-bottom: var(--s7); }
+
+    .ben-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: var(--s5); }
+    .ben-card {
+      border-radius: var(--r4); padding: var(--s6);
+      border: 1px solid var(--border);
+      position: relative; overflow: hidden;
+      transition: transform .28s var(--ease), box-shadow .28s;
+    }
+    .ben-card:hover { transform: translateY(-4px); box-shadow: var(--sh-blue); border-color: rgba(26,115,232,.18); }
+    .ben-card:nth-child(1) { background: linear-gradient(140deg, #EBF3FE 0%, #F5FAFF 100%); }
+    .ben-card:nth-child(2) { background: linear-gradient(140deg, #E6F4EA 0%, #F5FBF6 100%); }
+    .ben-card:nth-child(3) { background: linear-gradient(140deg, #FFF8E1 0%, #FFFEF5 100%); }
+    .ben-card:nth-child(4) { background: linear-gradient(140deg, #EDE7F6 0%, #F9F5FF 100%); }
+
+    .ben-icon {
+      width: 50px; height: 50px; border-radius: var(--r3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: var(--s5);
+      box-shadow: var(--sh-md);
+    }
+    .ben-card:nth-child(1) .ben-icon { background: linear-gradient(135deg, #1A73E8, #4A90D9); }
+    .ben-card:nth-child(2) .ben-icon { background: linear-gradient(135deg, #34A853, #55C674); }
+    .ben-card:nth-child(3) .ben-icon { background: linear-gradient(135deg, #FBBC04, #FFCF3D); }
+    .ben-card:nth-child(4) .ben-icon { background: linear-gradient(135deg, #7B1FA2, #AB47BC); }
+
+    .ben-title { font-size: 19px; font-weight: 700; color: var(--text-1); margin-bottom: var(--s2); }
+    .ben-desc { font-size: 15px; color: var(--text-2); line-height: 1.65; }
+
+    @media (max-width: 620px) { .ben-grid { grid-template-columns: 1fr; } }
+
+    /* =============================================
+       SUPPORTED CARDS
+    ============================================= */
+    #cards { background: var(--dark); padding: 90px 0; overflow: hidden; }
+    .cards-head { text-align: center; margin-bottom: var(--s7); }
+    .cards-head p { font-size: 15px; color: rgba(255,255,255,.45); margin-top: var(--s2); }
+
+    .ticker-wrap { position: relative; overflow: hidden; }
+    .ticker-wrap::before, .ticker-wrap::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 100px; z-index: 2; pointer-events: none;
+    }
+    .ticker-wrap::before { left: 0; background: linear-gradient(90deg, var(--dark), transparent); }
+    .ticker-wrap::after  { right: 0; background: linear-gradient(-90deg, var(--dark), transparent); }
+
+    .ticker-row { margin-bottom: var(--s3); }
+    .ticker {
+      display: flex; gap: var(--s3); width: max-content;
+      animation: scroll-l 32s linear infinite;
+    }
+    .ticker.rev { animation-direction: reverse; animation-duration: 28s; }
+    .ticker:hover { animation-play-state: paused; }
+
+    @keyframes scroll-l { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    .chip {
+      display: flex; align-items: center; gap: var(--s2);
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: var(--r5); padding: 7px 14px 7px 7px;
+      white-space: nowrap;
+      transition: background .2s;
+    }
+    .chip:hover { background: rgba(255,255,255,.12); }
+    .chip img {
+      width: 42px; height: 28px; border-radius: 4px;
+      object-fit: cover; background: #2D3748; flex-shrink: 0;
+    }
+    .chip span { font-size: 13px; color: rgba(255,255,255,.72); font-weight: 500; }
+
+    /* =============================================
+       SOCIAL PROOF
+    ============================================= */
+    #social { background: var(--bg); padding: 90px 0; }
+    .social-inner { text-align: center; }
+    .stats { display: flex; justify-content: center; gap: var(--s8); flex-wrap: wrap; margin: var(--s7) 0; }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(48px, 6vw, 68px);
+      font-weight: 700; color: var(--blue); line-height: 1;
+      margin-bottom: var(--s2);
+    }
+    .stat-lbl { font-size: 14px; color: var(--text-2); max-width: 160px; line-height: 1.5; }
+
+    .social-bq {
+      max-width: 580px; margin: 0 auto;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(19px, 2.6vw, 25px);
+      font-style: italic; color: var(--text-2); line-height: 1.65;
+    }
+    .social-bq cite {
+      display: block; margin-top: var(--s4);
+      font-style: normal; font-family: 'Outfit', sans-serif;
+      font-size: 12px; color: var(--text-3); letter-spacing: .5px; text-transform: uppercase;
+    }
+
+    /* =============================================
+       FAQ
+    ============================================= */
+    #faq { background: #fff; padding: 110px 0; }
+    .faq-inner { max-width: 700px; margin: 0 auto; }
+    .faq-head { text-align: center; margin-bottom: var(--s7); }
+
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:first-of-type { border-top: 1px solid var(--border); }
+
+    .faq-q {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: var(--s5) 0; text-align: left; gap: var(--s5);
+      font-size: 16px; font-weight: 600; color: var(--text-1);
+      transition: color .2s;
+    }
+    .faq-q:hover { color: var(--blue); }
+
+    .faq-ic {
+      width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
+      background: var(--bg); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; line-height: 1; color: var(--blue);
+      transition: transform .32s var(--ease), background .2s, color .2s;
+    }
+    .faq-item.open .faq-ic { transform: rotate(45deg); background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height .42s var(--ease), padding .3s;
+    }
+    .faq-item.open .faq-a { max-height: 360px; padding-bottom: var(--s5); }
+    .faq-a p { font-size: 15px; color: var(--text-2); line-height: 1.75; }
+
+    .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--s3); }
+    .tag {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--r5); padding: 3px 10px;
+      font-size: 12px; color: var(--text-2); font-weight: 500;
+    }
+
+    /* =============================================
+       FINAL CTA
+    ============================================= */
+    #cta { background: var(--dark); padding: 110px 0; position: relative; overflow: hidden; }
+    .cta-mesh {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -5%,  rgba(26,115,232,.22) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 15% 100%, rgba(197,165,90,.08) 0%, transparent 55%),
+        linear-gradient(180deg, #080C18 0%, #0A1428 100%);
+    }
+    .cta-grid-tex {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.014) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.014) 1px, transparent 1px);
+      background-size: 52px 52px;
+    }
+    .cta-inner { position: relative; z-index: 2; text-align: center; max-width: 620px; margin: 0 auto; }
+
+    .cta-appicon {
+      width: 76px; height: 76px; border-radius: 20px; overflow: hidden;
+      margin: 0 auto var(--s6);
+      box-shadow: 0 16px 44px rgba(26,115,232,.45);
+    }
+    .cta-appicon img { width: 100%; height: 100%; object-fit: cover; }
+
+    .cta-h {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(34px, 5vw, 54px);
+      font-weight: 700; font-style: italic;
+      color: #fff; line-height: 1.15; margin-bottom: var(--s5);
+    }
+    .cta-h em { font-style: normal; color: var(--gold); }
+
+    .cta-sub { font-size: 17px; color: rgba(255,255,255,.55); line-height: 1.75; margin-bottom: var(--s6); }
+
+    .cta-btns { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s3); margin-bottom: var(--s6); }
+
+    .waitlist-block { max-width: 380px; margin: 0 auto; }
+    .waitlist-note { font-size: 13px; color: rgba(255,255,255,.3); margin-bottom: var(--s3); }
+    .waitlist-form { display: flex; gap: var(--s2); }
+    .w-input {
+      flex: 1; padding: 12px 14px;
+      border-radius: var(--r3);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.07);
+      color: #fff; font-family: 'Outfit', sans-serif; font-size: 14px;
+      outline: none; transition: border-color .2s, background .2s;
+    }
+    .w-input::placeholder { color: rgba(255,255,255,.3); }
+    .w-input:focus { border-color: rgba(26,115,232,.6); background: rgba(255,255,255,.1); }
+    .w-btn {
+      padding: 12px 18px; border-radius: var(--r3);
+      background: var(--blue); color: #fff;
+      font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
+      white-space: nowrap; transition: background .2s, transform .15s;
+    }
+    .w-btn:hover { background: var(--blue-light); transform: translateY(-1px); }
+    .w-note { font-size: 11px; color: rgba(255,255,255,.22); margin-top: var(--s2); }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    footer {
+      background: #04060F;
+      border-top: 1px solid rgba(255,255,255,.05);
+      padding: var(--s6) 0;
+    }
+    .foot-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--s5); }
+    .foot-brand { display: flex; align-items: center; gap: var(--s2); }
+    .foot-brand img { height: 24px; width: 24px; border-radius: 6px; opacity: .65; }
+    .foot-brand span { font-size: 15px; font-weight: 600; color: rgba(255,255,255,.4); }
+    .foot-links { display: flex; gap: var(--s5); flex-wrap: wrap; }
+    .foot-links a { font-size: 13px; color: rgba(255,255,255,.3); transition: color .2s; }
+    .foot-links a:hover { color: rgba(255,255,255,.65); }
+    .foot-made { font-size: 12px; color: rgba(255,255,255,.2); text-align: right; line-height: 1.6; }
+    @media (max-width: 600px) { .foot-row { flex-direction: column; align-items: center; } .foot-made { text-align: center; } }
+
+    /* =============================================
+       CUSTOM SCROLLBAR
+    ============================================= */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #07090F; }
+    ::-webkit-scrollbar-thumb { background: rgba(26,115,232,.35); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ======================================================
+     NAV
+====================================================== -->
+<nav id="nav">
+  <div class="wrap">
+    <div class="nav-row">
+      <a href="#" class="nav-brand">
+        <img src="./maximile-app/assets/icon.png" alt="MaxiMile icon">
+        <span>MaxiMile</span>
+      </a>
+      <div class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#benefits">Features</a>
+        <a href="#faq">FAQ</a>
+        <a href="#cta" class="nav-dl">Download</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ======================================================
+     HERO
+====================================================== -->
+<section id="hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-grid-tex"></div>
+  <div class="hero-body">
+    <div class="wrap">
+      <div class="hero-grid">
+
+        <!-- Left -->
+        <div class="hero-left">
+          <div class="hero-pill r">
+            <span class="hero-pill-dot"></span>
+            <span>Singapore's miles co-pilot</span>
+          </div>
+          <h1 class="hero-h1 r d1">
+            The right card.<br><em>Every time.</em>
+          </h1>
+          <p class="hero-sub r d2">
+            MaxiMile tells you exactly which credit card to tap at checkout — in under a second. Personalized to your cards. Aware of your caps. Zero guesswork.
+          </p>
+          <div class="store-row r d3">
+            <a href="#" class="store-btn">
+              <span class="store-btn-icon">🍎</span>
+              <div class="store-btn-label">
+                <div class="top">Download on the</div>
+                <div class="bot">App Store</div>
+              </div>
+            </a>
+            <a href="#" class="store-btn">
+              <span class="store-btn-icon">▶</span>
+              <div class="store-btn-label">
+                <div class="top">Get it on</div>
+                <div class="bot">Google Play</div>
+              </div>
+            </a>
+          </div>
+          <span class="hero-waitlist r d3">Not available yet? <a href="#cta">Join the waitlist →</a></span>
+          <div class="trust-strip r d4">
+            <span class="trust-item">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M4 6l1.5 1.5L8 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              29 Singapore miles cards
+            </span>
+            <span class="trust-item" style="color:rgba(255,255,255,.18)">·</span>
+            <span class="trust-item">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M4 6l1.5 1.5L8 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Free
+            </span>
+            <span class="trust-item" style="color:rgba(255,255,255,.18)">·</span>
+            <span class="trust-item">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L2 3v3c0 2.2 1.7 4.2 4 4.9C8.3 10.2 10 8.2 10 6V3L6 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              No bank connection required
+            </span>
+          </div>
+        </div>
+
+        <!-- Right — phones -->
+        <div class="hero-right r d2">
+          <div class="phones">
+            <div class="phone-glow"></div>
+            <div class="phone phone-back">
+              <img src="./maximile-app/screenshots/11-my-cards.png" alt="My Cards — cap tracking">
+            </div>
+            <div class="phone phone-main">
+              <img src="./maximile-app/screenshots/16-smart-pay.png" alt="Flash Pay — instant recommendation">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================================================
+     THE MOMENT
+====================================================== -->
+<section id="moment">
+  <div class="moment-glow"></div>
+  <div class="wrap">
+    <div class="moment-inner">
+      <div class="moment-bigquote">"</div>
+      <p class="moment-body r">
+        You're at the checkout.<br>
+        <strong>Four cards in your wallet.</strong><br>
+        You can't remember if you've hit the<br>
+        DBS Altitude dining cap this month.<br><br>
+        You tap the safe card. <em>Again.</em>
+      </p>
+      <div class="moment-tag r d1">
+        <span class="moment-tag-icon">✈️</span>
+        <span class="moment-tag-text">
+          Sound familiar? <strong>You're not alone.</strong><br>
+          Most Singapore miles cardholders believe they're leaving miles on the table on over half their transactions.
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================================================
+     HOW IT WORKS
+====================================================== -->
+<section id="how">
+  <div class="wrap">
+    <div class="how-head r">
+      <span class="label">Simple by design</span>
+      <h2 class="sh">Three taps. <span class="accent">That's it.</span></h2>
+      <p class="how-sub">No spreadsheets. No blog-reading at checkout. No mental math.</p>
+    </div>
+    <div class="steps">
+      <div class="step r d1">
+        <div class="step-num">1</div>
+        <div class="step-phone">
+          <img src="./maximile-app/screenshots/26-onboarding.png" alt="Add your cards">
+        </div>
+        <h3 class="step-title">Add your cards once</h3>
+        <p class="step-desc">Tell MaxiMile which miles cards you carry. Takes 2 minutes. Do it once.</p>
+      </div>
+      <div class="step r d2">
+        <div class="step-num">2</div>
+        <div class="step-phone">
+          <img src="./maximile-app/screenshots/10-recommend-home.png" alt="Category tiles">
+        </div>
+        <h3 class="step-title">Tap your category at checkout</h3>
+        <p class="step-desc">Open the app. Tap Dining, Transport, Online — whatever you're paying for.</p>
+      </div>
+      <div class="step r d3">
+        <div class="step-num">3</div>
+        <div class="step-phone">
+          <img src="./maximile-app/screenshots/17-recommend-dining.png" alt="Card recommendation">
+        </div>
+        <h3 class="step-title">See which card to use — and why</h3>
+        <p class="step-desc">Your best card, remaining cap, earn rate. Tap it. Done.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================================================
+     APP SCREENSHOTS
+====================================================== -->
+<section id="screenshots">
+  <div class="ss-head wrap r">
+    <span class="label">The app</span>
+    <h2 class="sh">See it in action</h2>
+  </div>
+  <div class="ss-track" id="ssTrack">
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/10-recommend-home-full.png" alt="Home">
+      <div class="ss-cap"><span>Category tiles</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/16-smart-pay.png" alt="Flash Pay">
+      <div class="ss-cap"><span>Instant recommendation</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/17-recommend-dining.png" alt="Dining">
+      <div class="ss-cap"><span>Dining earn rates</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/11-my-cards.png" alt="My Cards">
+      <div class="ss-cap"><span>Cap tracking</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/14-miles-full.png" alt="Miles">
+      <div class="ss-cap"><span>Miles portfolio</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/12-transactions-tab.png" alt="Transactions">
+      <div class="ss-cap"><span>Transaction history</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/18-recommend-transport.png" alt="Transport">
+      <div class="ss-cap"><span>Transport earn rates</span></div>
+    </div>
+    <div class="ss-card">
+      <img class="ss-img" src="./maximile-app/screenshots/13-log-transaction.png" alt="Log transaction">
+      <div class="ss-cap"><span>Log a transaction</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================================================
+     KEY BENEFITS
+====================================================== -->
+<section id="benefits">
+  <div class="wrap">
+    <div class="ben-head r">
+      <span class="label">What you get</span>
+      <h2 class="sh">The miles co-pilot<br><span class="accent">your wallet deserves</span></h2>
+    </div>
+    <div class="ben-grid">
+      <div class="ben-card r d1">
+        <div class="ben-icon">🎯</div>
+        <h3 class="ben-title">The right card, right now</h3>
+        <p class="ben-desc">Real-time recommendations that know your live cap balance — not last month's blog post, not your memory.</p>
+      </div>
+      <div class="ben-card r d2">
+        <div class="ben-icon">📊</div>
+        <h3 class="ben-title">Never breach a cap again</h3>
+        <p class="ben-desc">Every transaction updates your spending state automatically. MaxiMile warns you before you waste a bonus.</p>
+      </div>
+      <div class="ben-card r d3">
+        <div class="ben-icon">🔔</div>
+        <h3 class="ben-title">Stay ahead of rate changes</h3>
+        <p class="ben-desc">When DBS, OCBC, or Citi changes their earn rates, you get a push alert — not 3 months later when you check a blog.</p>
+      </div>
+      <div class="ben-card r d4">
+        <div class="ben-icon">🗺️</div>
+        <h3 class="ben-title">200+ Singapore merchants</h3>
+        <p class="ben-desc">MCC-aware fuzzy search from Grab to Meidi-Ya. Find your exact merchant, get the exact earn rate for where you're paying.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================================================
+     SUPPORTED CARDS
+====================================================== -->
+<section id="cards">
+  <div class="wrap cards-head r">
+    <span class="label label-gold">Coverage</span>
+    <h2 class="sh sh-white">29 Singapore miles cards — and counting</h2>
+    <p>All earn rates, bonus caps, and MCC exclusions sourced directly from bank T&Cs.</p>
+  </div>
+  <div class="ticker-wrap">
+    <!-- Row 1 (left) -->
+    <div class="ticker-row">
+      <div class="ticker">
+        <div class="chip"><img src="./maximile-app/assets/cards/dbs-altitude-visa.png" alt=""><span>DBS Altitude Visa</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/ocbc-90n-visa.png" alt=""><span>OCBC 90°N</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/citi-premiermiles-visa.png" alt=""><span>Citi PremierMiles</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/uob-prvi-miles-visa.png" alt=""><span>UOB PRVI Miles</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/amex-krisflyer-credit-card.png" alt=""><span>AMEX KrisFlyer</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/hsbc-travelone.png" alt=""><span>HSBC TravelOne</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/sc-journey-card.png" alt=""><span>SC Journey Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/krisflyer-uob.png" alt=""><span>KrisFlyer UOB</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/hsbc-revolution.png" alt=""><span>HSBC Revolution</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/dbs-vantage-visa-infinite.png" alt=""><span>DBS Vantage Infinite</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/ocbc-voyage-card.png" alt=""><span>OCBC Voyage</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/amex-krisflyer-ascend.png" alt=""><span>AMEX KrisFlyer Ascend</span></div>
+        <!-- duplicate for seamless scroll -->
+        <div class="chip"><img src="./maximile-app/assets/cards/dbs-altitude-visa.png" alt=""><span>DBS Altitude Visa</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/ocbc-90n-visa.png" alt=""><span>OCBC 90°N</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/citi-premiermiles-visa.png" alt=""><span>Citi PremierMiles</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/uob-prvi-miles-visa.png" alt=""><span>UOB PRVI Miles</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/amex-krisflyer-credit-card.png" alt=""><span>AMEX KrisFlyer</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/hsbc-travelone.png" alt=""><span>HSBC TravelOne</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/sc-journey-card.png" alt=""><span>SC Journey Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/krisflyer-uob.png" alt=""><span>KrisFlyer UOB</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/hsbc-revolution.png" alt=""><span>HSBC Revolution</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/dbs-vantage-visa-infinite.png" alt=""><span>DBS Vantage Infinite</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/ocbc-voyage-card.png" alt=""><span>OCBC Voyage</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/amex-krisflyer-ascend.png" alt=""><span>AMEX KrisFlyer Ascend</span></div>
+      </div>
+    </div>
+    <!-- Row 2 (right — reverse direction) -->
+    <div class="ticker-row">
+      <div class="ticker rev">
+        <div class="chip"><img src="./maximile-app/assets/cards/maybank-horizon-visa.png" alt=""><span>Maybank Horizon</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/sc-visa-infinite.png" alt=""><span>SC Visa Infinite</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/uob-ladys-card.png" alt=""><span>UOB Lady's Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/boc-elite-miles-world-mc.png" alt=""><span>BOC Elite Miles</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/sc-beyond-card.png" alt=""><span>SC Beyond Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/maybank-world-mc.png" alt=""><span>Maybank World MC</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/citi-rewards.png" alt=""><span>Citi Rewards</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/hsbc-premier-mc.png" alt=""><span>HSBC Premier MC</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/uob-ladys-solitaire.png" alt=""><span>UOB Lady's Solitaire</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/posb-everyday-card.png" alt=""><span>POSB Everyday Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/sc-x-card.png" alt=""><span>SC X Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/uob-visa-signature.png" alt=""><span>UOB Visa Signature</span></div>
+        <!-- duplicate -->
+        <div class="chip"><img src="./maximile-app/assets/cards/maybank-horizon-visa.png" alt=""><span>Maybank Horizon</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/sc-visa-infinite.png" alt=""><span>SC Visa Infinite</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/uob-ladys-card.png" alt=""><span>UOB Lady's Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/boc-elite-miles-world-mc.png" alt=""><span>BOC Elite Miles</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/sc-beyond-card.png" alt=""><span>SC Beyond Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/maybank-world-mc.png" alt=""><span>Maybank World MC</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/citi-rewards.png" alt=""><span>Citi Rewards</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/hsbc-premier-mc.png" alt=""><span>HSBC Premier MC</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/uob-ladys-solitaire.png" alt=""><span>UOB Lady's Solitaire</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/posb-everyday-card.png" alt=""><span>POSB Everyday Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/sc-x-card.png" alt=""><span>SC X Card</span></div>
+        <div class="chip"><img src="./maximile-app/assets/cards/uob-visa-signature.png" alt=""><span>UOB Visa Signature</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================================================
+     SOCIAL PROOF
+====================================================== -->
+<section id="social">
+  <div class="wrap">
+    <div class="social-inner">
+      <div class="r">
+        <span class="label">The community agrees</span>
+        <h2 class="sh">You're not the only one<br><span class="accent">leaving miles on the table</span></h2>
+      </div>
+      <div class="stats">
+        <div class="r d1" style="text-align:center">
+          <div class="stat-num">97%</div>
+          <div class="stat-lbl">of Singapore miles users believe they aren't optimising every transaction</div>
+        </div>
+        <div class="r d2" style="text-align:center">
+          <div class="stat-num">948K</div>
+          <div class="stat-lbl">Singaporeans visit MileLion every month looking for the answer MaxiMile gives in a tap</div>
+        </div>
+        <div class="r d3" style="text-align:center">
+          <div class="stat-num">29</div>
+          <div class="stat-lbl">Singapore miles cards with verified earn rates, caps, and exclusions</div>
+        </div>
+      </div>
+      <blockquote class="social-bq r d2">
+        "Even with a spreadsheet, I was still guessing at checkout. There just isn't time to check anything when you're tapping your card."
+        <cite>— MaxiMile beta user, Marketing Manager</cite>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================================================
+     FAQ
+====================================================== -->
+<section id="faq">
+  <div class="wrap">
+    <div class="faq-inner">
+      <div class="faq-head r">
+        <span class="label">Questions</span>
+        <h2 class="sh">The ones everyone asks</h2>
+      </div>
+
+      <div class="faq-item r">
+        <button class="faq-q" onclick="faqToggle(this)">
+          Does MaxiMile access my bank account or card data?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>No. MaxiMile never connects to your bank. You manually tell us which cards you carry, and you log transactions yourself — or via iOS Shortcuts / Android auto-capture from payment notifications. Your financial data stays on your device.</p>
+        </div>
+      </div>
+
+      <div class="faq-item r">
+        <button class="faq-q" onclick="faqToggle(this)">
+          How accurate are the earn rates?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Earn rates, caps, and exclusions are sourced from official bank T&Cs for all 29 supported Singapore miles cards. When banks change their rules, MaxiMile sends you a push alert and updates the database. Every recommendation shows its reasoning — so you can always verify.</p>
+        </div>
+      </div>
+
+      <div class="faq-item r">
+        <button class="faq-q" onclick="faqToggle(this)">
+          Which cards are supported?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>MaxiMile supports 29 Singapore miles cards:</p>
+          <div class="tag-cloud">
+            <span class="tag">DBS Altitude Visa</span><span class="tag">DBS Vantage Infinite</span>
+            <span class="tag">DBS Woman's World</span><span class="tag">OCBC 90°N</span>
+            <span class="tag">OCBC Voyage</span><span class="tag">OCBC Titanium Rewards</span>
+            <span class="tag">Citi PremierMiles</span><span class="tag">Citi Rewards</span>
+            <span class="tag">UOB PRVI Miles</span><span class="tag">UOB Lady's Card</span>
+            <span class="tag">UOB Lady's Solitaire</span><span class="tag">UOB Preferred Platinum</span>
+            <span class="tag">UOB Visa Signature</span><span class="tag">AMEX KrisFlyer</span>
+            <span class="tag">AMEX KrisFlyer Ascend</span><span class="tag">HSBC TravelOne</span>
+            <span class="tag">HSBC Revolution</span><span class="tag">HSBC Premier MC</span>
+            <span class="tag">SC Journey Card</span><span class="tag">SC Beyond Card</span>
+            <span class="tag">SC Smart Card</span><span class="tag">SC Visa Infinite</span>
+            <span class="tag">SC X Card</span><span class="tag">KrisFlyer UOB</span>
+            <span class="tag">Maybank Horizon</span><span class="tag">Maybank World MC</span>
+            <span class="tag">Maybank FC Barcelona</span><span class="tag">Maybank XL Rewards</span>
+            <span class="tag">BOC Elite Miles</span><span class="tag">POSB Everyday Card</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item r">
+        <button class="faq-q" onclick="faqToggle(this)">
+          Is MaxiMile free?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes. MaxiMile is free to download and use. No subscription, no premium tier, no card referral kickbacks — which means we have zero incentive to push you toward any particular card. Every recommendation is based purely on your earn rates and cap status.</p>
+        </div>
+      </div>
+
+      <div class="faq-item r">
+        <button class="faq-q" onclick="faqToggle(this)">
+          I only have 2 miles cards. Is MaxiMile worth it for me?
+          <span class="faq-ic">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes — especially because most 2-card holders default to one card for everything, leaving the second card's category bonuses and caps unused. MaxiMile tells you when to switch, tracks your caps, and shows exactly how many extra miles you earned each month.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================================================
+     FINAL CTA
+====================================================== -->
+<section id="cta">
+  <div class="cta-mesh"></div>
+  <div class="cta-grid-tex"></div>
+  <div class="wrap">
+    <div class="cta-inner">
+      <div class="cta-appicon r">
+        <img src="./maximile-app/assets/icon.png" alt="MaxiMile">
+      </div>
+      <h2 class="cta-h r d1">
+        Your next tap<br><em>earns more miles.</em>
+      </h2>
+      <p class="cta-sub r d2">
+        Add your cards. Open the app. Tap your way to the miles you've been leaving on the table.
+      </p>
+      <div class="cta-btns r d3">
+        <a href="#" class="store-btn">
+          <span class="store-btn-icon">🍎</span>
+          <div class="store-btn-label">
+            <div class="top">Download on the</div>
+            <div class="bot">App Store</div>
+          </div>
+        </a>
+        <a href="#" class="store-btn">
+          <span class="store-btn-icon">▶</span>
+          <div class="store-btn-label">
+            <div class="top">Get it on</div>
+            <div class="bot">Google Play</div>
+          </div>
+        </a>
+      </div>
+      <div class="waitlist-block r d4">
+        <p class="waitlist-note">Not available yet in your region? Join the waitlist.</p>
+        <form class="waitlist-form" onsubmit="onWaitlist(event)">
+          <input class="w-input" type="email" placeholder="your@email.com" required>
+          <button class="w-btn" type="submit">Notify me</button>
+        </form>
+        <p class="w-note">No spam. One email when we launch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ======================================================
+     FOOTER
+====================================================== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <div class="foot-brand">
+        <img src="./maximile-app/assets/icon.png" alt="MaxiMile">
+        <span>MaxiMile</span>
+      </div>
+      <div class="foot-links">
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms of Use</a>
+        <a href="mailto:hello@maximile.app">Contact</a>
+      </div>
+      <div class="foot-made">
+        Built with ❤️ in Singapore<br>
+        <span>© 2026 MaxiMile</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  /* ── Nav scroll state ── */
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('stuck', window.scrollY > 60);
+  }, { passive: true });
+
+  /* ── Scroll reveal ── */
+  const revEls = document.querySelectorAll('.r');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+  revEls.forEach(el => io.observe(el));
+
+  /* ── Screenshot drag scroll ── */
+  const track = document.getElementById('ssTrack');
+  let down = false, sx, sl;
+  track.addEventListener('mousedown',  e => { down = true; sx = e.pageX - track.offsetLeft; sl = track.scrollLeft; track.classList.add('grabbing'); });
+  track.addEventListener('mouseleave', () => { down = false; track.classList.remove('grabbing'); });
+  track.addEventListener('mouseup',    () => { down = false; track.classList.remove('grabbing'); });
+  track.addEventListener('mousemove',  e => {
+    if (!down) return;
+    e.preventDefault();
+    track.scrollLeft = sl - (e.pageX - track.offsetLeft - sx) * 1.6;
+  });
+
+  /* ── FAQ accordion ── */
+  function faqToggle(btn) {
+    const item = btn.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
+
+  /* ── Waitlist submit ── */
+  function onWaitlist(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('.w-btn');
+    const inp = e.target.querySelector('.w-input');
+    btn.textContent = '✓ You\'re on the list';
+    btn.style.background = '#34A853';
+    inp.disabled = true; btn.disabled = true;
+  }
+</script>
+
+</body>
+</html>
