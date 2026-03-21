@@ -12,12 +12,15 @@ Built for Singapore credit card holders juggling multiple miles cards.
 
 | | URL |
 |---|---|
+| **Web App (Prototype)** | https://jnctan0913.github.io/MaxiMile-App/ |
 | **Landing Page** | https://jnctan0913.github.io/MaxiMile-App/ |
 | **Admin Dashboard** | https://jnctan0913.github.io/MaxiMile-App/admin/ |
 
+> **Note:** The landing page's subscription form, Privacy Policy, Terms of Use, and Contact links are mockups for prototype purposes and are not functional.
+
 ---
 
-## Evaluator Access
+## User Access
 
 ### Web App (Prototype)
 
