@@ -21,12 +21,7 @@ Built for Singapore credit card holders juggling multiple miles cards.
 
 ### Web App (Prototype)
 
-Login credentials for the prototype:
-
-| Field | Value |
-|---|---|
-| Email | `jnctan0913@gmail.com` |
-| Password | `MM12345` |
+Sign up for a free account at the landing page to access the prototype. Registration takes under a minute — just an email and password, no payment required.
 
 **Key flows to evaluate:**
 1. **Merchant Search** — type "Starbucks" in the search bar → instant card recommendation
