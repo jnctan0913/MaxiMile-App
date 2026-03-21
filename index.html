@@ -965,6 +965,102 @@
       transition: width .1s linear;
       pointer-events: none;
     }
+
+    /* ===== MOBILE FIXES ===== */
+
+    /* FIX 1 - trust-strip overflow */
+    @media (max-width: 480px) {
+      .trust-strip { flex-wrap: wrap; white-space: normal; justify-content: center; }
+    }
+
+    /* FIX 2 - ben-subhead white-space */
+    @media (max-width: 720px) {
+      .ben-subhead { white-space: normal; font-size: 15px; }
+    }
+
+    /* FIX 3 - how-sub white-space */
+    @media (max-width: 720px) {
+      .how-sub { white-space: normal; font-size: 14px; }
+    }
+
+    /* FIX 4 - phones container small screen */
+    @media (max-width: 480px) {
+      .phones { width: 180px; height: 380px; }
+      .phone-main { width: 170px; height: 360px; }
+      .hero-body { padding: 80px 0 60px; }
+    }
+
+    /* FIX 5 - hero H1 font size */
+    @media (max-width: 480px) {
+      .hero-h1 { font-size: 34px; letter-spacing: -0.8px; }
+    }
+
+    /* FIX 6 - hero-sub font size */
+    @media (max-width: 480px) {
+      .hero-sub { font-size: 16px; }
+    }
+
+    /* FIX 7 - store badge height */
+    @media (max-width: 480px) {
+      .store-badge { height: 52px; }
+    }
+
+    /* FIX 8 - ss-track horizontal scroll with touch support */
+    @media (max-width: 720px) {
+      .ss-track {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+        padding-left: var(--s5);
+        scrollbar-width: none;
+      }
+      .ss-track::-webkit-scrollbar { display: none; }
+      .ss-card { width: 160px; }
+    }
+
+    /* FIX 9 - ss-phone-frame mobile height */
+    @media (max-width: 680px) {
+      .ss-phone-frame { width: 220px; height: 380px; max-height: 380px; }
+      #how { min-height: auto; padding: 60px 0 40px; }
+    }
+
+    /* FIX 10 - social-chat-card stacking */
+    @media (max-width: 600px) {
+      .social-chat-card { flex-direction: column; }
+      .social-chat-img { width: 100%; min-height: 200px; border-right: none; border-bottom: 1px solid var(--border-glass); }
+    }
+
+    /* FIX 11 - cta-inner padding and waitlist form */
+    @media (max-width: 600px) {
+      .cta-inner { padding: var(--s5) var(--s4); border-radius: 20px; }
+      .waitlist-form { flex-direction: column; }
+      .w-btn { width: 100%; text-align: center; }
+      .cta-h { font-size: 28px; }
+    }
+
+    /* FIX 12 - moment-left min-height */
+    @media (max-width: 860px) {
+      .moment-left { min-height: 320px; }
+    }
+    @media (max-width: 480px) {
+      .moment-left { min-height: 220px; }
+    }
+
+    /* FIX 13 - cta section min-height */
+    @media (max-width: 720px) {
+      #cta { min-height: auto; padding: 80px 0 60px; }
+    }
+
+    /* FIX 14 - nav mobile button touch target */
+    @media (max-width: 860px) {
+      .nav-mobile .nav-dl { padding: 14px 18px; }
+    }
+
+    /* FIX 15 - faq icon size */
+    @media (max-width: 720px) {
+      .faq-ic { width: 36px; height: 36px; }
+    }
+
   </style>
 </head>
 <body>
@@ -1556,6 +1652,26 @@
       e.preventDefault();
       track.scrollLeft = sl - (e.pageX - track.offsetLeft - sx) * 1.6;
     });
+
+    // Touch drag support for screenshot track
+    const slider = track;
+    let isDown = false, startX, scrollLeft;
+    slider.addEventListener('touchstart', (e) => {
+      isDown = true;
+      slider.classList.add('active');
+      startX = e.touches[0].pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    }, { passive: true });
+    slider.addEventListener('touchend', () => {
+      isDown = false;
+      slider.classList.remove('active');
+    });
+    slider.addEventListener('touchmove', (e) => {
+      if (!isDown) return;
+      const x = e.touches[0].pageX - slider.offsetLeft;
+      const walk = (x - startX) * 2;
+      slider.scrollLeft = scrollLeft - walk;
+    }, { passive: true });
   }
 
   /* ── FAQ accordion ── */
