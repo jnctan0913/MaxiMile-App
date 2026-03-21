@@ -84,9 +84,9 @@ The prototype runs as a web app (PWA). Behaviour differs slightly between platfo
 └── .github/workflows/       # GitHub Actions — deploy to Pages
 ```
 
-## Quick Start
+## Simulator Setup Guide
 
-See **[TEAMMATE_GUIDE.md](./TEAMMATE_GUIDE.md)** for full setup instructions to run the prototype locally.
+See **[TEAMMATE_GUIDE.md](./TEAMMATE_GUIDE.md)** for full setup instructions to run the prototype locally on a simulator or physical device.
 
 **TL;DR:**
 ```bash
@@ -101,7 +101,10 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_XQeSilawJVtWnvMin063zQ_fLvLoD2L
 ```bash
 npx expo start
 ```
-Then scan the QR code with **Expo Go** on your phone (or press `w` for web preview).
+- Press `i` to open in **iOS Simulator** (macOS + Xcode required)
+- Press `a` to open in **Android Emulator** (Android Studio required)
+- Press `w` for a **web preview** in your browser
+- Scan the QR code with **Expo Go** to run on a physical device
 
 ## Tech Stack
 
