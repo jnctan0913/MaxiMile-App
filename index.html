@@ -354,42 +354,65 @@
       position: absolute; inset: 0;
       background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(197,165,90,.07) 0%, transparent 65%);
     }
-    .moment-inner {
-      position: relative; z-index: 2; max-width: 800px; margin: 0 auto; text-align: center;
+    .moment-grid {
+      position: relative; z-index: 2;
+      display: grid; grid-template-columns: 3fr 2fr;
+      gap: var(--s7); align-items: center;
+    }
+    /* Left — experience story */
+    .moment-left {
       background: rgba(255,255,255,.72);
       backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px);
       border: 1px solid var(--border-glass);
       box-shadow: var(--sh-gold);
       border-radius: var(--r4);
       padding: var(--s7);
+      position: relative; overflow: hidden;
     }
     .moment-bigquote {
       font-family: var(--font-display);
-      font-size: 180px; line-height: .8;
-      color: var(--gold); opacity: .08;
-      position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+      font-size: 200px; line-height: .75;
+      color: var(--gold); opacity: .06;
+      position: absolute; top: -30px; left: 20px;
       user-select: none; pointer-events: none;
     }
     .moment-body {
       font-family: var(--font-display);
-      font-size: clamp(20px, 2.8vw, 32px);
+      font-size: clamp(22px, 2.4vw, 34px);
       font-weight: 500;
-      line-height: 1.65; color: var(--text-1);
-      position: relative; z-index: 1; margin-bottom: var(--s6);
+      line-height: 1.6; color: var(--text-1);
+      position: relative; z-index: 1;
     }
     .moment-body strong { color: var(--text-1); font-weight: 700; }
     .moment-body em { font-style: italic; color: var(--gold); }
 
-    .moment-tag {
-      display: inline-flex; align-items: center; gap: var(--s3);
-      background: rgba(197,165,90,.08);
-      border: 1px solid var(--border-glass);
-      border-radius: var(--r4);
-      padding: 14px 22px;
+    /* Right — social statement */
+    .moment-right {
+      display: flex; flex-direction: column; gap: var(--s5);
+      padding-left: var(--s4);
     }
-    .moment-tag-icon { display: flex; align-items: center; flex-shrink: 0; }
-    .moment-tag-text { font-size: 15px; color: var(--text-2); text-align: left; line-height: 1.5; }
-    .moment-tag-text strong { color: var(--gold); }
+    .moment-eyebrow {
+      font-size: 12px; font-weight: 600; letter-spacing: 1.2px;
+      text-transform: uppercase; color: var(--gold);
+    }
+    .moment-claim {
+      font-family: var(--font-display);
+      font-size: clamp(26px, 3vw, 42px);
+      font-weight: 700; line-height: 1.2;
+      color: var(--text-1);
+    }
+    .moment-claim span { color: var(--gold); }
+    .moment-stat-text {
+      font-size: 16px; color: var(--text-2); line-height: 1.7;
+      border-left: 3px solid var(--border-glass);
+      padding-left: var(--s4);
+    }
+    .moment-stat-text strong { color: var(--gold); }
+
+    @media (max-width: 860px) {
+      .moment-grid { grid-template-columns: 1fr; }
+      .moment-right { padding-left: 0; }
+    }
 
     /* =============================================
        HOW IT WORKS
@@ -828,22 +851,29 @@
 <section id="moment">
   <div class="moment-glow"></div>
   <div class="wrap">
-    <div class="moment-inner">
-      <div class="moment-bigquote">"</div>
-      <p class="moment-body r">
-        You're at the checkout.<br>
-        <strong>Four cards in your wallet.</strong><br>
-        You can't remember if you've hit the<br>
-        DBS Altitude dining cap this month.<br><br>
-        You tap the safe card. <em>Again.</em>
-      </p>
-      <div class="moment-tag r d1">
-        <span class="moment-tag-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 16V14L13 9V3.5C13 2.67 12.33 2 11.5 2C10.67 2 10 2.67 10 3.5V9L2 14V16L10 13.5V19L8 20.5V22L11.5 21L15 22V20.5L13 19V13.5L21 16Z" fill="#C5A55A"/></svg></span>
-        <span class="moment-tag-text">
-          Sound familiar? <strong>You're not alone.</strong><br>
-          Most Singapore miles cardholders believe they're leaving miles on the table on over half their transactions.
-        </span>
+    <div class="moment-grid">
+
+      <!-- Left 3/5 — experience story -->
+      <div class="moment-left r">
+        <div class="moment-bigquote">"</div>
+        <p class="moment-body">
+          You're at the checkout.<br>
+          <strong>Four cards in your wallet.</strong><br>
+          You can't remember if you've hit the<br>
+          DBS Altitude dining cap this month.<br><br>
+          You tap the safe card. <em>Again.</em>
+        </p>
       </div>
+
+      <!-- Right 2/5 — social statement -->
+      <div class="moment-right r d1">
+        <p class="moment-eyebrow">Sound familiar?</p>
+        <h2 class="moment-claim">You're <span>not alone.</span></h2>
+        <p class="moment-stat-text">
+          Most Singapore miles cardholders believe they're leaving miles on the table on <strong>over half their transactions.</strong>
+        </p>
+      </div>
+
     </div>
   </div>
 </section>
