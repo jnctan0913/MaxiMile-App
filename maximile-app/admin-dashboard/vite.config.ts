@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/MaxiMile-App/',
+  base: '/MaxiMile-App/admin/',
   server: {
     port: 3001,
   },
