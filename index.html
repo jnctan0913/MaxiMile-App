@@ -941,21 +941,21 @@
       <div class="ss-phone-frame">
         <video
           src="./maximile-app/assets/demo.mp4"
-          autoplay loop muted playsinline
+          loop muted playsinline
           id="demoVideo"
         ></video>
       </div>
 
       <!-- Step annotations -->
       <div class="ss-steps" id="ssSteps">
-        <div class="ss-step active" data-start="0">
+        <div class="ss-step active" data-start="0"><!-- 0–8s -->
           <div class="ss-step-num">1</div>
           <div class="ss-step-text">
             <div class="ss-step-title">Open the app</div>
             <div class="ss-step-desc">Search where you're paying, pick what you're buying, or just tap to pay — three ways to find your best card.</div>
           </div>
         </div>
-        <div class="ss-step" data-start="4">
+        <div class="ss-step" data-start="8">
           <div class="ss-step-num">2</div>
           <div class="ss-step-text">
             <div class="ss-step-title">Type a merchant</div>
@@ -1340,16 +1340,25 @@
   }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
   revEls.forEach(el => io.observe(el));
 
-  /* ── Demo video step sync ── */
+  /* ── Demo video: play/pause on visibility, never restart ── */
   const demoVideo = document.getElementById('demoVideo');
   const ssStepEls = document.querySelectorAll('#ssSteps .ss-step');
   if (demoVideo) {
+    /* Play when in view, pause when out — currentTime is never reset */
+    const videoIO = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { demoVideo.play(); }
+        else { demoVideo.pause(); }
+      });
+    }, { threshold: 0.25 });
+    videoIO.observe(demoVideo);
+
+    /* Sync step highlights to playhead */
     demoVideo.addEventListener('timeupdate', () => {
       const t = demoVideo.currentTime;
       let active = 0;
       ssStepEls.forEach((el, i) => {
-        const start = parseFloat(el.dataset.start || 0);
-        if (t >= start) active = i;
+        if (t >= parseFloat(el.dataset.start || 0)) active = i;
       });
       ssStepEls.forEach((el, i) => el.classList.toggle('active', i === active));
     });
