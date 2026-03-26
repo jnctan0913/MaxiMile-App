@@ -1208,7 +1208,6 @@
       <!-- Phone frame with demo video -->
       <div class="ss-phone-frame">
         <video id="demoVideo" autoplay muted loop playsinline
-               src="https://github.com/jnctan0913/MaxiMile-App/releases/download/assets-v1/Payment.mp4"
                style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;">
         </video>
       </div>
@@ -1599,8 +1598,11 @@
     ssStepEls.forEach((el, i) => el.classList.toggle('active', i === active));
   }
 
-  // Self-hosted video: sync steps via timeupdate
+  // Self-hosted video: serve mobile-compressed or HD based on screen width
   const demoVid = document.getElementById('demoVideo');
+  demoVid.src = window.innerWidth < 768
+    ? 'assets/demo-mobile.mp4'
+    : 'https://github.com/jnctan0913/MaxiMile-App/releases/download/assets-v1/Payment.mp4';
   demoVid.addEventListener('timeupdate', () => syncSteps(demoVid.currentTime));
 
   // Restart video + reset steps when scrolled back into view
