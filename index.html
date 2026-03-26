@@ -1207,7 +1207,10 @@
     <div class="ss-demo-wrap r">
       <!-- Phone frame with demo video -->
       <div class="ss-phone-frame">
-        <div id="demoVideo"></div>
+        <video id="demoVideo" autoplay muted loop playsinline
+               src="https://github.com/jnctan0913/MaxiMile-App/releases/download/assets-v1/demo.mp4"
+               style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;">
+        </video>
       </div>
 
       <!-- Step annotations -->
@@ -1596,49 +1599,26 @@
     ssStepEls.forEach((el, i) => el.classList.toggle('active', i === active));
   }
 
-  // Load YouTube IFrame API
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
+  // Self-hosted video: sync steps via timeupdate
+  const demoVid = document.getElementById('demoVideo');
+  demoVid.addEventListener('timeupdate', () => syncSteps(demoVid.currentTime));
 
-  let ytPlayer;
-  window.onYouTubeIframeAPIReady = function () {
-    ytPlayer = new YT.Player('demoVideo', {
-      videoId: 'WzpXv4bpTK8',
-      playerVars: {
-        autoplay: 1, mute: 1, loop: 1, playlist: 'WzpXv4bpTK8',
-        controls: 0, playsinline: 1, rel: 0, modestbranding: 1
-      },
-      events: {
-        onReady: function (e) {
-          e.target.playVideo();
-          // Poll currentTime at ~10fps to replicate timeupdate
-          setInterval(() => {
-            if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-              syncSteps(ytPlayer.getCurrentTime());
-            }
-          }, 100);
-
-          // Restart video + reset steps when scrolled back into view
-          const frameEl = document.querySelector('.ss-phone-frame');
-          if (frameEl) {
-            const replayIO = new IntersectionObserver((entries) => {
-              entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                  ytPlayer.seekTo(0);
-                  ytPlayer.playVideo();
-                  syncSteps(0);
-                } else {
-                  ytPlayer.pauseVideo();
-                }
-              });
-            }, { threshold: 0.4 });
-            replayIO.observe(frameEl);
-          }
+  // Restart video + reset steps when scrolled back into view
+  const frameEl = document.querySelector('.ss-phone-frame');
+  if (frameEl) {
+    const replayIO = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          demoVid.currentTime = 0;
+          demoVid.play();
+          syncSteps(0);
+        } else {
+          demoVid.pause();
         }
-      }
-    });
-  };
+      });
+    }, { threshold: 0.4 });
+    replayIO.observe(frameEl);
+  }
 
   /* ── Screenshot drag scroll ── */
   const track = document.getElementById('ssTrack');
